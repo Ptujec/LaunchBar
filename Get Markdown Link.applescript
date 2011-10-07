@@ -4,6 +4,18 @@
 -- 
 -- truncateString() function by @cometbus 
 
+on handle_string(s)
+	
+	tell application "Safari"
+		set longURL to URL of front document
+	end tell
+	
+	set _result to "[" & s & "]" & "(" & longURL & ")" as text
+	
+	tell application "LaunchBar" to perform action "Copy and Paste" with string _result
+	
+end handle_string
+
 on run
 	
 	tell application "Safari"
