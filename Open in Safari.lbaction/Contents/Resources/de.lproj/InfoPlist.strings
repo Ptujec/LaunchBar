@@ -1,0 +1,3 @@
+"CFBundleName" = "In Safari öffnen";
+"LBSummary" = "Öffnet das aktuelle Google Chrome Tab/Fenster in Safari. Gleichzeitig wird selbiges auch in Google Chrome geschlossen. Im Falle das keine weiteren Tabs oder Fenster in Google Chrome geöffnet sind wird Google Chrome ganz beendet.";
+"LBRequirements" = "Benötigt eine aktive Internetverbindung.";

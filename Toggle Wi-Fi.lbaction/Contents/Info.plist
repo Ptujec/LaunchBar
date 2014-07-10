@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Toggle Wi-Fi</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CFBundleIdentifier</key>
+	<string>eu.ptujec.LaunchBar.action.togglewifi</string>
+	<key>CFBundleIconFile</key>
+	<string>/System/Library/PreferencePanes/Network.prefPane/Contents/Resources/Airport.tiff</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBScriptName</key>
+			<string>Toggle Wifi.scpt</string>
+			<key>LBRunInBackground</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBSummary</key>
+		<string>Toggle Wi-Fi on and off. The script this action is based on is from http://macscripter.net/viewtopic.php?id=36576</string>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+	</dict>
+
+</dict>
+</plist>

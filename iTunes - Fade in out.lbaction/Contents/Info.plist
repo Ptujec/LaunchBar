@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>iTunes - Fade in/out</string>
+	<key>CFBundleVersion</key>
+	<string>1.1.1</string>
+	<key>CFBundleIdentifier</key>
+	<string>eu.ptujec.LaunchBar.action.iTunesFade</string>
+	<key>CFBundleIconFile</key>
+	<string>FadeTemplate</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBScriptName</key>
+			<string>iTunes - Fade in out.scpt</string>
+			<key>LBRunInBackground</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<false/>
+		</dict>
+	</dict>
+		<key>LBDescription</key>
+	<dict>
+		<key>LBSummary</key>
+		<string>Depending on whether a song is playing or not the action starts playback and slowly increases the volume or slowly decreases the volume and eventually stops playing.</string>
+		<key>LBRequirements</key>
+		<string>Requires iTunes.</string>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+	</dict>
+</dict>
+</plist>
