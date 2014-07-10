@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Toggle Notification Center</string>
+	<key>CFBundleVersion</key>
+	<string>1.1</string>
+	<key>CFBundleIdentifier</key>
+	<string>eu.ptujec.LaunchBar.action.TNC</string>
+	<key>CFBundleIconFile</key>
+	<string>TNCTemplate</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBScriptName</key>
+			<string>TNC.scpt</string>
+			<key>LBRunInBackground</key>
+			<false/>
+			</dict>
+	</dict>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBSummary</key>
+		<string>This action enables/disables Notification Center.
+It requires GUI scripting privileges. See http://support.apple.com/kb/HT5914 for details.</string>
+		<key>LBRequirements</key>
+		<string>Requires GUI Scripting Privileges. See http://support.apple.com/kb/HT5914 for details</string>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+	</dict>
+
+</dict>
+</plist>
