@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>DollarEuroTemplate.pdf</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.DollarEuro</string>
+	<key>CFBundleName</key>
+	<string>Dollar ⇄ Euro</string>
+	<key>CFBundleVersion</key>
+	<string>2021-03</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBRequirements</key>
+		<string>Internet connection</string>
+		<key>LBSummary</key>
+		<string>Converts Dollar to Euro (and vice versa) using https://exchangeratesapi.io/  (No API key needed). 
+- It is okay to be a bit sloppy. You only need the number but if you select more that is fine too e.g. "How much ist $3.99 in Euros" or "Wieviel sind 5,20 Euro in Dollar". Everything other than the amount will be filtered out. 
+- You always get both directions. Decimals are separated by commas in the result. But it does not matter how you enter it.
+- Result is returned immediately and copied to the clipboard at the same time</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar</string>
+	</dict>
+	<key>LBRequirements</key>
+	<string>Internet connection</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+	<key>LBTextInputTitle</key>
+	<string>Enter any number or string ("2,95", "To pay: $20.99", …)</string>
+</dict>
+</plist>
