@@ -36,9 +36,13 @@ function run(argument) {
         var dResult = number + ' EUR = ' + dollar + ' USD (Rate: ' + dollarRate + ')'
         LaunchBar.setClipboardString(eResult + '\n' + dResult)
         return [{
-            title: eResult, icon: "DollarEuroTemplate"
+            title: euro + ' EUR',
+            subtitle: number + ' USD (Rate: ' + euroRate + ')', 
+            icon: "DollarEuroTemplate"
         }, {
-            title: dResult, icon: "EuroDollarTemplate"
+            title: dollar + ' USD',
+            subtitle: number + ' EUR (Rate: ' + dollarRate + ')', 
+            icon: "EuroDollarTemplate"
         }]
 
     } else if (exchangerate.error != undefined) {
