@@ -5,7 +5,11 @@ on handle_string(s)
 			activate
 			if visible of window 1 is false then
 				tell application "System Events"
-					click menu item "Musik" of menu "Fenster" of menu bar item "Fenster" of menu bar 1 of application process "Music"
+					try
+						click menu item "Musik" of menu "Fenster" of menu bar item "Fenster" of menu bar 1 of application process "Music"
+					on error
+						click menu item "Music" of menu "Window" of menu bar item "Window" of menu bar 1 of application process "Music"
+					end try
 				end tell
 			end if
 		end tell

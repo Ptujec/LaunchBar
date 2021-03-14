@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Apple Music</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2021-03.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,8 +17,8 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>This is build for a German UI. You need to tweak the Applescript to make it work with an English UI.
-The suggestions are coming from YouTube ;) </string>
+		<string>It works for me. It might not for you. Because GUI scripting. But you might give it a try. 
+The suggestions are coming from YouTube. Not ideal but better than nothing ;) </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
