@@ -13,7 +13,7 @@ GUI scripting is fragile. If Apple or developers make changes to the UI menus in
 
 But GUI scripting sometimes is the only way to make things happen. And these are some of the most useful in my personal workflow.  
 
-There is one action that can help you fix things. "GUI Scripting - Menu Structure" creates a document (in BBEdit) with all the available menus for a selected app. You just need to find the write line.  
+There is one action that can help you fix things. "GUI Elements of active Application" creates lists with all the available elements for GUI scripting of whatever app is active as you run it.   
 
 ## Good to know:
 - I use Apples [SF Symbols](https://developer.apple.com/sf-symbols/) to create most of the icons for my new actions. It's fairly easy with some tool like Affinity Designer or Pixelmator Pro. They look best if you use simple black vector shapes or text (because that what the symbols are). You can play with the opacity though. Make sure the name ends with "Template" (e.g. IconTemplate.pdf) for LaunchBar to catch it … so they fit in nicely.

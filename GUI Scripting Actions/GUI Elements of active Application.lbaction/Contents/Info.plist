@@ -5,11 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>FileMenuScriptTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.GUIScriptingMenuStructure</string>
+	<string>ptujec.LaunchBar.action.GUIElementsOfActiveApplication</string>
 	<key>CFBundleName</key>
-	<string>GUI Scripting - Menu Structure</string>
+	<string>GUI Elements of active Application</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2021-03.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>This action creates a document in BBEdit with the complete menu structure of whatever app is active as you run it. It is helpful for creating actions involving UI scripting.  </string>
+		<string>This action creates lists with all the available elements for GUI scripting of whatever app is active as you run it. It is helpful for creating actions involving GUI scripting.  </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

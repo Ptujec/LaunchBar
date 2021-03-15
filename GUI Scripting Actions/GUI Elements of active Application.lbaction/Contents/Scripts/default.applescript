@@ -1,5 +1,6 @@
 -- http://hints.macworld.com/article.php?story=20111208191312748
 -- http://macscripter.net/viewtopic.php?pid=146759
+-- https://stackoverflow.com/questions/14297644/check-if-an-application-exists-using-applescript
 
 on run
 	
@@ -16,32 +17,49 @@ on run
 		# set appname to text returned of userInput		
 	end tell
 	
-	--intelligent code, taken from Nigel Garvey
+	-- 
+	
 	tell application "System Events"
 		tell application process appname
+			set {winstuff, menustuff} to {"", ""}
 			set frontmost to true
 			set {windowExists, menuExists} to {front window exists, menu bar 1 exists}
-			set {winstuff, menustuff} to {missing value, missing value}
 			if (windowExists) then set winstuff to my listToText(entire contents of front window)
 			if (menuExists) then set menustuff to my listToText(entire contents of menu bar 1)
 		end tell
 	end tell
 	
-	-- the following block of simple-minded code is NOT by Nigel Garvey
-	--tell application "TextEdit"
-	--	activate
-	--	make new document at the front
-	--	set the text of the front document to winstuff & return & "-----" & return & menustuff
-	--end tell
 	
-	--
-	tell application "BBEdit"
-		make new document with properties {name:appname & " - Menu Structure"}
-		set the text of the front document to winstuff & return & "-----" & return & menustuff
-		delay 0.1
+	-- Check if BBEdit is installed É if not fallback to TextEdit 
+	try
+		tell application "Finder" to get application file id "com.barebones.bbedit"
+		set appExists to true
+	on error
+		set appExists to false
+	end try
+	
+	if appExists is true then
+		set editorName to "BBEdit"
+	else
+		set editorName to "TextEdit"
+	end if
+	
+	-- Create List(s)  	
+	tell application editorName
+		
+		if (windowExists) then
+			make new document with properties {name:appname & " - List of Window GUI Elements"}
+			set the text of the front document to winstuff
+			delay 0.1
+		end if
+		
+		
+		make new document with properties {name:appname & " - List of Menu GUI Elements"}
+		set the text of the front document to menustuff
+		
 		activate
 	end tell
-	--
+	
 	
 	-- 	return {winstuff:winstuff, menustuff:menustuff}
 end run
