@@ -46,18 +46,19 @@ on run
 	
 	-- Create List(s)  	
 	tell application editorName
+		activate
+		delay 0.1
 		
 		if (windowExists) then
 			make new document with properties {name:appname & " - List of Window GUI Elements"}
 			set the text of the front document to winstuff
-			delay 0.1
 		end if
 		
 		
 		make new document with properties {name:appname & " - List of Menu GUI Elements"}
 		set the text of the front document to menustuff
 		
-		activate
+		
 	end tell
 	
 	
