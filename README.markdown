@@ -1,5 +1,16 @@
-# LaunchBar
-## Installation and usage:
+# LaunchBar Actions
+
+## Some screenshots
+
+![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/Dollar%20⇄%20Euro.png?raw=true)
+
+![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/GUI.png?raw=true)
+
+![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/Temp.png?raw=true)
+
+![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/Day%20Night%20Mode%20Toggle.png?raw=true)
+
+## Installation and usage
 These actions and applescripts are created for use with [LaunchBar](http://www.obdev.at/products/launchbar/)
 - Install AppleScripts by moving them to a folder which is indexed by LaunchBar. The default location would be ~/Library/Application Support/LaunchBar/Actions
 - Install LB Actions is much easier. Just double click them.
@@ -15,5 +26,5 @@ But GUI scripting sometimes is the only way to make things happen. And these are
 
 There is one action that can help you fix things. "GUI Elements of active Application" creates lists with all the available elements for GUI scripting of whatever app is active as you run it.   
 
-## Good to know:
+## Good to know
 - I use Apples [SF Symbols](https://developer.apple.com/sf-symbols/) to create most of the icons for my new actions. It's fairly easy with some tool like Affinity Designer or Pixelmator Pro. They look best if you use simple black vector shapes or text (because that what the symbols are). You can play with the opacity though. Make sure the name ends with "Template" (e.g. IconTemplate.pdf) for LaunchBar to catch it … so they fit in nicely.
