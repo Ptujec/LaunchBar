@@ -3,15 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>MailURITemplate.pdf</string>
+	<string>com.apple.mail</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.PasteMailURIScheme</string>
+	<string>ptujec.LaunchBar.action.PasteMailURLScheme</string>
 	<key>CFBundleName</key>
-	<string>Paste Mail URI Scheme</string>
+	<string>Paste Mail URL Scheme</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
-	<key>LBAbbreviation</key>
-	<string>gmu</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -19,12 +17,18 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>1) Paste the URI scheme of a selected Email in the active text field. 2) If you enter some text (hit spacebar) this will be used as the title and be pasted along the URI scheme in Markdown format.</string>
+		<string>⏎ = Paste URL only, ⌥⏎ = MD, ⇧⏎ = RTF 
+
+This action might be a little overkill in terms of options. But it's basic function is very simple. Just run the action to paste the URL of an open or selected email into the current text field.
+
+You can use use ⌥ to get a Markdown link (or ⇧ for a RTF version) with the email subject as the title. If you hit space before running the action you can even enter a custom title for MD/RTF links.</string>
 		<key>LBTwitter</key>
 		<string>@Ptujec</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar</string>
 	</dict>
+	<key>LBRequiredApplication</key>
+	<string>com.apple.mail</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
@@ -38,10 +42,10 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string>Title for Markdown Link</string>
+	<string>Title for Markdown or RTF link</string>
 </dict>
 </plist>
