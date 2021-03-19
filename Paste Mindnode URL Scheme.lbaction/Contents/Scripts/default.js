@@ -12,14 +12,14 @@ function runWithPaths(path) {
     var mdLink = '[' + docTitle + '](' + urlScheme + ')'
 
     if (LaunchBar.options.alternateKey) {
-        LaunchBar.paste(urlScheme)
-        LaunchBar.setClipboardString(urlScheme)
+        LaunchBar.paste(mdLink)
+        LaunchBar.setClipboardString(mdLink)
     } else if (LaunchBar.options.shiftKey) {
         LaunchBar.executeAppleScriptFile('./rtf.applescript', urlScheme, docTitle);        
     } else if (LaunchBar.options.commandKey) {
         return urlScheme
     } else {
-        LaunchBar.paste(mdLink)
-        LaunchBar.setClipboardString(mdLink)
+        LaunchBar.paste(urlScheme)
+        LaunchBar.setClipboardString(urlScheme)
     }
 }
