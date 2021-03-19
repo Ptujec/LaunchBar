@@ -4,21 +4,22 @@ function runWithPaths(path) {
     // get file name with extention from path
     var docTitle = path.toString().replace(/\/Users\/.+\/Documents\//g, '');
     var eDocTitle = encodeURIComponent(docTitle)
-    
-    // Path to Mindnode URI Scheme
-    var uriScheme = 'ia-writer://open?path=' + eDocTitle;
+
+    // Path to iAWriter URI Scheme
+    var urlScheme = 'ia-writer://open?path=' + eDocTitle;
 
     // Markdown Link
-    var mdLink = '[' + docTitle + '](' + uriScheme + ')'
+    var mdLink = '[' + docTitle + '](' + urlScheme + ')'
 
     if (LaunchBar.options.alternateKey) {
-        LaunchBar.setClipboardString(uriScheme)
-        LaunchBar.paste(uriScheme)
-
-    } else if (LaunchBar.options.commandKey){
-        return uriScheme
+        LaunchBar.paste(urlScheme)
+        LaunchBar.setClipboardString(urlScheme)
+    } else if (LaunchBar.options.shiftKey) {
+        LaunchBar.executeAppleScriptFile('./rtf.applescript', urlScheme, docTitle);        
+    } else if (LaunchBar.options.commandKey) {
+        return urlScheme
     } else {
-        LaunchBar.setClipboardString(mdLink)
         LaunchBar.paste(mdLink)
+        LaunchBar.setClipboardString(mdLink)
     }
 }
