@@ -4,11 +4,13 @@
 // http://openexchangerates.github.io/accounting.js/
 // jquery - Convert String with Dot or Comma as decimal separator to number in JavaScript - Stack Overflow https://stackoverflow.com/a/29347112
 
+const apiKey = '123' // Replace 123 with your API Key. You can get one for free at https://exchangeratesapi.io/pricing/
+const exchangerate = HTTP.getJSON('http://api.exchangeratesapi.io/latest?access_key=' + apiKey + '&symbols=USD')
+
 function run(argument) {
-
-    var exchangerate = HTTP.getJSON('https://api.exchangeratesapi.io/latest?base=USD&symbols=EUR')
-
-    if (exchangerate.data != undefined) {
+    if (exchangerate.data.error != undefined) {
+        LaunchBar.alert('Unable to load results', exchangerate.data.error.info);
+    } else if (exchangerate.data != undefined) {
         argument = argument.toString().replace(/[^0-9.,]*/g, '')
 
         var result = argument.replace(/[^0-9]/g, '');
@@ -19,8 +21,8 @@ function run(argument) {
         argument = result
         number = argument.replace('.', ',')
 
-        var euroRate = exchangerate.data.rates.EUR
-        var dollarRate = 1 / euroRate
+        var dollarRate = exchangerate.data.rates.USD
+        var euroRate = 1 / dollarRate
         var euro = argument * euroRate
         euro = euro.toFixed(2)
         euro = euro.toString().replace('.', ',')
@@ -35,17 +37,16 @@ function run(argument) {
         var eResult = number + ' USD = ' + euro + ' EUR (Rate: ' + euroRate + ')'
         var dResult = number + ' EUR = ' + dollar + ' USD (Rate: ' + dollarRate + ')'
         LaunchBar.setClipboardString(eResult + '\n' + dResult)
+
         return [{
             title: euro + ' EUR',
-            subtitle: number + ' USD (Rate: ' + euroRate + ')', 
+            subtitle: number + ' USD (Rate: ' + euroRate + ')',
             icon: "DollarEuroTemplate"
         }, {
             title: dollar + ' USD',
-            subtitle: number + ' EUR (Rate: ' + dollarRate + ')', 
+            subtitle: number + ' EUR (Rate: ' + dollarRate + ')',
             icon: "EuroDollarTemplate"
         }]
 
-    } else if (exchangerate.error != undefined) {
-        LaunchBar.alert('Unable to load results', exchangerate.error);
     }
 }
