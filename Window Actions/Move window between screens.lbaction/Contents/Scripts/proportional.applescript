@@ -3,8 +3,6 @@
 # https://forum.latenightsw.com/t/get-sizes-of-monitor-s-via-applescript/1351/10
 
 ---
-
-
 # use AppleScript version "2.4" -- Yosemite (10.10) or later
 use framework "Foundation"
 use framework "AppKit"
@@ -20,15 +18,12 @@ set _mon1Hight to item 2 of _mon1
 set _mon2Width to item 1 of _mon2
 set _mon2Hight to item 2 of _mon2
 
-# set _hightoffset to _mon1Hight - _mon2Hight
 tell current application to set _hightoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:0:CurrentInfo:OriginY ' /Library/Preferences/com.apple.windowserver.displays.plist"
 set _hightoffset to _hightoffset as feet as number
 
-# set _screenWar to (1440 / 1920) # war width adaption ratio of screen 1 & 2
-set _screenWar to (_mon2Width / _mon1Width) # war width adaption ratio of screen 1 & 2
+set _screenWar to (_mon2Width / _mon1Width) # width adaption ratio of screen 1 & 2
 
-# set _screenHar to (900 / 1200) # war hight adaption ratio of screen 1 & 2 
-set _screenHar to (_mon2Hight / _mon1Hight) # war hight adaption ratio of screen 1 & 2 
+set _screenHar to (_mon2Hight / _mon1Hight) #  hight adaption ratio of screen 1 & 2 
 
 delay 0.01 # attempt to fix the script not setting position hight currently É not sure that causes it É it's not consistent
 
@@ -43,13 +38,12 @@ try
 			set _windowWidth to (item 1 of _windowSize)
 			set _windowHight to (item 2 of _windowSize)
 			
-			if x < 1920 then # 1920 width of monitor 1
-				set position of window 1 to {(x * _screenWar) + 1920, ((y - 25) * _screenHar) + (_hightoffset + 25)} # menubar = 25 pixel
-				set size of window 1 to {_windowWidth * _screenWar, _windowHight * _screenHar} # {1021, 728}
+			if x < _mon1Width then # 1920 width of monitor 1
+				set position of window 1 to {(x * _screenWar) + _mon1Width, ((y - 25) * _screenHar) + (_hightoffset + 25)} # menubar = 25 pixel
+				set size of window 1 to {_windowWidth * _screenWar, _windowHight * _screenHar}
 			else
-				# set position of window 1 to {0, 25}
-				set position of window 1 to {(x - 1920) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
-				set size of window 1 to {_windowWidth / _screenWar, _windowHight / _screenHar} # {1139, 790}
+				set position of window 1 to {(x - _mon1Width) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
+				set size of window 1 to {_windowWidth / _screenWar, _windowHight / _screenHar}
 			end if
 		end tell
 	end tell
