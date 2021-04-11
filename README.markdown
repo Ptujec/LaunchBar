@@ -2,6 +2,8 @@
 
 ## Some screenshots
 
+![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/Window%20actions.png?raw=true)
+
 ![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/Dollar%20⇄%20Euro.png?raw=true)
 
 ![](https://github.com/Ptujec/LaunchBar/blob/master/Screenshots/GUI.png?raw=true)
