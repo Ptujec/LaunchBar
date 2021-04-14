@@ -10,7 +10,6 @@ set _scaleWindowWidth to _percentWidth / 100
 set _scaleWindowHight to _percentHight / 100
 ---
 
-
 # use AppleScript version "2.4" -- Yosemite (10.10) or later
 use framework "Foundation"
 use framework "AppKit"
@@ -22,16 +21,11 @@ set _mon1 to item 2 of item 1 of allFrames
 set _mon1Width to item 1 of _mon1
 set _mon1Hight to item 2 of _mon1
 
-delay 0.01
-
 try
 	tell application "System Events"
 		tell (first process whose frontmost is true)
-			
 			set position of window 1 to {0, 25}
 			set size of window 1 to {_mon1Width, _mon1Hight}
-			
 		end tell
 	end tell
-	
 end try

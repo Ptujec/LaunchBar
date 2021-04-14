@@ -14,9 +14,12 @@ try
 	
 	set _mon1Width to item 1 of _mon1
 	set _mon1Hight to item 2 of _mon1
+	set _mon1Size to _mon1Width + _mon1Hight
+	
 	
 	set _mon2Width to item 1 of _mon2
 	set _mon2Hight to item 2 of _mon2
+	set _mon2Size to _mon2Width + _mon2Hight
 	
 	set _screenWar to (_mon2Width / _mon1Width) # width adaption ratio of screen 1 & 2
 	set _screenHar to (_mon2Hight / _mon1Hight) #  hight adaption ratio of screen 1 & 2 
@@ -46,7 +49,6 @@ try
 	end if
 end try
 
-delay 0.01 # attempt to fix the script not setting position hight currently É not sure that causes it É it's not consistent
 try
 	tell application "System Events"
 		tell (first process whose frontmost is true)
@@ -58,39 +60,71 @@ try
 			set _windowWidth to (item 1 of _windowSize)
 			set _windowHight to (item 2 of _windowSize)
 			
-			if _right is true then # second screen positioned to the right			
-				if x < _mon1Width then # width of monitor 1
-					set size of window 1 to {_windowWidth * _screenWar, _windowHight * _screenHar}
-					set position of window 1 to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)} # menubar = 25 pixel
+			
+			# set current location (which monitor) of the frontmost window and new window size and postion 
+			if _right is true then
+				if x < _mon1Width then
+					set _newSize to {_windowWidth * _screenWar, _windowHight * _screenHar}
+					set _newPosition to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)} # menubar = 25 pixel
+					set _winLocation to "mon1"
 				else
-					set position of window 1 to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
-					set size of window 1 to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _newPosition to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
+					set _newSize to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _winLocation to "mon2"
 				end if
+				
 			else if _bottom is true then
-				if y < _mon1Hight then # hight of monitor 1
-					set position of window 1 to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)}
-					set size of window 1 to {_windowWidth * _screenWar, _windowHight * _screenHar}
+				if y < _mon1Hight then
+					set _newPosition to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)}
+					set _newSize to {_windowWidth * _screenWar, _windowHight * _screenHar}
+					set _winLocation to "mon1"
 				else
-					set position of window 1 to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
-					set size of window 1 to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _newPosition to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
+					set _newSize to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _winLocation to "mon2"
 				end if
 			else if _left is true then
 				if x > -1 then
-					set size of window 1 to {_windowWidth * _screenWar, _windowHight * _screenHar}
-					set position of window 1 to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)}
+					set _newSize to {_windowWidth * _screenWar, _windowHight * _screenHar}
+					set _newPosition to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + (_hightoffset + 25)}
+					set _winLocation to "mon1"
 				else
-					set position of window 1 to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
-					set size of window 1 to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _newPosition to {(x - _widthoffset) / _screenWar, ((y - (_hightoffset + 25)) / _screenHar) + 25}
+					set _newSize to {_windowWidth / _screenWar, _windowHight / _screenHar}
+					set _winLocation to "mon2"
 				end if
 			else if _top is true then
-				if y < 25 then # hight of monitor 1
-					set position of window 1 to {(x - _widthoffset) / _screenWar, (y + (-_hightoffset - 25)) / _screenHar + 25}
-					set size of window 1 to {_windowWidth / _screenWar, (_windowHight + 25) / _screenHar - 25}
+				if y < 25 then
+					set _newPosition to {(x - _widthoffset) / _screenWar, (y + (-_hightoffset - 25)) / _screenHar + 25}
+					set _newSize to {_windowWidth / _screenWar, (_windowHight + 25) / _screenHar - 25}
+					set _winLocation to "mon2"
 				else
-					set size of window 1 to {_windowWidth * _screenWar, (_windowHight + 25) * _screenHar - 25}
-					set position of window 1 to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + _hightoffset + 25}
+					set _newSize to {_windowWidth * _screenWar, (_windowHight + 25) * _screenHar - 25}
+					set _newPosition to {(x * _screenWar) + _widthoffset, ((y - 25) * _screenHar) + _hightoffset + 25}
+					set _winLocation to "mon1"
 				end if
 			end if
+			
+			# checking for window loaction and whether the monitor it is located on is bigger or smaller than the other one 
+			if _winLocation is "mon1" then
+				if _mon1Size > _mon2Size then
+					set size of window 1 to _newSize
+					set position of window 1 to _newPosition
+				else
+					set position of window 1 to _newPosition
+					set size of window 1 to _newSize
+				end if
+				
+			else
+				if _mon2Size > _mon1Size then
+					set size of window 1 to _newSize
+					set position of window 1 to _newPosition
+				else
+					set position of window 1 to _newPosition
+					set size of window 1 to _newSize
+				end if
+			end if
+			
 		end tell
 	end tell
 end try

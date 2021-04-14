@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Move window to fill left half of the screen</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

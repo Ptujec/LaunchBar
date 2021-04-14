@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>moveWindowTemplate.png</string>
+	<string>moveWindow2Template.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.MoveWindow</string>
 	<key>CFBundleName</key>
 	<string>Move window between screens</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

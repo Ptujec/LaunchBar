@@ -17,8 +17,6 @@ set _mon1Hight to item 2 of _mon1
 set _mon1centerX to _mon1Width / 2
 set _mon1centerY to (_mon1Hight / 2) + 12.5 # half of menubar hight
 
-delay 0.01
-
 try
 	tell application "System Events"
 		tell (first process whose frontmost is true)
@@ -36,5 +34,4 @@ try
 			set position of window 1 to {_windowPosX, _windowPosY}
 		end tell
 	end tell
-	
 end try

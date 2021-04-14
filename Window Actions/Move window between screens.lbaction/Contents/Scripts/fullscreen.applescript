@@ -43,9 +43,7 @@ try
 		set _left to false
 		set _top to true
 	end if
-	
 end try
-delay 0.01
 
 try
 	tell application "System Events"
@@ -54,40 +52,43 @@ try
 			set x to item 1 of _windowPos # x = position width 
 			set y to item 2 of _windowPos # y = position hight 
 			
-			
-			if _right is true then # second screen positioned to the right			
+			if _right is true then # second screen positioned to the right		
 				if x < _mon1Width then # width of monitor 1
-					set position of window 1 to {_mon1Width, (_hightoffset + 25)} # 25 = menubar hight
-					set size of window 1 to {_mon2Width, (_mon2Hight - 25)}
+					set _newPosition to {_mon1Width, (_hightoffset + 25)} # 25 = menubar hight
+					set _newSize to {_mon2Width, (_mon2Hight - 25)}
 				else
-					set position of window 1 to {0, 25}
-					set size of window 1 to {_mon1Width, _mon1Hight}
+					set _newSize to {_mon1Width, _mon1Hight}
+					set _newPosition to {0, 25}
 				end if
 			else if _bottom is true then
 				if y < _mon1Hight then # hight of monitor 1
-					set position of window 1 to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
-					set size of window 1 to {_mon2Width, (_mon2Hight - 25)}
+					set _newPosition to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
+					set _newSize to {_mon2Width, (_mon2Hight - 25)}
 				else
-					set position of window 1 to {0, 25}
-					set size of window 1 to {_mon1Width, _mon1Hight}
+					set _newPosition to {0, 25}
+					set _newSize to {_mon1Width, _mon1Hight}
 				end if
 			else if _left is true then
 				if x > -1 then
-					set position of window 1 to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
-					set size of window 1 to {_mon2Width, (_mon2Hight - 25)}
+					set _newPosition to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
+					set _newSize to {_mon2Width, (_mon2Hight - 25)}
 				else
-					set position of window 1 to {0, 25}
-					set size of window 1 to {_mon1Width, _mon1Hight}
+					set _newPosition to {0, 25}
+					set _newSize to {_mon1Width, _mon1Hight}
 				end if
 			else if _top is true then
 				if y < 25 then # hight of monitor 1
-					set position of window 1 to {0, 25}
-					set size of window 1 to {_mon1Width, _mon1Hight}
+					set _newPosition to {0, 25}
+					set _newSize to {_mon1Width, _mon1Hight}
 				else
-					set position of window 1 to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
-					set size of window 1 to {_mon2Width, (_mon2Hight - 25)}
+					set _newPosition to {_widthoffset, (_hightoffset + 25)} # 25 = menubar hight
+					set _newSize to {_mon2Width, (_mon2Hight - 25)}
 				end if
 			end if
+			
+			# setting the position before size should always lead to the correct result 
+			set position of window 1 to _newPosition
+			set size of window 1 to _newSize
 		end tell
 	end tell
 end try

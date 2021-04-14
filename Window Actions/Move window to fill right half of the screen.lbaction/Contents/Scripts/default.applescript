@@ -15,16 +15,11 @@ set _wW to _mon1Width / 2
 set _wH to _mon1Hight - 25
 set _x to _mon1Width / 2
 
-delay 0.01
-
 try
 	tell application "System Events"
 		tell (first process whose frontmost is true)
-			
-			
 			set position of window 1 to {_x, 25}
 			set size of window 1 to {_wW, _wH}
 		end tell
 	end tell
-	
 end try

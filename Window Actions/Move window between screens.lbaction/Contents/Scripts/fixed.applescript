@@ -4,7 +4,7 @@
 
 ---
 set _percentWidth to 55 # set percentage relative to screen size
-set _percentHight to 65 # set percentage relative to screen size
+set _percentHight to 75 # set percentage relative to screen size
 
 set _scaleWindowWidth to _percentWidth / 100
 set _scaleWindowHight to _percentHight / 100
@@ -23,9 +23,11 @@ try
 	
 	set _mon1Width to item 1 of _mon1
 	set _mon1Hight to item 2 of _mon1
+	set _mon1Size to _mon1Width + _mon1Hight
 	
 	set _mon2Width to item 1 of _mon2
 	set _mon2Hight to item 2 of _mon2
+	set _mon2Size to _mon2Width + _mon2Hight
 	
 	tell current application to set _hightoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:0:CurrentInfo:OriginY ' /Library/Preferences/com.apple.windowserver.displays.plist"
 	set _hightoffset to _hightoffset as feet as number
@@ -85,37 +87,65 @@ try
 			
 			if _right is true then # second screen positioned to the right			
 				if x < _mon1Width then # width of monitor 1
-					set size of window 1 to {_mon2_windowWidth, _mon2_windowHight}
-					set position of window 1 to {_mon2_windowPosX, _mon2_windowPosY}
+					set _winLocation to "mon1"
+					set _newSize to {_mon2_windowWidth, _mon2_windowHight}
+					set _newPosition to {_mon2_windowPosX, _mon2_windowPosY}
 				else
-					set position of window 1 to {_mon1_windowPosX, _mon1_windowPosY}
-					set size of window 1 to {_mon1_windowWidth, _mon1_windowHight}
+					set _winLocation to "mon2"
+					set _newPosition to {_mon1_windowPosX, _mon1_windowPosY}
+					set _newSize to {_mon1_windowWidth, _mon1_windowHight}
 				end if
 			else if _bottom is true then
 				if y < _mon1Hight then # hight of monitor 1
-					set size of window 1 to {_mon2_windowWidth, _mon2_windowHight}
-					set position of window 1 to {_mon2_windowPosX, _mon2_windowPosY}
+					set _winLocation to "mon1"
+					set _newSize to {_mon2_windowWidth, _mon2_windowHight}
+					set _newPosition to {_mon2_windowPosX, _mon2_windowPosY}
 				else
-					set position of window 1 to {_mon1_windowPosX, _mon1_windowPosY}
-					set size of window 1 to {_mon1_windowWidth, _mon1_windowHight}
+					set _winLocation to "mon2"
+					set _newPosition to {_mon1_windowPosX, _mon1_windowPosY}
+					set _newSize to {_mon1_windowWidth, _mon1_windowHight}
 				end if
 			else if _left is true then
 				if x > -1 then
-					set size of window 1 to {_mon2_windowWidth, _mon2_windowHight}
-					set position of window 1 to {_mon2_windowPosX, _mon2_windowPosY}
+					set _winLocation to "mon1"
+					set _newSize to {_mon2_windowWidth, _mon2_windowHight}
+					set _newPosition to {_mon2_windowPosX, _mon2_windowPosY}
 				else
-					set position of window 1 to {_mon1_windowPosX, _mon1_windowPosY}
-					set size of window 1 to {_mon1_windowWidth, _mon1_windowHight}
+					set _winLocation to "mon2"
+					set _newPosition to {_mon1_windowPosX, _mon1_windowPosY}
+					set _newSize to {_mon1_windowWidth, _mon1_windowHight}
 				end if
 			else if _top is true then
 				if y < 25 then # hight of monitor 1
-					set position of window 1 to {_mon1_windowPosX, _mon1_windowPosY}
-					set size of window 1 to {_mon1_windowWidth, _mon1_windowHight}
+					set _winLocation to "mon2"
+					set _newPosition to {_mon1_windowPosX, _mon1_windowPosY}
+					set _newSize to {_mon1_windowWidth, _mon1_windowHight}
 				else
-					set size of window 1 to {_mon2_windowWidth, _mon2_windowHight}
-					set position of window 1 to {_mon2_windowPosX, _mon2_windowPosY}
+					set _winLocation to "mon1"
+					set _newSize to {_mon2_windowWidth, _mon2_windowHight}
+					set _newPosition to {_mon2_windowPosX, _mon2_windowPosY}
 				end if
 			end if
+			# checking for window loaction and whether the monitor it is located on is bigger or smaller than the other one 
+			if _winLocation is "mon1" then
+				if _mon1Size > _mon2Size then
+					set size of window 1 to _newSize
+					set position of window 1 to _newPosition
+				else
+					set position of window 1 to _newPosition
+					set size of window 1 to _newSize
+				end if
+				
+			else
+				if _mon2Size > _mon1Size then
+					set size of window 1 to _newSize
+					set position of window 1 to _newPosition
+				else
+					set position of window 1 to _newPosition
+					set size of window 1 to _newSize
+				end if
+			end if
+			
 		end tell
 	end tell
 end try
