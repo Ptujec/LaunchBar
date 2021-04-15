@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>LipsClosedTemplate.pdf</string>
+	<string>StopSpeechTemplate.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.StopSpeech</string>
 	<key>CFBundleName</key>
 	<string>Stop Speech</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2021.3.1</string>
 	<key>LBAbbreviation</key>
 	<string>sst</string>
 	<key>LBDescription</key>
@@ -34,7 +34,7 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>StopSpeech.applescript</string>
+			<string>StopSpeech.sh</string>
 		</dict>
 	</dict>
 </dict>
