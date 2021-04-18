@@ -1,6 +1,6 @@
 # LaunchBar GUI Scripting Actions
 
-![](https://github.com/Ptujec/LaunchBar-GUI-Scripting-Actions/blob/main/guiactions.png?raw=true)
+![](guiactions.png)
 
 ## Installation
 These actions are created for use with [LaunchBar](http://www.obdev.at/products/launchbar/). Download and double click to install.
