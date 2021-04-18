@@ -1,4 +1,0 @@
-"CFBundleName" = "Kaffee";
-"LBSummary" = "Started und aktiviert Caffeine.app. Wenn die App beim Ausführen der Aktion läuft wird sie beendet. Spart Platz in der Menubar. Es ist auch möglich Caffeine für eine bestimmte Zeit zu aktivieren. Leertaste drücken. 1 = 1s. Es können aber auch Minuten (1,5m) und Stunden (1h) eingegeben werden. Icon credits: http://www.aegeank.com/sketchactive/";
-"LBRequirements" = "Caffeine.app (kostenlos) http://lightheadsw.com/caffeine/";
-"LBTextInputTitle" = "10s, 1,5m, 2h… lang aktivieren";

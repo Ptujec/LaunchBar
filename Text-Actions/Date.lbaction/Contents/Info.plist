@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>CopyActionTemplate</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.Date</string>
+	<key>CFBundleName</key>
+	<string>Paste Date</string>
+	<key>CFBundleVersion</key>
+	<string>2021-03</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>"Date" does two things:
+1) Paste the current date in the frontmost window (yyyy-MM-dd format)
+2) On hitting space you can add a number … date in x days
+</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBScriptName</key>
+			<string>Date.js</string>
+		</dict>
+	</dict>
+	<key>LBTextInputTitle</key>
+	<string>Paste date in … days</string>
+</dict>
+</plist>

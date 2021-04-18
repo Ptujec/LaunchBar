@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>pro.writer.mac</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.PasteIAWriterURLScheme</string>
+	<key>CFBundleName</key>
+	<string>Paste iA Writer URL Scheme</string>
+	<key>CFBundleVersion</key>
+	<string>2021.2.1</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>⏎ = Paste URL only, ⌥⏎ = MD, ⇧⏎ = RTF,  ⌘⏎ = Select URL
+
+Usage: 
+1) Select a iA Writer document in LaunchBar  
+2) Hit "tab" and select this action 
+3) Hit "enter" to paste the iA Writer URL into the active text field (See above for more options)
+
+IMPORTANT: This assumes your files are stored in iCloud.</string>
+		<key>LBTwitter</key>
+		<string>@Ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec</string>
+	</dict>
+	<key>LBRequiredApplication</key>
+	<string>pro.writer.mac</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>path</string>
+			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>string</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

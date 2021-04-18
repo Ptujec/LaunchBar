@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Instapaper</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBTextInputTitle</key>
+	<string>Search for</string>	
+	<key>CFBundleIdentifier</key>
+	<string>eu.ptujec.action.Instapaper</string>
+	<key>CFBundleIconFile</key>
+	<string>instapaper</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBScriptName</key>
+			<string>Instapaper.scpt</string>
+			<key>LBRunInBackground</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBSummary</key>
+		<string>"Instapaper" does two things:
+1) If you launch the action it works like a bookmark … that is it opens "https://www.instapaper.com/u"
+2) If you tap space you can enter a search query. (Instapaper Search requires a subscription.) 
+Enjoy!
+</string>
+		<key>LBRequirements</key>
+		<string>Requires an active internet connection. Instapaper search is available only for subscribers.</string>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+	</dict>
+
+</dict>
+</plist>
