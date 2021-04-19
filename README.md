@@ -6,7 +6,7 @@ Screenshots and animations in the directories  (subfolders) of this repository s
 ## Download 
 You can download the whole repository …
 
-<img src="https://github.com/Ptujec/LaunchBar/raw/master/download.png" width="600"/> 
+<img src="download.png" width="600"/> 
 
 … or any of the directories separately. **There are download links in the readme of each directory.**  
 
@@ -17,4 +17,4 @@ These actions are created for use with [LaunchBar](http://www.obdev.at/products/
 ## Action icons
 I use Apples [SF Symbols](https://developer.apple.com/sf-symbols/) to create most of the icons for my actions. It's fairly easy with some tool like Affinity Designer or Pixelmator Pro. They look best if you use simple black vector shapes or text (because that what the symbols are). You can play with the opacity though. Make sure the name ends with "Template" (e.g. IconTemplate.pdf) for LaunchBar to catch it … so they fit in nicely.
 
-To use the icon of an application it is best to use the App ID. There is an [action for that](https://github.com/Ptujec/LaunchBar/tree/master/Get-App-ID) in this repository.
+To use the icon of an application it is best to use the App ID. There is an [action to easily get the ID of an app](https://github.com/Ptujec/LaunchBar/tree/master/Get-App-ID) in this repository.
