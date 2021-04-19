@@ -1,12 +1,18 @@
 # LaunchBar Text Actions
 
-![](textactions.png)
+<img src="textactions.png" width="600"/> 
+
+
+## Markdown to RTF Link
+
+<img src="mdrtf.gif" width="600"/> 
 
 
 ## List
 
 - Date (Paste current date or date plus/minus some days in an active text field)
-- Paste current site as rich text link (RTF)
+- Get Markdown Link from Safari
+- Get RTF Link from Safari
 - Lorem Ipsum (Generate placeholder text)
 - Lorem Slovensko (Slovene version)
 - Markdown to RTF Link (Convert a Markdown link into a proper RTF link e.g. in Mail)
