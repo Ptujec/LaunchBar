@@ -8,9 +8,7 @@ You can download the whole repository …
 
 <img src="https://github.com/Ptujec/LaunchBar/raw/master/download.png" width="600"/> 
 
-… or any of the directories separately. There are download links in the readme of each directory.  
-
-<img src="https://github.com/Ptujec/LaunchBar/raw/master/downloaddir.png" width="600"/> 
+… or any of the directories separately. **There are download links in the readme of each directory.**  
 
 
 ## Installation
