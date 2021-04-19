@@ -5,7 +5,7 @@
 
 ## List
 
-- Dollar ⇄ Euro 
+- Dollar ⇄ Euro (requires an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
 - Temperatur - Celsius in Fahrenheit
 - Temperatur - Fahrenheit in Celsius
 
