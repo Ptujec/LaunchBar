@@ -2,6 +2,8 @@
 // http://www.accordancebible.com/Accordance-1043-Is-Automagical/
 
 function run(argument) {
+    argument = argument.replace(/\s/g, '<AND>')
+    
     if (LaunchBar.options.shiftKey) {
         // This will be called when holding shift ⇧ as you launch the action
         LaunchBar.openURL('accord://search/ESVS?' + encodeURIComponent(argument))
