@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Paste scripture</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>(⌘⏎ = Paste as Markdown blockquote)
+		<string>⌘⏎ = Paste as Markdown blockquote
 
 Paste scriptures in an active text field. You can set the translation you want to use in the script itself. The default is the ESV study bible.</string>
 		<key>LBTwitter</key>
