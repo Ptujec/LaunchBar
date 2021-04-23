@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Search words</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,8 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Search words in Accordance.
-(You can set up alternative translations for use with modifier keys in default.js)</string>
+		<string>⏎ = Research All (A and B), ⌥⏎ = (A or B), ⌘⏎ =  Search in default tranlation</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

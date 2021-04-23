@@ -1,18 +1,17 @@
 // 2021-04-22 @Ptujec 
 // http://www.accordancebible.com/Accordance-1043-Is-Automagical/
+// http://accordancefiles2.com/helpfiles/OSX12/Default.htm#topics/05_dd/using_links_common_tasks.htm#kanchor184 (See: Examples of Accordance-specific URLs)
 
 function run(argument) {
-    argument = argument.replace(/\s/g, '<AND>')
-    
-    if (LaunchBar.options.shiftKey) {
-        // This will be called when holding shift ⇧ as you launch the action
-        LaunchBar.openURL('accord://search/ESVS?' + encodeURIComponent(argument))
-    } else if (LaunchBar.options.alternateKey) {
-        // You can add another URL Scheme her that you can call when holding the option ⌥ key as you launch the action
-    } else if (LaunchBar.options.commandKey) {
-        // You can replace the SSP° with an alternative translation of your choice. This will be called when holding command ⌘ as you launch the action
-        LaunchBar.openURL('accord://search/' + encodeURIComponent('SSP°') + '?' + encodeURIComponent(argument))
-    } else {
+    if (LaunchBar.options.commandKey) {
+        argument = argument.replace(/\s/g, '<AND>')
         LaunchBar.openURL('accord://search/' + encodeURIComponent(argument))
+    } else if (LaunchBar.options.alternateKey) {
+        argument = argument.replace(/\s/g, '<OR>')
+        LaunchBar.openURL('accord://research/' + encodeURIComponent(argument))
+    } else {
+        argument = argument.replace(/\s/g, '<AND>')
+        // "[Alle];?" is only in the URL to make it work with German local … but it works with English aswell
+        LaunchBar.openURL('accord://research/[Alle];?' + encodeURIComponent(argument))
     }
 }
