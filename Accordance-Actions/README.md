@@ -11,7 +11,11 @@ In order to make display and paste actions work properly it is suggested to set 
 ## Paste scripture
 <img src="accpaste.gif" width="600"/>
 
+## Look up scripture 
+<img src="acclookup.gif" width="600"/>
 
+## Search words
+<img src="accsearch.gif" width="600"/>
 
 ## List
 - Display in large type
