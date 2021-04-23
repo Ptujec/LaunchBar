@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Look up scripture</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.OakTree.Accordance</string>
 	<key>LBDescription</key>
@@ -19,8 +19,10 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Look up scripture in Accordance. 
-This action is associated with Accordance. So you can run it when pressing space when the app is selected. </string>
+		<string>⏎ = Look up in research window, ⌥⏎ = Look up in default translation only
+
+This action is associated with Accordance. So you can run it by pressing space when the app is selected.
+</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
