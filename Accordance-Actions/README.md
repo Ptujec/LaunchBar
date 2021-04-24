@@ -7,6 +7,7 @@ In order to make display and paste actions work properly it is suggested to set 
 
 ## Display in large type 
 <img src="accdisplay.gif" width="600"/>
+(Hint: Exit with ESC)
 
 ## Paste scripture
 <img src="accpaste.gif" width="600"/>
