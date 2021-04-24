@@ -15,9 +15,12 @@ In order to make display and paste actions work properly it is suggested to set 
 <img src="acclookup.gif" width="600"/>
 
 ## Search words
-<img src="accsearch.gif" width="600"/>
 Per default spaces are replaced with "AND" tags or with "OR" tags when holding option. By holding command the string will stay as entered. 
+
+<img src="accsearch.gif" width="600"/>
+
 You also can use "A" (AND), "O" (OR) or "N" (NOT) manually as shown here:    
+
 <img src="advancedsearchoptions.png" width="600"/>
 
 ## Download
