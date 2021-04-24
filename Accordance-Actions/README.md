@@ -16,12 +16,9 @@ In order to make display and paste actions work properly it is suggested to set 
 
 ## Search words
 <img src="accsearch.gif" width="600"/>
-
-## List
-- Display in large type
-- Paste scripture (with an option (⌘⏎) to paste as Markdown blockquote)
-- Look up scripture *(I built in a script that can translate input that Accordance does not understand. In this version it is disabled. You will need to enable it in default.js and adjust sloTitles.applescript. (As is the AppleScript will translate from Slovene to English book titles.))*
-- Search words 
+Per default spaces are replaced with "AND" tags or with "OR" tags when holding option. By holding command the string will stay as entered. 
+You also can use "A" (AND), "O" (OR) or "N" (NOT) manually as shown here:    
+<img src="advancedsearchoptions.png" width="600"/>
 
 ## Download
 [Download LaunchBar Accordance Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))

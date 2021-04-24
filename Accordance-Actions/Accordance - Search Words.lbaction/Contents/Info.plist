@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Search words</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2</string>
+	<string>2021.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⏎ = Research All (A and B), ⌥⏎ = (A or B), ⌘⏎ =  Search in default tranlation</string>
+		<string>⏎ = A and B, ⌥⏎ = A or B, ⌘⏎ = A B</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
