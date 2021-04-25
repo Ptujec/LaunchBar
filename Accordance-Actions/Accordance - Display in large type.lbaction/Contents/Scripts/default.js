@@ -41,14 +41,25 @@ function run(argument) {
 
     var scripture = LaunchBar.executeAppleScriptFile('./getScripture.applescript', argument);
 
-    var arrayOfLines = fold(scripture, 70);
-    scripture = arrayOfLines.join('\n').replace(/\n\s/g, '\n');
-    
-    if (scripture.length > 1050) {
-        // truncate 
-        scripture = scripture.substring(0, 1049) + "…";
+    var scLength = scripture.length  
+    var lineLength = scLength / 7
+
+    if (lineLength < 42) {
+        lineLength = 42
+    } else if  (lineLength > 68) {
+        lineLength = 68
     }
 
+    if (scLength > 948) {
+        // truncate 
+        scripture = scripture.trim()       
+        scripture = scripture.substring(0, 948) + "…"; 
+        lineLength = 68
+    }
+    
+    var arrayOfLines = fold(scripture, lineLength);
+    scripture = arrayOfLines.join('\n').replace(/\n\s/g, '\n');
+    
     // Uncomment if you are using this a lot in Fullscreen mode
     // LaunchBar.executeAppleScript('tell application "Mission Control" to launch');
 
