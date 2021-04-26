@@ -9,6 +9,8 @@ tell application "Safari"
 		
 		
 		set _URL to URL of front document
+		return _URL
+	on error (e)
+		return e
 	end try
-	return _URL
 end tell
