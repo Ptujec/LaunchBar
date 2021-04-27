@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Spotifeed - Convert Spotify podcasts to RSS feeds</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Send the Spotify URL to this action or just run it to pick up the URL from Safari.
+		<string>You need to enter a Spotify URL or have it open in Safari. ⌘⏎ = Open in Overcast or Podcasts.
 This is build upon Tim Dorrs excellent service.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
