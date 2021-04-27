@@ -6,7 +6,7 @@ Simply search for the Spotify show you would like to get the RSS feed for on the
  
 <img src="spotifeed.gif" width="600"/> 
 
-Now you have the RSS feed on your clipboard and can use [Apples universal clipboard feature](https://support.apple.com/en-us/HT209460) to paste it in a proper podcast app like e.g. [Castro](https://castro.fm) on your phone. You can also open the RSS feed in [Podcasts](https://www.apple.com/apple-podcasts/) or [Overcast](https://overcast.fm) on your Mac (with ⌘⏎ or a click on the notification).  
+Now you have the RSS feed on your clipboard and can use [Apples universal clipboard feature](https://support.apple.com/en-us/HT209460) to [paste it in a proper podcast app](https://www.macworld.com/article/234395/how-to-add-a-podcast-by-url-feed-to-podcasts-app-castro-overcast-pocketcasts.html) like e.g. [Castro](https://castro.fm) on your phone. You can also open the RSS feed in [Podcasts](https://www.apple.com/apple-podcasts/) or [Overcast](https://overcast.fm) on your Mac (with ⌘⏎ or a click on the notification).  
 
 ## Download
 
