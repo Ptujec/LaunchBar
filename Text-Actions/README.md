@@ -7,6 +7,10 @@
 
 <img src="mdrtf.gif" width="600"/> 
 
+## Get URLs from text
+
+<img src="geturls.gif" width="600"/> 
+
 
 ## List
 
