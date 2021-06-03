@@ -1,6 +1,6 @@
 # LaunchBar Action: Todoist Today
 
-This is a simple action which allows you to take a glance at your tasks for today. If there is a link in the task you can open it. Other wise return will open the Tododist app. 
+This is a simple action which allows you to take a glance at your tasks for today. If there is a link in the task you can open it. Other wise return will open the Todoist app. 
  
 <img src="ttoday.png" width="600"/> 
 
