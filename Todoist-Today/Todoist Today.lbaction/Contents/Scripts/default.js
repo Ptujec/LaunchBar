@@ -8,12 +8,32 @@ const token = ''
 function run(argument) {
 
     if (token == '') {
-        LaunchBar.alert('You need to enter your API-Token in default.js (line 6)')
+        if (LaunchBar.currentLocale == 'de') {
+            var alert = 'Du musst dein API-Token in default.js (Zeile 6) eintragen'
+        } else {
+            var alert = 'You need to enter your API-Token in default.js (line 6)'
+        }
+        LaunchBar.alert(alert)
     } else {
 
         var todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=today&token=' + token)
 
         todayData = todayData.data
+
+        if (todayData == '') {
+            // todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=tomorrow&token=' + token)
+            // todayData = todayData.data
+            if (LaunchBar.currentLocale == 'de') {
+                var title = 'Alles erledigt für heute!'
+            } else {
+                var title = 'All done for today!'
+            }
+            return [{
+                'title': title,
+                'icon': 'checkmarkTemplate',
+                'url': 'todoist://'
+            }]
+        }
 
         todayData = todayData.sort(function (a, b) {
             return a.priority < b.priority
