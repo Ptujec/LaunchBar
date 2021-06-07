@@ -92,7 +92,11 @@ function run(argument) {
                 });
 
                 // Title
-                var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate + ' Uhr)'
+                if (LaunchBar.currentLocale == 'de') {
+                    var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate + ' Uhr)'                    
+                } else {
+                    var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate.toLowerCase() + ')'
+                }
 
                 // Icon 
                 var icon = hTeam.toLowerCase()
