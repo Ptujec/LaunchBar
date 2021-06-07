@@ -1,0 +1,600 @@
+{
+    "_internal": {
+        "pubDateTime": "2021-06-06 18:24:12.526 EDT",
+        "igorPath": "S3,1623018245647,1623018250221|router,1623018250221,1623018250280|domUpdater,1623018250966,1623018251759|feedProducer,1623018251839,1623018252646",
+        "routeName": "ap_recap_article",
+        "routeValue": "S3::ap_recap_20210606_0042000177.xml",
+        "xslt": "NBA/xsl/date/scoreboard/marty_daily_scoreboard.xsl",
+        "xsltForceRecompile": "true",
+        "xsltInCache": "false",
+        "xsltCompileTimeMillis": "608",
+        "xsltTransformTimeMillis": "125",
+        "consolidatedDomKey": "prod__transform__marty_daily_scoreboard__1172175732872",
+        "endToEndTimeMillis": "6999"
+    },
+    "numGames": 2,
+    "games": [
+        {
+            "seasonStageId": 4,
+            "seasonYear": "2020",
+            "leagueName": "standard",
+            "gameId": "0042000201",
+            "arena": {
+                "name": "Wells Fargo Center",
+                "isDomestic": true,
+                "city": "Philadelphia",
+                "stateAbbr": "PA",
+                "country": "USA"
+            },
+            "isGameActivated": false,
+            "statusNum": 3,
+            "extendedStatusNum": 0,
+            "startTimeEastern": "1:00 PM ET",
+            "startTimeUTC": "2021-06-06T17:00:00.000Z",
+            "endTimeUTC": "2021-06-06T19:42:00.000Z",
+            "startDateEastern": "20210606",
+            "homeStartDate": "20210606",
+            "homeStartTime": "1300",
+            "visitorStartDate": "20210606",
+            "visitorStartTime": "1300",
+            "gameUrlCode": "20210606/ATLPHI",
+            "clock": "",
+            "isBuzzerBeater": false,
+            "isPreviewArticleAvail": true,
+            "isRecapArticleAvail": true,
+            "nugget": {
+                "text": ""
+            },
+            "attendance": "18624",
+            "tickets": {
+                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000201/APP_TIX",
+                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000201/TEAM_SCH",
+                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000201/WEB_MWEB",
+                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000201/LEAG_GAMEINFO",
+                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000201/LEAG_TIX"
+            },
+            "hasGameBookPdf": false,
+            "isStartTimeTBD": false,
+            "isNeutralVenue": false,
+            "gameDuration": {
+                "hours": "2",
+                "minutes": "31"
+            },
+            "tags": [
+                "E22020"
+            ],
+            "playoffs": {
+                "roundNum": "2",
+                "confName": "East",
+                "seriesId": "22",
+                "seriesSummaryText": "ATL leads 1-0",
+                "isSeriesCompleted": false,
+                "gameNumInSeries": "1",
+                "isIfNecessary": false,
+                "vTeam": {
+                    "seedNum": "5",
+                    "seriesWin": "1",
+                    "isSeriesWinner": false
+                },
+                "hTeam": {
+                    "seedNum": "1",
+                    "seriesWin": "0",
+                    "isSeriesWinner": false
+                }
+            },
+            "period": {
+                "current": 4,
+                "type": 0,
+                "maxRegular": 4,
+                "isHalftime": false,
+                "isEndOfPeriod": false
+            },
+            "vTeam": {
+                "teamId": "1610612737",
+                "triCode": "ATL",
+                "win": "41",
+                "loss": "31",
+                "seriesWin": "1",
+                "seriesLoss": "2",
+                "score": "128",
+                "linescore": [
+                    {
+                        "score": "42"
+                    },
+                    {
+                        "score": "32"
+                    },
+                    {
+                        "score": "25"
+                    },
+                    {
+                        "score": "29"
+                    }
+                ]
+            },
+            "hTeam": {
+                "teamId": "1610612755",
+                "triCode": "PHI",
+                "win": "49",
+                "loss": "23",
+                "seriesWin": "2",
+                "seriesLoss": "1",
+                "score": "124",
+                "linescore": [
+                    {
+                        "score": "27"
+                    },
+                    {
+                        "score": "27"
+                    },
+                    {
+                        "score": "29"
+                    },
+                    {
+                        "score": "41"
+                    }
+                ]
+            },
+            "watch": {
+                "broadcast": {
+                    "broadcasters": {
+                        "national": [
+                            {
+                                "shortName": "ABC",
+                                "longName": "ABC"
+                            }
+                        ],
+                        "canadian": [
+                            {
+                                "shortName": "SN",
+                                "longName": "Sportsnet"
+                            }
+                        ],
+                        "vTeam": [],
+                        "hTeam": [],
+                        "spanish_hTeam": [],
+                        "spanish_vTeam": [],
+                        "spanish_national": []
+                    },
+                    "video": {
+                        "regionalBlackoutCodes": "torr",
+                        "canPurchase": false,
+                        "isLeaguePass": true,
+                        "isNationalBlackout": true,
+                        "isTNTOT": false,
+                        "isVR": false,
+                        "tntotIsOnAir": false,
+                        "isNextVR": false,
+                        "isNBAOnTNTVR": false,
+                        "isMagicLeap": false,
+                        "isOculusVenues": false,
+                        "streams": [
+                            {
+                                "streamType": "vTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "hTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_vTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_hTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_natl",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "mobile",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "condensed",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "alt",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            }
+                        ],
+                        "deepLink": [
+                            {
+                                "broadcaster": "ABC",
+                                "regionalMarketCodes": "",
+                                "iosApp": "http://www.espn.com/watch?id=3789583",
+                                "androidApp": "http://www.espn.com/watch?id=3789583",
+                                "desktopWeb": "http://www.espn.com/watch?id=3789583",
+                                "mobileWeb": "http://www.espn.com/watch?id=3789583"
+                            }
+                        ]
+                    },
+                    "audio": {
+                        "national": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": []
+                        },
+                        "vTeam": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": [
+                                {
+                                    "shortName": "WZGC 92.9 FM The Game",
+                                    "longName": "WZGC 92.9 FM The Game"
+                                }
+                            ]
+                        },
+                        "hTeam": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": [
+                                {
+                                    "shortName": "97.5 The Fanatic",
+                                    "longName": "97.5 The Fanatic"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "seasonStageId": 4,
+            "seasonYear": "2020",
+            "leagueName": "standard",
+            "gameId": "0042000177",
+            "arena": {
+                "name": "STAPLES Center",
+                "isDomestic": true,
+                "city": "Los Angeles",
+                "stateAbbr": "CA",
+                "country": "USA"
+            },
+            "isGameActivated": false,
+            "statusNum": 3,
+            "extendedStatusNum": 0,
+            "startTimeEastern": "3:30 PM ET",
+            "startTimeUTC": "2021-06-06T19:30:00.000Z",
+            "endTimeUTC": "2021-06-06T22:15:00.000Z",
+            "startDateEastern": "20210606",
+            "homeStartDate": "20210606",
+            "homeStartTime": "1230",
+            "visitorStartDate": "20210606",
+            "visitorStartTime": "1430",
+            "gameUrlCode": "20210606/DALLAC",
+            "clock": "",
+            "isBuzzerBeater": false,
+            "isPreviewArticleAvail": true,
+            "isRecapArticleAvail": true,
+            "nugget": {
+                "text": ""
+            },
+            "attendance": "7342",
+            "tickets": {
+                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000177/APP_TIX",
+                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000177/TEAM_SCH",
+                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000177/WEB_MWEB",
+                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000177/LEAG_GAMEINFO",
+                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000177/LEAG_TIX"
+            },
+            "hasGameBookPdf": false,
+            "isStartTimeTBD": false,
+            "isNeutralVenue": false,
+            "gameDuration": {
+                "hours": "2",
+                "minutes": "27"
+            },
+            "tags": [
+                "W12020"
+            ],
+            "playoffs": {
+                "roundNum": "1",
+                "confName": "West",
+                "seriesId": "11",
+                "seriesSummaryText": "LAC wins 4-3",
+                "isSeriesCompleted": true,
+                "gameNumInSeries": "7",
+                "isIfNecessary": false,
+                "vTeam": {
+                    "seedNum": "5",
+                    "seriesWin": "3",
+                    "isSeriesWinner": false
+                },
+                "hTeam": {
+                    "seedNum": "4",
+                    "seriesWin": "4",
+                    "isSeriesWinner": true
+                }
+            },
+            "period": {
+                "current": 4,
+                "type": 0,
+                "maxRegular": 4,
+                "isHalftime": false,
+                "isEndOfPeriod": false
+            },
+            "vTeam": {
+                "teamId": "1610612742",
+                "triCode": "DAL",
+                "win": "42",
+                "loss": "30",
+                "seriesWin": "2",
+                "seriesLoss": "1",
+                "score": "111",
+                "linescore": [
+                    {
+                        "score": "38"
+                    },
+                    {
+                        "score": "24"
+                    },
+                    {
+                        "score": "23"
+                    },
+                    {
+                        "score": "26"
+                    }
+                ]
+            },
+            "hTeam": {
+                "teamId": "1610612746",
+                "triCode": "LAC",
+                "win": "47",
+                "loss": "25",
+                "seriesWin": "1",
+                "seriesLoss": "2",
+                "score": "126",
+                "linescore": [
+                    {
+                        "score": "35"
+                    },
+                    {
+                        "score": "35"
+                    },
+                    {
+                        "score": "30"
+                    },
+                    {
+                        "score": "26"
+                    }
+                ]
+            },
+            "watch": {
+                "broadcast": {
+                    "broadcasters": {
+                        "national": [
+                            {
+                                "shortName": "ABC",
+                                "longName": "ABC"
+                            }
+                        ],
+                        "canadian": [
+                            {
+                                "shortName": "SN",
+                                "longName": "Sportsnet"
+                            }
+                        ],
+                        "vTeam": [],
+                        "hTeam": [],
+                        "spanish_hTeam": [],
+                        "spanish_vTeam": [],
+                        "spanish_national": []
+                    },
+                    "video": {
+                        "regionalBlackoutCodes": "torr",
+                        "canPurchase": false,
+                        "isLeaguePass": true,
+                        "isNationalBlackout": true,
+                        "isTNTOT": false,
+                        "isVR": false,
+                        "tntotIsOnAir": false,
+                        "isNextVR": false,
+                        "isNBAOnTNTVR": false,
+                        "isMagicLeap": false,
+                        "isOculusVenues": false,
+                        "streams": [
+                            {
+                                "streamType": "vTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "hTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_vTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_hTeam",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "espanol_natl",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "mobile",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "condensed",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            },
+                            {
+                                "streamType": "alt",
+                                "isOnAir": false,
+                                "doesArchiveExist": false,
+                                "isArchiveAvailToWatch": false,
+                                "streamId": "",
+                                "duration": 0
+                            }
+                        ],
+                        "deepLink": [
+                            {
+                                "broadcaster": "ABC",
+                                "regionalMarketCodes": "",
+                                "iosApp": "http://www.espn.com/watch?id=3789948",
+                                "androidApp": "http://www.espn.com/watch?id=3789948",
+                                "desktopWeb": "http://www.espn.com/watch?id=3789948",
+                                "mobileWeb": "http://www.espn.com/watch?id=3789948"
+                            }
+                        ]
+                    },
+                    "audio": {
+                        "national": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": []
+                        },
+                        "vTeam": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": [
+                                {
+                                    "shortName": "",
+                                    "longName": ""
+                                }
+                            ]
+                        },
+                        "hTeam": {
+                            "streams": [
+                                {
+                                    "language": "English",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                },
+                                {
+                                    "language": "Spanish",
+                                    "isOnAir": false,
+                                    "streamId": ""
+                                }
+                            ],
+                            "broadcasters": [
+                                {
+                                    "shortName": "",
+                                    "longName": ""
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
