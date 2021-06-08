@@ -46,6 +46,8 @@ function run(argument) {
 
     if (LaunchBar.options.commandKey) {
         LaunchBar.openURL('https://www.espn.com/nba/scoreboard/_/date/' + dateString)
+    } else if (LaunchBar.options.shiftKey) {
+        LaunchBar.openURL('http://data.nba.net/prod/v2/' + dateString + '/scoreboard.json')
     } else {
         if (argument == undefined) {
             var scoreData = HTTP.getJSON('http://data.nba.net/prod/v2/' + dateString + '/scoreboard.json')
@@ -67,6 +69,7 @@ function run(argument) {
         for (i = 0; i < games.length; i++) {
             var game = games[i]
             var clock = game.clock
+            var period = game.period.current
             var vTeam = game.vTeam.triCode
             var vTeamScore = game.vTeam.score
             var hTeam = game.hTeam.triCode
@@ -117,10 +120,10 @@ function run(argument) {
             // https://www.nba.com/game/lac-vs-dal-0042000176/box-score
             var url = 'https://www.nba.com/game/' + vTeam.toLowerCase() + '-vs-' + hTeam.toLowerCase() + '-' + game.gameId + '/box-score'
 
-            // Badge 
+            // Label 
             var label = ''
             if (clock != '') {
-                label = clock
+                label = 'Q' + period + ' ' + clock
             }
             
             results.push({
