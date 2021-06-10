@@ -1,7 +1,8 @@
 # LaunchBar Text Actions
 
-<img src="textactions.png" width="600"/> 
+## Paste date
 
+<img src="pasteDate.gif" width="600"/> 
 
 ## Markdown to RTF Link
 
@@ -12,9 +13,9 @@
 <img src="geturls.gif" width="600"/> 
 
 
-## List
+## Full List
 
-- Date (Paste current date or date plus/minus some days in an active text field)
+- Date (Paste current date or date plus/minus some days (e.g. "-3") in an active text field. You can also specify an upcoming day of the week (e.g. "Sunday") or its abbreviation (e.g. "sun")
 - Get Markdown Link from Safari (and paste into active text field)
 - Get RTF Link from Safari (and paste into active text field)
 - Lorem Ipsum (Generate placeholder text)
