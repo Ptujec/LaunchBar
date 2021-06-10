@@ -12,7 +12,6 @@
 
 function run(argument) {
 
-
     // Date
     if (argument == undefined) {
         var date = new Date();
@@ -32,15 +31,57 @@ function run(argument) {
         dateStringY = dateStringY.replace(/-/g, '')
 
     } else {
-        var date = new Date();
+        var checkNum = parseInt(argument)
 
-        // Add or subtrackt days
-        var offsetNumber = parseInt(argument);
-        date.setDate(date.getDate() + offsetNumber);
+        if (!isNaN(checkNum)) {
+            // Number offset
+            var date = new Date();
 
-        var dateString = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
-            .toISOString()
-            .split('T')[0]
+            // Add or subtrackt days
+            var offsetNumber = parseInt(argument);
+            date.setDate(date.getDate() + offsetNumber);
+
+            var dateString = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+                .toISOString()
+                .split('T')[0]
+
+        } else {
+            // day of the week
+
+            var weekdaysEN = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+            var weekdaysDE = ['sonntag', 'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag']
+
+            var dayOfWeek = '';
+            var i = 0;
+            for (i = 0; i < weekdaysEN.length; i++) {
+                var dayOfWeekEN = weekdaysEN[i];
+                if (dayOfWeekEN.startsWith(argument.toLowerCase())) {
+                    dayOfWeek = i
+                }
+            }
+
+            if (dayOfWeek == '') {
+                var i = 0;
+                for (i = 0; i < weekdaysDE.length; i++) {
+                    var dayOfWeekDE = weekdaysDE[i];
+                    if (dayOfWeekDE.startsWith(argument.toLowerCase())) {
+                        dayOfWeek = i
+                    }
+                }
+            }
+
+            var date = new Date();
+
+            var dayOfWeekDate = new Date(date.getTime());
+            // dayOfWeekDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+            dayOfWeekDate.setDate(date.getDate() + (dayOfWeek - 1 - date.getDay() + 7) % 7 + 1);
+
+            var dateString = new Date(dayOfWeekDate.getTime() - (dayOfWeekDate.getTimezoneOffset() * 60000))
+                .toISOString()
+                .split('T')[0]
+
+        }
     }
     dateString = dateString.replace(/-/g, '')
 
@@ -78,7 +119,7 @@ function run(argument) {
             // Subtitle 
             var playoffs = game.playoffs
             if (playoffs != undefined) {
-                var subtitle = playoffs.seriesSummaryText
+                var subtitle = 'Game ' + playoffs.gameNumInSeries + ' (' + playoffs.seriesSummaryText + ')'
             } else {
                 var subtitle = ''
             }
@@ -96,7 +137,7 @@ function run(argument) {
 
                 // Title
                 if (LaunchBar.currentLocale == 'de') {
-                    var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate + ' Uhr)'                    
+                    var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate.toLowerCase() + ' Uhr)'
                 } else {
                     var title = hTeam + ' vs. ' + vTeam + ' (' + relativeDate.toLowerCase() + ')'
                 }
@@ -125,7 +166,7 @@ function run(argument) {
             if (clock != '') {
                 label = 'Q' + period + ' ' + clock
             }
-            
+
             results.push({
                 'title': title,
                 'subtitle': subtitle,
