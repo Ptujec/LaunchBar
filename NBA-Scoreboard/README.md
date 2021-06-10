@@ -1,5 +1,6 @@
 # LaunchBar Action: NBA Scoreboard
 <img src="nba_scoreboard_01.png" width="600"/> 
+<img src="nba_scoreboard_02.png" width="600"/> 
 
 ## Features
 This action lets you check NBA scores really quick. 
