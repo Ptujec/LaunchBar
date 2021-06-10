@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Paste Date</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2021.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -19,8 +19,7 @@
 		<key>LBSummary</key>
 		<string>"Date" does two things:
 1) Paste the current date in the frontmost window (yyyy-MM-dd format)
-2) On hitting space you can add a number … date in x days
-</string>
+2) On hitting space you can enter days from now (e.g. "-3") or an upcoming weekday ("Sunday", "sun") to get the date for that.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -41,6 +40,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string>Paste date in … days</string>
+	<string>Enter days from now (e.g. "-3") or weekday ("Sunday", "sun") </string>
 </dict>
 </plist>
