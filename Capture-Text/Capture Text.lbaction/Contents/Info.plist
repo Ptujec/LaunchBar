@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>Template.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.CaptureTextOCR</string>
+	<key>CFBundleName</key>
+	<string>Capture Text (OCR)</string>
+	<key>CFBundleVersion</key>
+	<string>2021.1</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBRequirements</key>
+		<string>macOCR (https://github.com/schappim/macOCR)</string>
+		<key>LBSummary</key>
+		<string>⌘= Copy, ⌘⏎ = Select in LB, ⇧⏎ = Open link, email address or phone number
+Capture Text uses the great command line app macOCR by Marcus Schappi (@schappi). </string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar</string>
+	</dict>
+	<key>LBRequirements</key>
+	<string>macOCR (https://github.com/schappim/macOCR)</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBRunInBackground</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+	<key>NSHumanReadableCopyright</key>
+	<string>for macOCR see: https://github.com/schappim/macOCR#mit-license</string>
+</dict>
+</plist>
