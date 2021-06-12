@@ -38,7 +38,7 @@ function run() {
         // Large display
         var rLength = result.length
 
-        if (rLength > 80) {
+        if (rLength > 70) {
 
             var lineLength = rLength / 7
 
@@ -65,8 +65,8 @@ function run() {
 
         LaunchBar.execute('/usr/bin/afplay', '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf')
 
-        // Hide after 2 seconds
-        wait(2000);
+        // Hide after 3 seconds
+        wait(3000);
         LaunchBar.hide()
     }
 }
