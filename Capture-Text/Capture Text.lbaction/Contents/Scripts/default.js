@@ -7,7 +7,6 @@
 // https://www.obdev.at/resources/launchbar/help/URLCommands.html
 
 function run() {
-
     var result = LaunchBar.execute('/usr/local/bin/ocr')
         .trim()
 
@@ -16,7 +15,6 @@ function run() {
 
     } else if (LaunchBar.options.shiftKey) {
         // open URL, Email or Phone number
-
         if (result.includes('www') || result.includes('http') || /\.\w+/.test(result) && !result.includes('@')) {
             if (!result.includes('http')) {
                 result = 'http://' + result
@@ -42,7 +40,6 @@ function run() {
         }
 
     } else {
-
         // Large display
         var rLength = result.length
 
@@ -62,13 +59,28 @@ function run() {
             result = arrayOfLines.join('\n').replace(/\n\s/g, '\n')
         }
 
+        if (LaunchBar.currentLocale == 'de') {
+            var title = 'Erfasster Text:'
+        } else {
+            var title = 'Captured text:'
+        }
+
         LaunchBar.displayInLargeType({
-            title: 'Text copied!',
+            title: title,
             string: result
         });
 
-        // Hide after 3 seconds
-        wait(3000);
+        if (rLength < 70) {
+            var time = 2000 // 1000 = 1 sec 
+        } else if (rLength < 200) {
+            var time = 3000
+        } else if (rLength > 500) {
+            var time = 6000
+        } else if (rLength > 200) {
+            var time = 4500 
+        }
+
+        wait(time);
         LaunchBar.hide()
     }
 }
