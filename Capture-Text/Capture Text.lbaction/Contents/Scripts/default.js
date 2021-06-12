@@ -16,8 +16,12 @@ function run() {
     } else if (LaunchBar.options.shiftKey) {
         // open URL, Email or Phone number
 
-        if (result.includes('www') || result.includes('http')) {
-            var url = result.replace(/www/, 'http://www')
+        if (result.includes('www') || result.includes('http') || result.includes('.com') && !result.includes('@')) {
+            // var url = result.replace(/www/, 'http://www')
+            if (!result.includes('http')) {
+                result = 'http://' + result
+            }
+            var url = result.match(/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])|(www\.[\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi).toString()
             LaunchBar.openURL(url)
         } else if (result.includes('@')) {
             var url = 'mailto:' + result
