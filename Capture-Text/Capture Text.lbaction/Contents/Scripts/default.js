@@ -7,6 +7,7 @@
 // https://www.obdev.at/resources/launchbar/help/URLCommands.html
 
 function run() {
+
     var result = LaunchBar.execute('/usr/local/bin/ocr')
         .trim()
 
@@ -16,48 +17,47 @@ function run() {
     } else if (LaunchBar.options.shiftKey) {
         // open URL, Email or Phone number
 
-        if (result.includes('www') || result.includes('http') || result.includes('.com') && !result.includes('@')) {
-            // var url = result.replace(/www/, 'http://www')
+        if (result.includes('www') || result.includes('http') || /\.\w+/.test(result) && !result.includes('@')) {
             if (!result.includes('http')) {
                 result = 'http://' + result
             }
-            var url = result.match(/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])|(www\.[\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi).toString()
-            LaunchBar.openURL(url)
+            var urls = result.match(/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])|(www\.[\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi)
+
+            if (urls.length > 1) {
+                urls = urls.toString().replace(/,/g, '\n')
+                LaunchBar.openURL('x-launchbar:select?string=' + encodeURI(urls))
+            } else {
+                LaunchBar.openURL(urls[0])
+            }
+
         } else if (result.includes('@')) {
-            var url = 'mailto:' + result
-            LaunchBar.openURL(url)
-        } else if (/\d\d\d/.test(result)) {
-            var url = 'tel:' + result.replace(/\D/g, '')
-            LaunchBar.openURL(url)
+            var mailto = 'mailto:' + result
+            LaunchBar.openURL(mailto)
+        } else if (/^\d|^\+/.test(result)) {
+            result = result
+                .replace(/\(0\)/g, '')
+                .replace(/[^0-9\+]/g, '')
+            var tel = 'tel://' + result
+            LaunchBar.openURL(tel)
         }
 
     } else {
-
-        // Notification
-        // LaunchBar.displayNotification({
-        //     title: 'Text copied!',
-        //     string: result
-        // })
 
         // Large display
         var rLength = result.length
 
         if (rLength > 70) {
-
             var lineLength = rLength / 7
-
             if (lineLength < 42) {
                 lineLength = 42
             } else if (lineLength > 68) {
                 lineLength = 68
             }
-
             if (rLength > 948) {
                 // truncate 
                 result = result.substring(0, 949) + "…";
                 lineLength = 68
             }
-
             var arrayOfLines = fold(result, lineLength);
             result = arrayOfLines.join('\n').replace(/\n\s/g, '\n')
         }
@@ -66,8 +66,6 @@ function run() {
             title: 'Text copied!',
             string: result
         });
-
-        LaunchBar.execute('/usr/bin/afplay', '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf')
 
         // Hide after 3 seconds
         wait(3000);
