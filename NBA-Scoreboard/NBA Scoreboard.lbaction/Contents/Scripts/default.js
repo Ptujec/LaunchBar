@@ -101,9 +101,9 @@ function run(argument) {
             var games = scoreData.data.games
         }
 
-        // games = games.sort(function (a, b) {
-        //     return b.startTimeEastern > b.startTimeEastern;
-        // });
+        games = games.sort(function (a, b) {
+            return b.isGameActivated - a.isGameActivated;
+        });
 
         var results = [];
         var i = 0;
