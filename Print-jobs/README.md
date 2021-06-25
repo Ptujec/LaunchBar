@@ -1,8 +1,8 @@
 # LaunchBar Action: Print jobs (CUPS Server)
 
-<img src="01.png" width="600"/> 
+<img src="pj01.png" width="600"/> 
 
-<img src="02.png" width="600"/> 
+<img src="pj02.png" width="600"/> 
 
 This action comes in handy, if you are using a [Raspberry Pi as a print server](https://www.tomshardware.com/how-to/raspberry-pi-print-server) and you want to check the currently active print jobs. 
 
