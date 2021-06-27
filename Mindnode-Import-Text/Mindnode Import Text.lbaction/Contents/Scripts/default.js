@@ -11,7 +11,7 @@ function run(argument) {
     // fix long dashes except when using shift 
     if (!LaunchBar.options.shiftKey) {
         argument = argument
-            .replace(/–/g, '-')
+            .replace(/–|—/g, '-')
     }
 
     if (LaunchBar.options.shiftKey) {

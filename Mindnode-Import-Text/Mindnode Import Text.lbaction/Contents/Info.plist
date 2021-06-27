@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Mindnode Import Text</string>
 	<key>CFBundleVersion</key>
-	<string>2021.3</string>
+	<string>2021.3.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.ideasoncanvas.mindnode.macos</string>
 	<key>LBDescription</key>
