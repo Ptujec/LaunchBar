@@ -3,15 +3,18 @@
 <img src="mindnodeImport.gif" width="600"/>
 
 ## Function
-This action is meant to send text to. If no text is send to the action it will take the most recent clipboard content. 
+This action is meant to send text to. If no text is send to the action it will use the most recent clipboard content. 
 
-This action is associated with MindNode. This means sending text to MindNode will have the same effect as sending it to the action (as shown above).
+By default (⏎) the action will try to detect if your selection is in markdown format or not and treat it accordingly. Use modifier keys (see Options) to enforce the respective options. 
+
+The action is associated with MindNode. This means sending text to MindNode will work the same as sending it to the action.
 
 Options:
 
-- ⏎ = Import text as is
+- ⏎ = Smart mode (default)
 - ⌥⏎ = Treat as Markdown
-- ⌘⏎ Make first line main node
+- ⌘⏎ = Make first line main node
+- ⇧⏎ = Import as is
 
 
 ## Download
