@@ -4,6 +4,11 @@
 // https://mindnode.cdn.prismic.io/mindnode/418d8e20-51d4-45ef-94f5-ee28ce05c347_MindNode-User-Guide.pdf
 
 function run(argument) {
+
+    if (argument == undefined) {
+        argument = LaunchBar.getClipboardString()
+    }
+
     if (LaunchBar.options.commandKey) {
         // add tab to all lines except first … this will result in the first line being the main node and the others as child nodes
         argument = argument.replace(/\n\s*\n/g, '\n').replace(/\n/g, '\n\t')

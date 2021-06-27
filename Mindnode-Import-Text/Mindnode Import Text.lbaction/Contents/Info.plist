@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Mindnode Import Text</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.ideasoncanvas.mindnode.macos</string>
 	<key>LBDescription</key>
@@ -22,7 +22,7 @@
 		<string>⏎ = Import text as is;  ⌥⏎ = Treat as Markdown; ⌘⏎ Make first line main node
 
 This action is meant to send text to. It is associated with MindNode. So you can also send text directly to the app. 
-Use the modifier keys listed above for options such as treating the input as markdown. </string>
+Use the modifier keys listed above for options such as treating the input as markdown. If no text is send to the action it will take the most recent clipboard content. </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -38,8 +38,6 @@ Use the modifier keys listed above for options such as treating the input as mar
 			<array>
 				<string>string</string>
 			</array>
-			<key>LBRequiresArgument</key>
-			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBScriptName</key>
