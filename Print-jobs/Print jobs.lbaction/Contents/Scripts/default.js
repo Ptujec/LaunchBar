@@ -73,7 +73,7 @@ function run() {
                     .replace(/(<([^>]+)>)/gi, '')
                     .replace(/&nbsp;/g, '')
                     .replace(/\n+/g, '')
-                    .replace(/\, /g, '\.')
+                    .replace(/\, /g, ': ')
                     .replace(/"/g, '\"')
                     .split(',')
 
