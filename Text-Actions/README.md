@@ -21,6 +21,7 @@
 - Lorem Ipsum (Generate placeholder text)
 - Lorem Slovensko (Slovene version)
 - Markdown to RTF Link (Convert a Markdown link into a proper RTF link e.g. in Mail)
+- Replace Commas with Linebreaks
 
 ## Download
 
