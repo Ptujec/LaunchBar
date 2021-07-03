@@ -22,6 +22,7 @@
 - Lorem Slovensko (Slovene version)
 - Markdown to RTF Link (Convert a Markdown link into a proper RTF link e.g. in Mail)
 - Replace Commas with Linebreaks
+- Remove Duplicate Email Addresses
 
 ## Download
 
