@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Look up scripture</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2</string>
+	<string>2021.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.OakTree.Accordance</string>
 	<key>LBDescription</key>
@@ -19,7 +19,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⏎ = Look up in research window, ⌥⏎ = Look up in default translation only
+		<string>⏎ = Smart option ⌘⏎ = Look up in default translation only, ⌥⏎ = Look up in research window
 
 This action is associated with Accordance. So you can run it by pressing space when the app is selected.
 </string>
