@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Display in large type</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2.1</string>
+	<string>2021.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Display scriptures in large type. You can set the translation you want to use in the included AppleScript. The default is the ESV study bible.</string>
+		<string>Display scriptures in large type. You can set the translation you want to use in default.js (line 11). Open the integrated Action Editor and go to "Scripts".</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
