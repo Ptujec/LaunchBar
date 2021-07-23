@@ -8,7 +8,7 @@ Sources:
 */
 
 // SET THE TRANSLATION YOU WANT TO USE IN THE NEXT LINE. (You can usually find the correct abbreviation in brackets when you select "About this Text" in Accordance.)
-const bibleText =  'ESVS'
+var bibleText =  'ESVS'
 
 // --- Only change if you know what you are doing from here --- //
 
@@ -141,7 +141,7 @@ function displayText(result, argument) {
 
     // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
     bibleText = bibleText.replace(/°|-LEM/g, '')
-    
+
     LaunchBar.displayInLargeType({
         title: argument + ' (' + bibleText + ')',
         string: text
