@@ -139,6 +139,9 @@ function displayText(result, argument) {
     // Uncomment if you are using this a lot in Fullscreen mode
     // LaunchBar.executeAppleScript('tell application "Mission Control" to launch');
 
+    // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
+    bibleText = bibleText.replace(/°|-LEM/g, '')
+    
     LaunchBar.displayInLargeType({
         title: argument + ' (' + bibleText + ')',
         string: text
