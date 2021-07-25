@@ -115,7 +115,7 @@ function lookUp(result) {
     } else if (LaunchBar.options.alternateKey) {
         // UI language check
         var lang = LaunchBar.executeAppleScriptFile('./langCheck.applescript');
-        if (lang.indexOf('de') >= 0) {
+        if (lang.startsWith('de')) {
             var allTextSetting = '[Alle_Texte];Verses?'
         } else {
             var allTextSetting = '[All_Texts];Verses?'
