@@ -110,30 +110,36 @@ function run(argument) {
 
 function lookUp(result) {
 
+    // UI language check
+    var aPlist = File.readPlist('~/Library/Preferences/com.OakTree.Accordance.plist')
+    var lang = aPlist.AppleLanguages
+
+    if (lang != undefined) {
+        lang = lang
+            .toString()
+    } else {
+        var gPlist = File.readPlist('/Library/Preferences/.GlobalPreferences.plist')
+        lang = gPlist.AppleLanguages
+            .toString()
+    }
+
+    if (lang.startsWith('de')) {
+        var allTextSetting = '[Alle_Texte];Verses?'
+    } else {
+        var allTextSetting = '[All_Texts];Verses?'
+    }
+
     if (LaunchBar.options.commandKey) {
-        LaunchBar.openURL('accord://read/' + encodeURIComponent(result))
+        // Force read option
+        LaunchBar.openURL('accord://read/?' + encodeURIComponent(result))
     } else if (LaunchBar.options.alternateKey) {
-        // UI language check
-        var lang = LaunchBar.executeAppleScriptFile('./langCheck.applescript');
-        if (lang.startsWith('de')) {
-            var allTextSetting = '[Alle_Texte];Verses?'
-        } else {
-            var allTextSetting = '[All_Texts];Verses?'
-        }
+        // Force research option
         LaunchBar.openURL('accord://research/' + allTextSetting + encodeURIComponent(result))
     } else {
-        // Smart Option
+        // Smart option
         if (result.includes('-') || result.includes(';') || !result.includes(',')) {
             LaunchBar.openURL('accord://read/?' + encodeURIComponent(result))
         } else {
-            // UI language check
-            var lang = LaunchBar.executeAppleScriptFile('./langCheck.applescript')
-                .trim()
-            if (lang.startsWith('de')) {
-                var allTextSetting = '[Alle_Texte];Verses?'
-            } else {
-                var allTextSetting = '[All_Texts];Verses?'
-            }
             LaunchBar.openURL('accord://research/' + allTextSetting + encodeURIComponent(result))
         }
     }

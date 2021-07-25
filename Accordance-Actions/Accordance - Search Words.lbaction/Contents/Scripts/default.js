@@ -3,17 +3,35 @@
 // http://accordancefiles2.com/helpfiles/OSX12/Default.htm#topics/05_dd/using_links_common_tasks.htm#kanchor184 (See: Examples of Accordance-specific URLs)
 
 function run(argument) {
+    // UI language check
+    var aPlist = File.readPlist('~/Library/Preferences/com.OakTree.Accordance.plist')
+    var lang = aPlist.AppleLanguages
+
+    if (lang != undefined) {
+        lang = lang
+            .toString()
+    } else {
+        var gPlist = File.readPlist('/Library/Preferences/.GlobalPreferences.plist')
+        lang = gPlist.AppleLanguages
+            .toString()
+    }
+
+    if (lang.startsWith('de')) {
+        var allSetting = '[Alle];?'
+    } else {
+        var allSetting = '[All];?'
+    }
+
+    // Search options:
     // A = <AND>, O = <OR>, N = <NOT>
     argument = argument.replace(/\sO\s/g, '<OR>').replace(/\sA\s/g, '<AND>').replace(/\sN\s/g, '<NOT>')
     if (LaunchBar.options.commandKey) {
-        // LaunchBar.openURL('accord://search/' + encodeURIComponent(argument))
-        LaunchBar.openURL('accord://research/[Alle];?' + encodeURIComponent(argument))
+        LaunchBar.openURL('accord://research/' + allSetting + encodeURIComponent(argument))
     } else if (LaunchBar.options.alternateKey) {
         argument = argument.replace(/\s/g, '<OR>')
-        LaunchBar.openURL('accord://research/' + encodeURIComponent(argument))
+        LaunchBar.openURL('accord://research/' + allSetting + encodeURIComponent(argument))
     } else {
         argument = argument.replace(/\s/g, '<AND>')
-        // "[Alle];?" is only in the URL to make it work with German local … but it works with English aswell
-        LaunchBar.openURL('accord://research/[Alle];?' + encodeURIComponent(argument))
+        LaunchBar.openURL('accord://research/' + allSetting + encodeURIComponent(argument))
     }
 }
