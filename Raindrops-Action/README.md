@@ -11,7 +11,7 @@ Options:
 3. ⌘⏎ = Open the app 
 
 ## First run
-<img src="setapi.png" width="409"/> 
+<img src="setapi.png" width="600"/> 
 
 When you run the aciton for the first time you will be notice that you need an API key. 
 
