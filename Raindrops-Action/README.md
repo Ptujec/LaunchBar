@@ -19,7 +19,7 @@ Step 1: Open Raindrop settings. In the integration section create an "applicatio
 
 Step 2: Run the action again and select "Set API key (from Clipboard)"
 
-<img src="setapi_02.png" width="600"/> 
+<img src="setapi2.png" width="600"/> 
 
 ## Download
 
