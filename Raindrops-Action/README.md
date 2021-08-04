@@ -1,6 +1,6 @@
 # LaunchBar Action: Raindrops (Raindrop.io)
  
-<img src="rd.gif" width="750"/> 
+<img src="action.png" width="600"/> 
  
 This actions lets you browse or search your bookmarks from Raindrop.io.
 
