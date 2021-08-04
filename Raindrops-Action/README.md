@@ -1,6 +1,6 @@
 # LaunchBar Action: Raindrops (Raindrop.io)
  
-<img src="rd.gif" width="600"/> 
+<img src="rd.gif" width="750"/> 
  
 This actions lets you browse or search your bookmarks from Raindrop.io.
 
@@ -11,7 +11,7 @@ Options:
 3. ⌘⏎ = Open the app 
 
 ## First run
-<img src="setapi.png" width="600"/> 
+<img src="setapi.png" width="409"/> 
 
 When you run the aciton for the first time you will be notice that you need an API key. 
 
