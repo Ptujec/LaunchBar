@@ -4,10 +4,14 @@
 // http://openexchangerates.github.io/accounting.js/
 // jquery - Convert String with Dot or Comma as decimal separator to number in JavaScript - Stack Overflow https://stackoverflow.com/a/29347112
 
-const apiKey = 'e00fe1953c6c9de16cddba790d922b6d' // Replace 123 with your API Key. You can get one for free at https://exchangeratesapi.io/pricing/
+const apiKey = '123' // Replace 123 with your API Key in default.js (in LaunchBars Acticon Editor). You can get an API Key for free at https://exchangeratesapi.io/pricing/
 const exchangerate = HTTP.getJSON('http://api.exchangeratesapi.io/latest?access_key=' + apiKey + '&symbols=USD')
 
 function run(argument) {
+    if (apiKey == '123') {
+        LaunchBar.alert('Replace 123 with your API Key in default.js (in LaunchBars Acticon Editor). You can get an API Key for free at https://exchangeratesapi.io/pricing/')
+    }
+
     if (exchangerate.data.error != undefined) {
         LaunchBar.alert('Unable to load results', exchangerate.data.error.info);
     } else if (exchangerate.data != undefined) {
