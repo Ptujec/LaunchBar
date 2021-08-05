@@ -1,4 +1,4 @@
-# LaunchBar Action: Raindrops (Raindrop.io)
+# Raindrop.io Actions for LaunchBar
 
 ## Raindrops (Browse and Search Raindrop.io)
  
