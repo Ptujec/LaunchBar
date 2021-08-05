@@ -11,9 +11,6 @@ const apiKey = File.readText('~/Library/Application Support/LaunchBar/Actions/Ra
     .trim()
 
 function run(argument) {
-    argument = argument
-        .replace(/,/g, '')
-
     if (LaunchBar.options.commandKey) {
         if (File.exists('/Applications/Raindrop.io.app')) {
             // File or folder exists
@@ -26,6 +23,8 @@ function run(argument) {
     } else {
         if (argument != undefined) {
             // Search 
+            argument = argument
+                .replace(/,/g, '')
             var rData = HTTP.getJSON(encodeURI('https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey))
         } else {
             // List 25 most recent items
