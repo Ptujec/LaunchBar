@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Raindrops</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.2</string>
+	<string>2021.1.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -58,5 +58,7 @@
 			<string>suggestions.js</string>
 		</dict>
 	</dict>
+	<key>LBTextInputTitle</key>
+	<string>Search Raindrops</string>
 </dict>
 </plist>

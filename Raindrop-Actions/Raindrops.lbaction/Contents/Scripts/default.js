@@ -25,7 +25,11 @@ function run(argument) {
             // Search 
             argument = argument
                 .replace(/,/g, '')
-            var rData = HTTP.getJSON(encodeURI('https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey))
+            if (LaunchBar.options.shiftKey) {
+                var rData = HTTP.getJSON(encodeURI('https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"tag","val":"' + argument + '"}]&access_token=' + apiKey))
+            } else {
+                var rData = HTTP.getJSON(encodeURI('https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey))
+            }
         } else {
             // List 25 most recent items
             var rData = HTTP.getJSON('https://api.raindrop.io/rest/v1/raindrops/0?access_token=' + apiKey)
@@ -52,6 +56,9 @@ function run(argument) {
             if (results == '') {
                 LaunchBar.alert('No raindrop found for "' + argument + '"')
             } else {
+                results.sort(function (a, b) {
+                    return a.title > b.title;
+                });
                 return results;
             }
 
