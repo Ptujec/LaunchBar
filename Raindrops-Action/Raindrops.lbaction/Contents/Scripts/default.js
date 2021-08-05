@@ -11,14 +11,10 @@ const apiKey = File.readText('~/Library/Application Support/LaunchBar/Actions/Ra
     .trim()
 
 function run(argument) {
-    // Check internet connection
-    var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')   
-    if (output == '') {
-        LaunchBar.alert('You seem to have no internet connection!')
-        return
-    }
+    argument = argument
+        .replace(/,/g, '')
 
-    if (LaunchBar.options.commandKey) { 
+    if (LaunchBar.options.commandKey) {
         if (File.exists('/Applications/Raindrop.io.app')) {
             // File or folder exists
             LaunchBar.openURL(File.fileURLForPath('/Applications/Raindrop.io.app'))
@@ -26,7 +22,7 @@ function run(argument) {
             // File or folder doesn't exist
             LaunchBar.openURL('https://app.raindrop.io')
         }
-        
+
     } else {
         if (argument != undefined) {
             // Search 
@@ -69,7 +65,14 @@ function run(argument) {
             }
 
         } else if (rData.data == undefined) {
-            setAPIkey()
+            // Check internet connection
+            var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')
+            if (output == '') {
+                LaunchBar.alert('You seem to have no internet connection!')
+                return
+            } else {
+                setAPIkey()
+            }
         }
     }
 }
