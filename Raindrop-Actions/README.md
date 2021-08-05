@@ -18,9 +18,7 @@ Options:
 
 <img src="save_action.png" width="600"/> 
 
-This action lets you save the current website in Safari to Raindrop.io.
-
-Press space before you hit return to add as many tags as you like (separated by commas). 
+This action lets you save the current website in Safari to Raindrop.io. Press space before you hit return to add as many tags as you like (separated by commas). 
 
 You can hit return on the confirmation to see the entry in the Raindrop.io app (or webapp).  
 
