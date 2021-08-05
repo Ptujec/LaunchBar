@@ -1,6 +1,6 @@
 # Raindrop.io Actions for LaunchBar
 
-## Raindrops (Browse and Search Raindrop.io)
+## Action: Raindrops (Browse and Search Raindrop.io)
  
 <img src="browse_action.png" width="600"/> 
  
@@ -12,7 +12,7 @@ Options:
 2. Space = Enter search term (⇧⏎ = Search only within tags) 
 3. ⌘⏎ = Open the app
 
-## Save Raindrop (Save current website in Safari to Raindrop.io)
+## Action: Save Raindrop (Save current website in Safari to Raindrop.io)
 
 <img src="save_action_02.png" width="600"/> 
 
