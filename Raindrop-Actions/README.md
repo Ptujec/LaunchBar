@@ -1,4 +1,4 @@
-# Raindrop.io Actions for LaunchBar
+# LaunchBar Actions for Raindrop.io
 
 ## Action: Raindrops (Browse and Search Raindrop.io)
  
@@ -35,4 +35,4 @@ Step 2: Run the action again and select "Set API key (from Clipboard)"
 
 ## Download
 
-[Download Raindrop.io Actions for LaunchBar](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Download LaunchBar Actions for Raindrop.io](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
