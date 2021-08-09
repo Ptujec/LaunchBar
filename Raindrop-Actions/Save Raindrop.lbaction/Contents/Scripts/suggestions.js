@@ -1,6 +1,5 @@
 /* 
-Save Raindrop - Raindrop.io Action for LaunchBar
-Suggestions (Tags)
+Save Raindrop - Raindrop.io Action for LaunchBar - Suggestions (Tags)
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar

@@ -1,6 +1,5 @@
 /* 
-Save Raindrop - Raindrop.io Action for LaunchBar
-Main Action
+Save Raindrop - Raindrop.io Action for LaunchBar - Main Action
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
@@ -10,6 +9,7 @@ Other sources:
 - https://apple.stackexchange.com/questions/219582/default-browser-plist-location
 - https://apple.stackexchange.com/questions/313454/applescript-find-the-users-set-default-browser
 - https://macscripter.net/viewtopic.php?id=22375 MacScripter / fastest way to get the name of the frontmost application?
+- https://github.com/raguay/MyLaunchBarActions/blob/92884fb2132e55c922232a80db9ddfb90b2471c4/NotePad%20-%20Set%20Note.lbaction/Contents/Scripts/default.js#L126 - PUT method
 */
 
 const browsers = ["com.apple.safari", "com.brave.browser", "org.chromium.chromium", "com.google.chrome", "com.vivaldi.vivaldi", "com.microsoft.edgemac", "org.mozilla.firefox"]
@@ -69,69 +69,187 @@ function run(argument) {
         return
     }
 
-    if (link == '') {
+    // --------------------------------------------------------
+
+    if (link == '') { // No Link found
         LaunchBar.alert('No URL found')
-        return
-    }
+    } else { // Link exists
+        
+        // Check if the URL has been saved before  
+        var answerCheckURL = HTTP.postJSON('https://api.raindrop.io/rest/v1/import/url/exists?access_token=' + apiKey, {
+            body: {
+                "urls": [link]
+            }
+        });
+        answerCheckURL = eval('[' + answerCheckURL.data + ']')
 
-    // Add Tags (argument)
-    if (argument != undefined) {
-        var tags = argument.split(', ')
-    } else {
-        var tags = []
-    }
+        if (answerCheckURL[0] != undefined && answerCheckURL[0].result == true) { // Options for existing Raindrops
 
-    // Post Raindrop
-    var answer = HTTP.postJSON('https://api.raindrop.io/rest/v1/raindrop?access_token=' + apiKey, {
-        body: {
-            "title": name,
-            "link": link,
-            "tags": tags
-        }
-    });
+            var responseCheckURL = LaunchBar.alert('You bookmarked this website before!', 'URL: ' + link + '\nDo you want to update the existing entry? WARNING: This will overwrite the existing title and tags!', 'Update', 'Open App', 'Cancel');
+            switch (responseCheckURL) {
 
-    answer = eval('[' + answer.data + ']')
+                case 0: // Update
+                    var rID = answerCheckURL[0].ids
 
-    if (answer[0] != undefined && answer[0].item != undefined) {
+                    // Add Tags (if argument exists)
+                    if (argument != undefined) {
+                        var tags = argument.split(', ')
+                    } else {
+                        var tags = []
+                    }
 
-        var title = answer[0].item.title
-        var link = answer[0].item.link
+                    // PUT method
+                    var putURL = 'https://api.raindrop.io/rest/v1/raindrop/' + rID + '/?access_token=' + apiKey
+                    var req = HTTP.createRequest(putURL, {
+                        method: 'PUT',
+                        body: {
+                            "title": name,
+                            "link": link,
+                            "tags": tags
+                        },
+                        bodyType: 'json'
+                    })
+                    var answerUpdate = HTTP.loadRequest(req)
 
-        if (File.exists('/Applications/Raindrop.io.app')) {
-            var url = File.fileURLForPath('/Applications/Raindrop.io.app')
-        } else {
-            var url = 'https://app.raindrop.io'
-        }
+                    answerUpdate = eval('[' + answerUpdate.data + ']')
 
-        var tags = answer[0].item.tags
-            .toString()
-            .replace(/(.),(.)/g, '$1, $2')
+                    if (answerUpdate[0] != undefined && answerUpdate[0].item != undefined) {
 
-        return [{
-            title: title,
-            subtitle: link,
-            label: tags,
-            icon: 'drop',
-            url: url
-        }]
+                        var title = answerUpdate[0].item.title
+                        var link = answerUpdate[0].item.link
 
-    } else if (answer[0] != undefined && answer[0].errorMessage != undefined) {
+                        if (File.exists('/Applications/Raindrop.io.app')) {
+                            var url = File.fileURLForPath('/Applications/Raindrop.io.app')
+                        } else {
+                            var url = 'https://app.raindrop.io'
+                        }
 
-        var e = answer[0].errorMessage
-        if (e == 'Incorrect access_token') {
-            setAPIkey()
-        } else {
-            LaunchBar.alert(e)
-        }
+                        var tags = answerUpdate[0].item.tags
+                            .toString()
+                            .replace(/(.),(.)/g, '$1, $2')
 
-    } else if (answer[0] == undefined) {
-        // Check internet connection
-        var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')
-        if (output == '') {
-            LaunchBar.alert('You seem to have no internet connection!')
-            return
-        } else {
-            setAPIkey()
+                        return [{
+                            title: 'Updated: ' + title,
+                            subtitle: link,
+                            label: tags,
+                            icon: 'drop',
+                            url: url
+                        }]
+
+                    } else if (answerUpdate[0] != undefined && answerUpdate[0].errorMessage != undefined) {
+
+                        var e = answerUpdate[0].errorMessage
+                        if (e == 'Incorrect access_token') {
+                            setAPIkey()
+                        } else {
+                            LaunchBar.alert(e)
+                        }
+
+                    } else if (answerUpdate[0] == undefined) {
+                        // Check internet connection
+                        var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')
+                        if (output == '') {
+                            LaunchBar.alert('You seem to have no internet connection!')
+                            return
+                        } else {
+                            setAPIkey()
+                        }
+                    }
+                    break
+
+                case 1: // Open App
+                    if (File.exists('/Applications/Raindrop.io.app')) {
+                        LaunchBar.openURL(File.fileURLForPath('/Applications/Raindrop.io.app'))
+                    } else {
+                        LaunchBar.openURL('https://app.raindrop.io')
+                    }
+                    break;
+
+                case 2: // Cancel
+                    break;
+            }
+
+        } else if (answerCheckURL[0] != undefined && answerCheckURL[0].result == false) { // Post new Raindrop
+
+            // Add Tags (if argument exists)
+            if (argument != undefined) {
+                var tags = argument.split(', ')
+            } else {
+                var tags = []
+            }
+
+            // Post Raindrop
+            var answerPost = HTTP.postJSON('https://api.raindrop.io/rest/v1/raindrop?access_token=' + apiKey, {
+                body: {
+                    "title": name,
+                    "link": link,
+                    "tags": tags
+                }
+            });
+
+            answerPost = eval('[' + answerPost.data + ']')
+
+            if (answerPost[0] != undefined && answerPost[0].item != undefined) {
+
+                var title = answerPost[0].item.title
+                var link = answerPost[0].item.link
+
+                if (File.exists('/Applications/Raindrop.io.app')) {
+                    var url = File.fileURLForPath('/Applications/Raindrop.io.app')
+                } else {
+                    var url = 'https://app.raindrop.io'
+                }
+
+                var tags = answerPost[0].item.tags
+                    .toString()
+                    .replace(/(.),(.)/g, '$1, $2')
+
+                return [{
+                    title: 'Saved: ' + title,
+                    subtitle: link,
+                    label: tags,
+                    icon: 'drop',
+                    url: url
+                }]
+
+            } else if (answerPost[0] != undefined && answerPost[0].errorMessage != undefined) {
+
+                var e = answerPost[0].errorMessage
+                if (e == 'Incorrect access_token') {
+                    setAPIkey()
+                } else {
+                    LaunchBar.alert(e)
+                }
+
+            } else if (answerPost[0] == undefined) {
+                // Check internet connection
+                var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')
+                if (output == '') {
+                    LaunchBar.alert('You seem to have no internet connection!')
+                    return
+                } else {
+                    setAPIkey()
+                }
+            }
+
+        } else if (answerCheckURL[0] != undefined && answerCheckURL[0].errorMessage != undefined) { // Error handling
+
+            var e = answer[0].errorMessage
+            if (e == 'Incorrect access_token') {
+                setAPIkey()
+            } else {
+                LaunchBar.alert(e)
+            }
+
+        } else if (answerCheckURL[0] == undefined) { // Error handling
+            // Check internet connection
+            var output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io')
+            if (output == '') {
+                LaunchBar.alert('You seem to have no internet connection!')
+                return
+            } else {
+                setAPIkey()
+            }
         }
     }
 }
