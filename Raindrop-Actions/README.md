@@ -12,13 +12,15 @@ Options:
 2. Space = Enter search term (⇧⏎ = Search only within tags) 
 3. ⌘⏎ = Open the app
 
-## Action: Save Raindrop (Save current website in Safari to Raindrop.io)
+## Action: Save Raindrop (Save current website to Raindrop.io)
 
 <img src="save_action_02.png" width="600"/> 
 
 <img src="save_action.png" width="600"/> 
 
-This action lets you save the current website in Safari to Raindrop.io. Press space before you hit return to add as many tags as you like (separated by commas). You can also hit return on the confirmation to see the entry in the Raindrop.io app (or webapp).  
+This action lets you save the current website in your browser to Raindrop.io. Press space before you hit return to add as many tags as you like (separated by commas). You can also hit return on the confirmation to see the entry in the Raindrop.io app (or webapp). 
+
+Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi
 
 ## First run
 <img src="setapi.png" width="600"/> 

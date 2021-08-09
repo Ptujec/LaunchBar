@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Save Raindrop</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,11 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Press space to add tags</string>
+		<string>Press space to add tags
+
+This action lets you save the current website in your browser to Raindrop.io. Press space before you hit return to add as many tags as you like (separated by commas). You can also hit return on the confirmation to see the entry in the Raindrop.io app (or webapp). 
+
+Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
