@@ -6,7 +6,7 @@ Documentation:
 - https://developer.raindrop.io
 */
 
-const apiKey = File.readText('~/Library/Application Support/LaunchBar/Actions/Raindrops.lbaction/Contents/Resources/api_key.txt')
+const apiKey = File.readText('~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.SaveRaindrop/api_key.txt')
     .trim()
 
 function runWithString(string) {
