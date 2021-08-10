@@ -1,16 +1,16 @@
 {
     "_internal": {
-        "pubDateTime": "2021-06-06 18:24:12.526 EDT",
-        "igorPath": "S3,1623018245647,1623018250221|router,1623018250221,1623018250280|domUpdater,1623018250966,1623018251759|feedProducer,1623018251839,1623018252646",
-        "routeName": "ap_recap_article",
-        "routeValue": "S3::ap_recap_20210606_0042000177.xml",
+        "pubDateTime": "2021-06-13 17:49:48.789 EDT",
+        "igorPath": "domUpdater,1623620987265,1623620988487|feedProducer,1623620988634,1623620989910",
+        "routeName": "schedule_sync",
+        "routeValue": "2020_20210613_schedule_sync",
         "xslt": "NBA/xsl/date/scoreboard/marty_daily_scoreboard.xsl",
         "xsltForceRecompile": "true",
         "xsltInCache": "false",
-        "xsltCompileTimeMillis": "608",
-        "xsltTransformTimeMillis": "125",
-        "consolidatedDomKey": "prod__transform__marty_daily_scoreboard__1172175732872",
-        "endToEndTimeMillis": "6999"
+        "xsltCompileTimeMillis": "140",
+        "xsltTransformTimeMillis": "24",
+        "consolidatedDomKey": "prod__transform__marty_daily_scoreboard__2380465870026",
+        "endToEndTimeMillis": "2645"
     },
     "numGames": 2,
     "games": [
@@ -18,47 +18,46 @@
             "seasonStageId": 4,
             "seasonYear": "2020",
             "leagueName": "standard",
-            "gameId": "0042000201",
+            "gameId": "0042000214",
             "arena": {
-                "name": "Wells Fargo Center",
+                "name": "Fiserv Forum",
                 "isDomestic": true,
-                "city": "Philadelphia",
-                "stateAbbr": "PA",
+                "city": "Milwaukee",
+                "stateAbbr": "WI",
                 "country": "USA"
             },
-            "isGameActivated": false,
-            "statusNum": 3,
+            "isGameActivated": true,
+            "statusNum": 2,
             "extendedStatusNum": 0,
-            "startTimeEastern": "1:00 PM ET",
-            "startTimeUTC": "2021-06-06T17:00:00.000Z",
-            "endTimeUTC": "2021-06-06T19:42:00.000Z",
-            "startDateEastern": "20210606",
-            "homeStartDate": "20210606",
-            "homeStartTime": "1300",
-            "visitorStartDate": "20210606",
-            "visitorStartTime": "1300",
-            "gameUrlCode": "20210606/ATLPHI",
+            "startTimeEastern": "3:00 PM ET",
+            "startTimeUTC": "2021-06-13T19:00:00.000Z",
+            "startDateEastern": "20210613",
+            "homeStartDate": "20210613",
+            "homeStartTime": "1400",
+            "visitorStartDate": "20210613",
+            "visitorStartTime": "1500",
+            "gameUrlCode": "20210613/BKNMIL",
             "clock": "",
             "isBuzzerBeater": false,
             "isPreviewArticleAvail": true,
-            "isRecapArticleAvail": true,
+            "isRecapArticleAvail": false,
             "nugget": {
                 "text": ""
             },
-            "attendance": "18624",
+            "attendance": "0",
             "tickets": {
-                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000201/APP_TIX",
-                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000201/TEAM_SCH",
-                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000201/WEB_MWEB",
-                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000201/LEAG_GAMEINFO",
-                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000201/LEAG_TIX"
+                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000214/APP_TIX",
+                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000214/TEAM_SCH",
+                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000214/WEB_MWEB",
+                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000214/LEAG_GAMEINFO",
+                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000214/LEAG_TIX"
             },
             "hasGameBookPdf": false,
             "isStartTimeTBD": false,
             "isNeutralVenue": false,
             "gameDuration": {
                 "hours": "2",
-                "minutes": "31"
+                "minutes": "26"
             },
             "tags": [
                 "E22020"
@@ -66,19 +65,19 @@
             "playoffs": {
                 "roundNum": "2",
                 "confName": "East",
-                "seriesId": "22",
-                "seriesSummaryText": "ATL leads 1-0",
+                "seriesId": "23",
+                "seriesSummaryText": "BKN leads 2-1",
                 "isSeriesCompleted": false,
-                "gameNumInSeries": "1",
+                "gameNumInSeries": "4",
                 "isIfNecessary": false,
                 "vTeam": {
-                    "seedNum": "5",
-                    "seriesWin": "1",
+                    "seedNum": "2",
+                    "seriesWin": "2",
                     "isSeriesWinner": false
                 },
                 "hTeam": {
-                    "seedNum": "1",
-                    "seriesWin": "0",
+                    "seedNum": "3",
+                    "seriesWin": "1",
                     "isSeriesWinner": false
                 }
             },
@@ -87,51 +86,51 @@
                 "type": 0,
                 "maxRegular": 4,
                 "isHalftime": false,
-                "isEndOfPeriod": false
+                "isEndOfPeriod": true
             },
             "vTeam": {
-                "teamId": "1610612737",
-                "triCode": "ATL",
-                "win": "41",
-                "loss": "31",
+                "teamId": "1610612751",
+                "triCode": "BKN",
+                "win": "48",
+                "loss": "24",
                 "seriesWin": "1",
                 "seriesLoss": "2",
-                "score": "128",
+                "score": "96",
                 "linescore": [
                     {
-                        "score": "42"
+                        "score": "26"
                     },
                     {
-                        "score": "32"
+                        "score": "22"
                     },
                     {
-                        "score": "25"
+                        "score": "21"
                     },
                     {
-                        "score": "29"
+                        "score": "27"
                     }
                 ]
             },
             "hTeam": {
-                "teamId": "1610612755",
-                "triCode": "PHI",
-                "win": "49",
-                "loss": "23",
+                "teamId": "1610612749",
+                "triCode": "MIL",
+                "win": "46",
+                "loss": "26",
                 "seriesWin": "2",
                 "seriesLoss": "1",
-                "score": "124",
+                "score": "107",
                 "linescore": [
                     {
-                        "score": "27"
+                        "score": "23"
                     },
                     {
-                        "score": "27"
+                        "score": "30"
                     },
                     {
-                        "score": "29"
+                        "score": "28"
                     },
                     {
-                        "score": "41"
+                        "score": "26"
                     }
                 ]
             },
@@ -146,8 +145,8 @@
                         ],
                         "canadian": [
                             {
-                                "shortName": "SN",
-                                "longName": "Sportsnet"
+                                "shortName": "SN360",
+                                "longName": "Sportsnet 360"
                             }
                         ],
                         "vTeam": [],
@@ -238,10 +237,10 @@
                             {
                                 "broadcaster": "ABC",
                                 "regionalMarketCodes": "",
-                                "iosApp": "http://www.espn.com/watch?id=3789583",
-                                "androidApp": "http://www.espn.com/watch?id=3789583",
-                                "desktopWeb": "http://www.espn.com/watch?id=3789583",
-                                "mobileWeb": "http://www.espn.com/watch?id=3789583"
+                                "iosApp": "http://www.espn.com/watch?id=3783530",
+                                "androidApp": "http://www.espn.com/watch?id=3783530",
+                                "desktopWeb": "http://www.espn.com/watch?id=3783530",
+                                "mobileWeb": "http://www.espn.com/watch?id=3783530"
                             }
                         ]
                     },
@@ -276,8 +275,8 @@
                             ],
                             "broadcasters": [
                                 {
-                                    "shortName": "WZGC 92.9 FM The Game",
-                                    "longName": "WZGC 92.9 FM The Game"
+                                    "shortName": "WFAN-FM",
+                                    "longName": "WFAN-FM"
                                 }
                             ]
                         },
@@ -296,8 +295,8 @@
                             ],
                             "broadcasters": [
                                 {
-                                    "shortName": "97.5 The Fanatic",
-                                    "longName": "97.5 The Fanatic"
+                                    "shortName": "620 AM/103.3 FM WTMJ",
+                                    "longName": "620 AM/103.3 FM WTMJ"
                                 }
                             ]
                         }
@@ -309,136 +308,113 @@
             "seasonStageId": 4,
             "seasonYear": "2020",
             "leagueName": "standard",
-            "gameId": "0042000177",
+            "gameId": "0042000234",
             "arena": {
-                "name": "STAPLES Center",
+                "name": "Ball Arena",
                 "isDomestic": true,
-                "city": "Los Angeles",
-                "stateAbbr": "CA",
+                "city": "Denver",
+                "stateAbbr": "CO",
                 "country": "USA"
             },
             "isGameActivated": false,
-            "statusNum": 3,
+            "statusNum": 1,
             "extendedStatusNum": 0,
-            "startTimeEastern": "3:30 PM ET",
-            "startTimeUTC": "2021-06-06T19:30:00.000Z",
-            "endTimeUTC": "2021-06-06T22:15:00.000Z",
-            "startDateEastern": "20210606",
-            "homeStartDate": "20210606",
-            "homeStartTime": "1230",
-            "visitorStartDate": "20210606",
-            "visitorStartTime": "1430",
-            "gameUrlCode": "20210606/DALLAC",
+            "startTimeEastern": "8:00 PM ET",
+            "startTimeUTC": "2021-06-14T00:00:00.000Z",
+            "startDateEastern": "20210613",
+            "homeStartDate": "20210613",
+            "homeStartTime": "1800",
+            "visitorStartDate": "20210613",
+            "visitorStartTime": "1700",
+            "gameUrlCode": "20210613/PHXDEN",
             "clock": "",
             "isBuzzerBeater": false,
             "isPreviewArticleAvail": true,
-            "isRecapArticleAvail": true,
+            "isRecapArticleAvail": false,
             "nugget": {
                 "text": ""
             },
-            "attendance": "7342",
+            "attendance": "",
             "tickets": {
-                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000177/APP_TIX",
-                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000177/TEAM_SCH",
-                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000177/WEB_MWEB",
-                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000177/LEAG_GAMEINFO",
-                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000177/LEAG_TIX"
+                "mobileApp": "https://a.data.nba.com/tickets/single/2020/0042000234/APP_TIX",
+                "desktopWeb": "https://a.data.nba.com/tickets/single/2020/0042000234/TEAM_SCH",
+                "mobileWeb": "https://a.data.nba.com/tickets/single/2020/0042000234/WEB_MWEB",
+                "leagGameInfo": "https://a.data.nba.com/tickets/single/2020/0042000234/LEAG_GAMEINFO",
+                "leagTix": "https://a.data.nba.com/tickets/single/2020/0042000234/LEAG_TIX"
             },
             "hasGameBookPdf": false,
             "isStartTimeTBD": false,
             "isNeutralVenue": false,
             "gameDuration": {
-                "hours": "2",
-                "minutes": "27"
+                "hours": "",
+                "minutes": ""
             },
             "tags": [
-                "W12020"
+                "W22020"
             ],
             "playoffs": {
-                "roundNum": "1",
+                "roundNum": "2",
                 "confName": "West",
-                "seriesId": "11",
-                "seriesSummaryText": "LAC wins 4-3",
-                "isSeriesCompleted": true,
-                "gameNumInSeries": "7",
+                "seriesId": "21",
+                "seriesSummaryText": "PHX leads 3-0",
+                "isSeriesCompleted": false,
+                "gameNumInSeries": "4",
                 "isIfNecessary": false,
                 "vTeam": {
-                    "seedNum": "5",
+                    "seedNum": "2",
                     "seriesWin": "3",
                     "isSeriesWinner": false
                 },
                 "hTeam": {
-                    "seedNum": "4",
-                    "seriesWin": "4",
-                    "isSeriesWinner": true
+                    "seedNum": "3",
+                    "seriesWin": "0",
+                    "isSeriesWinner": false
                 }
             },
             "period": {
-                "current": 4,
+                "current": 0,
                 "type": 0,
                 "maxRegular": 4,
                 "isHalftime": false,
                 "isEndOfPeriod": false
             },
             "vTeam": {
-                "teamId": "1610612742",
-                "triCode": "DAL",
-                "win": "42",
-                "loss": "30",
-                "seriesWin": "2",
-                "seriesLoss": "1",
-                "score": "111",
-                "linescore": [
-                    {
-                        "score": "38"
-                    },
-                    {
-                        "score": "24"
-                    },
-                    {
-                        "score": "23"
-                    },
-                    {
-                        "score": "26"
-                    }
-                ]
-            },
-            "hTeam": {
-                "teamId": "1610612746",
-                "triCode": "LAC",
-                "win": "47",
-                "loss": "25",
+                "teamId": "1610612756",
+                "triCode": "PHX",
+                "win": "51",
+                "loss": "21",
                 "seriesWin": "1",
                 "seriesLoss": "2",
-                "score": "126",
-                "linescore": [
-                    {
-                        "score": "35"
-                    },
-                    {
-                        "score": "35"
-                    },
-                    {
-                        "score": "30"
-                    },
-                    {
-                        "score": "26"
-                    }
-                ]
+                "score": "",
+                "linescore": []
+            },
+            "hTeam": {
+                "teamId": "1610612743",
+                "triCode": "DEN",
+                "win": "47",
+                "loss": "25",
+                "seriesWin": "2",
+                "seriesLoss": "1",
+                "score": "",
+                "linescore": []
             },
             "watch": {
                 "broadcast": {
                     "broadcasters": {
                         "national": [
                             {
-                                "shortName": "ABC",
-                                "longName": "ABC"
+                                "shortName": "TNTOT",
+                                "longName": "TNT OT"
+                            },
+                            {
+                                "shortName": "TNT",
+                                "longName": "TNT"
                             }
                         ],
                         "canadian": [
                             {
-                                "shortName": "SN",
-                                "longName": "Sportsnet"
+                                "shortName": "TSN4",
+                                "longName": "TSN4"
                             }
                         ],
                         "vTeam": [],
@@ -448,7 +424,7 @@
                         "spanish_national": []
                     },
                     "video": {
-                        "regionalBlackoutCodes": "torr",
+                        "regionalBlackoutCodes": "tarr",
                         "canPurchase": false,
                         "isLeaguePass": true,
                         "isNationalBlackout": true,
@@ -527,12 +503,12 @@
                         ],
                         "deepLink": [
                             {
-                                "broadcaster": "ABC",
+                                "broadcaster": "TNT",
                                 "regionalMarketCodes": "",
-                                "iosApp": "http://www.espn.com/watch?id=3789948",
-                                "androidApp": "http://www.espn.com/watch?id=3789948",
-                                "desktopWeb": "http://www.espn.com/watch?id=3789948",
-                                "mobileWeb": "http://www.espn.com/watch?id=3789948"
+                                "iosApp": "https://tnt.app.link/7w91Bdy0NV",
+                                "androidApp": "https://tnt.app.link/7w91Bdy0NV",
+                                "desktopWeb": "https://tnt.app.link/7w91Bdy0NV",
+                                "mobileWeb": "https://tnt.app.link/7w91Bdy0NV"
                             }
                         ]
                     },
@@ -567,8 +543,8 @@
                             ],
                             "broadcasters": [
                                 {
-                                    "shortName": "",
-                                    "longName": ""
+                                    "shortName": "KMVP 98.7 / S: KSUN",
+                                    "longName": "KMVP 98.7 / S: KSUN"
                                 }
                             ]
                         },
@@ -587,8 +563,8 @@
                             ],
                             "broadcasters": [
                                 {
-                                    "shortName": "",
-                                    "longName": ""
+                                    "shortName": "KKSE 92.5FM",
+                                    "longName": "KKSE 92.5FM"
                                 }
                             ]
                         }
