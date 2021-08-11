@@ -56,31 +56,34 @@ function run(argument) {
 
             var weekdaysDE = ['sonntag', 'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag']
 
-            var dayOfWeek = '';
-            var i = 0;
-            for (i = 0; i < weekdaysEN.length; i++) {
+
+            for (var i = 0; i < weekdaysEN.length; i++) {
                 var dayOfWeekEN = weekdaysEN[i];
                 if (dayOfWeekEN.startsWith(argument.toLowerCase())) {
-                    dayOfWeek = i
+                    var dayOfWeek = i
                 }
             }
 
-            if (dayOfWeek == '') {
-                var i = 0;
+
+            if (dayOfWeek == undefined) {
                 for (i = 0; i < weekdaysDE.length; i++) {
                     var dayOfWeekDE = weekdaysDE[i];
                     if (dayOfWeekDE.startsWith(argument.toLowerCase())) {
-                        dayOfWeek = i
+                        var dayOfWeek = i
                     }
                 }
+            }
+
+            if (dayOfWeek == undefined) {
+                LaunchBar.alert('No valid entry')
+                return
             }
 
             var date = new Date();
 
             var dayOfWeekDate = new Date(date.getTime());
-            // dayOfWeekDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
             dayOfWeekDate.setDate(date.getDate() + (dayOfWeek - 1 - date.getDay() + 7) % 7 + 1);
-            
+
             var dateString = new Date(dayOfWeekDate.getTime() - (dayOfWeekDate.getTimezoneOffset() * 60000))
                 .toISOString()
                 .split('T')[0]
