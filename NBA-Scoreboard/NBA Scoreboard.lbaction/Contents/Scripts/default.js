@@ -31,6 +31,15 @@ function run(argument) {
         dateStringY = dateStringY.replace(/-/g, '')
 
     } else {
+        // Date with offset (either number … or an upcoming day of the week)
+
+        // relativ days of the week
+        if (argument.toLowerCase() == 'morgen') {
+            argument = '1'
+        } else if (argument.toLowerCase() == 'gestern') {
+            argument = '-1'
+        }
+
         var checkNum = parseInt(argument)
 
         if (!isNaN(checkNum)) {
@@ -89,6 +98,9 @@ function run(argument) {
     }
     dateString = dateString.replace(/-/g, '')
 
+    // LaunchBar.alert(dateString)
+
+    // return
     if (LaunchBar.options.commandKey) {
         LaunchBar.openURL('https://www.espn.com/nba/scoreboard/_/date/' + dateString)
     } else if (LaunchBar.options.shiftKey) {
@@ -119,6 +131,7 @@ function run(argument) {
             var vTeamScore = game.vTeam.score
             var hTeam = game.hTeam.triCode
             var hTeamScore = game.hTeam.score
+            var league = game.leagueName
 
             // Subtitle 
             var playoffs = game.playoffs
@@ -171,13 +184,32 @@ function run(argument) {
                 label = 'Q' + period + ' ' + clock
             }
 
-            results.push({
-                'title': title,
-                'subtitle': subtitle,
-                'icon': icon,
-                'url': url,
-                'label': label
-            });
+            if (league != 'standard') {
+
+                if (league == 'vegas') {
+                    var badge = 'Summer League'
+                } else {
+                    var badge = league
+                }
+
+                results.push({
+                    'title': title,
+                    'subtitle': subtitle,
+                    'icon': icon,
+                    'url': url,
+                    'label': label,
+                    'badge': badge
+                });
+                
+            } else {
+                results.push({
+                    'title': title,
+                    'subtitle': subtitle,
+                    'icon': icon,
+                    'url': url,
+                    'label': label
+                });
+            }
         }
         return results;
     }
