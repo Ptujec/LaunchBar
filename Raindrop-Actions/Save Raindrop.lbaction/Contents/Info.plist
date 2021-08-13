@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Save Raindrop</string>
 	<key>CFBundleVersion</key>
-	<string>2021.4.1</string>
+	<string>2021.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -29,6 +29,13 @@ Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
+		<key>LBActionURLScript</key>
+		<dict>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBScriptName</key>
+			<string>actionURL.js</string>
+		</dict>
 		<key>LBDefaultScript</key>
 		<dict>
 			<key>LBAcceptedArgumentTypes</key>

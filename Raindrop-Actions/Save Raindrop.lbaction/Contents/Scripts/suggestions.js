@@ -6,11 +6,13 @@ Documentation:
 - https://developer.raindrop.io
 */
 
-const apiKey = File.readText('~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.SaveRaindrop/api_key.txt')
-    .trim()
-
 function runWithString(string) {
-    var rData = HTTP.getJSON(encodeURI('https://api.raindrop.io/rest/v1/tags/0?access_token=' + apiKey))
+    var rData = HTTP.getJSON(
+        encodeURI(
+            "https://api.raindrop.io/rest/v1/tags/0?access_token=" +
+            Action.preferences.apiKey
+        )
+    );
 
     var first = [];
     var second = [];
