@@ -11,7 +11,7 @@ function runWithString(string) {
   var rData = HTTP.getJSON(
     encodeURI(
       "https://api.raindrop.io/rest/v1/tags/0?access_token=" +
-        Action.preference.apiKey
+      Action.preferences.apiKey
     )
   );
 
