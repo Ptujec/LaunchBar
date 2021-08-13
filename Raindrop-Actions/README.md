@@ -23,15 +23,9 @@ This action lets you save the current website in your browser to Raindrop.io. Pr
 Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi
 
 ## First run
-<img src="setapi.png" width="600"/> 
+<img src="oauth.png" width="600"/> 
 
-When you run the aciton for the first time you will be notice that you need an API key. 
-
-Step 1: Open Raindrop settings. In the integration section create an "application" and copy its test token. 
-
-Step 2: Run the action again and select "Set API key (from Clipboard)"
-
-<img src="setapi2.png" width="600"/> 
+When you run the action for the first time you will be redirected to Raindrop.io to connect your account.
 
 ## Download
 
