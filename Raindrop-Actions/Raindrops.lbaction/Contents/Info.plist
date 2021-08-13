@@ -59,6 +59,13 @@
 			<key>LBScriptName</key>
 			<string>suggestions.js</string>
 		</dict>
+		<key>LBActionURLScript</key>
+		<dict>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBScriptName</key>
+			<string>actionURL.js</string>
+		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
 	<string>Search Raindrops</string>
