@@ -135,7 +135,7 @@ function run(argument) {
 function setAPIkey() {
   var response = LaunchBar.alert(
     "Authentication Required",
-    "You will be redirected to raindrop.io to connect your account.",
+    "You will be redirected to Raindrop.io to connect your account.",
     "Open Raindrop.io",
     "Cancel"
   );
