@@ -1,28 +1,34 @@
 // Todoist Today View
 // https://developer.todoist.com/rest/v1/#overview
 // https://mike.ps/todoist-today-by-project/
+// https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 
-// Add your API-Token in the next line inside the quotations
-const token = ''
+const apiToken = Action.preferences.apiToken
 
 function run(argument) {
 
-    if (token == '') {
-        if (LaunchBar.currentLocale == 'de') {
-            var alert = 'Du musst dein API-Token in default.js (Zeile 6) eintragen'
-        } else {
-            var alert = 'You need to enter your API-Token in default.js (line 6)'
+    if (apiToken == undefined) {
+        var response = LaunchBar.alert(
+            "API-Token required", "1) Go to Settings/Integrations and copy the API-Token.\n2) Press »Set API-Token«", "Open Settings", "Set API-Token", "Cancel"
+        );
+        switch (response) {
+            case 0:
+                LaunchBar.openURL('https://todoist.com/app/settings/integrations')
+                LaunchBar.hide()
+                break
+            case 1:
+                Action.preferences.apiToken = LaunchBar.getClipboardString()
+                LaunchBar.alert('Success!', 'API-Token set to: ' + Action.preferences.apiToken)
+                break
+            case 2:
+                break
         }
-        LaunchBar.alert(alert)
+
     } else {
-
-        var todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=today&token=' + token)
-
+        var todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=today&token=' + apiToken)
         todayData = todayData.data
 
         if (todayData == '') {
-            // todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=tomorrow&token=' + token)
-            // todayData = todayData.data
             if (LaunchBar.currentLocale == 'de') {
                 var title = 'Alles erledigt für heute!'
             } else {
@@ -36,7 +42,7 @@ function run(argument) {
         }
 
         todayData = todayData.sort(function (a, b) {
-            return a.priority < b.priority
+            return a.priority < b.priority && a.created > b.created
         });
 
         var results = [];
@@ -46,8 +52,8 @@ function run(argument) {
             var title = task.content
             // var sub = ''
             var url = 'todoist://' // task.url
+            var badge = ''
             var prio = task.priority
-            var label = ''
             // var dueTime = task.due.string.match(/\d\d:\d\d/)
 
             if (prio == 4) {
@@ -64,20 +70,29 @@ function run(argument) {
                 m = title.match(/\[(.*?)\]\((.*?)\)/)
                 title = m[1]
                 url = m[2]
-                label = 'link'
+                badge = 'link'
             }
 
             // if (dueTime != null) {
             //     title = title + ' (' + dueTime + ' Uhr)'
             // }
 
-            results.push({
-                'title': title,
-                // 'subtitle': sub,
-                'icon': icon,
-                'url': url,
-                'label': label
-            });
+            if (badge != '') {
+                results.push({
+                    'title': title,
+                    // 'subtitle': sub,
+                    'icon': icon,
+                    'url': url,
+                    'badge': badge
+                });
+            } else {
+                results.push({
+                    'title': title,
+                    // 'subtitle': sub,
+                    'icon': icon,
+                    'url': url
+                });
+            }
         }
         return results;
     }

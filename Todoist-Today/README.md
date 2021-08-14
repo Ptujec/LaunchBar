@@ -4,8 +4,12 @@ This is a simple action which allows you to take a glance at your tasks for toda
  
 <img src="ttoday.png" width="600"/> 
 
-## Installation
-You need to enter your API-Token in default.js. You can find your token in Todoists preferences/integrations, when you scroll all the way to the bottom. 
+## Requirements 
+
+You need an API-Token for this action, which you can find when you scroll all the way to the bottom in [integration settings](https://todoist.com/app/settings/integrations). 
+Copy it to you clipboard and run the action.
+
+<img src="set_token.png" width="600"/> 
 
 ## Download
 
