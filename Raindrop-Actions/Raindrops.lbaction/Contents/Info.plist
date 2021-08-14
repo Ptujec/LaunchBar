@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Raindrops</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2.4</string>
+	<string>2021.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⏎ = Browse recent items, Space = Search (⇧⏎ = Only within tags), ⌘⏎ = Open app</string>
+		<string>⏎ = Browse recent items, Space = Search by tags (⇧⏎ = Search all text), ⌘⏎ = Open app</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

@@ -50,31 +50,28 @@ function run(argument) {
 
     if (apiKey === undefined) {
       setAPIkey();
+    
     } else {
-      if (argument != undefined) {
-        // Search
-        argument = argument.replace(/,/g, "");
-        if (LaunchBar.options.shiftKey) {
+      if (argument != undefined) { // Search
+        if (LaunchBar.options.shiftKey) { // Force search all text (takes longer … more possible results)
           var rData = HTTP.getJSON(
             encodeURI(
-              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"tag","val":"' +
-                argument +
-                '"}]&access_token=' +
-                apiKey
-            )
-          );
-        } else {
+              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey
+            ));
+        } else { // Search by tag (fast)
           var rData = HTTP.getJSON(
             encodeURI(
-              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' +
-                argument +
-                '"}]&access_token=' +
-                apiKey
-            )
-          );
+              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"tag","val":"' + argument + '"}]&access_token=' + apiKey
+            ));
+          if (rData.data.items.length == 0) { // Search all text if query does not match a tag (takes longer)
+            rData = HTTP.getJSON(
+              encodeURI(
+                'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey
+              ));
+          }
         }
-      } else {
-        // List 25 most recent items
+
+      } else { // List 25 most recent items
         var rData = HTTP.getJSON(
           "https://api.raindrop.io/rest/v1/raindrops/0?access_token=" + apiKey
         );
