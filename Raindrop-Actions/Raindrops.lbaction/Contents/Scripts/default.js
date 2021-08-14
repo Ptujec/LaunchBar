@@ -20,8 +20,8 @@ const getApiKey = () => {
           body: {
             grant_type: "refresh_token",
             refresh_token: Action.preferences.refresh_token,
-            client_id: "61124ebbf7497de7c96ca18a",
-            client_secret: "7b1047d2-51db-4168-a712-7eb8802b54b8",
+            client_id: "6116c7c7c1005a0f29f1d303",
+            client_secret: "85bf8ca2-1e85-491b-82ca-a344c65cd3eb",
           },
         });
 
@@ -142,7 +142,7 @@ function setAPIkey() {
   switch (response) {
     case 0:
       LaunchBar.openURL(
-        "https://raindrop.io/oauth/authorize?redirect_uri=https://launchbar.link/action/ptujec.LaunchBar.action.Raindrops/redirect&client_id=61124ebbf7497de7c96ca18a"
+        "https://raindrop.io/oauth/authorize?redirect_uri=https://launchbar.link/action/ptujec.LaunchBar.action.Raindrops/redirect&client_id=6116c7c7c1005a0f29f1d303"
       );
       LaunchBar.hide();
       break;
