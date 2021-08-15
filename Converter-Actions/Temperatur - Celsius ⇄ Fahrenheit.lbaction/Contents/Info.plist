@@ -5,11 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>ThermoTemplate.pdf</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.TemperaturFahrenheitInCelsius</string>
+	<string>ptujec.LaunchBar.action.Temperatur</string>
 	<key>CFBundleName</key>
-	<string>Temperatur - Fahrenheit in Celsius</string>
+	<string>Temperatur - Celsius ⇄ Fahrenheit</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2021.1</string>
 	<key>LBDebugLogEnabled</key>
 	<true/>
 	<key>LBDescription</key>
@@ -32,6 +32,8 @@
 				<string>string</string>
 			</array>
 			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBLiveFeedbackEnabled</key>
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
