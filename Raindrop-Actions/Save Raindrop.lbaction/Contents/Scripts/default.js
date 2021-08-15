@@ -151,6 +151,9 @@ function run(argument) {
 
                             var title = answerUpdate[0].item.title
                             var link = answerUpdate[0].item.link
+                            if (link.length > 30) {
+                                link = link.toString().replace(/^(.*\/\/[^\/?#]*).*$/, "$1");
+                            }
 
                             if (File.exists('/Applications/Raindrop.io.app')) {
                                 var url = File.fileURLForPath('/Applications/Raindrop.io.app')
@@ -158,14 +161,19 @@ function run(argument) {
                                 var url = 'https://app.raindrop.io'
                             }
 
-                            var tags = answerUpdate[0].item.tags
+                            var tags = []
+                            for (var iT = 0; iT < answerUpdate[0].item.tags.length; iT++) {
+                                var tag = '#' + answerUpdate[0].item.tags[iT] + ' '
+                                tags.push(tag)
+                            }
+                            tags = tags
                                 .toString()
-                                .replace(/(.),(.)/g, '$1, $2')
+                                .replace(/,/g, '')
 
                             return [{
                                 title: 'Updated: ' + title,
-                                subtitle: link,
-                                label: tags,
+                                subtitle: link + ' ' + tags,
+                                // label: link,
                                 icon: 'drop',
                                 url: url
                             }]
@@ -227,6 +235,9 @@ function run(argument) {
 
                     var title = answerPost[0].item.title
                     var link = answerPost[0].item.link
+                    if (link.length > 30) {
+                        link = link.toString().replace(/^(.*\/\/[^\/?#]*).*$/, "$1");
+                    }
 
                     if (File.exists('/Applications/Raindrop.io.app')) {
                         var url = File.fileURLForPath('/Applications/Raindrop.io.app')
@@ -234,14 +245,19 @@ function run(argument) {
                         var url = 'https://app.raindrop.io'
                     }
 
-                    var tags = answerPost[0].item.tags
+                    var tags = []
+                    for (var iT = 0; iT < answerPost[0].item.tags.length; iT++) {
+                        var tag = '#' + answerPost[0].item.tags[iT] + ' '
+                        tags.push(tag)
+                    }
+                    tags = tags
                         .toString()
-                        .replace(/(.),(.)/g, '$1, $2')
+                        .replace(/,/g, '')
 
                     return [{
                         title: 'Saved: ' + title,
-                        subtitle: link,
-                        label: tags,
+                        subtitle: link + ' ' + tags,
+                        // label: tags,
                         icon: 'drop',
                         url: url
                     }]

@@ -50,7 +50,7 @@ function run(argument) {
 
     if (apiKey === undefined) {
       setAPIkey();
-    
+
     } else {
       if (argument != undefined) { // Search
         if (LaunchBar.options.shiftKey) { // Force search all text (takes longer … more possible results)
@@ -80,16 +80,27 @@ function run(argument) {
       if (rData.data != undefined && rData.data.items != undefined) {
         var results = [];
         for (var i = 0; i < rData.data.items.length; i++) {
+          var collId = rData.data.items[i].collection.$id
           var title = rData.data.items[i].title;
           var link = rData.data.items[i].link;
-          var tags = rData.data.items[i].tags
+          var label = link
+          if (label.length > 30) {
+            label = label.toString().replace(/^(.*\/\/[^\/?#]*).*$/, "$1");
+          }
+
+          var tags = []
+          for (var iT = 0; iT < rData.data.items[i].tags.length; iT++) {
+            var tag = '#' + rData.data.items[i].tags[iT] + ' '
+            tags.push(tag)
+          }
+          tags = tags
             .toString()
-            .replace(/(.),(.)/g, "$1, $2");
+            .replace(/,/g, '')
 
           results.push({
             title: title,
-            subtitle: link,
-            label: tags,
+            subtitle: tags,
+            label: label,
             icon: "drop",
             url: link,
           });
@@ -143,7 +154,7 @@ function setAPIkey() {
       );
       LaunchBar.hide();
       break;
-    case 2:
+    case 1:
       break;
   }
 }

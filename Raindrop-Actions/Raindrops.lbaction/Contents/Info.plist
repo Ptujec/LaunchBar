@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Raindrops</string>
 	<key>CFBundleVersion</key>
-	<string>2021.3</string>
+	<string>2021.3.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -25,6 +25,13 @@
 	</dict>
 	<key>LBScripts</key>
 	<dict>
+		<key>LBActionURLScript</key>
+		<dict>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBScriptName</key>
+			<string>actionURL.js</string>
+		</dict>
 		<key>LBDefaultScript</key>
 		<dict>
 			<key>LBAcceptedArgumentTypes</key>
@@ -58,13 +65,6 @@
 			<true/>
 			<key>LBScriptName</key>
 			<string>suggestions.js</string>
-		</dict>
-		<key>LBActionURLScript</key>
-		<dict>
-			<key>LBResultType</key>
-			<string>unknown</string>
-			<key>LBScriptName</key>
-			<string>actionURL.js</string>
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
