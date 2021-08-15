@@ -14,6 +14,7 @@ function run(argument) {
         if (todayData.error != undefined) {
             if (todayData.response != undefined) {
                 if (todayData.response.localizedStatus = 'forbidden') {
+                    LaunchBar.alert('You have not supplied a valid API-Token.')
                     setApiKey()
                     return
                 }
