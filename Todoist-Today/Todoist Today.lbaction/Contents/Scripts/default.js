@@ -6,29 +6,24 @@
 const apiToken = Action.preferences.apiToken
 
 function run(argument) {
-
     if (apiToken == undefined) {
-        var response = LaunchBar.alert(
-            "API-Token required", "1) Go to Settings/Integrations and copy the API-Token.\n2) Press »Set API-Token«", "Open Settings", "Set API-Token", "Cancel"
-        );
-        switch (response) {
-            case 0:
-                LaunchBar.openURL('https://todoist.com/app/settings/integrations')
-                LaunchBar.hide()
-                break
-            case 1:
-                Action.preferences.apiToken = LaunchBar.getClipboardString()
-                LaunchBar.alert('Success!', 'API-Token set to: ' + Action.preferences.apiToken)
-                break
-            case 2:
-                break
-        }
-
+        setApiKey()
     } else {
         var todayData = HTTP.getJSON('https://api.todoist.com/rest/v1/tasks?filter=today&token=' + apiToken)
-        todayData = todayData.data
 
-        if (todayData == '') {
+        if (todayData.error != undefined) {
+            if (todayData.response != undefined) {
+                if (todayData.response.localizedStatus = 'forbidden') {
+                    setApiKey()
+                    return
+                }
+            } else {
+                LaunchBar.alert(todayData.error)
+                return
+            }
+        }
+
+        if (todayData.data == '') {
             if (LaunchBar.currentLocale == 'de') {
                 var title = 'Alles erledigt für heute!'
             } else {
@@ -40,6 +35,8 @@ function run(argument) {
                 'url': 'todoist://'
             }]
         }
+
+        todayData = todayData.data
 
         todayData = todayData.sort(function (a, b) {
             return a.priority < b.priority && a.created > b.created
@@ -95,5 +92,23 @@ function run(argument) {
             }
         }
         return results;
+    }
+}
+
+function setApiKey() {
+    var response = LaunchBar.alert(
+        "API-Token required", "1) Go to Settings/Integrations and copy the API-Token.\n2) Press »Set API-Token«", "Open Settings", "Set API-Token", "Cancel"
+    );
+    switch (response) {
+        case 0:
+            LaunchBar.openURL('https://todoist.com/app/settings/integrations')
+            LaunchBar.hide()
+            break
+        case 1:
+            Action.preferences.apiToken = LaunchBar.getClipboardString().trim()
+            LaunchBar.alert('Success!', 'API-Token set to: ' + Action.preferences.apiToken)
+            break
+        case 2:
+            break
     }
 }
