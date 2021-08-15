@@ -34,7 +34,7 @@ With this action you can browse your bookmarks by collection.
 ## First run
 <img src="07_oauth.png" width="600"/> 
 
-When you run one of these actions for the first time you will be redirected to Raindrop.io to connect your account. Thanks to @mlinzner for the OAuth integration.
+When you run one of these actions for the first time you will be redirected to Raindrop.io to connect your account. Thanks to [@mlinzner](https://github.com/mlinzner) for the OAuth integration.
 
 ## Download
 
