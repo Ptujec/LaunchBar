@@ -20,6 +20,7 @@ function run(argument) {
 
         if (exchangerate.data.error != undefined) {
             if (exchangerate.data.error.info.includes('You have not supplied a valid API Access Key.')) {
+                LaunchBar.alert(exchangerate.data.error.info)
                 setApiKey()
             } else {
                 LaunchBar.alert('Unable to load results', exchangerate.data.error.info);
