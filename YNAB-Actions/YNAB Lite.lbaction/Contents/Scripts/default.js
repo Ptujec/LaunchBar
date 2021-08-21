@@ -69,6 +69,9 @@ function run() {
                     // Open YNAB
                     LaunchBar.openURL('https://app.youneedabudget.com/')
                 } else {
+                    // Set Currency Symbol
+                    var currencySymbol = check.data.data.settings.currency_format.currency_symbol
+
                     // Period to look for transactions (default: 10 days)
                     if (Action.preferences.days == undefined) {
                         Action.preferences.days = 10
@@ -93,16 +96,27 @@ function run() {
                         var tDate = transaction.date
                         var account = transaction.account_name
                         var memo = transaction.memo
-
                         var amount = transaction.amount / 1000
-                        amount = amount.toFixed(2).toString().replace(/\./, ',') + '€'
+                        amount = amount.toFixed(2).toString() 
 
-                        if (amount.includes('-')) {
-                            var icon = '03_cartTemplate'
+                        if (currencySymbol == '€') {
+                            amount = amount.replace(/\./, ',') + currencySymbol
+                            if (amount.includes('-')) {
+                                var icon = '03_cartTemplate'
+                            } else {
+                                var icon = '00_incomingTemplate'
+                            }
                         } else {
-                            var icon = '00_incomingTemplate'
+                            if (amount.includes('-')) {
+                                var icon = '03_cartTemplate'
+                                amount = amount.replace(/-/, '')
+                                amount = '-' + currencySymbol + amount
+                            } else {
+                                var icon = '00_incomingTemplate'
+                                amount = currencySymbol + amount 
+                            }
                         }
-
+                       
                         var cleared = transaction.cleared
                         var title = payee + ': ' + amount
 
@@ -131,7 +145,7 @@ function run() {
                         var sub = tDate + ' (' + memo + ')'
                         if (memo == null || memo == '') {
                             sub = tDate
-                        } 
+                        }
 
                         results.push({
                             'title': title,
