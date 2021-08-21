@@ -10,9 +10,13 @@ There is only one right now. But I have more in the pipe (e.g. Quick Add) that n
 
 <img src="settings.png" width="600"/> 
 
-This action gives you a quick glance at your last transactions. You can set the period to look for (from 10 days to a whole year)
+This action gives you a quick glance at your recent transactions. You can set the period to look for (from 10 days to a whole year)
 
 On the first run you will need to set your Personal Access Token, which you can get in [YNAB Developer Settings](https://app.youneedabudget.com/settings/developer). 
+
+Options:
+- ⌘⏎ = Open the webapp 
+- ⌥⏎ = Settings (Budget, Days)
 
 ## Download
 
