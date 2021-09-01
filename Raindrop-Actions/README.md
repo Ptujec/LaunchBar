@@ -12,7 +12,7 @@ Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi
 
 ## Action: Raindrops (Browse and Search Raindrop.io)
 
-Suggestions: 
+Search suggestions: 
 
 <img src="03_search.png" width="600"/> 
  
