@@ -19,52 +19,58 @@ function runWithString(string) {
   var second = [];
   for (var iData = 0; iData < rData.data.items.length; iData++) {
     var suggestion = rData.data.items[iData]._id;
-
-    testString = string.split(",");
-
-    var t = testString[testString.length - 1].trim();
-
-    if (suggestion.toLowerCase().includes(t.toLowerCase())) {
-      if (suggestion.toLowerCase().startsWith(t.toLowerCase())) {
-        if (testString.length >= 2) {
-          s = string.split(",");
-          s.pop().toString();
-          var title = s + ", " + suggestion;
-          var icon = "tagsTemplate";
-        } else {
-          var title = suggestion;
-          var icon = "tagTemplate";
-        }
-
+    if (suggestion.toLowerCase().includes(string.toLowerCase())) {
+      if (suggestion.toLowerCase().startsWith(string.toLowerCase())) {
         first.push({
-          title: title,
-          icon: icon,
+          title: suggestion,
+          icon: "tagTemplate",
         });
       } else {
-        if (testString.length >= 2) {
-          s = string.split(",");
-          s.pop().toString();
-          var title = s + ", " + suggestion;
-          var icon = "tagsTemplate";
-        } else {
-          var title = suggestion;
-          var icon = "tagTemplate";
-        }
-
         second.push({
-          title: title,
-          icon: icon,
+          title: suggestion,
+          icon: "tagTemplate",
         });
       }
     }
   }
+
   first.sort(function (a, b) {
     return a.title > b.title;
   });
   second.sort(function (a, b) {
     return a.title > b.title;
   });
-  var suggestions = first.concat(second);
+  var tags = first.concat(second);
+
+
+  var operators = [
+    {
+      title: "type:article",
+      icon: "articleTemplate"
+    },
+    {
+      title: "type:document",
+      icon: "docTemplate"
+    },
+    {
+      title: "type:image",
+      icon: "imageTemplate"
+    },
+    {
+      title: "type:video",
+      icon: "videoTemplate"
+    },
+    {
+      title: "type:audio",
+      icon: "audioTemplate"
+    }
+  ]
+
+  operators = operators.filter(function (el) {
+    return el.title.includes(string);
+  });
+
+  var suggestions = operators.concat(tags)
 
   return suggestions;
 }

@@ -47,27 +47,33 @@ function run(argument) {
     }
   } else {
     var apiKey = getApiKey();
-
     if (apiKey === undefined) {
       setAPIkey();
-
     } else {
       if (argument != undefined) { // Search
-        if (LaunchBar.options.shiftKey) { // Force search all text (takes longer … more possible results)
+        if (LaunchBar.options.controlKey) { // Force search all text (takes longer … more possible results)
           var rData = HTTP.getJSON(
-            encodeURI(
-              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey
-            ));
-        } else { // Search by tag (fast)
+            'https://api.raindrop.io/rest/v1/raindrops/0?search=' + encodeURI(argument) + '&access_token=' + apiKey
+          );
+        } else if (LaunchBar.options.shiftKey) { // Force search all text (takes longer … more possible results)
           var rData = HTTP.getJSON(
-            encodeURI(
-              'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"tag","val":"' + argument + '"}]&access_token=' + apiKey
-            ));
-          if (rData.data.items.length == 0) { // Search all text if query does not match a tag (takes longer)
-            rData = HTTP.getJSON(
+            'https://api.raindrop.io/rest/v1/raindrops/0?search=link:' + encodeURI(argument) + '&access_token=' + apiKey
+          );
+        } else {
+          if (argument.includes(':')) { // Search all if argument includes operator (since they all include a colon we check for that) 
+            var rData = HTTP.getJSON(
+              'https://api.raindrop.io/rest/v1/raindrops/0?search=' + encodeURI(argument) + '&access_token=' + apiKey
+            );
+          } else { // Search by tag (fast)
+            var rData = HTTP.getJSON(
               encodeURI(
-                'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"word","val":"' + argument + '"}]&access_token=' + apiKey
+                'https://api.raindrop.io/rest/v1/raindrops/0?search=[{"key":"tag","val":"' + argument + '"}]&access_token=' + apiKey
               ));
+            if (rData.data.items.length == 0) { // Search all text if query does not match a tag (takes longer)
+              rData = HTTP.getJSON(
+                'https://api.raindrop.io/rest/v1/raindrops/0?search=' + encodeURI(argument) + '&access_token=' + apiKey
+              );
+            }
           }
         }
 

@@ -11,6 +11,8 @@ This action lets you save the current website in your browser to Raindrop.io. Pr
 Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi
 
 ## Action: Raindrops (Browse and Search Raindrop.io)
+
+<img src="03_search.png" width="600"/> 
  
 <img src="01_tags.png" width="600"/> 
 
@@ -21,7 +23,7 @@ This actions lets you browse or search your bookmarks on Raindrop.io.
 Options:
 
 1. ⏎ = Browse recent items
-2. Space = Enter search term/tag (⇧⏎ = Search all text) 
+2. Space = Enter search term/tag (⇧⏎ = Search in URLs, ^⏎ = Search all text) 
 3. ⌘⏎ = Open the app
 
 ## Action: Raindrop Collections (Show all bookmarks of a selected Raindrop.io collection)
