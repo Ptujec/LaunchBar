@@ -97,7 +97,13 @@ function run() {
                         var account = transaction.account_name
                         var memo = transaction.memo
                         var amount = transaction.amount / 1000
-                        amount = amount.toFixed(2).toString() 
+                        amount = amount.toFixed(2).toString()
+
+                        if (memo != null && memo.includes('message://')) {
+                            var link = memo.match(/(message:\S*)/).toString()
+                        } else {
+                            var link = ''
+                        }
 
                         if (currencySymbol == '€') {
                             amount = amount.replace(/\./, ',') + currencySymbol
@@ -113,10 +119,10 @@ function run() {
                                 amount = '-' + currencySymbol + amount
                             } else {
                                 var icon = '00_incomingTemplate'
-                                amount = currencySymbol + amount 
+                                amount = currencySymbol + amount
                             }
                         }
-                       
+
                         var cleared = transaction.cleared
                         var title = payee + ': ' + amount
 
@@ -152,6 +158,7 @@ function run() {
                             'subtitle': sub,
                             'badge': account,
                             'icon': icon,
+                            'url': link
                         });
                     }
                     results = results.sort(function (a, b) {
