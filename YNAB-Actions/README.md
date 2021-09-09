@@ -1,4 +1,5 @@
 # YNAB Actions
+For use with [You Need A Budget](https://www.youneedabudget.com/).   
 
 ## YNAB - Add Transaction <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Resources/YNABAddTemplate.png?raw=true" width="32"/> 
 
