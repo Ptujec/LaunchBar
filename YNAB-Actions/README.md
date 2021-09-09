@@ -1,9 +1,7 @@
 # YNAB Actions
 
-There is only one right now. But I have more in the pipe (e.g. Quick Add) that need some work before I can share them.
-
 ## YNAB - Add Transaction
-This does what the name suggests … adding transactions to YNAB the LaunchBar way. 
+This action does what the name suggests, it adds a transaction to YNAB the LaunchBar way. 
 
 On the first run you will need to set your Personal Access Token, which you can get in [YNAB Developer Settings](https://app.youneedabudget.com/settings/developer). 
 
@@ -23,12 +21,12 @@ No worries if you made a mistake. In most cases you can go back one or more step
 
 <img src="yat_confirmation.png" width="600"/> 
 
-**A special twist for users of Apple Mail**:
-If you have an Email selected you can add the link to that Email (e.g. the bill you are paying) as a memo. 
+**A special goodie for users of Apple Mail**:
+If you have an Email selected or open in Apple Mail you can add the link to that Email (e.g. the bill you are paying) as a memo. If you use the YNAB Lite action you can open those Email links by hitting return on a transaction with an Email link there.
 
 <img src="yat_memo.png" width="600"/> 
 
-If you use YNAB Lite you can open those Email links by hitting return on a transaction with an Email link.   
+   
 
 ## YNAB Lite
 
