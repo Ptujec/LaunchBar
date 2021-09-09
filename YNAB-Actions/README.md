@@ -3,7 +3,7 @@ For use with [You Need A Budget](https://www.youneedabudget.com/).
 
 ## YNAB - Add Transaction <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Resources/YNABAddTemplate.png?raw=true" width="32"/> 
 
-This action does what the name suggests, it adds a transaction to YNAB the [LaunchBar](https://www.obdev.at/products/launchbar/index.html) way. It's fast and efficient. No need to wait for the webapp to load. 
+This action does what the name suggests, it adds a transaction to YNAB the [LaunchBar](https://www.obdev.at/products/launchbar/index.html) way. It's fast and efficient. No need to grab your phone or wait for the webapp to load. 
 
 On the first run you will need to set your Personal Access Token, which you can get in [YNAB Developer Settings](https://app.youneedabudget.com/settings/developer). 
 
