@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>YNABTemplate.pdf</string>
+	<string>actionIconTemplate.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.YNABLite</string>
 	<key>CFBundleName</key>
 	<string>YNAB Lite</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.2</string>
+	<string>2021.1.2.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
