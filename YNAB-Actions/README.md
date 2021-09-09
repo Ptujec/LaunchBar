@@ -1,6 +1,6 @@
 # YNAB Actions
 
-## <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Resources/YNABAddTemplate.png?raw=true" width="32"/> YNAB - Add Transaction
+## YNAB - Add Transaction <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Resources/YNABAddTemplate.png?raw=true" width="32"/> 
 
 This action does what the name suggests, it adds a transaction to YNAB the LaunchBar way. 
 
@@ -29,7 +29,7 @@ If you have an Email selected or open in Apple Mail you can add the link to that
 
    
 
-## <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20Lite.lbaction/Contents/Resources/actionIconTemplate.png?raw=true" width="32"/> YNAB Lite 
+##  YNAB Lite <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20Lite.lbaction/Contents/Resources/actionIconTemplate.png?raw=true" width="32"/> 
 
 <img src="yl.png" width="600"/> 
 
