@@ -3,8 +3,9 @@
 <img src="file_actions.png" width="600"/>
 
 ## List 
-- Sort by type
-- Filter by type
+- Sort by extension
+- Filter by extension
+- Filter images
 
 ## Download
 

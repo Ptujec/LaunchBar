@@ -5,9 +5,9 @@
 	<key>CFBundleIconFile</key>
 	<string>iconTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.FilterbytypeCopy</string>
+	<string>ptujec.LaunchBar.action.FilterByExtension</string>
 	<key>CFBundleName</key>
-	<string>Sort by type</string>
+	<string>Filter by extension</string>
 	<key>CFBundleVersion</key>
 	<string>2021.1</string>
 	<key>LBDescription</key>
