@@ -7,15 +7,17 @@
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.FilterImages</string>
 	<key>CFBundleName</key>
-	<string>Filter - Images</string>
+	<string>Filter images</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>⌥⏎ = Sort results by extension (default is by name)</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

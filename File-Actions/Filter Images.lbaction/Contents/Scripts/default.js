@@ -4,10 +4,8 @@
 
 function run(argument) {
     if (argument == undefined) {
-        var folder = LaunchBar.executeAppleScript(
-            'set f to choose folder with prompt "Pick a folder:"',
-            'set p to POSIX path of f')
-            .trim()
+        var folder = LaunchBar.executeAppleScriptFile('./open.applescript').trim()
+        LaunchBar.hide()
     } else {
         var folder = argument
     }
@@ -30,6 +28,9 @@ function run(argument) {
         .trim()
         .split('\n')
 
+    if (images == '') {
+        return
+    }
 
     var result = []
     for (var i = 0; i < images.length; i++) {
@@ -50,12 +51,15 @@ function run(argument) {
     if (LaunchBar.options.alternateKey) {
         result.sort(function (a, b) {
             return a.extension > b.extension;
-        });    
+        });
     } else {
         result.sort(function (a, b) {
             return a.title > b.title;
         });
     }
-    
+
+    if (argument == undefined) {
+        LaunchBar.executeAppleScript('tell application "LaunchBar" to activate')
+    } 
     return result
 }
