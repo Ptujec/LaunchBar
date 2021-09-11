@@ -105,7 +105,7 @@ function run(argument) {
             .replace(/5 Moses|5Moses/, 'Deuteronomy')
 
     }
-    lookUp(result, argument)
+    lookUp(result)
 }
 
 function lookUp(result) {
