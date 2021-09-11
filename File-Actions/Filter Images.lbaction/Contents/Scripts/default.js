@@ -2,14 +2,8 @@
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-file
 */
 
-function run(argument) {
-    if (argument == undefined) {
-        var folder = LaunchBar.executeAppleScriptFile('./open.applescript').trim()
-        LaunchBar.hide()
-    } else {
-        var folder = argument
-    }
-
+function run(folder) {
+    
     var gPlist = File.readPlist('/Library/Preferences/.GlobalPreferences.plist')
     lang = gPlist.AppleLanguages
         .toString()

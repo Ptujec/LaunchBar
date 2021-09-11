@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Filter images</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2021.1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -32,6 +32,8 @@
 				<string>path</string>
 			</array>
 			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>

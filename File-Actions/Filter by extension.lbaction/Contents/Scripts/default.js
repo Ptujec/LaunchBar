@@ -2,16 +2,7 @@
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-file
 */
 
-function run(argument) {
-    if (argument == undefined) {
-        var folder = LaunchBar.executeAppleScript(
-            'set f to choose folder with prompt "Pick a folder:"',
-            'set p to POSIX path of f')
-            .trim()
-    } else {
-        var folder = argument
-    }
-
+function run(folder) {
     var contents = File.getDirectoryContents(folder)
 
     var types = []
