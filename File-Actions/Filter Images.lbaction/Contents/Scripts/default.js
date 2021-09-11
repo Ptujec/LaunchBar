@@ -52,8 +52,5 @@ function run(folder) {
         });
     }
 
-    if (argument == undefined) {
-        LaunchBar.executeAppleScript('tell application "LaunchBar" to activate')
-    } 
     return result
 }
