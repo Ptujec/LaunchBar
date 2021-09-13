@@ -216,7 +216,17 @@ function setPayeeAndContinue(p) {
         var i2 = 0;
         for (i2 = 0; i2 < categories.length; i2++) {
             if (cGroups[i1].name == 'Internal Master Category') {
-                if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                if (Action.preferences.pinnedCategory != undefined) {
+                    if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                        internalCategories.push({
+                            'title': categories[i2].name,
+                            'subtitle': cGroups[i1].name,
+                            'icon': 'categoryTemplate.png',
+                            'action': "setCategoryAndContinue",
+                            'actionArgument': categories[i2].id
+                        });
+                    }
+                } else {
                     internalCategories.push({
                         'title': categories[i2].name,
                         'subtitle': cGroups[i1].name,
@@ -225,8 +235,19 @@ function setPayeeAndContinue(p) {
                         'actionArgument': categories[i2].id
                     });
                 }
+                
             } else {
-                if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                if (Action.preferences.pinnedCategory != undefined) {
+                    if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                        userCategories.push({
+                            'title': categories[i2].name,
+                            'subtitle': cGroups[i1].name,
+                            'icon': 'categoryTemplate.png',
+                            'action': "setCategoryAndContinue",
+                            'actionArgument': categories[i2].id
+                        });
+                    }
+                } else {
                     userCategories.push({
                         'title': categories[i2].name,
                         'subtitle': cGroups[i1].name,
@@ -769,7 +790,18 @@ function pinCategory() {
         var i2 = 0;
         for (i2 = 0; i2 < categories.length; i2++) {
             if (cGroups[i1].name == 'Internal Master Category') {
-                if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                if (Action.preferences.pinnedCategory != undefined) {
+                    if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                        internalCategories.push({
+                            'title': categories[i2].name,
+                            'subtitle': cGroups[i1].name,
+                            'icon': 'categoryTemplate.png',
+                            'badge': 'Pin Category Setting',
+                            'action': "setPin",
+                            'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                        });
+                    }
+                } else {
                     internalCategories.push({
                         'title': categories[i2].name,
                         'subtitle': cGroups[i1].name,
@@ -779,8 +811,20 @@ function pinCategory() {
                         'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
                     });
                 }
+                
             } else {
-                if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                if (Action.preferences.pinnedCategory != undefined) {
+                    if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
+                        userCategories.push({
+                            'title': categories[i2].name,
+                            'subtitle': cGroups[i1].name,
+                            'icon': 'categoryTemplate.png',
+                            'badge': 'Pin Category Setting',
+                            'action': "setPin",
+                            'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                        });
+                    }
+                } else {
                     userCategories.push({
                         'title': categories[i2].name,
                         'subtitle': cGroups[i1].name,
