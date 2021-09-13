@@ -447,13 +447,13 @@ function setMemoAndComplete(m) {
         }
     } else {
 
-        
+
         // Evaluate result
         tResult = eval('[' + tResult.data + ']')
-        
+
         if (tResult[0].error != undefined) {
             LaunchBar.alert(tResult[0].error.id + ' ' + tResult[0].error.name + ': ' + tResult[0].error.detail)
-            return 
+            return
         }
 
         var tData = tResult[0].data.transaction
@@ -569,7 +569,7 @@ function setMemoAndComplete(m) {
 // Setting Functions
 function setToken() {
     var response = LaunchBar.alert(
-        "Personal Access Token required", "You can creat your Personal Access Token at https://app.youneedabudget.com/settings/developer. Copy it to your clipboard, run the action again and choose »Set Token«", "Open Website", "Set Token", "Cancel"
+        "Personal Access Token required", "You can creat your Personal Access Token at https://app.youneedabudget.com/settings/developer. Copy it to your clipboard, run the action again and choose »Set Token«.\n\nYour clipboard is currently set to: " + LaunchBar.getClipboardString().trim(), "Open Website", "Set Token", "Cancel"
     );
     switch (response) {
         case 0:
@@ -596,6 +596,9 @@ function budgetSettings() {
             LaunchBar.alert("You seem to have no internet connection!");
             return;
         }
+    } if (bData.data.error != undefined) {
+        LaunchBar.alert('Error ' + bData.data.error.id + ' ' + bData.data.error.name, 'Your token "' + Action.preferences.accessToken + '" seems to be invalid. Try to set your token again!')
+        setToken()
     } else {
         var results = [];
         for (var i = 0; i < bData.data.data.budgets.length; i++) {
@@ -747,6 +750,12 @@ function pinCategory() {
         LaunchBar.alert('Error while reading JSON: ' + exception);
     }
 
+    if (cData.error != undefined) {
+        LaunchBar.alert('Error ' + cData.error.id + ' ' + cData.error.name, 'Your token "' + Action.preferences.accessToken + '" seems to be invalid. Try to set your token again!')
+        setToken()
+        return
+    }
+
     var cGroups = cData.data.category_groups
     cGroups = cGroups.filter(function (el) {
         return el.name != 'Hidden Categories';
@@ -818,10 +827,18 @@ function setPin(pin) {
     }]
 }
 function dataRefresh() {
-    // Preload data
-    LaunchBar.hide()
-
+    
+    // Preload data  
     var pData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/payees?access_token=' + token, 3)
+        
+    if (pData.data.error != undefined) {
+        LaunchBar.alert('Error ' + pData.data.error.id + ' ' + pData.data.error.name, 'Your token "' + Action.preferences.accessToken + '" seems to be invalid. Try to set your token again!')
+        setToken()
+        return
+    }
+
+    LaunchBar.hide()
+    
     var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories?access_token=' + token, 3)
     var aData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts?access_token=' + token, 3)
 

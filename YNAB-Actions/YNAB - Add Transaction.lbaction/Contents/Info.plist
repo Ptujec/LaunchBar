@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>YNAB - Add Transaction</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2021.1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
