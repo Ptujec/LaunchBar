@@ -655,7 +655,7 @@ function setBudgetID(bId) {
     File.writeJSON(aData.data, '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/accounts.json');
 
     return [{
-        title: "Buget set!",
+        title: "Budget set!",
         icon: "checkTemplate"
     }];
 }
