@@ -27,6 +27,12 @@ function run(argument) {
         // Default Vers Notation
         var result = argument
     } else {
+        // Add number of first chapternumber if just a bookname is given 
+        var numCheck = / \d/.test(argument)
+        if (numCheck == false) {
+            argument = argument + ' 1'
+        }
+
         // European Vers Notation
         argument = argument
             // clean up capture (e.g. brackets) and formart errors (e.g. spaces before or after verse numbers) in entry
@@ -36,64 +42,69 @@ function run(argument) {
         // Convert Slovene and German argument strings
         var mA = argument.match(/(?:[1-5]\.?\s?)?(?:[a-zžščöäü]+\.?\s?)?[0-9,.:\-–f]+/gi)
 
-        var result = []
-        for (var i = 0; i < mA.length; i++) {
-            var scrip = mA[i]
-                .toString()
-                .trim()
-
-            // makes sure non-european styles get converted 
-            if (scrip.includes(':')) {
-                scrip = scrip
-                    .replace(/,/g, '.')
-                    .replace(/:/g, ',')
-            }
-
-            var mB = scrip.match(/([1-5]\.?\s?)?([a-zžščöäü]+\.?\s?)?([0-9,.:\-–f]+)/i)
-
-            var prefix = mB[1]
-
-            if (prefix == undefined) {
-                prefix = ''
-            } else {
-                prefix = prefix
-                    .replace(/\./, '')
-            }
-
-            var bookName = mB[2]
-
-            if (bookName == undefined) {
-                bookName = ''
-            } else {
-                bookName = bookName
+        if (mA == undefined) {
+            var result = argument
+        } else {
+            var result = []
+            for (var i = 0; i < mA.length; i++) {
+                var scrip = mA[i]
+                    .toString()
                     .trim()
-                    .replace(/\./, '')
-                    .toLowerCase()
 
-                var iBN = GermanBookList
-                    .findIndex(element => element
+                // makes sure non-european styles get converted 
+                if (scrip.includes(':')) {
+                    scrip = scrip
+                        .replace(/,/g, '.')
+                        .replace(/:/g, ',')
+                }
+
+                var mB = scrip.match(/([1-5]\.?\s?)?([a-zžščöäü]+\.?\s?)?([0-9,.:\-–f]+)/i)
+
+                var prefix = mB[1]
+
+                if (prefix == undefined) {
+                    prefix = ''
+                } else {
+                    prefix = prefix
+                        .replace(/\./, '')
+                }
+
+                var bookName = mB[2]
+
+                if (bookName == undefined) {
+                    bookName = ''
+                } else {
+                    bookName = bookName
+                        .trim()
+                        .replace(/\./, '')
                         .toLowerCase()
-                        .startsWith(bookName))
 
-
-                if (iBN == -1) {
-                    iBN = SloveneBookList
+                    var iBN = GermanBookList
                         .findIndex(element => element
                             .toLowerCase()
                             .startsWith(bookName))
-                }
 
-                if (iBN != -1) {
-                    bookName = EnglishBookList[iBN]
+
+                    if (iBN == -1) {
+                        iBN = SloveneBookList
+                            .findIndex(element => element
+                                .toLowerCase()
+                                .startsWith(bookName))
+                    }
+
+                    if (iBN != -1) {
+                        bookName = EnglishBookList[iBN]
+                    }
+                    bookName = bookName + ' '
                 }
-                bookName = bookName + ' '
+                var suffix = mB[3]
+
+                var newScrip = prefix + bookName + suffix
+
+                result.push(newScrip + ' ')
             }
-            var suffix = mB[3]
-
-            var newScrip = prefix + bookName + suffix
-
-            result.push(newScrip + ' ')
         }
+
         result = result
             .toString()
             .replace(/ ,/g, '; ')
@@ -137,7 +148,7 @@ function lookUp(result) {
         LaunchBar.openURL('accord://research/' + allTextSetting + encodeURIComponent(result))
     } else {
         // Smart option
-        if (result.includes('-') || result.includes(';') || !result.includes(',')) {
+        if (result.endsWith('f') || result.includes('-') || result.includes(';') || !result.includes(',')) {
             LaunchBar.openURL('accord://read/?' + encodeURIComponent(result))
         } else {
             LaunchBar.openURL('accord://research/' + allTextSetting + encodeURIComponent(result))
