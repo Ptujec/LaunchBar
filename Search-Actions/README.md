@@ -13,6 +13,7 @@
 - Zotero Search
 - Notion Search
 - iA Writer Search 
+- Mindnode Search
 - Google Search (with DuckDuckGos version of Feeling Lucky)
 
 ## Download
