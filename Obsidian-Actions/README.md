@@ -3,9 +3,9 @@
 ## New Obsidian Note
 
 <img src="non_vault.png" width="600"/> 
+<img src="non_vault_set.png" width="600"/> 
 <img src="non_title.png" width="600"/> 
 <img src="non_enter.png" width="600"/> 
-<img src="non_vault_set.png" width="600"/> 
 
 ## Search Obsidian
 
