@@ -66,7 +66,7 @@ function run(argument) {
                     if (LaunchBar.options.commandKey) {
                         results.push({
                             'title': title,
-                            'icon': 'md.obsidian',
+                            'icon': 'docTemplate',
                             'url': 'obsidian://open?path=' + path 
                         })
 
@@ -91,13 +91,13 @@ function run(argument) {
                             results.push({
                                 'title': title,
                                 'subtitle': sub,
-                                'icon': 'md.obsidian',
+                                'icon': 'docTemplate',
                                 'url': 'obsidian://open?path=' + path
                             })
                         } else {
                             results.push({
                                 'title': title,
-                                'icon': 'md.obsidian',
+                                'icon': 'docTemplate',
                                 'url': 'obsidian://open?path=' + path
                             })
                         }
