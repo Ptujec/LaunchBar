@@ -18,7 +18,6 @@ function run(argument) {
 
             var vPath = oJSON.vaults[vault].path
             var vName = File.displayName(vPath)
-            var vID = oJSON.vaults[vault].ts
 
             results.push({
                 'title': vName,
