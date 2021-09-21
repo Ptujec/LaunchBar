@@ -6,12 +6,13 @@ Search Obsidian by Christian Bender (@ptujec)
 */
 
 function run(argument) {
+    var oJSON = File.readJSON('/Users/hischa/Library/Application Support/obsidian/obsidian.json')
+    var vaults = Object.keys(oJSON.vaults)
 
-    if (argument == undefined) {
-        var oJSON = File.readJSON('~/Library/Application Support/obsidian/obsidian.json')
-        var vaults = Object.keys(oJSON.vaults)
+    var vSetting = Action.preferences.vaultName
+    if (argument == undefined || vSetting == undefined) {
 
-        var results = []
+        var vResults = []
         for (var i = 0; i < vaults.length; i++) {
 
             var vault = vaults[i]
@@ -19,24 +20,126 @@ function run(argument) {
             var vPath = oJSON.vaults[vault].path
             var vName = File.displayName(vPath)
 
-            results.push({
+            vResults.push({
                 'title': vName,
                 'icon': 'vaultTemplate.png',
                 'action': 'setVault',
                 'actionArgument': vName + ',' + vPath
             })
         }
+
+        var allVaults = [{
+            'title': 'All Vaults',
+            'icon': 'allVaultTemplate.png',
+            'action': 'setVault',
+            'actionArgument': ''
+        }]
+
+        vResults.sort(function (a, b) {
+            return a.title > b.title;
+        });
+
+        results = allVaults.concat(vResults)
+
         return results
 
+    } else if (vSetting == '') {
+        argument = argument
+            .toLowerCase()
+            .trim()
+
+        var results = []
+        for (var i = 0; i < vaults.length; i++) {
+
+            var vault = vaults[i]
+            var vPath = oJSON.vaults[vault].path
+            var vaultName = File.displayName(vPath)
+
+            if (LaunchBar.options.commandKey) {
+                // Dateiname 
+                var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', vPath, '-name', argument)
+                    .trim()
+                    .split('\n')
+            } else {
+                var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', vPath, argument)
+                    .trim()
+                    .split('\n')
+            }
+
+            if (output != '') {
+                for (var i2 = 0; i2 < output.length; i2++) {
+                    var path = output[i2]
+
+                    if (path != '' && !File.isDirectory(path)) {
+                        var title = File.displayName(path)
+
+                        if (LaunchBar.options.commandKey) {
+                            results.push({
+                                'title': title,
+                                'icon': 'docTemplate',
+                                'badge': vaultName,
+                                'url': 'obsidian://open?path=' + encodeURI(path)
+                            })
+
+                        } else {
+                            var regex = new RegExp('.*' + argument + '.*', 'gi')
+                            try {
+                                var sub = File.readText(path)
+                                    .match(regex)
+                            } catch (error) {
+                            }
+
+                            if (sub != null) {
+                                sub = sub
+                                    .toString()
+                                    .replace(/\n/g, ' ')
+                                    .trim()
+
+                                results.push({
+                                    'title': title,
+                                    'subtitle': sub,
+                                    'icon': 'docTemplate',
+                                    'badge': vaultName,
+                                    'url': 'obsidian://open?path=' + encodeURI(path)
+                                })
+                            } else {
+                                results.push({
+                                    'title': title,
+                                    'icon': 'docTemplate',
+                                    'badge': vaultName,
+                                    'url': 'obsidian://open?path=' + encodeURI(path)
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+            if (results != '') {
+                results.sort(function (a, b) {
+                    return a.title < b.title;
+                });
+            }
+        }
+        if (results == '') {
+            return [{
+                'title': 'No results',
+                'icon': 'md.obsidian'
+            }]
+        } else {
+            results.sort(function (a, b) {
+                return a.badge > b.badge;
+            });
+            return results
+        }
+
     } else {
-        var vPath = Action.preferences.currentVaultPath
+        var vPath = Action.preferences.vaultPath
 
         argument = argument
             .toLowerCase()
             .trim()
 
         if (LaunchBar.options.commandKey) {
-            // Dateiname 
             var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', vPath, '-name', argument)
                 .trim()
                 .split('\n')
@@ -44,7 +147,6 @@ function run(argument) {
             var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', vPath, argument)
                 .trim()
                 .split('\n')
-
         }
 
         if (output == '') {
@@ -67,7 +169,7 @@ function run(argument) {
                         results.push({
                             'title': title,
                             'icon': 'docTemplate',
-                            'url': 'obsidian://open?path=' + path 
+                            'url': 'obsidian://open?path=' + path
                         })
 
                     } else {
@@ -117,11 +219,18 @@ function setVault(v) {
     var vName = v[0]
     var vPath = v[1]
 
-    Action.preferences.currentVault = vName
-    Action.preferences.currentVaultPath = vPath
+    Action.preferences.vaultName = vName
+    Action.preferences.vaultPath = vPath
 
-    return [{
-        'title': 'Search in "' + vName + '"',
-        'icon': 'checkTemplate.png'
-    }]
+    if (vName == '') {
+        return [{
+            'title': 'Search in all vaults',
+            'icon': 'checkTemplate.png'
+        }]
+    } else {
+        return [{
+            'title': 'Search in "' + vName + '"',
+            'icon': 'checkTemplate.png'
+        }]
+    }
 }
