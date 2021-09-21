@@ -13,6 +13,10 @@
 <img src="sob_enter.png" width="600"/> 
 <img src="sob_result.png" width="600"/> 
 
+You can either choose a vault to search in or search in all vaults (default, slow if you have a lot of vaults).
+
+<img src="sob_vaults.png" width="600"/> 
+
 ## Obsidian - Vaults and Notes
 This action is associated with the Obsidian application on your Mac. This means you can press space when the App is selected to see all your vaults. 
 
