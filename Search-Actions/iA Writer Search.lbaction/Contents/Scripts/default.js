@@ -69,7 +69,7 @@ function run(argument) {
             }
         }
         results.sort(function (a, b) {
-            return a.title > b.title;
+            return a.path > b.path;
         });
         return results
     }
