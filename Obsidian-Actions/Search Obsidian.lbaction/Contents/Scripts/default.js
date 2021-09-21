@@ -10,7 +10,7 @@ function run(argument) {
     var vaults = Object.keys(oJSON.vaults)
 
     var vSetting = Action.preferences.vaultName
-    if (argument == undefined || vSetting == undefined) {
+    if (argument == undefined) {
 
         var vResults = []
         for (var i = 0; i < vaults.length; i++) {
@@ -43,7 +43,7 @@ function run(argument) {
 
         return results
 
-    } else if (vSetting == '') {
+    } else if (vSetting == '' || vSetting == undefined) {
         argument = argument
             .toLowerCase()
             .trim()
