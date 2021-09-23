@@ -23,5 +23,10 @@ You also can use "A" (AND), "O" (OR) or "N" (NOT) manually as shown here:
 
 <img src="advancedsearchoptions.png" width="600"/>
 
+With # you can scroll to a specific book. For example "Moses#Acts_6:14" will search for all instances of Moses, but scroll to Acts 6:14. You start with a specific translation followed by : e.g "ESVS:Moses#Acts_6:14". There are suggestions so you can avoid misspelling. 
+
+<img src="suggestions.png" width="600"/>
+
+
 ## Download
 [Download LaunchBar Accordance Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
