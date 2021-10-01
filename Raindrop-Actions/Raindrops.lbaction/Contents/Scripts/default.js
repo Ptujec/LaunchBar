@@ -100,8 +100,7 @@ function run(argument) {
             tags.push(tag)
           }
           tags = tags
-            .toString()
-            .replace(/,/g, '')
+            .join('')
 
           results.push({
             title: title,
