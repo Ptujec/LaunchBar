@@ -167,8 +167,7 @@ function run(argument) {
                                 tags.push(tag)
                             }
                             tags = tags
-                                .toString()
-                                .replace(/,/g, '')
+                                .join('')
 
                             return [{
                                 title: 'Updated: ' + title,
@@ -251,8 +250,7 @@ function run(argument) {
                         tags.push(tag)
                     }
                     tags = tags
-                        .toString()
-                        .replace(/,/g, '')
+                        .join('')
 
                     return [{
                         title: 'Saved: ' + title,
