@@ -8,6 +8,7 @@ const budgetID = Action.preferences.budgetID
 
 // Check token, budget ID, entry, set amount and show payees 
 function run(argument) {
+
     if (argument == undefined) {
         if (token == undefined) {
             setToken()
@@ -170,7 +171,6 @@ function run(argument) {
 }
 // Set payee and show categories
 function setPayeeAndContinue(p) {
-
     p = p.split('\n')
     var pName = p[0]
     var pId = p[1]
@@ -197,7 +197,6 @@ function setPayeeAndContinue(p) {
     // Category
     try {
         var cData = File.readJSON('~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/categories.json');
-        // Use object
     } catch (exception) {
         LaunchBar.alert('Error while reading JSON: ' + exception);
     }
@@ -215,6 +214,7 @@ function setPayeeAndContinue(p) {
         var categories = cGroups[i1].categories
         var i2 = 0;
         for (i2 = 0; i2 < categories.length; i2++) {
+
             if (cGroups[i1].name == 'Internal Master Category') {
                 if (Action.preferences.pinnedCategory != undefined) {
                     if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
@@ -235,7 +235,7 @@ function setPayeeAndContinue(p) {
                         'actionArgument': categories[i2].id
                     });
                 }
-                
+
             } else {
                 if (Action.preferences.pinnedCategory != undefined) {
                     if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
@@ -467,9 +467,9 @@ function setMemoAndComplete(m) {
             return;
         }
     } else {
-
-
         // Evaluate result
+        var currencySymbol = Action.preferences.budgetCurrencySymbol
+
         tResult = eval('[' + tResult.data + ']')
 
         if (tResult[0].error != undefined) {
@@ -491,6 +491,7 @@ function setMemoAndComplete(m) {
         var tDate = tData.date
         var tPayee = tData.payee_name
         var tCat = tData.category_name
+        var tCatId = tData.category_id
         var tAcc = tData.account_name
         var tMemo = tData.memo
         var link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
@@ -507,13 +508,13 @@ function setMemoAndComplete(m) {
             var aIcon = Action.preferences.recentAccountIcon
         }
 
-        if (Action.preferences.budgetCurrencySymbol == '€') {
+        if (currencySymbol == '€') {
             var cIcon = 'euroTemplate'
-            tAmount = tAmount.replace(/\./, ',') + ' ' + Action.preferences.budgetCurrencySymbol
+            tAmount = tAmount.replace(/\./, ',') + ' ' + currencySymbol
         } else {
             var cIcon = 'dollarTemplate'
             tAmount = tAmount.replace(/-/, '')
-            tAmount = '-' + Action.preferences.budgetCurrencySymbol + tAmount
+            tAmount = '-' + currencySymbol + tAmount
         }
 
         // Refresh Payees (if a new one was added)
@@ -522,6 +523,29 @@ function setMemoAndComplete(m) {
 
             File.writeJSON(pData.data, '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/payees.json');
         }
+
+        // Check Category Balance
+        var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories/' + tCatId + '?access_token=' + token)
+        var balance = cData.data.data.category.balance / 1000
+        balance = balance.toFixed(2).toString()
+        if (currencySymbol == '€') {
+            balance = balance.replace(/\./, ',') + currencySymbol
+            if (balance.includes('-')) {
+                var catIcon = 'categoryRed'
+            } else {
+                var catIcon = 'categoryTemplate'
+            }
+        } else {
+            if (balance.includes('-')) {
+                balance = balance.replace(/-/, '')
+                balance = '-' + currencySymbol + balance
+                var catIcon = 'categoryRed'
+            } else {
+                balance = currencySymbol + balance
+                var catIcon = 'categoryTemplate'
+            }
+        }
+        var catSub = 'Category' + ' (Balance: ' + balance + ')'
 
         // Show Result
         if (tMemo == '') {
@@ -542,8 +566,8 @@ function setMemoAndComplete(m) {
                 url: link
             }, {
                 title: tCat,
-                subtitle: 'Category',
-                icon: 'categoryTemplate',
+                subtitle: catSub,
+                icon: catIcon,
                 url: link
             }, {
                 title: tAcc,
@@ -569,8 +593,8 @@ function setMemoAndComplete(m) {
                 url: link
             }, {
                 title: tCat,
-                subtitle: 'Category',
-                icon: 'categoryTemplate',
+                subtitle: catSub,
+                icon: catIcon,
                 url: link
             }, {
                 title: tAcc,
@@ -811,7 +835,7 @@ function pinCategory() {
                         'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
                     });
                 }
-                
+
             } else {
                 if (Action.preferences.pinnedCategory != undefined) {
                     if (categories[i2].name != Action.preferences.pinnedCategory[0].title) {
@@ -871,10 +895,10 @@ function setPin(pin) {
     }]
 }
 function dataRefresh() {
-    
+
     // Preload data  
-    var pData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/payees?access_token=' + token, 3)
-        
+    var pData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/payees?access_token=' + token)
+
     if (pData.data.error != undefined) {
         LaunchBar.alert('Error ' + pData.data.error.id + ' ' + pData.data.error.name, 'Your token "' + Action.preferences.accessToken + '" seems to be invalid. Try to set your token again!')
         setToken()
@@ -882,9 +906,9 @@ function dataRefresh() {
     }
 
     LaunchBar.hide()
-    
-    var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories?access_token=' + token, 3)
-    var aData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts?access_token=' + token, 3)
+
+    var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories?access_token=' + token)
+    var aData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts?access_token=' + token)
 
     File.writeJSON(cData.data, '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/categories.json');
     File.writeJSON(pData.data, '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/payees.json');
