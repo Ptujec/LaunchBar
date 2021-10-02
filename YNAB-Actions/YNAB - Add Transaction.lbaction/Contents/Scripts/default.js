@@ -510,7 +510,7 @@ function setMemoAndComplete(m) {
 
         if (currencySymbol == '€') {
             var cIcon = 'euroTemplate'
-            tAmount = tAmount.replace(/\./, ',') + ' ' + currencySymbol
+            tAmount = tAmount.replace(/\./, ',') + currencySymbol
         } else {
             var cIcon = 'dollarTemplate'
             tAmount = tAmount.replace(/-/, '')
