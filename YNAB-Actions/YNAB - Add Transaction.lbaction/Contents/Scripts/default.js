@@ -526,26 +526,33 @@ function setMemoAndComplete(m) {
 
         // Check Category Balance
         var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories/' + tCatId + '?access_token=' + token)
-        var balance = cData.data.data.category.balance / 1000
-        balance = balance.toFixed(2).toString()
-        if (currencySymbol == '€') {
-            balance = balance.replace(/\./, ',') + currencySymbol
-            if (balance.includes('-')) {
-                var catIcon = 'categoryRed'
+
+        if (tCat != 'Uncategorized') {
+            var balance = cData.data.data.category.balance / 1000
+            balance = balance.toFixed(2).toString()
+            if (currencySymbol == '€') {
+                balance = balance.replace(/\./, ',') + currencySymbol
+                if (balance.includes('-')) {
+                    var catIcon = 'categoryRed'
+                } else {
+                    var catIcon = 'categoryTemplate'
+                }
             } else {
-                var catIcon = 'categoryTemplate'
+                if (balance.includes('-')) {
+                    balance = balance.replace(/-/, '')
+                    balance = '-' + currencySymbol + balance
+                    var catIcon = 'categoryRed'
+                    link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
+                } else {
+                    balance = currencySymbol + balance
+                    var catIcon = 'categoryTemplate'
+                }
             }
+            var catSub = 'Category' + ' (Balance: ' + balance + ')'
         } else {
-            if (balance.includes('-')) {
-                balance = balance.replace(/-/, '')
-                balance = '-' + currencySymbol + balance
-                var catIcon = 'categoryRed'
-            } else {
-                balance = currencySymbol + balance
-                var catIcon = 'categoryTemplate'
-            }
+            var catIcon = 'categoryTemplate'
+            var catSub = 'Category'
         }
-        var catSub = 'Category' + ' (Balance: ' + balance + ')'
 
         // Show Result
         if (tMemo == '') {
