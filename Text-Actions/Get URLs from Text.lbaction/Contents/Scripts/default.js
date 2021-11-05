@@ -11,15 +11,19 @@ function run(argument) {
 
         var m = string.match(/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])|(www\.[\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi)
 
-        var clipb = m.toString().replace(/,/g , '\n')
-
-        LaunchBar.setClipboardString(clipb)
-
-        if (null != m) {
-                var result = '[{"icon":"/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/BookmarkIcon.icns","url":"' + m.toString().replace(/,/g, '\"\}\,\{\"icon\"\:\"\/System\/Library\/CoreServices\/CoreTypes\.bundle\/Contents\/Resources\/BookmarkIcon\.icns\"\,\"url\"\:\"') + '","icon":"/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/BookmarkIcon.icns"}]'
-                result = eval(result);
-                return result;
-        } else {
-                LaunchBar.alert('No URLs found in this String');
+        var result = [];
+        var i = 0;
+        for (i = 0; i < m.length; i++) {
+                result.push({
+                        'title': m[i],
+                        'icon': '/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/BookmarkIcon.icns',
+                        'actionArgument': m[i],
+                        'action' : 'pasteURL'
+                })
         }
+        return result
+}
+
+function pasteURL(theURL) {
+        LaunchBar.paste(theURL)
 }

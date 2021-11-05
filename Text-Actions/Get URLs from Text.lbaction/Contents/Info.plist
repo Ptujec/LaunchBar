@@ -8,6 +8,8 @@
 	<string>ptujec.LaunchBar.action.GetURLsFromText</string>
 	<key>CFBundleName</key>
 	<string>Get URLs from Text</string>
+	<key>CFBundleVersion</key>
+	<string>2021.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -15,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Filters out all URLs from selected text or clipboard text. The URLs are also copied to your clipboard automatically.</string>
+		<string>Filters out all URLs from selected text or clipboard text. Hit enter (⏎) to paste one of the URLs in an active Window.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
