@@ -527,7 +527,7 @@ function setMemoAndComplete(m) {
         // Check Category Balance
         var cData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/categories/' + tCatId + '?access_token=' + token)
 
-        if (tCat != 'Uncategorized') {
+        if (tCat != 'Uncategorized' && tCat != 'Inflow: Ready to Assign') {
             var balance = cData.data.data.category.balance / 1000
             balance = balance.toFixed(2).toString()
             if (currencySymbol == '€') {
