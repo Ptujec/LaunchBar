@@ -91,7 +91,8 @@ function run(argument) {
           var link = rData.data.items[i].link;
           var label = link
           if (label.length > 30) {
-            label = label.toString().replace(/^(.*\/\/[^\/?#]*).*$/, "$1");
+            // label = label.toString().replace(/^(.*\/\/[^\/?#]*).*$/, "$1");
+            label = label.toString().replace(/^(https?:\/\/[^\/?#]*).*$/, "$1");
           }
 
           var tags = []
