@@ -2,7 +2,6 @@
 
 <img src="st_action.png" width="600"/> 
 
-
 ## Requirements 
 
 This action requires macOS 12 (Monterey).
@@ -11,7 +10,7 @@ This action requires macOS 12 (Monterey).
 
 **1) Show Notification** 
 
-<img src="st_notification.png" width="600"/> 
+<img src="st_notification.png" width="450"/> 
 
 It can take a bit for the notification to show up. There will be also a sound so you don't miss it. 
 
