@@ -6,7 +6,7 @@ Search Obsidian by Christian Bender (@ptujec)
 */
 
 function run(argument) {
-    var oJSON = File.readJSON('/Users/hischa/Library/Application Support/obsidian/obsidian.json')
+    var oJSON = File.readJSON('~/Library/Application Support/obsidian/obsidian.json')
     var vaults = Object.keys(oJSON.vaults)
 
     var vSetting = Action.preferences.vaultName
