@@ -24,6 +24,11 @@ function run() {
         Responsiveness: Medium (744 RPM)`
         */
 
+        LaunchBar.displayNotification({
+            title: 'Speedtest',
+            string: 'Test started … may take a few seconds'
+        });
+
         var noti = LaunchBar.execute('/usr/bin/networkQuality')
             .trim()
             .split('\n')
