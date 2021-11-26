@@ -1,6 +1,6 @@
 # LaunchBar Actions for managing notifications
 
-<img src="screenshot.png" width="800"/> 
+<img src="noti.png" width="800"/> 
 
 *Note: The following actions work for german and english user interfaces only.* 
 
