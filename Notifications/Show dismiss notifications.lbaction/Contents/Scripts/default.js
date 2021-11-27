@@ -18,7 +18,7 @@ function run(argument) {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
     } else {
-        var titleClose = 'Dismiss all'
+        var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
     }
@@ -59,7 +59,7 @@ function showLess() {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
     } else {
-        var titleClose = 'Dismiss all'
+        var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
     }
@@ -89,7 +89,7 @@ function showMore() {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
     } else {
-        var titleClose = 'Dismiss all'
+        var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
     }
