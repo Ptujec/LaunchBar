@@ -1,8 +1,8 @@
 # LaunchBar Actions for Managing Notifications
 
-<img src="s_01.png" width="800"/> 
+<img src="scr_01.png" width="800"/> 
 
-<img src="s_02.png" width="800"/> 
+<img src="scr_02.png" width="800"/> 
 
 *Note: The following actions work for german and english user interfaces only.* 
 
