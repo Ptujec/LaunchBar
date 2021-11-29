@@ -17,10 +17,12 @@ function run(argument) {
         var titleClose = 'Mitteilungen schließen'
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
+        var titleOpen = 'Aktuelle öffnen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
+        var titleOpen = 'Open most recent'
     }
 
     var output = LaunchBar.executeAppleScriptFile('./show.applescript')
@@ -40,6 +42,10 @@ function run(argument) {
                 title: titleLess,
                 icon: "lessTemplate",
                 action: "showLess"
+            }, {
+                title: titleOpen,
+                icon: "openTemplate",
+                action: "openAction"
             }
         ]
     } else {
@@ -58,10 +64,12 @@ function showLess() {
         var titleClose = 'Mitteilungen schließen'
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
+        var titleOpen = 'Aktuelle öffnen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
+        var titleOpen = 'Open most recent'
     }
 
     LaunchBar.executeAppleScriptFile('./less.applescript')
@@ -79,6 +87,10 @@ function showLess() {
             title: titleLess,
             icon: "lessTemplate",
             action: "showLess"
+        }, {
+            title: titleOpen,
+            icon: "openTemplate",
+            action: "openAction"
         }
     ]
 }
@@ -88,10 +100,12 @@ function showMore() {
         var titleClose = 'Mitteilungen schließen'
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
+        var titleOpen = 'Aktuelle öffnen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
+        var titleOpen = 'Open most recent'
     }
 
     var output = LaunchBar.executeAppleScriptFile('./show.applescript')
@@ -111,7 +125,16 @@ function showMore() {
                 title: titleLess,
                 icon: "lessTemplate",
                 action: "showLess"
+            }, {
+                title: titleOpen,
+                icon: "openTemplate",
+                action: "openAction"
             }
         ]
     }
+}
+
+function openAction() {
+    LaunchBar.hide()
+    LaunchBar.executeAppleScriptFile('./open.applescript')
 }

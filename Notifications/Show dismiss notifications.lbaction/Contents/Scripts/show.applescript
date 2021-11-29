@@ -1,4 +1,4 @@
-activate application "NotificationCenter"
+ activate application "NotificationCenter"
 tell application "System Events"
 	set _groups to groups of UI element 1 of scroll area 1 of window "Notification Center" of application process "NotificationCenter"
 	
