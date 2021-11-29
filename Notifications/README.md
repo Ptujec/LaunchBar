@@ -1,7 +1,5 @@
 # LaunchBar Actions for Managing Notifications
 
-<img src="scr_02.png" width="800"/> 
-
 *Note: The following actions work for German and English user interfaces only. I developed them on macOS 12 Montery, but Big Sur should work also.*
 
 ## Action: Notification Actions
