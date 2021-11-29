@@ -18,11 +18,13 @@ function run(argument) {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
         var titleOpen = 'Aktuelle öffnen'
+        var titleActions = 'Weitere Aktionen anzeigen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
         var titleOpen = 'Open most recent'
+        var titleActions = 'Show more actions'
     }
 
     var output = LaunchBar.executeAppleScriptFile('./show.applescript')
@@ -46,6 +48,10 @@ function run(argument) {
                 title: titleOpen,
                 icon: "openTemplate",
                 action: "openAction"
+            }, {
+                title: titleActions,
+                icon: "actionsTemplate",
+                action: "getActions"
             }
         ]
     } else {
@@ -65,11 +71,13 @@ function showLess() {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
         var titleOpen = 'Aktuelle öffnen'
+        var titleActions = 'Weitere Aktionen anzeigen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
         var titleOpen = 'Open most recent'
+        var titleActions = 'Show more actions'
     }
 
     LaunchBar.executeAppleScriptFile('./less.applescript')
@@ -91,6 +99,10 @@ function showLess() {
             title: titleOpen,
             icon: "openTemplate",
             action: "openAction"
+        }, {
+            title: titleActions,
+            icon: "actionsTemplate",
+            action: "getActions"
         }
     ]
 }
@@ -101,11 +113,13 @@ function showMore() {
         var titleLess = 'Weniger anzeigen'
         var titleMore = 'Mehr anzeigen'
         var titleOpen = 'Aktuelle öffnen'
+        var titleActions = 'Weitere Aktionen anzeigen'
     } else {
         var titleClose = 'Dismiss notifications'
         var titleLess = 'Show less'
         var titleMore = 'Show more'
         var titleOpen = 'Open most recent'
+        var titleActions = 'Show more actions'
     }
 
     var output = LaunchBar.executeAppleScriptFile('./show.applescript')
@@ -129,6 +143,10 @@ function showMore() {
                 title: titleOpen,
                 icon: "openTemplate",
                 action: "openAction"
+            }, {
+                title: titleActions,
+                icon: "actionsTemplate",
+                action: "getActions"
             }
         ]
     }
@@ -137,4 +155,31 @@ function showMore() {
 function openAction() {
     LaunchBar.hide()
     LaunchBar.executeAppleScriptFile('./open.applescript')
+}
+
+function getActions() {
+    var output = LaunchBar.executeAppleScriptFile('./getActions.applescript')
+        .trim()
+        .split(',')
+
+    var actions = []
+    for (var i = 0; i < output.length; i++) {
+        var action = output[i].trim()
+
+        if (action != 'AXScrollToVisible' && action != 'drücken' && action != 'press') {
+            actions.push({
+                title: action,
+                icon: 'actionTemplate',
+                action: 'runAction',
+                actionArgument: action
+            })
+        }
+    }
+    return actions
+        .reverse()
+}
+
+function runAction(argument) {
+    LaunchBar.hide()
+    LaunchBar.executeAppleScriptFile('./runAction.applescript', argument)
 }

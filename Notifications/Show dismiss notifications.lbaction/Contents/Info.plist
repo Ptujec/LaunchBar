@@ -3,19 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>notiTemplate.png</string>
+	<string>Template.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.Showanddismissnotifications</string>
 	<key>CFBundleName</key>
 	<string>Show/dismiss notifications</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2</string>
+	<string>2021.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Ptujec</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>This action will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few more options.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
