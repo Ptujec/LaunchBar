@@ -1,7 +1,9 @@
-activate application "NotificationCenter"
 tell application "System Events"
+	
 	set activeApp to bundle identifier of application processes whose frontmost is true
-
+	
+	activate application "NotificationCenter"
+	
 	try
 		set _buttons to buttons of UI element 1 of scroll area 1 of window "Notification Center" of application process "NotificationCenter"
 		
