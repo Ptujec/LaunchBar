@@ -13,5 +13,3 @@ tell application "System Events"
 		end repeat
 	end try
 end tell
-
--- tell application "LaunchBar" to activate
