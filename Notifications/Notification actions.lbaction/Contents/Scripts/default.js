@@ -17,7 +17,8 @@ function run() {
                 title: action,
                 icon: 'actionTemplate',
                 action: 'runAction',
-                actionArgument: action
+                actionArgument: action,
+                actionRunsInBackground: true
             })
         }
     }
