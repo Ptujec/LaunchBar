@@ -35,7 +35,8 @@ function run(argument) {
             {
                 title: titleClose,
                 icon: "notiTemplate",
-                action: "closeAction"
+                action: "closeAction",
+                actionRunsInBackground: true
             }, {
                 title: titleMore,
                 icon: "moreTemplate",
@@ -47,7 +48,8 @@ function run(argument) {
             }, {
                 title: titleOpen,
                 icon: "openTemplate",
-                action: "openAction"
+                action: "openAction",
+                actionRunsInBackground: true
             }, {
                 title: titleActions,
                 icon: "actionsTemplate",
@@ -171,7 +173,8 @@ function getActions() {
                 title: action,
                 icon: 'actionTemplate',
                 action: 'runAction',
-                actionArgument: action
+                actionArgument: action,
+                actionRunsInBackground: true
             })
         }
     }
