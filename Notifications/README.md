@@ -4,15 +4,15 @@
 
 ## Action: Notification Actions
 
-<img src="noti_actions.png" width="800"/> 
-
 Let's you run actions of the most recent notification (group). 
+
+<img src="noti_actions.png" width="800"/> 
  
 ## Action: Show/Dismiss Notifications
 
-<img src="noti_show_dismiss.png" width="800"/> 
-
 This will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few other options. 
+
+<img src="noti_show_dismiss.png" width="800"/> 
 
 ## Action: Dismiss All Notifications
 
