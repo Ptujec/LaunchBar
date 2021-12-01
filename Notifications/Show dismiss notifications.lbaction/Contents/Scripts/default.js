@@ -88,7 +88,8 @@ function showLess() {
         {
             title: titleClose,
             icon: "notiTemplate",
-            action: "closeAction"
+            action: "closeAction",
+            actionRunsInBackground: true
         }, {
             title: titleMore,
             icon: "moreTemplate",
@@ -100,7 +101,8 @@ function showLess() {
         }, {
             title: titleOpen,
             icon: "openTemplate",
-            action: "openAction"
+            action: "openAction",
+            actionRunsInBackground: true
         }, {
             title: titleActions,
             icon: "actionsTemplate",
@@ -132,7 +134,8 @@ function showMore() {
             {
                 title: titleClose,
                 icon: "notiTemplate",
-                action: "closeAction"
+                action: "closeAction",
+                actionRunsInBackground: true
             }, {
                 title: titleMore,
                 icon: "moreTemplate",
@@ -144,7 +147,8 @@ function showMore() {
             }, {
                 title: titleOpen,
                 icon: "openTemplate",
-                action: "openAction"
+                action: "openAction",
+                actionRunsInBackground: true
             }, {
                 title: titleActions,
                 icon: "actionsTemplate",
