@@ -1,4 +1,11 @@
-// LaunchBar Action Script
+/*
+Run shortcut Action by Christian Bender (@ptujec)
+
+Documentation:
+- https://support.apple.com/lt-lt/guide/shortcuts-mac/apd455c82f02/mac
+- https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+*/
+
 
 function run() {
     var output = LaunchBar.execute('/usr/bin/shortcuts', 'list')
@@ -11,7 +18,8 @@ function run() {
             'title': output[i],
             'icon' : 'shortcutTemplate.png',
             'action' : 'runShortcut',
-            'actionArgument' : output[i]
+            'actionArgument' : output[i],
+            actionRunsInBackground: true
         })
     }
     result.sort(function (a, b) {
