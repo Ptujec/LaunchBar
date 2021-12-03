@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Get AppID</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2021.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -29,15 +29,17 @@
 			<array>
 				<string>path</string>
 			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
 			<key>LBScriptName</key>
-			<string>Get appID.scpt</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
-	<key>LBTextInputTitle</key>
-	<string>AppName</string>
 </dict>
 </plist>
