@@ -39,7 +39,8 @@ function run(argument) {
                     title: "Refresh Data",
                     subtitle: "Refresh categories, payees and accounts. They are preloaded for better performance.",
                     icon: "refreshTemplate",
-                    action: "dataRefresh"
+                    action: "dataRefresh",
+                    actionRunsInBackground: true
                 }
             ]
         }
@@ -493,6 +494,7 @@ function setMemoAndComplete(m) {
         var tCat = tData.category_name
         var tCatId = tData.category_id
         var tAcc = tData.account_name
+        var tAccId = tData.account_id // To check Account balance
         var tMemo = tData.memo
         var link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
 
@@ -554,6 +556,31 @@ function setMemoAndComplete(m) {
             var catSub = 'Category'
         }
 
+        // Check Account Balance 
+        var aBalanceData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts/' + tAccId + '?access_token=' + token)
+
+        var accountBalance = aBalanceData.data.data.account.cleared_balance / 1000
+        accountBalance = accountBalance.toFixed(2).toString()
+            if (currencySymbol == '€') {
+                accountBalance = accountBalance.replace(/\./, ',') + currencySymbol
+                // if (accountBalance.includes('-')) {
+                //     var aIcon = 'accountRed'
+                // } else {
+                //     var aIcon = 'accountTemplate'
+                // }
+            } else {
+                if (accountBalance.includes('-')) {
+                    accountBalance = accountBalance.replace(/-/, '')
+                    accountBalance = '-' + currencySymbol + accountBalance
+                    // var catIcon = 'accountRed'
+                    link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
+                } else {
+                    accountBalance = currencySymbol + accountBalance
+                    // var catIcon = 'accountTemplate'
+                }
+            }
+            var accSub = 'Account' + ' (Balance: ' + accountBalance + ')'
+
         // Show Result
         if (tMemo == '') {
             return [{
@@ -578,7 +605,7 @@ function setMemoAndComplete(m) {
                 url: link
             }, {
                 title: tAcc,
-                subtitle: 'Account',
+                subtitle: accSub, // 'Account',
                 icon: aIcon,
                 url: link
             }]
@@ -605,7 +632,7 @@ function setMemoAndComplete(m) {
                 url: link
             }, {
                 title: tAcc,
-                subtitle: 'Account',
+                subtitle: accSub, // 'Account',
                 icon: aIcon,
                 url: link
             }, {
