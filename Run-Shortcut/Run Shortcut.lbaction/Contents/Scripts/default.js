@@ -19,7 +19,7 @@ function run() {
             'icon' : 'shortcutTemplate.png',
             'action' : 'runShortcut',
             'actionArgument' : output[i],
-            actionRunsInBackground: true
+            'actionRunsInBackground': true
         })
     }
     result.sort(function (a, b) {
