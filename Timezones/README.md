@@ -5,10 +5,13 @@ The main purpose is to look up cities by pressing "space".
  
 <img src="01.png" width="600"/> 
 
-
-But you can also add cities to a list of favorites, which you will be presented with, when you just hit return. 
+But you can also add cities to a list of favorites, …
 
 <img src="02.png" width="600"/> 
+
+… which you will be presented with, when you just hit return. 
+
+<img src="03.png" width="600"/> 
 
 ## Download
 
