@@ -4,7 +4,7 @@ Timezones for LaunchBar by Christian Bender @Ptujec
 Datasources: 
 - https://github.com/dmfilipenko/timezones.json/blob/master/timezones.json
 - https://github.com/dr5hn/countries-states-cities-database
-- https://github.com/kevinroberts/city-timezones
+- https://github.com/kevinroberts/city-timezones (This is what I am currently using)
 - https://github.com/moment/moment-timezone/tree/bf1de5d6a7cc6cb493d90b021fb2c0ac777c93eb
 
 
@@ -43,9 +43,9 @@ function run(argument) {
 
 
                     if (cData[i].state_ansi != undefined) {
-                        var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].state_ansi
+                        var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].state_ansi)
                     } else {
-                        var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].country
+                        var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].country)
                     }
 
                     try {
@@ -179,9 +179,9 @@ function showFavs() {
             }
 
             if (cData[i].state_ansi != undefined) {
-                var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].state_ansi
+                var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].state_ansi)
             } else {
-                var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].country
+                var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].country)
             }
 
             try {
@@ -301,16 +301,18 @@ function favOptions(actionArgument) {
 }
 
 function removeFav(dataString) {
-    var oldFavs = Action.preferences.favorites
-    var oldFavsString = JSON.stringify(oldFavs)
+    var toBeRemovedData = eval('[' + dataString + ']')
+    var tCity = toBeRemovedData[0].city
+    var tTz = toBeRemovedData[0].timezone
 
-    var favs = oldFavsString.replace(dataString, '')
-    favs = favs
-        .replace(/\[\,/, '[')
-        .replace(/\,\,/, ',')
-        .replace(/\,\]/, ']')
-
-    Action.preferences.favorites = eval(favs)
+    var cData = Action.preferences.favorites
+    for (var i = 0; i < cData.length; i++) {
+        if (cData[i].city == tCity && cData[i].timezone == tTz) {
+            cData.splice(i, 1)
+            break
+        }
+    }
+    Action.preferences.favorites = cData
     var output = showFavs()
     return output;
 }
