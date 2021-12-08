@@ -13,6 +13,10 @@ But you can also add cities to a list of favorites, …
 
 <img src="03.png" width="600"/> 
 
+You can also remove items from your Favorites, or remove all Favorites, if you want to start over. 
+
+<img src="04.png" width="600"/> 
+
 ## Download
 
 [Download LaunchBar Action: Timezones by city](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Timezones) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
