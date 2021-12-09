@@ -151,7 +151,10 @@ function run(argument) {
                     'title': pName,
                     'icon': icon,
                     'action': "setPayeeAndContinue",
-                    'actionArgument': pName + '\n' + pId
+                    'actionArgument': {
+                        pName: pName,
+                        pId: pId
+                    }
                 });
             }
 
@@ -163,7 +166,9 @@ function run(argument) {
                 'title': 'New Payee',
                 'icon': 'newTemplate.png',
                 'action': "setPayeeAndContinue",
-                'actionArgument': 'Enter New Payee'
+                'actionArgument': {
+                    pName: 'Enter New Payee'
+                } 
             }]
             var pResults = newPayee.concat(p)
             return pResults;
@@ -172,9 +177,8 @@ function run(argument) {
 }
 // Set payee and show categories
 function setPayeeAndContinue(p) {
-    p = p.split('\n')
-    var pName = p[0]
-    var pId = p[1]
+    var pName = p.pName
+    var pId = p.pId
 
 
     if (pName == 'Enter New Payee') {
@@ -303,12 +307,11 @@ function setCategoryAndContinue(c) {
                 'title': accounts[i].name,
                 'icon': icon,
                 'action': "setAccountAndContinue",
-                'actionArgument':
-                    accounts[i].id
-                    + '\n'
-                    + accounts[i].type
-                    + '\n'
-                    + icon
+                'actionArgument': {
+                    aId: accounts[i].id,
+                    aType: accounts[i].type,
+                    aIcon: icon
+                }
             });
         }
     }
@@ -316,10 +319,9 @@ function setCategoryAndContinue(c) {
 }
 // Set account and show date options
 function setAccountAndContinue(a) {
-    a = a.split('\n')
-    Action.preferences.recentAccountID = a[0]
-    Action.preferences.recentAccountType = a[1]
-    Action.preferences.recentAccountIcon = a[2]
+    Action.preferences.recentAccountID = a.aId
+    Action.preferences.recentAccountType = a.aType
+    Action.preferences.recentAccountIcon = a.aIcon
 
     // Dates
     var dates = []
@@ -561,25 +563,25 @@ function setMemoAndComplete(m) {
 
         var accountBalance = aBalanceData.data.data.account.cleared_balance / 1000
         accountBalance = accountBalance.toFixed(2).toString()
-            if (currencySymbol == '€') {
-                accountBalance = accountBalance.replace(/\./, ',') + currencySymbol
-                // if (accountBalance.includes('-')) {
-                //     var aIcon = 'accountRed'
-                // } else {
-                //     var aIcon = 'accountTemplate'
-                // }
+        if (currencySymbol == '€') {
+            accountBalance = accountBalance.replace(/\./, ',') + currencySymbol
+            // if (accountBalance.includes('-')) {
+            //     var aIcon = 'accountRed'
+            // } else {
+            //     var aIcon = 'accountTemplate'
+            // }
+        } else {
+            if (accountBalance.includes('-')) {
+                accountBalance = accountBalance.replace(/-/, '')
+                accountBalance = '-' + currencySymbol + accountBalance
+                // var catIcon = 'accountRed'
+                link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
             } else {
-                if (accountBalance.includes('-')) {
-                    accountBalance = accountBalance.replace(/-/, '')
-                    accountBalance = '-' + currencySymbol + accountBalance
-                    // var catIcon = 'accountRed'
-                    link = 'https://app.youneedabudget.com/' + budgetID + '/accounts'
-                } else {
-                    accountBalance = currencySymbol + accountBalance
-                    // var catIcon = 'accountTemplate'
-                }
+                accountBalance = currencySymbol + accountBalance
+                // var catIcon = 'accountTemplate'
             }
-            var accSub = 'Account' + ' (Balance: ' + accountBalance + ')'
+        }
+        var accSub = 'Account' + ' (Balance: ' + accountBalance + ')'
 
         // Show Result
         if (tMemo == '') {
@@ -791,21 +793,26 @@ function clearedUncleared(aType) {
             'icon': 'unclearedTemplate',
             'badge': 'Cleared/Uncleared Setting',
             'action': 'setClearedSetting',
-            'actionArgument': 'uncleared\n' + aType
+            'actionArgument': {
+                cState: 'uncleared',
+                aType: aType
+            }
         },
         {
             'title': 'Mark all new ' + aType + ' transactions as "cleared"',
             'icon': 'clearedTemplate',
             'badge': 'Cleared/Uncleared Setting',
             'action': 'setClearedSetting',
-            'actionArgument': 'cleared\n' + aType
+            'actionArgument': {
+                cState: 'cleared',
+                aType: aType
+            }
         }
     ]
 }
 function setClearedSetting(cInfo) {
-    r = cInfo.split('\n')
-    cState = r[0]
-    aType = r[1]
+    cState = cInfo.cState
+    aType = cInfo.aType
 
     if (aType == undefined) {
         Action.preferences.clearedSettingsOtherAsset = cState
@@ -856,7 +863,11 @@ function pinCategory() {
                             'icon': 'categoryTemplate.png',
                             'badge': 'Pin Category Setting',
                             'action': "setPin",
-                            'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                            'actionArgument': {
+                                pinTitle: categories[i2].name,
+                                pinSubtitle: cGroups[i1].name,
+                                pinID: categories[i2].id
+                            }
                         });
                     }
                 } else {
@@ -866,7 +877,11 @@ function pinCategory() {
                         'icon': 'categoryTemplate.png',
                         'badge': 'Pin Category Setting',
                         'action': "setPin",
-                        'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                        'actionArgument': {
+                            pinTitle: categories[i2].name,
+                            pinSubtitle: cGroups[i1].name,
+                            pinID: categories[i2].id
+                        }
                     });
                 }
 
@@ -879,7 +894,11 @@ function pinCategory() {
                             'icon': 'categoryTemplate.png',
                             'badge': 'Pin Category Setting',
                             'action': "setPin",
-                            'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                            'actionArgument': {
+                                pinTitle: categories[i2].name,
+                                pinSubtitle: cGroups[i1].name,
+                                pinID: categories[i2].id
+                            }
                         });
                     }
                 } else {
@@ -889,7 +908,11 @@ function pinCategory() {
                         'icon': 'categoryTemplate.png',
                         'badge': 'Pin Category Setting',
                         'action': "setPin",
-                        'actionArgument': categories[i2].name + '\n' + cGroups[i1].name + '\n' + categories[i2].id
+                        'actionArgument': {
+                            pinTitle: categories[i2].name,
+                            pinSubtitle: cGroups[i1].name,
+                            pinID: categories[i2].id
+                        }
                     });
                 }
             }
@@ -907,18 +930,13 @@ function pinCategory() {
 
 }
 function setPin(pin) {
-    pin = pin.split('\n')
-    pinTitle = pin[0]
-    pinSubtitle = pin[1]
-    pinID = pin[2]
-
     var pinnedCategory = [{
-        'title': pinTitle,
-        'subtitle': pinSubtitle,
+        'title': pin.pinTitle,
+        'subtitle': pin.pinSubtitle,
         'icon': 'categoryTemplate.png',
         'badge': 'Pinned',
         'action': "setCategoryAndContinue",
-        'actionArgument': pinID
+        'actionArgument': pin.pinID
     }]
 
     Action.preferences.pinnedCategory = pinnedCategory
