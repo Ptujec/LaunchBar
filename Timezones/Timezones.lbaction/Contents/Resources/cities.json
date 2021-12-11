@@ -1953,11 +1953,11 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
-    "city": "Capitan Arturo Prat Station",
-    "city_ascii": "Capitan Arturo Prat Station",
+    "city": "Captain  Arturo Prat Station",
+    "city_ascii": "Captain Arturo Prat Station",
     "lat": -62.49950682,
     "lng": -59.68331852,
     "pop": 41,
@@ -1965,7 +1965,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Marambio Station",
@@ -1977,7 +1977,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Zucchelli Station",
@@ -1989,7 +1989,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "Rothera Station",
@@ -2001,7 +2001,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Palmer Station",
@@ -2013,7 +2013,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Base Presidente Montalva",
@@ -2025,7 +2025,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-04"
   },
   {
     "city": "Carlini Station",
@@ -2037,7 +2037,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "King Sejong Station",
@@ -2049,7 +2049,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Great Wall Station",
@@ -2061,7 +2061,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Escudero Base",
@@ -2073,7 +2073,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Elephant Island",
@@ -2085,7 +2085,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Scott Base",
@@ -2097,7 +2097,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "McMurdo Station",
@@ -2109,7 +2109,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "Zhongshan Station",
@@ -2121,7 +2121,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+07"
   },
   {
     "city": "Vostok",
@@ -2133,7 +2133,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+06"
   },
   {
     "city": "Peter I Island",
@@ -2145,7 +2145,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-04"
   },
   {
     "city": "Mirny Station",
@@ -2157,7 +2157,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+06"
   },
   {
     "city": "Mawson Station",
@@ -2169,7 +2169,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+05"
   },
   {
     "city": "Davis Station",
@@ -2181,7 +2181,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+07"
   },
   {
     "city": "Concordia Research Station",
@@ -2193,7 +2193,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+08"
   },
   {
     "city": "Casey Station",
@@ -2205,7 +2205,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+11"
   },
   {
     "city": "Amundsen–Scott South Pole Station",
@@ -2217,7 +2217,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "Wasa Station",
@@ -2229,7 +2229,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "Troll Station",
@@ -2241,7 +2241,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC"
   },
   {
     "city": "Svea Station",
@@ -2253,7 +2253,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+01"
   },
   {
     "city": "Novolazarevskaya Station",
@@ -2265,7 +2265,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Neumayer Station III",
@@ -2277,7 +2277,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC"
   },
   {
     "city": "Maitri Station",
@@ -2289,7 +2289,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Halley Station",
@@ -2301,7 +2301,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC"
   },
   {
     "city": "Belgrano Station",
@@ -2313,7 +2313,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Camp Sobral",
@@ -2325,7 +2325,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Aboa Station",
@@ -2337,7 +2337,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC"
   },
   {
     "city": "San Martín Station",
@@ -2349,10 +2349,10 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
-    "city": "Gen. O'Higgins Station",
+    "city": "General Bernado O'Higgins Station",
     "city_ascii": "General Bernado O'Higgins Station",
     "lat": -63.32841823,
     "lng": -57.88959352,
@@ -2361,7 +2361,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+13"
   },
   {
     "city": "Esperanza Station",
@@ -2373,7 +2373,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Orcadas Station",
@@ -2385,19 +2385,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
-  },
-  {
-    "city": "Signy Research Station",
-    "city_ascii": "Signy Island",
-    "lat": -60.63130815,
-    "lng": -45.60070332,
-    "pop": 4,
-    "country": "Antarctica",
-    "iso2": "AQ",
-    "iso3": "ATA",
-    "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Dumont d'Urville Station",
@@ -2409,7 +2397,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC+10"
   },
   {
     "city": "Showa Station",
@@ -2421,7 +2409,7 @@
     "iso2": "AQ",
     "iso3": "ATA",
     "province": "",
-    "timezone": null
+    "timezone": "UTC-03"
   },
   {
     "city": "Saint John's",
@@ -3597,7 +3585,7 @@
     "iso2": "AR",
     "iso3": "ARG",
     "province": "La Rioja",
-    "timezone": null
+    "timezone": "America/Argentina/La_Rioja"
   },
   {
     "city": "Chamical",
@@ -4257,7 +4245,7 @@
     "iso2": "AR",
     "iso3": "ARG",
     "province": "Chubut",
-    "timezone": null
+    "timezone": "America/Argentina/Catamarca"
   },
   {
     "city": "Mendoza",
@@ -7236,7 +7224,7 @@
     "timezone": "Europe/Vienna"
   },
   {
-    "city": "Vienna",
+    "city": "Vienna (Wien)",
     "city_ascii": "Vienna",
     "lat": 48.20001528,
     "lng": 16.36663896,
@@ -18034,7 +18022,7 @@
     "iso2": "CA",
     "iso3": "CAN",
     "province": "British Columbia",
-    "timezone": null
+    "timezone": "America/Dawson_Creek"
   },
   {
     "city": "Iqaluit",
@@ -24805,7 +24793,7 @@
     "timezone": "Asia/Chongqing"
   },
   {
-    "city": "Beijing",
+    "city": "Beijing (Peking)",
     "city_ascii": "Beijing",
     "lat": 39.92889223,
     "lng": 116.3882857,
@@ -32293,7 +32281,7 @@
     "timezone": "Europe/Berlin"
   },
   {
-    "city": "Cologne",
+    "city": "Cologne (Köln)",
     "city_ascii": "Cologne",
     "lat": 50.93000368,
     "lng": 6.950004434,
@@ -32341,7 +32329,7 @@
     "timezone": "Europe/Berlin"
   },
   {
-    "city": "Munich",
+    "city": "Munich (München)",
     "city_ascii": "Munich",
     "lat": 48.12994204,
     "lng": 11.57499345,
@@ -38722,7 +38710,7 @@
     "iso2": "IR",
     "iso3": "IRN",
     "province": "West Azarbaijan",
-    "timezone": null
+    "timezone": "Asia/Tehran"
   },
   {
     "city": "Ahar",
@@ -51623,7 +51611,7 @@
     "iso2": "NI",
     "iso3": "NIC",
     "province": "Nicaragua",
-    "timezone": null
+    "timezone": "America/Managua"
   },
   {
     "city": "Esteli",
@@ -58979,7 +58967,7 @@
     "iso2": "RU",
     "iso3": "RUS",
     "province": "Sakha (Yakutia)",
-    "timezone": null
+    "timezone": "Asia/Ust-Nera"
   },
   {
     "city": "Timiryazevskiy",
@@ -63947,7 +63935,7 @@
     "iso2": "RU",
     "iso3": "RUS",
     "province": "Penza",
-    "timezone": null
+    "timezone": "Europe/Moscow"
   },
   {
     "city": "Ryazan",
@@ -64691,7 +64679,7 @@
     "iso2": "RU",
     "iso3": "RUS",
     "province": "Perm'",
-    "timezone": null
+    "timezone": "Asia/Yekaterinburg"
   },
   {
     "city": "Palana",
@@ -67010,7 +66998,7 @@
     "timezone": "Africa/Johannesburg"
   },
   {
-    "city": "Cape Town",
+    "city": "Cape Town (Kapstadt)",
     "city_ascii": "Cape Town",
     "lat": -33.92001097,
     "lng": 18.43498816,

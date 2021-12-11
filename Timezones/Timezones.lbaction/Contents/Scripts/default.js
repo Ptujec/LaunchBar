@@ -10,17 +10,30 @@ Datasources:
 
 Documentation: 
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+- https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
+
+Usefull:
+- https://timezone360.com/en/time-in/ for timezone name lookup
 */
 
 function run(argument) {
 
     if (argument == undefined) {
-        var output = showFavs()
-        return output;
+        if (LaunchBar.options.alternateKey) {
+            return [
+                {
+                    title: 'Set Day Time',
+                    badge: 'Settings',
+                    icon: 'gearTemplate',
+                    action: 'setDayTimeOptions'
+                }
+            ]
+        } else {
+            var output = showFavs()
+            return output;
+        }
     } else {
-
         if (argument != '' && argument != ' ') {
-
             var cData = File.readJSON('~/Library/Application Support/LaunchBar/Actions/Timezones.lbaction/Contents/Resources/cities.json');
 
             var cities = []
@@ -30,23 +43,29 @@ function run(argument) {
                 var city = cData[i].city
 
                 if (city.toLowerCase().includes(argument.toLowerCase())) {
-                    var country = cData[i].country
-                    var province = cData[i].province
+                    city = city
+                        .replace(/\(.*\)/, '')
+                        .trim()
 
                     var tz = cData[i].timezone
-
+                    var country = cData[i].country
+                    var province = cData[i].province
                     if (province != '') {
                         var localeInfo = province + ', ' + country
                     } else {
                         var localeInfo = country
                     }
 
+                    var lat = cData[i].lat
+                    var lng = cData[i].lng
 
-                    if (cData[i].state_ansi != undefined) {
-                        var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].state_ansi)
+                    if (cData[i].iso2 == 'US') {
+                        var mapLocationInfo = province
                     } else {
-                        var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].country)
+                        var mapLocationInfo = country
                     }
+
+                    var mapsURL = encodeURI(('https://maps.apple.com/?q=' + city + ',' + mapLocationInfo + '&near=' + lat + ',' + lng))
 
                     try {
                         var date = LaunchBar.formatDate(new Date(), {
@@ -68,7 +87,16 @@ function run(argument) {
                             hour = hour + 12
                         }
 
-                        if (hour > 7 && hour < 21) {
+                        // Check for day time setting
+                        if (Action.preferences.dayTime != undefined) {
+                            var m = Action.preferences.dayTime.m
+                            var e = Action.preferences.dayTime.e
+                        } else {
+                            var m = 8
+                            var e = 21
+                        }
+
+                        if (hour >= m && hour < e) {
                             var icon = 'dayTemplate'
                         } else {
                             var icon = 'nightTemplate'
@@ -81,60 +109,18 @@ function run(argument) {
                             icon: icon,
                             // url: mapsURL,
                             action: 'actionOptions',
-                            actionArgument: mapsURL + '|' + city + '|' + JSON.stringify(cData[i])
+                            actionArgument: {
+                                mapsURL: mapsURL,
+                                city: city,
+                                lat: lat,
+                                lng: lng,
+                                cData: cData[i]
+                            }
                         })
                     } catch (error) {
                         // 
                     }
                 }
-
-                // if (province != '' && province.toLowerCase().includes(argument.toLowerCase())) {
-                //     var tz = cData[i].timezone
-
-                //     if (cData[i].state_ansi != undefined) {
-                //         var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].state_ansi
-                //     } else {
-                //         var mapsURL = 'https://maps.apple.com/?address=' + city + ',%20' + cData[i].country
-                //     }
-
-                //     try {
-                //         var date = LaunchBar.formatDate(new Date(), {
-                //             timeStyle: 'none',
-                //             dateStyle: 'long',
-                //             timeZone: tz
-                //         });
-
-                //         var time = LaunchBar.formatDate(new Date(), {
-                //             timeStyle: 'short',
-                //             dateStyle: 'none',
-                //             timeZone: tz
-                //         });
-
-                //         var hour = time.split(':')[0]
-
-                //         // Convert to 24 hour format
-                //         if (time.toLowerCase().includes('pm')) {
-                //             hour = hour + 12
-                //         }
-
-                //         if (hour > 7 && hour < 21) {
-                //             var icon = 'dayTemplate'
-                //         } else {
-                //             var icon = 'nightTemplate'
-                //         }
-
-                //         provinces.push({
-                //             title: time + ', ' + date,
-                //             subtitle: city + ', ' + country + ', TZ: ' + tz,
-                //             badge: province,
-                //             icon: icon,
-                //             url: mapsURL
-                //         })
-                //         // break
-                //     } catch (error) {
-                //         // 
-                //     }
-                // }
             }
         }
 
@@ -164,25 +150,32 @@ function showFavs() {
             LaunchBar.alert('No Favorites found!', 'Press "space" to search for cities.\nThen press enter on a result for more options.')
         }
     } else {
+
         var cData = Action.preferences.favorites
         var cities = []
         for (var i = 0; i < cData.length; i++) {
             var city = cData[i].city
+                .replace(/\(.*\)/, '')
+                .trim()
+            var tz = cData[i].timezone
             var country = cData[i].country
             var province = cData[i].province
-            var tz = cData[i].timezone
-
             if (province != '') {
                 var localeInfo = province + ', ' + country
             } else {
                 var localeInfo = country
             }
 
-            if (cData[i].state_ansi != undefined) {
-                var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].state_ansi)
+            var lat = cData[i].lat
+            var lng = cData[i].lng
+
+            if (cData[i].iso2 == 'US') {
+                var mapLocationInfo = province
             } else {
-                var mapsURL = encodeURI('https://maps.apple.com/?address=' + city + ', ' + cData[i].country)
+                var mapLocationInfo = country
             }
+
+            var mapsURL = encodeURI(('https://maps.apple.com/?q=' + city + ',' + mapLocationInfo + '&near=' + lat + ',' + lng))
 
             try {
                 var date = LaunchBar.formatDate(new Date(), {
@@ -204,7 +197,16 @@ function showFavs() {
                     hour = hour + 12
                 }
 
-                if (hour > 7 && hour < 21) {
+                // Check for day time setting
+                if (Action.preferences.dayTime != undefined) {
+                    var m = Action.preferences.dayTime.m
+                    var e = Action.preferences.dayTime.e
+                } else {
+                    var m = 8
+                    var e = 21
+                }
+
+                if (hour >= m && hour < e) {
                     var icon = 'dayTemplate'
                 } else {
                     var icon = 'nightTemplate'
@@ -216,7 +218,13 @@ function showFavs() {
                     badge: city,
                     icon: icon,
                     action: 'favOptions',
-                    actionArgument: mapsURL + '|' + city + '|' + JSON.stringify(cData[i])
+                    actionArgument: {
+                        mapsURL: mapsURL,
+                        city: city,
+                        lat: lat,
+                        lng: lng,
+                        cData: cData[i]
+                    }
                 })
             } catch (error) {
                 // 
@@ -229,18 +237,11 @@ function showFavs() {
     }
 }
 
-function actionOptions(actionArgument) {
-    // var sunsetData = HTTP.getJSON('https://api.sunrise-sunset.org/json?lat=' + cData[i].lat + '&lng=' + cData[i].lng)
-    // var sunrise = sunsetData.data.results.sunrise
-    // var sunset = sunsetData.data.results.sunset
+function actionOptions(a) {
 
-    // https://www.timeanddate.de/zeitzonen/weltkarte/#!cities=70
-
-    var a = actionArgument.split('|')
-
-    var url = a[0]
-    var city = a[1]
-    var dataString = a[2]
+    var url = a.mapsURL
+    var city = a.city
+    var cData = a.cData
 
     return [
         {
@@ -248,36 +249,32 @@ function actionOptions(actionArgument) {
             url: url,
             // icon: 'mapTemplate'
             icon: 'com.apple.Maps'
-        },
-        {
+        }, {
             title: 'Mark "' + city + '" as Favorite',
             icon: 'favTemplate',
             action: 'makeFav',
-            actionArgument: dataString
+            actionArgument: cData
         }
     ]
 }
 
-function makeFav(dataString) {
-    var newFav = eval('[' + dataString + ']')
+function makeFav(cData) {
     var oldFavs = Action.preferences.favorites
 
     if (oldFavs != '') {
-        var favs = oldFavs.concat(newFav)
+        var favs = oldFavs.concat(cData)
     } else {
-        var favs = newFav
+        var favs = cData
     }
     Action.preferences.favorites = favs
     var output = showFavs()
     return output;
 }
 
-function favOptions(actionArgument) {
-    var a = actionArgument.split('|')
-
-    var url = a[0]
-    var city = a[1]
-    var dataString = a[2]
+function favOptions(a) {
+    var url = a.mapsURL
+    var city = a.city
+    var cData = a.cData
 
     return [
         {
@@ -285,14 +282,12 @@ function favOptions(actionArgument) {
             url: url,
             // icon: 'mapTemplate'
             icon: 'com.apple.Maps'
-        },
-        {
+        }, {
             title: 'Remove "' + city + '" from Favorites',
             icon: 'unFavTemplate.png',
             action: 'removeFav',
-            actionArgument: dataString
-        },
-        {
+            actionArgument: cData
+        }, {
             title: 'Remove all Favorites',
             icon: 'unFavAllTemplate.png',
             action: 'removeAll'
@@ -300,25 +295,126 @@ function favOptions(actionArgument) {
     ]
 }
 
-function removeFav(dataString) {
-    var toBeRemovedData = eval('[' + dataString + ']')
-    var tCity = toBeRemovedData[0].city
-    var tTz = toBeRemovedData[0].timezone
+function removeFav(cData) {
+    var fcData = Action.preferences.favorites
 
-    var cData = Action.preferences.favorites
-    for (var i = 0; i < cData.length; i++) {
-        if (cData[i].city == tCity && cData[i].timezone == tTz) {
-            cData.splice(i, 1)
+    var city = cData.city
+    var tz = cData.timezone
+
+    for (var i = 0; i < fcData.length; i++) {
+        if (fcData[i].city == city && fcData[i].timezone == tz) {
+            fcData.splice(i, 1)
             break
         }
     }
-    Action.preferences.favorites = cData
+    Action.preferences.favorites = fcData
     var output = showFavs()
     return output;
 }
 
 function removeAll() {
-    // Frage reinmachen: Sicher?
-    Action.preferences.favoritesBackup = Action.preferences.favorites
-    Action.preferences.favorites = ''
+    var responseCheckURL = LaunchBar.alert('Remove all Favorites', 'Do you want to remove all Favorites?', 'Yes', 'Cancel');
+    switch (responseCheckURL) {
+        case 0: // Remove all
+            Action.preferences.favoritesBackup = Action.preferences.favorites
+            Action.preferences.favorites = ''
+            break;
+        case 1: // Cancel
+            var output = showFavs()
+            return output;
+    }
+}
+
+function setDayTimeOptions() {
+    return [
+        {
+            title: '6:00 - 21:00 (6 am - 9 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 6,
+                'e': 21
+            }
+        }, {
+            title: '6:00 - 22:00 (6 am - 10 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 6,
+                'e': 22
+            }
+        }, {
+            title: '7:00 - 21:00 (7 am - 9 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 7,
+                'e': 21
+            }
+        }, {
+            title: '7:00 - 22:00 (7 am - 10 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 7,
+                'e': 22
+            }
+        }, {
+            title: '8:00 - 21:00 (8 am - 9 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 8,
+                'e': 21
+            }
+        }, {
+            title: '8:00 - 22:00 (8 am - 10 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 8,
+                'e': 22
+            }
+        }, {
+            title: '8:00 - 23:00 (8 am - 11 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 8,
+                'e': 23
+            }
+        }, {
+            title: '9:00 - 23:00 (9 am - 11 pm)',
+            badge: 'Settings - Day Time',
+            icon: 'gearTemplate',
+            action: 'setDayTime',
+            actionArgument: {
+                'm': 9,
+                'e': 23
+            }
+        }
+    ]
+}
+
+function setDayTime(dayTime) {
+    Action.preferences.dayTime = dayTime
+    var output = showFavs()
+    return output;
+}
+
+function refreshData() {
+    var result = HTTP.getJSON('https://raw.githubusercontent.com/kevinroberts/city-timezones/master/data/cityMap.json');
+
+    File.writeJSON(result.data, '~/Library/Application Support/LaunchBar/Actions/Timezones.lbaction/Contents/Resources/cities.json')
+
+    LaunchBar.alert('Done!')
+    var output = showFavs()
+    return output;
 }
