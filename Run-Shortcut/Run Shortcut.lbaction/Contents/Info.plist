@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Run Shortcut</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.2</string>
+	<string>2021.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.shortcuts</string>
 	<key>LBDescription</key>
@@ -18,6 +18,8 @@
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>⌥⏎ = Select Folder</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
