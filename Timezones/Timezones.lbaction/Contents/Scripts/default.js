@@ -17,17 +17,10 @@ Usefull:
 */
 
 function run(argument) {
-
     if (argument == undefined) {
         if (LaunchBar.options.alternateKey) {
-            return [
-                {
-                    title: 'Set Day Time',
-                    badge: 'Settings',
-                    icon: 'gearTemplate',
-                    action: 'setDayTimeOptions'
-                }
-            ]
+            var output = setDayTimeOptions()
+            return output
         } else {
             var output = showFavs()
             return output;
@@ -37,8 +30,6 @@ function run(argument) {
             var cData = File.readJSON('~/Library/Application Support/LaunchBar/Actions/Timezones.lbaction/Contents/Resources/cities.json');
 
             var cities = []
-            // var provinces = []
-
             for (var i = 0; i < cData.length; i++) {
                 var city = cData[i].city
 
@@ -107,7 +98,6 @@ function run(argument) {
                             subtitle: localeInfo + ', TZ: ' + tz,
                             badge: city,
                             icon: icon,
-                            // url: mapsURL,
                             action: 'actionOptions',
                             actionArgument: {
                                 mapsURL: mapsURL,
@@ -150,8 +140,8 @@ function showFavs() {
             LaunchBar.alert('No Favorites found!', 'Press "space" to search for cities.\nThen press enter on a result for more options.')
         }
     } else {
-
         var cData = Action.preferences.favorites
+
         var cities = []
         for (var i = 0; i < cData.length; i++) {
             var city = cData[i].city
@@ -238,7 +228,6 @@ function showFavs() {
 }
 
 function actionOptions(a) {
-
     var url = a.mapsURL
     var city = a.city
     var cData = a.cData
@@ -247,7 +236,6 @@ function actionOptions(a) {
         {
             title: 'Open "' + city + '" in Apple Maps',
             url: url,
-            // icon: 'mapTemplate'
             icon: 'com.apple.Maps'
         }, {
             title: 'Mark "' + city + '" as Favorite',
@@ -259,13 +247,14 @@ function actionOptions(a) {
 }
 
 function makeFav(cData) {
-    var oldFavs = Action.preferences.favorites
+    var currentFavs = Action.preferences.favorites
 
-    if (oldFavs != '') {
-        var favs = oldFavs.concat(cData)
+    if (currentFavs != undefined) {
+        var favs = currentFavs.concat(cData)
     } else {
-        var favs = cData
+        var favs = [cData]
     }
+
     Action.preferences.favorites = favs
     var output = showFavs()
     return output;
@@ -280,7 +269,6 @@ function favOptions(a) {
         {
             title: 'Open "' + city + '" in Apple Maps',
             url: url,
-            // icon: 'mapTemplate'
             icon: 'com.apple.Maps'
         }, {
             title: 'Remove "' + city + '" from Favorites',
@@ -326,95 +314,111 @@ function removeAll() {
 }
 
 function setDayTimeOptions() {
-    return [
+
+    var options = [
         {
             title: '6:00 - 21:00 (6 am - 9 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 6,
-                'e': 21
+                'e': 21,
+                'm': 6
             }
         }, {
             title: '6:00 - 22:00 (6 am - 10 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 6,
-                'e': 22
+                'e': 22,
+                'm': 6
             }
         }, {
             title: '7:00 - 21:00 (7 am - 9 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 7,
-                'e': 21
+                'e': 21,
+                'm': 7
             }
         }, {
             title: '7:00 - 22:00 (7 am - 10 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 7,
-                'e': 22
+                'e': 22,
+                'm': 7
             }
         }, {
             title: '8:00 - 21:00 (8 am - 9 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockSelectedTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 8,
-                'e': 21
+                'e': 21,
+                'm': 8
             }
         }, {
             title: '8:00 - 22:00 (8 am - 10 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 8,
-                'e': 22
+                'e': 22,
+                'm': 8
             }
         }, {
             title: '8:00 - 23:00 (8 am - 11 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 8,
-                'e': 23
+                'e': 23,
+                'm': 8
             }
         }, {
             title: '9:00 - 23:00 (9 am - 11 pm)',
             badge: 'Settings - Day Time',
-            icon: 'gearTemplate',
+            icon: 'clockTemplate',
             action: 'setDayTime',
             actionArgument: {
-                'm': 9,
-                'e': 23
+                'e': 23,
+                'm': 9
             }
         }
     ]
+
+    if (Action.preferences.dayTime == undefined) {
+        return options
+    } else {
+        var dayTime = Action.preferences.dayTime
+        // LaunchBar.alert(JSON.stringify(dayTime))
+        // LaunchBar.alert(JSON.stringify(options[0].actionArgument))
+
+        var result = [];
+        for (var i = 0; i < options.length; i++) {
+            if (JSON.stringify(dayTime) == JSON.stringify(options[i].actionArgument)) {
+                var icon = 'clockSelectedTemplate'
+            } else {
+                var icon = 'clockTemplate'
+            }
+            result.push({
+                title: options[i].title,
+                badge: options[i].badge,
+                icon: icon,
+                action: options[i].action,
+                actionArgument: options[i].actionArgument
+            })
+        }
+        return result
+    }
 }
 
 function setDayTime(dayTime) {
     Action.preferences.dayTime = dayTime
-    var output = showFavs()
-    return output;
-}
-
-function refreshData() {
-    var result = HTTP.getJSON('https://raw.githubusercontent.com/kevinroberts/city-timezones/master/data/cityMap.json');
-
-    File.writeJSON(result.data, '~/Library/Application Support/LaunchBar/Actions/Timezones.lbaction/Contents/Resources/cities.json')
-
-    LaunchBar.alert('Done!')
     var output = showFavs()
     return output;
 }
