@@ -3,23 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>WifiTemplate.pdf</string>
+	<string>onTemplate.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.togglewifi</string>
 	<key>CFBundleName</key>
 	<string>Toggle Wi-Fi</string>
 	<key>CFBundleVersion</key>
-	<string>2021-02</string>
-	<key>LBAbbreviation</key>
-	<string>air</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
-		<key>LBSummary</key>
-		<string>Toggle Wi-Fi on and off. </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -29,12 +25,14 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
+			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>Toggle Wifi.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>
