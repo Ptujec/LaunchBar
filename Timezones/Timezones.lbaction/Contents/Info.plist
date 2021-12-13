@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Time Zones for Cities</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.3</string>
+	<string>2021.1.3.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⌥⏎ = Settings</string>
+		<string>⇧⏎ = Settings</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

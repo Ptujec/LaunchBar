@@ -18,7 +18,7 @@ Usefull:
 
 function run(argument) {
     if (argument == undefined) {
-        if (LaunchBar.options.alternateKey) {
+        if (LaunchBar.options.shiftKey) {
             var output = setDayTimeOptions()
             return output
         } else {
