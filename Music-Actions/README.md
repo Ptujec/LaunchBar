@@ -15,10 +15,12 @@
 ## Song Info
 
 Shows notification with artist and song title.
+<img src="info.png" width="600"/> 
 
 ## Current Track
 
 Go to current track in Music.
+<img src="current.png" width="600"/> 
 
 ## Download
 
