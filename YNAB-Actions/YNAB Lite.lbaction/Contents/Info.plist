@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>YNAB Lite</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.2.1</string>
+	<string>1.2.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⏎ = Recent transactions, ⌘⏎ = Open YNAB, ⌥⏎ = Settings</string>
+		<string>⏎ = Recent transactions, ⌘⏎ = Open YNAB, ⇧⏎ = Settings</string>
 		<key>LBTwitter</key>
 		<string>@Ptujec</string>
 		<key>LBWebsiteURL</key>

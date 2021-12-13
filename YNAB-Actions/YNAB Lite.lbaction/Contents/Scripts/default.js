@@ -19,7 +19,7 @@ function run() {
             }
         ]
     } else {
-        if (LaunchBar.options.alternateKey) {
+        if (LaunchBar.options.shiftKey) {
             // Settings
             return [
                 {
@@ -171,7 +171,6 @@ function run() {
 
     }
 }
-
 
 function setToken() {
     var response = LaunchBar.alert(
