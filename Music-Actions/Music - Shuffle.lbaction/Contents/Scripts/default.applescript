@@ -4,14 +4,14 @@ on run
 	
 	if _local starts with "de" then
 		set _title_on to "Zufällige Wiedergabe ist an"
-		set _sub_on to ""
+		set _sub_on to "Ausschalten?"
 		set _title_off to "Zufällige Wiedergabe ist aus"
-		set _sub_off to ""
+		set _sub_off to "Einschalten?"
 	else
 		set _title_on to "Shuffle is on"
-		set _sub_on to "Hit Enter to turn it off"
+		set _sub_on to "Turn it off?"
 		set _title_off to "Shuffle is off"
-		set _sub_off to "Hit Enter to turn it on"
+		set _sub_off to "Turn it on?"
 	end if
 	
 	tell application "Music"
@@ -31,14 +31,14 @@ on shuffle_on()
 	
 	if _local starts with "de" then
 		set _title_on to "Zufällige Wiedergabe ist an"
-		set _sub_on to ""
+		set _sub_on to "Ausschalten?"
 		set _title_off to "Zufällige Wiedergabe ist aus"
-		set _sub_off to ""
+		set _sub_off to "Einschalten?"
 	else
 		set _title_on to "Shuffle is on"
-		set _sub_on to "Hit Enter to turn it off"
+		set _sub_on to "Turn it off?"
 		set _title_off to "Shuffle is off"
-		set _sub_off to "Hit Enter to turn it on"
+		set _sub_off to "Turn it on?"
 	end if
 	tell application "Music" to set shuffle enabled to true
 	set output to {title:_title_on, subtitle:_sub_on, action:"shuffle_off", icon:"Template"}
@@ -50,14 +50,14 @@ on shuffle_off()
 	
 	if _local starts with "de" then
 		set _title_on to "Zufällige Wiedergabe ist an"
-		set _sub_on to ""
+		set _sub_on to "Ausschalten?"
 		set _title_off to "Zufällige Wiedergabe ist aus"
-		set _sub_off to ""
+		set _sub_off to "Einschalten?"
 	else
 		set _title_on to "Shuffle is on"
-		set _sub_on to "Hit Enter to turn it off"
+		set _sub_on to "Turn it off?"
 		set _title_off to "Shuffle is off"
-		set _sub_off to "Hit Enter to turn it on"	
+		set _sub_off to "Turn it on?"
 	end if
 	tell application "Music" to set shuffle enabled to false
 	set output to {title:_title_off, subtitle:_sub_off, action:"shuffle_on", icon:"offTemplate"}
