@@ -8,9 +8,17 @@
 
 <img src="fade.png" width="600"/> 
 
-## Music - Fade to Next Song
+## Fade to Next Song
 
 <img src="fade_next.png" width="600"/> 
+
+## Song Info
+
+Shows notification with artist and song title.
+
+## Current Track
+
+Go to current track in Music.
 
 ## Download
 
