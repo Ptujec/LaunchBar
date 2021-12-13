@@ -7,7 +7,7 @@ Documentation:
 */
 
 function run() {
-    if (LaunchBar.options.alternateKey) {
+    if (LaunchBar.options.shiftKey) {
         var folderList = LaunchBar.execute('/usr/bin/shortcuts', 'list', '--folders')
             .trim()
             .split('\n')
