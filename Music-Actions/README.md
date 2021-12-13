@@ -1,10 +1,16 @@
 # LaunchBar Action: Music Actions
 
-Here is a first. Others coming …
-
 ## Shuffle
 
 <img src="shuffle.png" width="600"/> 
+
+## Fade In/Out
+
+<img src="fade.png" width="600"/> 
+
+## Music - Fade to Next Song
+
+<img src="fade_next.png" width="600"/> 
 
 ## Download
 
