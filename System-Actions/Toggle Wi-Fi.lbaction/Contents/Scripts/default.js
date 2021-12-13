@@ -1,7 +1,7 @@
 // Toggle Wi-Fi Action by Christian Bender (@ptujec)
 
 // Localization
-if (LaunchBar.currentLocale != 'de') {
+if (LaunchBar.currentLocale == 'de') {
     var titleOn = 'WLAN ist eingeschaltet'
     var subOn = 'Ausschalten?'
     var titleOff = 'WLAN ist ausgeschaltet'
