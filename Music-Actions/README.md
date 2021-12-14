@@ -4,6 +4,10 @@
 
 <img src="shuffle.png" width="600"/> 
 
+## Like/Dislike
+
+<img src="like.png" width="600"/> 
+
 ## Fade In/Out
 
 <img src="fade.png" width="600"/> 
