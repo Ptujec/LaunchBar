@@ -28,6 +28,10 @@ Go to current track in Music.
 
 <img src="current.png" width="600"/> 
 
+## Search for Song on YouTube
+
+<img src="m_yt.png" width="600"/> 
+
 ## Download
 
 [Download LaunchBar Action: Music Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Music-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
