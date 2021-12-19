@@ -5,19 +5,51 @@ by Ptujec
 */
 
 function run(argument) {
+    var folderPath = Action.preferences.folderLocation
+
+    if (folderPath == undefined || folderPath == '') {
+        try {
+            var plist = File.readPlist('~/Library/Containers/com.ideasoncanvas.mindnode.macos/Data/Library/Preferences/com.ideasoncanvas.mindnode.macos.plist');
+        } catch (exception) {
+            LaunchBar.alert('Error while reading plist: ' + exception);
+        }
+
+        var folderPath = File.pathForFileURL(File.fileURLForPath(plist.NSNavLastRootDirectory))
+
+        if (folderPath == undefined) {
+            var folderPath = LaunchBar.executeAppleScript(
+                'set _home to path to home folder as string',
+                'set _default to _home & "Library:Mobile Documents:" as alias',
+                'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
+                'set _folder to POSIX path of _folder')
+                .trim()
+            Action.preferences.folderLocation = folderPath
+        } else {
+            Action.preferences.folderLocation = folderPath
+        }
+    } else if (LaunchBar.options.shiftKey) {
+        var folderPath = LaunchBar.executeAppleScript(
+            'set _home to path to home folder as string',
+            'set _default to _home & "Library:Mobile Documents:" as alias',
+            'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
+            'set _folder to POSIX path of _folder')
+            .trim()
+        Action.preferences.folderLocation = folderPath
+        return
+    }
 
     argument = argument
         .toLowerCase()
         .trim()
 
     if (LaunchBar.options.commandKey) {
-        var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', '/Users/hischa/Library/Mobile\ Documents/W6L39UYL6Z\~com\~mindnode\~MindNode/Documents', '-name', argument)
+        var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', folderPath, '-name', argument)
             .split('\n')
-    } else if (LaunchBar.options.shiftKey) {
-        LaunchBar.performAction('Run Terminal Command', 'grep -ri ' + argument + ' /Users/hischa/Library/Mobile\\ Documents/W6L39UYL6Z\~com\~mindnode\~MindNode/Documents')
-        return
+        // } else if (LaunchBar.options.shiftKey) {
+        //     LaunchBar.performAction('Run Terminal Command', 'grep -ri ' + argument + ' /Users/hischa/Library/Mobile\\ Documents/W6L39UYL6Z\~com\~mindnode\~MindNode/Documents')
+        //     return
     } else {
-        var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', '/Users/hischa/Library/Mobile\ Documents/W6L39UYL6Z\~com\~mindnode\~MindNode/Documents', argument)
+        var output = LaunchBar.execute('/usr/bin/mdfind', '-onlyin', folderPath, argument)
             .split('\n')
     }
 

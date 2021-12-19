@@ -16,9 +16,6 @@
 - Mindnode Search
 - Google Search (with DuckDuckGos version of Feeling Lucky)
 
-## Known issues
-- There are some hardcoded paths in iA Writer and Mindnode searches. Sorry. I will fix that asap.
-
 ## Download
 
 [Download LaunchBar Search Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))

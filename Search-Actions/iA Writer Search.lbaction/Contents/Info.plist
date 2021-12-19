@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>iA Writer Search</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.2</string>
+	<string>1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Open quick search with (press space) or without text</string>
+		<string>Open quick search with (press space) or without text; ; ⇧⏎ = Choose folder</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -34,8 +34,6 @@
 				<string>string</string>
 			</array>
 			<key>LBKeepWindowActive</key>
-			<true/>
-			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
