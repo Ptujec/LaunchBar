@@ -1,4 +1,6 @@
 tell application "Music"
-	reveal current track
+	try
+		reveal current track
+	end try
 	activate
 end tell
