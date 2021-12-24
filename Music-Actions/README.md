@@ -13,7 +13,7 @@
 I wish Apple would have better support for this in AppleScript. But with some GUI scripting it is possible to add the currently playing song to a playlist of your choice. 
 The implementation is not ideal and you may see some stuff going on in the background. But at least it does work.
 
-<img src="addtoPL.png" width="600"/> 
+<img src="atp.gif" width="600"/> 
 
 ## Fade In/Out
 
