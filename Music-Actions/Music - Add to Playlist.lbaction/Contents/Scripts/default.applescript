@@ -13,7 +13,7 @@ on addToPlaylist(_name)
 	
 	tell application "LaunchBar" to hide
 	tell application "System Events"
-		set _visible to visible of application process "Music"
+		set _frontmost to item 1 of (get name of processes whose frontmost is true)
 		
 		# Localizations
 		set edit_lang to name of menu bar item 4 of menu bar 1 of application process "Music"
@@ -49,7 +49,7 @@ on addToPlaylist(_name)
 			tell application "Music" to set view of front browser window to user playlist _name
 		end try
 		
-		if _visible is false then
+		if _frontmost is not "Music" then
 			set visible of application process "Music" to false
 		end if
 	end tell
