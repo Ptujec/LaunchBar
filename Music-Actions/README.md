@@ -8,6 +8,13 @@
 
 <img src="like.png" width="600"/> 
 
+## Add to Playlist
+
+I wish Apple would have better support for this in AppleScript. But with some GUI scripting it is possible to add the currently playing song to a playlist of your choice. 
+The implementation is not ideal and you may see some stuff going on in the background. But at least it does work.
+
+<img src="addtoPL.png" width="600"/> 
+
 ## Fade In/Out
 
 <img src="fade.png" width="600"/> 
@@ -30,15 +37,7 @@ Go to current track in Music.
 
 ## Search for Song on YouTube
 
-<img src="m_yt.png" width="600"/> 
-
-## Add to Playlist
-
-I wish Apple would have better support for this in AppleScript. But with some GUI scripting it is possible to add the currently playing song to a playlist of your choice. 
-The implementation is not ideal and you may see some stuff going on in the background. But at least it does work.
-
-<img src="addtoPL.png" width="600"/> 
-
+<img src="m_yt.png" width="600"/>
 
 ## Download
 
