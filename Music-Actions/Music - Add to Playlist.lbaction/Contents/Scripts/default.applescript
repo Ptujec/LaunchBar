@@ -10,8 +10,10 @@ on run
 end run
 
 on addToPlaylist(_name)
+	
 	tell application "LaunchBar" to hide
 	tell application "System Events"
+		set _visible to visible of application process "Music"
 		
 		# Localizations
 		set edit_lang to name of menu bar item 4 of menu bar 1 of application process "Music"
@@ -26,7 +28,7 @@ on addToPlaylist(_name)
 			set _add_to_playlist to "Zur Playlist hinzufügen"
 			set _song to "Titel"
 		end if
-
+		
 		# Main action
 		try
 			click menu item _switch_to_miniplayer of menu _window of menu bar item _window of menu bar 1 of application process "Music" -- We need to change the view to be able to use the following menu items … otherwise they are greyed out 
@@ -46,6 +48,9 @@ on addToPlaylist(_name)
 		try
 			tell application "Music" to set view of front browser window to user playlist _name
 		end try
-		set visible of application process "Music" to false
+		
+		if _visible is false then
+			set visible of application process "Music" to false
+		end if
 	end tell
 end addToPlaylist
