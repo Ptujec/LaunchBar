@@ -2,7 +2,7 @@
 
 This action is using the [ESV API](https://api.esv.org/docs/passage-text/). You can display a given passage in large type or paste it with ⇧⏎. 
  
-<img src="01.png" width="600"/> 
+<img src="esv.gif" width="800"/> 
 
 ## Requirements 
 
