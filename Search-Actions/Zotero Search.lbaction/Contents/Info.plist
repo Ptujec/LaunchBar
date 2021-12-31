@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Zotero Search</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>1.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>org.zotero.zotero</string>
 	<key>LBDescription</key>
@@ -36,11 +36,13 @@
 			<array>
 				<string>string</string>
 			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
+			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>
