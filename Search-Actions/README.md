@@ -1,13 +1,8 @@
 # LaunchBar Search Actions
-## Zotero
 
 <img src="zotero.gif" width="600"/> 
 
-## Twitter
-
-<img src="twitter.gif" width="600"/> 
-
-## List 
+## Full List: 
 
 - Twitter Search
 - Zotero Search
