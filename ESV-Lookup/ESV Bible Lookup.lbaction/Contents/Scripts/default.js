@@ -48,7 +48,7 @@ function run(argument) {
             argument = argument[0].toUpperCase() + argument.slice(1)
 
             LaunchBar.displayInLargeType({
-                tipLe: argument + ' (ESV)',
+                title: argument + ' (ESV)',
                 string: passage
             });
         }
