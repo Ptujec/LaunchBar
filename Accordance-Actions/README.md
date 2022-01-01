@@ -1,5 +1,5 @@
 # LaunchBar Browser Actions
-These actions require [Accordance Bible Software](https://www.accordancebible.com/). There is also a post related to these in the [Accordance Forums](https://forums.accordancebible.com/topic/5191-launchbar-scripts/). 
+These actions require [Accordance Bible Software](https://www.accordancebible.com/). There is also a post related to these in the [Accordance Forums](https://forums.accordancebible.com/topic/5191-launchbar-scripts/). The original AppleScripts/Automator Workflows were developed by [Joe Weaks](http://macbiblioblog.blogspot.com/search/label/accordance).
 
 In order to make display and paste actions work properly it is suggested to set up citation settings like this in Accordcance: 
 
