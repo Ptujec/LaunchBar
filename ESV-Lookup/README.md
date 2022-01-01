@@ -1,8 +1,8 @@
 # LaunchBar Action: ESV Bible Lookup
 
-This action is using the [ESV API](https://api.esv.org/docs/passage-text/). You can display a given passage in large type or paste it with ⇧⏎. 
+This action is using the [ESV API](https://api.esv.org/docs/passage-text/). It pastes a given passage in whatever app you’re in! Or you can display it in large type with ⇧⏎. 
  
-<img src="esv.gif" width="800"/> 
+<img src="esv.png" width="600"/> 
 
 ## Requirements 
 
