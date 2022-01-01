@@ -10,8 +10,8 @@ Documentation:
 function runWithString(string) {
   var rData = HTTP.getJSON(
     encodeURI(
-      "https://api.raindrop.io/rest/v1/tags/0?access_token=" +
-      Action.preferences.apiKey
+      'https://api.raindrop.io/rest/v1/tags/0?access_token=' +
+        Action.preferences.apiKey
     )
   );
 
@@ -23,12 +23,12 @@ function runWithString(string) {
       if (suggestion.toLowerCase().startsWith(string.toLowerCase())) {
         first.push({
           title: suggestion,
-          icon: "tagTemplate",
+          icon: 'tagTemplate',
         });
       } else {
         second.push({
           title: suggestion,
-          icon: "tagTemplate",
+          icon: 'tagTemplate',
         });
       }
     }
@@ -42,35 +42,34 @@ function runWithString(string) {
   });
   var tags = first.concat(second);
 
-
   var operators = [
     {
-      title: "type:article",
-      icon: "articleTemplate"
+      title: 'type:article',
+      icon: 'articleTemplate',
     },
     {
-      title: "type:document",
-      icon: "docTemplate"
+      title: 'type:document',
+      icon: 'docTemplate',
     },
     {
-      title: "type:image",
-      icon: "imageTemplate"
+      title: 'type:image',
+      icon: 'imageTemplate',
     },
     {
-      title: "type:video",
-      icon: "videoTemplate"
+      title: 'type:video',
+      icon: 'videoTemplate',
     },
     {
-      title: "type:audio",
-      icon: "audioTemplate"
-    }
-  ]
+      title: 'type:audio',
+      icon: 'audioTemplate',
+    },
+  ];
 
   operators = operators.filter(function (el) {
     return el.title.includes(string);
   });
 
-  var suggestions = operators.concat(tags)
+  var suggestions = operators.concat(tags);
 
   return suggestions;
 }
