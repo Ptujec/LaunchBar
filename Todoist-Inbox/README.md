@@ -55,14 +55,12 @@ You can even add markdown formatted links to websites or email if you start with
 
 ### Setup & Settings
 
-<img src="06.png" width="450"/> 
-
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
 Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data or turn off confirmation notifications. 
 
-<img src="07.png" width="600"/> 
+<img src="06.png" width="600"/> 
 
 ## Download
 
