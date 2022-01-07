@@ -22,9 +22,10 @@ The were only a few minor things bugging me with when using my old action:
 Obviously some of this could easily be solved by just using the global shortcut. But for me it is just easier to press cmd-space followed by "ta" (Todoist Add), than remembering another global shortcut. So I took another look at the [API](https://developer.todoist.com/rest/v1/#create-a-new-task) and started making this action.
 
 ## How it works
-The basic idea is very simple. **You type something, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
 <img src="02.png" width="600"/> 
+
+The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
 However, as I enjoyed adding things to Todoist that way, I added a few more optional features. 
 
@@ -54,14 +55,14 @@ You can even add markdown formatted links to websites or email if you start with
 
 ### Setup & Settings
 
-<img src="06.png" width="600"/> 
+<img src="06.png" width="450"/> 
 
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
 Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data or turn off confirmation notifications. 
 
-<img src="set_token.png" width="600"/> 
+<img src="07.png" width="600"/> 
 
 ## Download
 
