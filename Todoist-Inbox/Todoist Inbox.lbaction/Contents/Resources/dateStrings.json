@@ -1,0 +1,38 @@
+{
+    "de": [
+        "heute",
+        "alle \\d (Tage|Wochen|Monate)",
+        "jeden (\\d\\. )?(Tag|Morgen|Abend|Wochentag|Werktag|Montag|Mo|Dienstag|Di|Mittwoch|Mi|Donnerstag|Do|Freitag|Fr|Samstag|Sa|Sonntag|Monat|Januar|Jan|Februar|Feb|März|April|Mai|Juni|Juli|August|Aug|September|Sept|Oktober|Okt|November|Nov|Dezember|Dez),? ?(um )?((\\d+(:\\d+)?( Uhr)?))?( bis (Montag|Mo|Dienstag|Di|Mittwoch|Mi|Donnerstag|Do|Freitag|Fr|Samstag|Sa|Sonntag))?",
+        "nächste(n|s)? (Woche|Monat|Jahr)",
+        "(am )?(Wochenende|Monatsende)",
+        "(über)?morgen,? ?(um )?((\\d+(:\\d+)?( Uhr)?))?(früh|mittag)?",
+        "(am )?(nächsten )?(Montag|Mo|Dienstag|Di|Mittwoch|Mi|Donnerstag|Do|Freitag|Fr|Samstag|Sa|Sonntag),? ?(um )?((\\d+(:\\d+)?( Uhr)?))?",
+        "\\d+\\. ?(\\d+\\.|Januar|Jan|Februar|Feb|März|April|Mai|Juni|Juli|August|Aug|September|Sept|Oktober|Okt|November|Nov|Dezember|Dez) ?(\\d+)?,? ?(um )?((\\d+(:\\d+)?( Uhr)?))?",
+        "in 1 Stunde",
+        "in 1 Woche,? ?(um )?((\\d+(:\\d+)?( Uhr)?))?",
+        "in \\d+ (Stunden|Minuten|Min)",
+        "in \\d+ (Wochen|Tagen|Jahr),? ?(um )?((\\d+(:\\d+)?( Uhr)?))?",
+        "(um )?(\\d+:)?\\d+ Uhr",
+        "um (\\d+:)?\\d+( Uhr)?",
+        "\\d+:\\d+"
+    ],
+    "en": [
+        "today",
+        "every \\d (days|weeks|months)",
+        "every (day|morning|evening|weekday|workday|monday|mon|tuesday|tue|wednesday|wed|thursday|thur|friday|fri|saturday|sat|sunday|sun|week|month|year)",
+        "next (week|month|year)",
+        "this weekend",
+        "in the (morning|afternoon|evening)",
+        "(tomorrow|someday),? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "(on |next )?(monday|mon|tuesday|tue|wednesday|wed|thursday|thur|friday|fri|saturday|sat|sunday|sun),? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "(January|Jan|February|Feb|March|April|May|June|July|August|Aug|September|Sept|October|Oct|November|Nov|December|Dec) \\d+,? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "\\d+/\\d+(/\\d+)?,? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "in 1 hour",
+        "in 1 week,? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "in \\d+ (hours|minutes|min)",
+        "in \\d+ (weeks|days|year),? ?(at )?((\\d+(:\\d+)? ?(am|pm)?))?",
+        "at \\d+(:\\d+)? ?(am|pm)?",
+        "(at )?\\d+(:\\d+)? ?(am|pm)",
+        "\\d+:\\d+"
+    ]
+}
