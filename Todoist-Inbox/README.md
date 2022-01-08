@@ -55,7 +55,7 @@ You can even add markdown formatted links for the current website in Safari or a
 
 <img src="06.png" width="800"/> 
 
-If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. 
+If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. (Alternatively you can press ⌘⏎ to get to projects and labels.)
 
 <img src="07.png" width="800"/> 
 
