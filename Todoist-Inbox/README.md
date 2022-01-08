@@ -1,6 +1,6 @@
 # LaunchBar Action: Todoist Inbox
 
-<img src="01.png" width="600"/> 
+<img src="main.gif" width="800"/> 
 
 ## Why? 
 Todoist has its own [quick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good! So what’s the benefit of a LaunchBar action?
@@ -23,13 +23,11 @@ So I took another look at the [API](https://developer.todoist.com/rest/v1/#creat
 
 ## How it works
 
-<img src="02.png" width="600"/> 
-
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-However, as I enjoyed adding things to Todoist that way, I added a few more features: 
+<img src="02.png" width="800"/> 
 
-<img src="03.png" width="600"/> 
+However, as I enjoyed adding things to Todoist that way, I added a few more features: 
 
 ### Due dates and times
 
@@ -37,23 +35,29 @@ Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-
 
 The action will detect a bunch of due strings like "today, next week, …" automatically (German or English depending on the current locale of your system). The action will provide feedback on how it parses your input. 
 
+<img src="04.png" width="800"/> 
+
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
 
 ### Priorities
 
 Add priorities like you would in Todoists interface with p1-3.
 
+<img src="05.png" width="800"/> 
+
 ### URLs from Safari or Mail
 
 You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start with a "." 
 
-<img src="05.png" width="600"/> 
+<img src="md_links.gif" width="800"/> 
 
-###  Projects and labels
+### Projects and labels
+
+<img src="06.png" width="800"/> 
 
 If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. 
 
-<img src="04.png" width="600"/> 
+<img src="07.png" width="800"/> 
 
 The projects and labels you use frequently, will appear on top of the list. If you entered a task before, it will suggest the matching project/label the next time.  
 
@@ -64,7 +68,7 @@ You will be prompted to add it on the first run.
 
 Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data or turn off confirmation notifications. 
 
-<img src="07.png" width="600"/> 
+
 
 ## Download
 
