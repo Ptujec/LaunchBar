@@ -5,19 +5,19 @@
 ## Why? 
 Todoist has its own [quick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good! So what’s the benefit of a LaunchBar action?
 
-If you don't mind remembering global shortcuts, there really is not much of a good reason. Even if you do mind, you could do, what I did for a long time. For a long time, I would use a custom action to either simulate pressing the global shortcut or lately launching it with the URI scheme "todoist://addtask". 
+If you don't mind using global shortcuts, there really is not much of a good reason. Even if you do mind, you could do, what I did for a long time. For a long time, I would use a custom action to either simulate pressing the global shortcut or lately launching it with the URI scheme "todoist://addtask". 
 
 The were only a few minor things bugging me with when using my old action: 
 
-1) Running the action, when Todoist is not running. My old action does not work in that (rare) case. Neither does the global shortcut. The app needs to run first. The new action does not need the app running, because it is using the API directly. Just an internet connection.
+1) Running the action, when Todoist is not running. My old action does not work in that (rare) case. Neither does the global shortcut. The app needs to run first. The new action does not need the app running, because it is using the API directly. .
 
 2) When working in fullscreen mode the old action would result  in switching to the desktop or the interface would show up on my other (dimmed) screen. 
 
-3) The old action would also frequently bring up the main Todoist interface.
+3) My old action would also frequently bring up the main Todoist interface.
 
 4) Evoking LaunchBar first and then Todoists quick add interface seemed to be more "noise" than needed. 
 
-**Obviously some of this could easily be solved by just using the global shortcut. But I just like the LaunchBar workflow of pressing cmd-space followed by the initials of the app/action**. It's easier for me to remembering than all kind of global shortcuts. It's kind of my [hyper key](https://thesweetsetup.com/macos-hyper-key-bettertouchtool/). 
+**Obviously some of this could easily be solved by just using the global shortcut. But I just like the LaunchBar workflow of pressing cmd-space followed by the initials of the app/action**. It's second nature. It's easier to remember and execute than most global shortcuts. It's kind of my [hyper key](https://thesweetsetup.com/macos-hyper-key-bettertouchtool/).  
 
 So I took another look at the [API](https://developer.todoist.com/rest/v1/#create-a-new-task) and started making this action.
 
