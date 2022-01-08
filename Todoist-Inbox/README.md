@@ -9,7 +9,7 @@ If you don't mind using global shortcuts, there really is not much of a good rea
 
 The were only a few minor things bugging me with when using my old action: 
 
-1) Running the action, when Todoist is not running. My old action does not work in that (rare) case. Neither does the global shortcut. The app needs to run first. The new action does not need the app running, because it is using the API directly. .
+1) Running the action, when Todoist is not running. My old action does not work in that (rare) case. Neither does the global shortcut. The app needs to run first. The new action does not need the app running, because it is using the API directly. 
 
 2) When working in fullscreen mode the old action would result  in switching to the desktop or the interface would show up on my other (dimmed) screen. 
 
@@ -27,7 +27,7 @@ So I took another look at the [API](https://developer.todoist.com/rest/v1/#creat
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-However, as I enjoyed adding things to Todoist that way, I added a few more optional features. 
+However, as I enjoyed adding things to Todoist that way, I added a few more features: 
 
 <img src="03.png" width="600"/> 
 
@@ -43,15 +43,19 @@ If what you are typing is not detected automatically, you can add "@" at the beg
 
 Add priorities like you would in Todoists interface with p1-3.
 
-### More
+### URLs from Safari or Mail
 
-If can add "#" to what you are writing, you can select a project or label after hitting return. 
+You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start with a "." 
+
+<img src="05.png" width="600"/> 
+
+###  Projects and labels
+
+If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. 
 
 <img src="04.png" width="600"/> 
 
-You can even add markdown formatted links to websites or email if you start with a "." 
-
-<img src="05.png" width="600"/> 
+The projects and labels you use frequently, will appear on top of the list. If you entered a task before, it will suggest the matching project/label the next time.  
 
 ### Setup & Settings
 
