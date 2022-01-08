@@ -3,11 +3,9 @@
 <img src="01.png" width="600"/> 
 
 ## Why? 
-Todoist has its own [qick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good. So what’s the benefit of a LaunchBar action that is adding things to your inbox?
+Todoist has its own [quick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good! So what’s the benefit of a LaunchBar action?
 
-If you don't mind remembering global shortcuts, there really is not much of a good reason. Even if you do, you could do, what I did for a long time. 
-
-For a long time, I would use a custom action to either simulate pressing the global shortcut or lately launching "todoist://addtask". 
+If you don't mind remembering global shortcuts, there really is not much of a good reason. Even if you do mind, you could do, what I did for a long time. For a long time, I would use a custom action to either simulate pressing the global shortcut or lately launching it with the URI scheme "todoist://addtask". 
 
 The were only a few minor things bugging me with when using my old action: 
 
@@ -19,7 +17,9 @@ The were only a few minor things bugging me with when using my old action:
 
 4) Evoking LaunchBar first and then Todoists quick add interface seemed to be more "noise" than needed. 
 
-Obviously some of this could easily be solved by just using the global shortcut. But for me it is just easier to press cmd-space followed by "ta" (Todoist Add), than remembering another global shortcut. So I took another look at the [API](https://developer.todoist.com/rest/v1/#create-a-new-task) and started making this action.
+**Obviously some of this could easily be solved by just using the global shortcut. But I just like the LaunchBar workflow of pressing cmd-space followed by the initials of the app/action**. It's easier for me to remembering than all kind of global shortcuts. It's kind of my [hyper key](https://thesweetsetup.com/macos-hyper-key-bettertouchtool/). 
+
+So I took another look at the [API](https://developer.todoist.com/rest/v1/#create-a-new-task) and started making this action.
 
 ## How it works
 
