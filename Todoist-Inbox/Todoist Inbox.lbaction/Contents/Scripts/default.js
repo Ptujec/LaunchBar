@@ -129,7 +129,7 @@ function run(argument) {
         lang: lang,
       };
 
-      if (advanced == true) {
+      if (advanced == true || LaunchBar.options.commandKey) {
         var output = advancedOptions();
         return output;
       } else {
