@@ -68,8 +68,6 @@ You will be prompted to add it on the first run.
 
 Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data or turn off confirmation notifications. 
 
-
-
 ## Download
 
 [Download LaunchBar Action: Todoist Inbox](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Todoist-Inbox) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
