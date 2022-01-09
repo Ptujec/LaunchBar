@@ -1228,15 +1228,28 @@ function updatePayees() {
         '/payees.json'
     );
 
-    // Compare Online to Local payee data
-    var ids = pLocalData.data.payees.map((ch) => ch.id);
+    // Add new payess
+    var localIds = pLocalData.data.payees.map((ch) => ch.id);
     var newIds = pOnlineData.data.data.payees.filter(
-      (ch) => !ids.includes(ch.id)
+      (ch) => !localIds.includes(ch.id)
     );
 
-    // Push new items
     for (var i = 0; i < newIds.length; i++) {
       pLocalData.data.payees.push(newIds[i]);
+    }
+
+    // Remove old payess
+    var onlineIds = pOnlineData.data.data.payees.map((ch) => ch.id);
+    var oldIds = pLocalData.data.payees.filter(
+      (ch) => !onlineIds.includes(ch.id)
+    );
+
+    for (var i = 0; i < oldIds.length; i++) {
+      for (var j = 0; j < pLocalData.data.payees.length; j++) {
+        if (pLocalData.data.payees[j] == oldIds[i]) {
+          pLocalData.data.payees.splice(j, 1);
+        }
+      }
     }
 
     File.writeJSON(
@@ -1246,20 +1259,11 @@ function updatePayees() {
         '/payees.json'
     );
 
-    if (newIds.length == 0) {
-      var title = 'No changes!';
-      var subtitle = 'Your payees are uptodate!';
-    } else if (newIds.length == 1) {
-      var title = newIds.length + ' new payee was added.';
-      var subtitle = 'Your payees are uptodate again!';
-    } else if (newIds.length > 1) {
-      var title = newIds.length + ' new payees were added.';
-      var subtitle = 'Your payees are uptodate again!';
-    }
+    var changes = newIds.length + oldIds.length;
 
     LaunchBar.displayNotification({
-      title: title,
-      subtitle: subtitle,
+      title: 'YNAB Payees updated',
+      subtitle: changes + ' change(s)',
     });
   }
 }
