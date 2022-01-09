@@ -66,7 +66,7 @@ The projects and labels you use frequently, will appear on top of the list. If y
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
-Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data or turn off confirmation notifications. 
+Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data (stored in ~/Library/Application Support/LaunchBar/Action Support) or turn off confirmation notifications. 
 
 ## Download
 
