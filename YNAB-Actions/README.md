@@ -28,7 +28,7 @@ If you have an Email selected or open in Apple Mail you can add the link to that
 
 <img src="yat_memo.png" width="600"/> 
 
-   
+**Important:** For performance reasons some data is preloaded and stored in ~/Library/Application Support/LaunchBar/Action Support/. New Payees will be added as you create them using this action. You can also update or even reset all data in the settings manually. 
 
 ##  YNAB Lite <img src="https://github.com/Ptujec/LaunchBar/blob/master/YNAB-Actions/YNAB%20Lite.lbaction/Contents/Resources/actionIconTemplate.png?raw=true" width="32"/> 
 
