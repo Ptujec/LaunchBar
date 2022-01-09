@@ -15,7 +15,7 @@ if (LaunchBar.currentLocale == 'de') {
   var p2 = 'Priorität 2';
   var p3 = 'Priorität 3';
   var lang = 'de';
-  var refresh = 'Projekte & Etiketten aktualisieren.';
+  var refresh = 'Projekte & Etiketten aktualisieren';
   var titleReset = 'Zurücksetzen';
   var subReset = 'Nutzungsdaten werden zurückgesetzt!';
   var titleUpdate = 'Aktualisieren';
@@ -603,25 +603,40 @@ function refreshData() {
 }
 
 function update() {
+  // Compare local with online data
   LaunchBar.hide();
 
   var projectsOnline = HTTP.getJSON(
     'https://api.todoist.com/rest/v1/projects?token=' + apiToken
   );
+
   if (projectsOnline.error != undefined) {
     LaunchBar.alert(projectsOnline.error);
   } else {
-    // Projects
     var projectsLocal = Action.preferences.projects;
 
-    // Compare Online to Local payee data
-    var projectIds = projectsLocal.data.map((ch) => ch.id);
+    // Add new projects
+    var localProjectIds = projectsLocal.data.map((ch) => ch.id);
     var newProjectIds = projectsOnline.data.filter(
-      (ch) => !projectIds.includes(ch.id)
+      (ch) => !localProjectIds.includes(ch.id)
     );
 
     for (var i = 0; i < newProjectIds.length; i++) {
       projectsLocal.data.push(newProjectIds[i]);
+    }
+
+    // Remove old projects
+    var onlineProjectIds = projectsOnline.data.map((ch) => ch.id);
+    var oldProjectIds = projectsLocal.data.filter(
+      (ch) => !onlineProjectIds.includes(ch.id)
+    );
+
+    for (var i = 0; i < oldProjectIds.length; i++) {
+      for (var j = 0; j < projectsLocal.data.length; j++) {
+        if (projectsLocal.data[j] == oldProjectIds[i]) {
+          projectsLocal.data.splice(j, 1);
+        }
+      }
     }
 
     // Labels
@@ -631,17 +646,35 @@ function update() {
 
     var labelsLocal = Action.preferences.labels;
 
-    // Compare Online to Local payee data
-    var labelIds = labelsLocal.data.map((ch) => ch.id);
+    // Add new labels
+    var localLabelIds = labelsLocal.data.map((ch) => ch.id);
     var newLabelIds = labelsOnline.data.filter(
-      (ch) => !labelIds.includes(ch.id)
+      (ch) => !localLabelIds.includes(ch.id)
     );
 
     for (var i = 0; i < newLabelIds.length; i++) {
       labelsLocal.data.push(newLabelIds[i]);
     }
 
-    var changes = newLabelIds.length + newProjectIds.length;
+    // Remove old labels
+    var onlineLabelIds = labelsOnline.data.map((ch) => ch.id);
+    var oldLabelIds = labelsLocal.data.filter(
+      (ch) => !onlineLabelIds.includes(ch.id)
+    );
+
+    for (var i = 0; i < oldLabelIds.length; i++) {
+      for (var j = 0; j < labelsLocal.data.length; j++) {
+        if (labelsLocal.data[j] == oldLabelIds[i]) {
+          labelsLocal.data.splice(j, 1);
+        }
+      }
+    }
+
+    var changes =
+      newLabelIds.length +
+      oldLabelIds.length +
+      newProjectIds.length +
+      oldProjectIds.length;
 
     LaunchBar.displayNotification({
       title: updateNotificationTitle,
