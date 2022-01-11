@@ -3,6 +3,7 @@
         "heute",
         "alle \\d (Tage|Wochen|Monate)",
         "jeden (\\d\\. )?(Tag|Morgen|Abend|Wochentag|Werktag|Montag|Mo|Dienstag|Di|Mittwoch|Mi|Donnerstag|Do|Freitag|Fr|Samstag|Sa|Sonntag|Monat|Januar|Jan|Februar|Feb|März|April|Mai|Juni|Juli|August|Aug|September|Sept|Oktober|Okt|November|Nov|Dezember|Dez),? ?(um )?((\\d+(:\\d+)?( Uhr)?))?( bis (Montag|Mo|Dienstag|Di|Mittwoch|Mi|Donnerstag|Do|Freitag|Fr|Samstag|Sa|Sonntag))?",
+        "(Ende|Mitte|Anfang) (Januar|Jan|Februar|Feb|März|April|Mai|Juni|Juli|August|Aug|September|Sept|Oktober|Okt|November|Nov|Dezember|Dez)",
         "nächste(n|s)? (Woche|Monat|Jahr)",
         "(am )?(Wochenende|Monatsende)",
         "(über)?morgen,? ?(um )?((\\d+(:\\d+)?( Uhr)?))?(früh|mittag)?",

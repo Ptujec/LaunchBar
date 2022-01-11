@@ -175,6 +175,7 @@ function advancedOptions() {
       subtitle: sub,
       icon: 'addToProjectTemplate',
       usage: usage,
+      // badge: usage.toString(),
       action: 'postTask',
       actionArgument: {
         type: 'project',
@@ -184,8 +185,17 @@ function advancedOptions() {
       },
     };
 
-    if (projects[i].lastContent == taskDict.content) {
-      resultPrioritized.push(pushDataProject);
+    // if (projects[i].lastContent == taskDict.content) {
+    if (projects[i].lastContent != undefined) {
+      if (
+        projects[i].lastContent
+          .toLowerCase()
+          .includes(taskDict.content.toLowerCase())
+      ) {
+        resultPrioritized.push(pushDataProject);
+      } else {
+        resultProjects.push(pushDataProject);
+      }
     } else {
       resultProjects.push(pushDataProject);
     }
@@ -219,6 +229,7 @@ function advancedOptions() {
       subtitle: sub,
       icon: 'labelTemplate',
       usage: usage,
+      // badge: usage.toString(),
       action: 'addProject',
       actionArgument: {
         name: name,
@@ -227,8 +238,17 @@ function advancedOptions() {
       },
     };
 
-    if (labels[i].lastContent == taskDict.content) {
-      resultPrioritized.push(pushDataLabel);
+    // if (labels[i].lastContent == taskDict.content) {
+    if (labels[i].lastContent != undefined) {
+      if (
+        labels[i].lastContent
+          .toLowerCase()
+          .includes(taskDict.content.toLowerCase())
+      ) {
+        resultPrioritized.push(pushDataLabel);
+      } else {
+        resultLabels.push(pushDataLabel);
+      }
     } else {
       resultLabels.push(pushDataLabel);
     }
