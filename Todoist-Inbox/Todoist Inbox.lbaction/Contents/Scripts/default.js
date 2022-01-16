@@ -2,11 +2,18 @@
 - https://developer.todoist.com/rest/v1/#create-a-new-task
 - https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+
+Stopwords:
+- https://github.com/stopwords-iso/stopwords-de
+- https://github.com/stopwords-iso/stopwords-iso/blob/master/python/stopwordsiso/stopwords-iso.json
 */
 
 const apiToken = Action.preferences.apiToken;
-var dateStrings = File.readJSON(
+const dateStringsJSON = File.readJSON(
   '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/dateStrings.json'
+);
+const stopwordsJSON = File.readJSON(
+  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/stopwords.json'
 );
 
 // Localization
@@ -24,7 +31,6 @@ if (LaunchBar.currentLocale == 'de') {
   var updateNotificationTitle = 'Projekte & Etiketten wurden aktualisiert.';
   var updateNotificationString = ' Änderung(en)';
   var setKey = 'API-Token erneuern';
-  var setKeySub = 'API-Token zuerst in die Zwischenablage kopieren!';
   var dueStringTitle = ', Fällig: ';
   var notiSettings = 'Bestätigungsmitteilungen';
   var nSubOff = 'Eingabetaste drücken, um Mitteilungen auszuschalten.';
@@ -33,7 +39,8 @@ if (LaunchBar.currentLocale == 'de') {
   var inboxName = 'Eingang';
   var done = 'Fertig!';
 
-  dateStrings = dateStrings.de;
+  var dateStrings = dateStringsJSON.de;
+  stopwords = stopwordsJSON.de;
 } else {
   var p1 = 'Priority 1';
   var p2 = 'Priority 2';
@@ -48,7 +55,6 @@ if (LaunchBar.currentLocale == 'de') {
   var updateNotificationTitle = 'Projects & labels updated.';
   var updateNotificationString = ' change(s)';
   var setKey = 'Reset API-Token';
-  var setKeySub = 'Make sure to copy your API-Token first!';
   var dueStringTitle = ', Due: ';
   var notiSettings = 'Confirmation Notifications';
   var nSubOff = 'Hit enter to turn off notifications';
@@ -57,7 +63,8 @@ if (LaunchBar.currentLocale == 'de') {
   var inboxName = 'Inbox';
   var done = 'Done!';
 
-  dateStrings = dateStrings.en;
+  dateStrings = dateStringsJSON.en;
+  stopwords = stopwordsJSON.de;
 }
 
 function run(argument) {
@@ -119,6 +126,7 @@ function run(argument) {
 
       argument = argument.replace(/\s+/g, ' ').trim();
 
+      // Capitalize first character of the content/title
       argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
       Action.preferences.taskDict = {
@@ -175,7 +183,6 @@ function advancedOptions() {
       subtitle: sub,
       icon: 'addToProjectTemplate',
       usage: usage,
-      // badge: usage.toString(),
       action: 'postTask',
       actionArgument: {
         type: 'project',
@@ -185,19 +192,44 @@ function advancedOptions() {
       },
     };
 
-    // if (projects[i].lastContent == taskDict.content) {
-    if (projects[i].lastContent != undefined) {
-      if (
-        projects[i].lastContent
-          .toLowerCase()
-          .includes(taskDict.content.toLowerCase())
-      ) {
+    var words = taskDict.content
+      .replace(/\[(.+)\]\(.+\)/, '$1')
+      .match(/[a-zäüööčžšß]+/gi);
+
+    var taskDictWords = [];
+    for (var j = 0; j < words.length; j++) {
+      taskDictWords.push(words[j].toLowerCase());
+    }
+    Action.preferences.taskDict.words = taskDictWords;
+    words = taskDictWords;
+
+    // Prioritize projects with matching title and/or words
+    if (projects[i].usedWords != undefined) {
+      if (words.includes(projects[i].name.toLowerCase())) {
+        var matchCount = 2; // 2 to prioritize it more … might change back to 1
+      } else {
+        var matchCount = 0;
+      }
+
+      for (var k = 0; k < words.length; k++) {
+        if (projects[i].usedWords.includes(words[k].toLowerCase())) {
+          matchCount = matchCount + 1;
+        }
+      }
+
+      if (matchCount > 0) {
+        pushDataProject.matchCount = matchCount;
         resultPrioritized.push(pushDataProject);
       } else {
         resultProjects.push(pushDataProject);
       }
     } else {
-      resultProjects.push(pushDataProject);
+      if (words.includes(projects[i].name.toLowerCase())) {
+        pushDataProject.matchCount = 2; // 2 to prioritize it more … might change back to 1
+        resultPrioritized.push(pushDataProject);
+      } else {
+        resultProjects.push(pushDataProject);
+      }
     }
   }
 
@@ -229,7 +261,6 @@ function advancedOptions() {
       subtitle: sub,
       icon: 'labelTemplate',
       usage: usage,
-      // badge: usage.toString(),
       action: 'addProject',
       actionArgument: {
         name: name,
@@ -238,24 +269,38 @@ function advancedOptions() {
       },
     };
 
-    // if (labels[i].lastContent == taskDict.content) {
-    if (labels[i].lastContent != undefined) {
-      if (
-        labels[i].lastContent
-          .toLowerCase()
-          .includes(taskDict.content.toLowerCase())
-      ) {
+    // Prioritize labels with matching title and/or words
+    if (labels[i].usedWords != undefined) {
+      if (words.includes(labels[i].name.toLowerCase())) {
+        var labelMatchCount = 2; // 2 to prioritize it more … might change back to 1
+      } else {
+        var labelMatchCount = 0;
+      }
+
+      for (var j = 0; j < words.length; j++) {
+        if (labels[i].usedWords.includes(words[j].toLowerCase())) {
+          labelMatchCount = labelMatchCount + 1;
+        }
+      }
+
+      if (labelMatchCount > 0) {
+        pushDataLabel.matchCount = labelMatchCount;
         resultPrioritized.push(pushDataLabel);
       } else {
         resultLabels.push(pushDataLabel);
       }
     } else {
-      resultLabels.push(pushDataLabel);
+      if (words.includes(labels[i].name.toLowerCase())) {
+        pushDataLabel.matchCount = 2; // 2 to prioritize it more … might change back to 1
+        resultPrioritized.push(pushDataLabel);
+      } else {
+        resultLabels.push(pushDataLabel);
+      }
     }
   }
 
   resultPrioritized.sort(function (a, b) {
-    return b.usage - a.usage;
+    return b.matchCount - a.matchCount || b.usage - a.usage;
   });
 
   var both = resultProjects.concat(resultLabels);
@@ -335,6 +380,8 @@ function postTask(advancedData) {
     var projectIndex = advancedData.index;
     var projectUsageCount =
       Action.preferences.projects.data[projectIndex].usage;
+    var projectUsedWords =
+      Action.preferences.projects.data[projectIndex].usedWords;
 
     if (projectUsageCount == undefined) {
       Action.preferences.projects.data[projectIndex].usage = 1;
@@ -352,9 +399,20 @@ function postTask(advancedData) {
         project_id: advancedData.id,
       };
 
-      // remember used content (= title)
-      Action.preferences.projects.data[projectIndex].lastContent =
-        Action.preferences.taskDict.content;
+      // remember used words
+      if (projectUsedWords == undefined) {
+        Action.preferences.projects.data[projectIndex].usedWords = [];
+        var projectUsedWords =
+          Action.preferences.projects.data[projectIndex].usedWords;
+      }
+      for (var i = 0; i < taskDict.words.length; i++) {
+        if (
+          !projectUsedWords.includes(taskDict.words[i]) &&
+          !stopwords.includes(taskDict.words[i].toLowerCase())
+        ) {
+          projectUsedWords.push(taskDict.words[i].toLowerCase());
+        }
+      }
     } else if (advancedData.type == 'projectAndLabel') {
       var labelId = advancedData.labelId;
       var labelIndex = advancedData.labelIndex;
@@ -380,9 +438,22 @@ function postTask(advancedData) {
         project_id: advancedData.id,
       };
 
-      // remember used content (= title)
-      Action.preferences.labels.data[labelIndex].lastContent =
-        Action.preferences.taskDict.content;
+      // remember used words
+      var labelUsedWords = Action.preferences.labels.data[labelIndex].usedWords;
+
+      if (labelUsedWords == undefined) {
+        Action.preferences.labels.data[labelIndex].usedWords = [];
+        var labelUsedWords =
+          Action.preferences.labels.data[labelIndex].usedWords;
+      }
+      for (var i = 0; i < taskDict.words.length; i++) {
+        if (
+          !labelUsedWords.includes(taskDict.words[i]) &&
+          !stopwords.includes(taskDict.words[i].toLowerCase())
+        ) {
+          labelUsedWords.push(taskDict.words[i].toLowerCase());
+        }
+      }
     }
   } else {
     var body = {
@@ -526,7 +597,6 @@ function settings() {
     },
     {
       title: setKey,
-      // subtitle: setKeySub,
       icon: 'keyTemplate',
       action: 'setApiKey',
     },

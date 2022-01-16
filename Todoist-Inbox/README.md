@@ -55,11 +55,13 @@ You can even add markdown formatted links for the current website in Safari or a
 
 <img src="06.png" width="800"/> 
 
-If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. (Alternatively you can press ⌘⏎ to get to projects and labels.)
+If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. Alternatively you can press ⌘⏎ to get to projects and labels.
 
 <img src="07.png" width="800"/> 
 
-The projects and labels you use frequently, will appear on top of the list. If you entered a task before, it will suggest the matching project/label the next time.  
+Select a project or label with arrow keys or by typing its name. 
+Projects and labels you use frequently will rank higher in the list. The same is true if a project or label name is part of your entered task. Additionally the action will store used words by project/label. If what you type matches one or more previously used words of a project/label, that project/label will also be ranked higher. 
+Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/labels. So all you have to do is hit return. 
 
 ### Setup & Settings
 
