@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Save Raindrop</string>
 	<key>CFBundleVersion</key>
-	<string>5.2.1</string>
+	<string>5.2.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -25,7 +25,9 @@ Supported browsers: Safari, Brave, Chromium, Chrome, Edge, Vivaldi</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions#action-save-raindrop-save-current-website-to-raindropio</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Raindrop-Actions/Save%20Raindrop.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

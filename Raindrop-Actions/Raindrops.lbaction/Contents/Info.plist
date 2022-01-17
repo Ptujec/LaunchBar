@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Raindrops</string>
 	<key>CFBundleVersion</key>
-	<string>4.2.1</string>
+	<string>4.2.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>io.raindrop.macapp</string>
 	<key>LBDescription</key>
@@ -23,7 +23,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions#action-raindrops-browse-and-search-raindropio</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Raindrop-Actions/Raindrops.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

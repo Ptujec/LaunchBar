@@ -187,6 +187,6 @@ function getActions() {
 }
 
 function runAction(argument) {
-    LaunchBar.hide()
+    // LaunchBar.hide()
     LaunchBar.executeAppleScriptFile('./runAction.applescript', argument)
 }

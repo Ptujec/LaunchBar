@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Show/dismiss notifications</string>
 	<key>CFBundleVersion</key>
-	<string>2021.3.4.2</string>
+	<string>3.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -21,7 +21,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-showdismiss-notifications</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Show%20dismiss%20notifications.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
