@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>com.microsoft.Word</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.RecentWordDocuments</string>
+	<key>CFBundleName</key>
+	<string>Recent Word Documents</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LBAssociatedApplication</key>
+	<string>com.microsoft.Word</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-Office-Documents</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-Office-Documents/Recent%20Word%20Documents.lbaction/Contents/Info.plist</string>
+	</dict>
+	<key>LBRequiredApplication</key>
+	<string>com.microsoft.Word</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
