@@ -15,10 +15,13 @@ function run() {
   for (var i = 0; i < fileURLs.length; i++) {
     var filePath = File.pathForFileURL(fileURLs[i]);
     var lastUsedDate = plist[fileURLs[i]].kLastUsedDateKey.toString();
-    result.push({
-      path: filePath,
-      lastUsedDate: lastUsedDate,
-    });
+
+    if (File.exists(filePath) && !File.isDirectory(filePath)) {
+      result.push({
+        path: filePath,
+        lastUsedDate: lastUsedDate,
+      });
+    }
   }
 
   result.sort(function (a, b) {

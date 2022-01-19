@@ -16,7 +16,7 @@ function run() {
     var filePath = File.pathForFileURL(fileURLs[i]);
     var lastUsedDate = plist[fileURLs[i]].kLastUsedDateKey.toString();
 
-    if (File.exists(filePath)) {
+    if (File.exists(filePath) && !File.isDirectory(filePath)) {
       result.push({
         path: filePath,
         lastUsedDate: lastUsedDate,
