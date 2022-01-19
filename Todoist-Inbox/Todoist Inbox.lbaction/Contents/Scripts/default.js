@@ -603,7 +603,7 @@ function settings() {
     {
       title: refresh,
       icon: 'refreshTemplate',
-      action: 'refreshData',
+      children: refreshData(),
     },
   ];
 }
