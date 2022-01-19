@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>YNAB Lite</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.2</string>
+	<string>1.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -21,7 +21,9 @@
 		<key>LBTwitter</key>
 		<string>@Ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/YNAB-Actions#ynab-lite-</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/YNAB-Actions/YNAB%20Lite.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
