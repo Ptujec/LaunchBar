@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.OakTree.Accordance</string>
+	<string>flame.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.AccPaste</string>
 	<key>CFBundleName</key>
 	<string>Accordance - Paste scripture</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2</string>
+	<string>2.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -23,7 +23,9 @@ Paste scriptures in an active text field. You can set the translation you want t
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#paste-scripture</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Accordance-Actions/Accordance%20-%20Paste%20scripture.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.OakTree.Accordance</string>
