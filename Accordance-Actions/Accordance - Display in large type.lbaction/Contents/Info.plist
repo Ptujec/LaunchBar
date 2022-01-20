@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.OakTree.Accordance</string>
+	<string>flame.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.AccordanceDisplayInLargeType</string>
 	<key>CFBundleName</key>
 	<string>Accordance - Display in large type</string>
 	<key>CFBundleVersion</key>
-	<string>2021.3.1.1</string>
+	<string>3.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,11 +17,13 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Display scriptures in large type. You can set the translation you want to use in default.js (line 11). Open the integrated Action Editor and go to "Scripts".</string>
+		<string>⇧⏎ = Set default translation, ⌘⏎ (after entry) = Display in a different translation</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#display-in-large-type</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Accordance-Actions/Accordance%20-%20Display%20in%20large%20type.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.OakTree.Accordance</string>
@@ -33,11 +35,13 @@
 			<array>
 				<string>string</string>
 			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
+			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>

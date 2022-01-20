@@ -8,6 +8,8 @@ In order to make display and paste actions work properly it is suggested to set 
 ## Display in large type 
 <img src="accdisplay.gif" width="600"/>
 
+Options: ⇧⏎ = Set default translation, ⌘⏎ (after entry) = Display in a different translation
+
 ## Paste scripture
 <img src="accpaste.gif" width="600"/>
 
@@ -30,3 +32,7 @@ With # you can scroll to a specific book. For example "Moses#Acts_6:14" will sea
 
 ## Download
 [Download LaunchBar Accordance Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+
+## Updates
+
+The latest versions of these actions integrate with Action Updates by @prenagha. You can find the [latest version of Action Updates in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
