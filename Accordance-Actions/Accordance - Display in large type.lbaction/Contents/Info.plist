@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Display in large type</string>
 	<key>CFBundleVersion</key>
-	<string>3.2.1</string>
+	<string>3.2.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⇧⏎ = Set default translation, ⌘⏎ (after entry) = Display in a different translation</string>
+		<string>⇧⏎ = Set default translation, ⌘⏎ (after entry) = Choose translation</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
