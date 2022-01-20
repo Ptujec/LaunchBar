@@ -21,3 +21,7 @@ You can also remove items from your Favorites, or remove all Favorites, if you w
 ## Download
 
 [Download LaunchBar Action: Time Zones for Cities](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Timezones) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+
+## Updates
+
+The latest version of this action integrates with Action Updates by @prenagha.    You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).

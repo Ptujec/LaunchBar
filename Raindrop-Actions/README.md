@@ -45,3 +45,7 @@ When you run one of these actions for the first time you will be redirected to R
 ## Download
 
 [Download LaunchBar Actions for Raindrop.io](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+
+## Updates
+
+The latest version of this action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).

@@ -25,3 +25,7 @@ Opens the most recent notification.
 
 ## Download
 [Download LaunchBar Actions for Managing Notifications](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Notifications) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+
+## Updates
+
+The latest version of this action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
