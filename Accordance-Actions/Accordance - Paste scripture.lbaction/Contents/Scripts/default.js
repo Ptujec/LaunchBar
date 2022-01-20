@@ -7,119 +7,434 @@ Sources:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
 
-// SET THE TRANSLATION YOU WANT TO USE IN THE NEXT LINE. (You can usually find the correct abbreviation in brackets when you select "About this Text" in Accordance.)
-var bibleText = 'ESVS'
+// Use "common.strings" for the current language when calling localize() on Strings:
+String.prototype.localizationTable = 'default';
 
-// --- Only change if you know what you are doing from here --- //
+const GermanBookList = [
+  'Mose',
+  'Genesis',
+  'Exodus',
+  'Levitikus',
+  'Numeri',
+  'Deuternomium',
+  'Josua',
+  'Richter',
+  'Rut',
+  'Könige',
+  'Chronik',
+  'Esra',
+  'Nehemia',
+  'Ester',
+  'Hiob',
+  'Psalmen',
+  'Sprichwörter',
+  'Sprüche',
+  'Kohelet',
+  'Prediger',
+  'Hohelied',
+  'Jesaja',
+  'Jeremia',
+  'Klagelieder',
+  'Hesekiel',
+  'Hosea',
+  'Obadja',
+  'Jona',
+  'Micha',
+  'Habakuk',
+  'Zefanja',
+  'Haggai',
+  'Sacharja',
+  'Maleachi',
+  'Matthäus',
+  'Markus',
+  'Lukas',
+  'Johannes',
+  'Apg',
+  'Apostelgeschichte',
+  'Römer',
+  'Korinther',
+  'Galater',
+  'Epheser',
+  'Philipper',
+  'Kolosser',
+  'Thessalonicher',
+  'Timotheus',
+  'Philemon',
+  'Hebräer',
+  'Jakobus',
+  'Petrus',
+  'Judas',
+  'Offenbarung',
+];
 
-const GermanBookList = ["Mose", "Genesis", "Exodus", "Levitikus", "Numeri", "Deuternomium", "Josua", "Richter", "Rut", "Könige", "Chronik", "Esra", "Nehemia", "Ester", "Hiob", "Psalmen", "Sprichwörter", "Sprüche", "Kohelet", "Prediger", "Hohelied", "Jesaja", "Jeremia", "Klagelieder", "Hesekiel", "Hosea", "Obadja", "Jona", "Micha", "Habakuk", "Zefanja", "Haggai", "Sacharja", "Maleachi", "Matthäus", "Markus", "Lukas", "Johannes", "Apg", "Apostelgeschichte", "Römer", "Korinther", "Galater", "Epheser", "Philipper", "Kolosser", "Thessalonicher", "Timotheus", "Philemon", "Hebräer", "Jakobus", "Petrus", "Judas", "Offenbarung"]
+const SloveneBookList = [
+  'Mojzes',
+  'Geneza',
+  'Eksodus',
+  'Levitik',
+  'Numeri',
+  'Devteronomij',
+  'Jozue',
+  'Sodniki',
+  'Ruta',
+  'Kralji',
+  'Kroniška',
+  'Ezra',
+  'Nehemija',
+  'Estera',
+  'Job',
+  'Psalmi',
+  'Pregovori',
+  'Pregovori',
+  'Kohelet',
+  'Pridigar',
+  'Visoka pesem',
+  'Izaija',
+  'Jeremija',
+  'Žalostinke',
+  'Ezekiel',
+  'Ozej',
+  'Abdija',
+  'Jona',
+  'Mihej',
+  'Habakuk',
+  'Sofonija',
+  'Agej',
+  'Zaharija',
+  'Malahija',
+  'Matej',
+  'Marko',
+  'Luka',
+  'Janez',
+  'Apd',
+  'Apostolska dela',
+  'Rimljanom',
+  'Korinčanom',
+  'Galačanom',
+  'Efežanom',
+  'Filipljanom',
+  'Kološanom',
+  'Tesaloničanom',
+  'Timoteju',
+  'Filemonu',
+  'Hebrejcem',
+  'Jakob',
+  'Peter',
+  'Juda',
+  'Razodetje',
+];
 
-const SloveneBookList = ["Mojzes", "Geneza", "Eksodus", "Levitik", "Numeri", "Devteronomij", "Jozue", "Sodniki", "Ruta", "Kralji", "Kroniška", "Ezra", "Nehemija", "Estera", "Job", "Psalmi", "Pregovori", "Pregovori", "Kohelet", "Pridigar", "Visoka pesem", "Izaija", "Jeremija", "Žalostinke", "Ezekiel", "Ozej", "Abdija", "Jona", "Mihej", "Habakuk", "Sofonija", "Agej", "Zaharija", "Malahija", "Matej", "Marko", "Luka", "Janez", "Apd", "Apostolska dela", "Rimljanom", "Korinčanom", "Galačanom", "Efežanom", "Filipljanom", "Kološanom", "Tesaloničanom", "Timoteju", "Filemonu", "Hebrejcem", "Jakob", "Peter", "Juda", "Razodetje"]
+const EnglishBookList = [
+  'Moses',
+  'Genesis',
+  'Exodus',
+  'Leviticus',
+  'Numbers',
+  'Deuteronomy',
+  'Joshua',
+  'Judges',
+  'Ruth',
+  'Kings',
+  'Chronicles',
+  'Ezra',
+  'Nehemiah',
+  'Esther',
+  'Job',
+  'Psalms',
+  'Proverbs',
+  'Proverbs',
+  'Ecclesiastes',
+  'Ecclesiastes',
+  'Song',
+  'Isaiah',
+  'Jeremiah',
+  'Lamentations',
+  'Ezekiel',
+  'Hosea',
+  'Obadiah',
+  'Jonah',
+  'Micah',
+  'Habakkuk',
+  'Zephaniah',
+  'Haggai',
+  'Zechariah',
+  'Malachi',
+  'Matthew',
+  'Mark',
+  'Luke',
+  'John',
+  'Acts',
+  'Acts',
+  'Romans',
+  'Corinthians',
+  'Galatians',
+  'Ephesians',
+  'Philippians',
+  'Colossians',
+  'Thessalonians',
+  'Timothy',
+  'Philemon',
+  'Hebrews',
+  'James',
+  'Peter',
+  'Jude',
+  'Revelation',
+];
 
-const EnglishBookList = ["Moses", "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "Kings", "Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Proverbs", "Ecclesiastes", "Ecclesiastes", "Song", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Hosea", "Obadiah", "Jonah", "Micah", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Acts", "Romans", "Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "Thessalonians", "Timothy", "Philemon", "Hebrews", "James", "Peter", "Jude", "Revelation"]
-
+const AccordancePrefs = eval(
+  File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
+)[0];
 
 function run(argument) {
+  var translation = Action.preferences.translation;
 
+  if (translation == undefined) {
+    var translation =
+      AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+
+    Action.preferences.translation = translation;
+  }
+
+  if (LaunchBar.options.shiftKey) {
+    var output = settings();
+    return output;
+  } else {
     // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
-    var content = File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
-    var string = content.match(/useeuropeanversenotation":(\d)/)
-    var num = string[1]
+    var num =
+      AccordancePrefs['com.oaktree.settings.general.useeuropeanversenotation'];
 
     if (num == 0) {
-        // Default Vers Notation
-        var result = argument
+      // Default Vers Notation
+      var result = argument;
     } else {
-        // European Vers Notation
-        argument = argument
-            .trim()
-            // clean up capture (e.g. brackets) and formart errors (e.g. spaces before or after verse numbers) in entry
-            .replace(/\(|\)/g, '')
-            .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2')
-
-
-        // Convert Slovene and German argument strings
-        var mA = argument.match(/(?:[1-5]\.?\s?)?(?:[a-zžščöäü]+\.?\s?)?[0-9,.:\-–f]+/gi)
-
-        var result = []
-        for (var i = 0; i < mA.length; i++) {
-            var scrip = mA[i]
-                .toString()
-                .trim()
-
-            // makes sure non-european styles get converted 
-            if (scrip.includes(':')) {
-                scrip = scrip
-                    .replace(/,/g, '.')
-                    .replace(/:/g, ',')
-            }
-
-            var mB = scrip.match(/([1-5]\.?\s?)?([a-zžščöäü]+\.?\s?)?([0-9,.:\-–f]+)/i)
-
-            var prefix = mB[1]
-
-            if (prefix == undefined) {
-                prefix = ''
-            } else {
-                prefix = prefix
-                    .replace(/\./, '')
-            }
-
-            var bookName = mB[2]
-
-            if (bookName == undefined) {
-                bookName = ''
-            } else {
-                bookName = bookName
-                    .trim()
-                    .replace(/\./, '')
-                    .toLowerCase()
-
-                var iBN = GermanBookList
-                    .findIndex(element => element
-                        .toLowerCase()
-                        .startsWith(bookName))
-
-
-                if (iBN == -1) {
-                    iBN = SloveneBookList
-                        .findIndex(element => element
-                            .toLowerCase()
-                            .startsWith(bookName))
-                }
-
-                if (iBN != -1) {
-                    bookName = EnglishBookList[iBN]
-                }
-                bookName = bookName + ' '
-            }
-            var suffix = mB[3]
-
-            var newScrip = prefix + bookName + suffix
-
-            result.push(newScrip + ' ')
-        }
-        result = result
-            .toString()
-            .replace(/ ,/g, '; ')
-            .trim()
-            .replace(/1 Moses|1Moses/, 'Genesis')
-            .replace(/2 Moses|2Moses/, 'Exodus')
-            .replace(/3 Moses|3Moses/, 'Leviticus')
-            .replace(/4 Moses|4Moses/, 'Numbers')
-            .replace(/5 Moses|5Moses/, 'Deuteronomy')
-    }
-
-    var text = LaunchBar.executeAppleScript('tell application "Accordance" to set theResult to «event AccdTxRf» {"' + bibleText + '", "' + result + '", true}')
+      // European Vers Notation
+      argument = argument
         .trim()
+        // clean up capture (e.g. brackets) and formart errors (e.g. spaces before or after verse numbers) in entry
+        .replace(/\(|\)/g, '')
+        .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2');
 
-    // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
-    bibleText = bibleText.replace(/°|-LEM/g, '')
+      // Convert Slovene and German argument strings
+      var mA = argument.match(
+        /(?:[1-5]\.?\s?)?(?:[a-zžščöäü]+\.?\s?)?[0-9,.:\-–f]+/gi
+      );
+
+      var result = [];
+      for (var i = 0; i < mA.length; i++) {
+        var scrip = mA[i].toString().trim();
+
+        // makes sure non-european styles get converted
+        if (scrip.includes(':')) {
+          scrip = scrip.replace(/,/g, '.').replace(/:/g, ',');
+        }
+
+        var mB = scrip.match(
+          /([1-5]\.?\s?)?([a-zžščöäü]+\.?\s?)?([0-9,.:\-–f]+)/i
+        );
+
+        var prefix = mB[1];
+
+        if (prefix == undefined) {
+          prefix = '';
+        } else {
+          prefix = prefix.replace(/\./, '');
+        }
+
+        var bookName = mB[2];
+
+        if (bookName == undefined) {
+          bookName = '';
+        } else {
+          bookName = bookName.trim().replace(/\./, '').toLowerCase();
+
+          var iBN = GermanBookList.findIndex((element) =>
+            element.toLowerCase().startsWith(bookName)
+          );
+
+          if (iBN == -1) {
+            iBN = SloveneBookList.findIndex((element) =>
+              element.toLowerCase().startsWith(bookName)
+            );
+          }
+
+          if (iBN != -1) {
+            bookName = EnglishBookList[iBN];
+          }
+          bookName = bookName + ' ';
+        }
+        var suffix = mB[3];
+
+        var newScrip = prefix + bookName + suffix;
+
+        result.push(newScrip + ' ');
+      }
+      result = result
+        .toString()
+        .replace(/ ,/g, '; ')
+        .trim()
+        .replace(/1 Moses|1Moses/, 'Genesis')
+        .replace(/2 Moses|2Moses/, 'Exodus')
+        .replace(/3 Moses|3Moses/, 'Leviticus')
+        .replace(/4 Moses|4Moses/, 'Numbers')
+        .replace(/5 Moses|5Moses/, 'Deuteronomy');
+    }
 
     if (LaunchBar.options.commandKey) {
-        // MD
-        LaunchBar.paste('> ' + text + ' (' + argument + ' ' + bibleText + ')')
+      var output = listTranslations(result, argument);
+      return output;
     } else {
-        LaunchBar.paste(text + ' (' + argument + ' ' + bibleText + ')')
+      pasteText(result, argument, translation);
     }
+  }
+}
+
+function pasteText(result, argument, translation) {
+  var text = LaunchBar.executeAppleScript(
+    'tell application "Accordance" to set theResult to «event AccdTxRf» {"' +
+      translation +
+      '", "' +
+      result +
+      '", true}'
+  ).trim();
+
+  // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
+  translationName = translation.replace(/°|-LEM/g, '');
+  argument = argument.charAt(0).toUpperCase() + argument.slice(1);
+
+  if (Action.preferences.format == 'citation') {
+    LaunchBar.paste(
+      '> ' + text + ' (' + argument + ' ' + translationName + ')'
+    );
+  } else {
+    LaunchBar.paste(text + ' (' + argument + ' ' + translationName + ')');
+  }
+}
+
+function settings() {
+  // TODO: localize
+  if (Action.preferences.format == undefined) {
+    var formatTitle = 'Paste unformatted'.localize();
+    var formatIcon = 'plainTemplate';
+    var formatArgument = 'plain';
+  } else {
+    var formatTitle = 'Paste as markdown quote'.localize();
+    var formatIcon = 'citationTemplate';
+    var formatArgument = 'citation';
+  }
+
+  return [
+    {
+      title: formatTitle,
+      subtitle: 'Hit return to change!'.localize(),
+      icon: formatIcon,
+      action: 'setFormat',
+      actionArgument: formatArgument,
+    },
+    {
+      title: 'Choose default translation'.localize(),
+      icon: 'bookTemplate',
+      children: listTranslations(),
+    },
+  ];
+}
+
+function setFormat(format) {
+  if (format == 'citation') {
+    Action.preferences.format = undefined;
+  } else {
+    Action.preferences.format = 'citation';
+  }
+  var output = settings();
+  return output;
+}
+
+function listTranslations(result, argument) {
+  var translations = File.getDirectoryContents(
+    '~/Library/Application Support/Accordance/Modules/Texts'
+  );
+
+  var defaultTranslation = [];
+  var lastUsedTranslation = [];
+  var rest = [];
+  for (var i = 0; i < translations.length; i++) {
+    var translation = translations[i].split('.')[0];
+
+    if (translations[i].split('.')[1] == 'atext') {
+      var plistPath =
+        '~/Library/Application Support/Accordance/Modules/Texts/' +
+        translation +
+        '.atext/Info.plist';
+
+      if (!File.exists(plistPath)) {
+        plistPath =
+          '~/Library/Application Support/Accordance/Modules/Texts/' +
+          translation +
+          '.atext/ExtraInfo.plist';
+      }
+
+      var plist = File.readPlist(plistPath);
+      var translationName = plist['com.oaktree.module.humanreadablename'];
+
+      if (translationName == undefined) {
+        var translationName = translation.trim().replace('°', '');
+      }
+    } else {
+      var translationName = translation.trim().replace('°', '');
+    }
+
+    if (LaunchBar.options.commandKey) {
+      var pushContent = {
+        title: translationName,
+        subtitle: argument,
+        action: 'setTranslation',
+        actionArgument: {
+          result: result,
+          argument: argument,
+          translation: translation,
+        },
+      };
+    } else {
+      var pushContent = {
+        title: translationName,
+        action: 'setDefaultTranslation',
+        actionArgument: translation,
+      };
+    }
+
+    if (
+      translation === Action.preferences.lastUsed &&
+      LaunchBar.options.commandKey
+    ) {
+      pushContent.icon = 'bookTemplate';
+      lastUsedTranslation.push(pushContent);
+    } else if (translation === Action.preferences.translation) {
+      pushContent.icon = 'selectedBookTemplate';
+      defaultTranslation.push(pushContent);
+    } else {
+      pushContent.icon = 'bookTemplate';
+      rest.push(pushContent);
+    }
+  }
+  rest.sort(function (a, b) {
+    return a.title > b.title;
+  });
+
+  var result = lastUsedTranslation.concat(defaultTranslation.concat(rest));
+  return result;
+}
+
+function setDefaultTranslation(translation) {
+  Action.preferences.translation = translation;
+  var output = listTranslations();
+  return output;
+}
+
+function setTranslation(aA) {
+  result = aA.result;
+  argument = aA.argument;
+  translation = aA.translation;
+
+  Action.preferences.lastUsed = translation;
+
+  pasteText(result, argument, translation);
 }

@@ -8,10 +8,12 @@ In order to make display and paste actions work properly it is suggested to set 
 ## Display in large type 
 <img src="accdisplay.gif" width="600"/>
 
-Options: ⇧⏎ = Set default translation, ⌘⏎ (after entry) = Display in a different translation
+Options: ⇧⏎ = Set default translation, ⌘⏎ (after entry) = Choose translation
 
 ## Paste scripture
 <img src="accpaste.gif" width="600"/>
+
+Options: ⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation
 
 ## Look up scripture 
 <img src="acclookup.gif" width="600"/>

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Paste scripture</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,9 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⌘⏎ = Paste as Markdown blockquote
-
-Paste scriptures in an active text field. You can set the translation you want to use in default.js (line 11). Open the integrated Action Editor and go to "Scripts".</string>
+		<string>⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -37,10 +35,14 @@ Paste scriptures in an active text field. You can set the translation you want t
 			<array>
 				<string>string</string>
 			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>
 		</dict>
