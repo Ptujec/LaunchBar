@@ -4,7 +4,7 @@ Translation Suggestion
 
 function runWithString(string) {
 
-    var t = string
+    var t = string.toLowerCase()
     var texts = File.getDirectoryContents('~/Library/Application Support/Accordance/Modules/Texts')
 
     var result = []
