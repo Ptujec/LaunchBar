@@ -229,12 +229,14 @@ function showFavs() {
           var icon = 'nightTemplate';
         }
 
+        var cityData = cData[i];
+
         cities.push({
           title: time + ', ' + date,
           subtitle: localeInfo + ', TZ: ' + tz,
           badge: city,
           icon: icon,
-          children: favOptions(mapsURL, city, lat, lng, cData[i]),
+          children: favOptions(mapsURL, city, lat, lng, cityData),
         });
       } catch (error) {
         //
@@ -281,22 +283,18 @@ function makeFav(cData) {
   return output;
 }
 
-function favOptions(a) {
-  var url = a.mapsURL;
-  var city = a.city;
-  var cData = a.cData;
-
+function favOptions(mapsURL, city, lat, lng, cityData) {
   return [
     {
       title: 'Open "' + city + '" in Apple Maps',
-      url: url,
+      url: mapsURL,
       icon: 'com.apple.Maps',
     },
     {
       title: 'Remove "' + city + '" from Favorites',
       icon: 'unFavTemplate.png',
       action: 'removeFav',
-      actionArgument: cData,
+      actionArgument: cityData,
     },
     {
       title: 'Remove all Favorites',
