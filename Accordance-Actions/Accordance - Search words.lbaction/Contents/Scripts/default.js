@@ -14,10 +14,17 @@ function run(argument) {
       var translation = encodeURI(a[0]);
       var query = encodeURI(a[1]);
       query = searchOptions(query);
+
       LaunchBar.openURL('accord://search/' + translation + '?' + query);
     } else {
       LaunchBar.openURL('accord://search/?' + encodeURI(argument));
     }
+  } else if (argument.includes(':')) {
+    var a = argument.split(':');
+    var translation = encodeURI(a[0]);
+    var query = encodeURI(a[1]);
+    query = searchOptions(query);
+    LaunchBar.openURL('accord://search/' + translation + '?' + query);
   } else {
     // UI language check
     var aPlist = File.readPlist(
