@@ -371,7 +371,13 @@ function chooseTranslation(result, argument) {
       title: translationName,
       subtitle: argument,
       icon: 'bookTemplate',
-      url: 'accord://read/' + encodeURI(translation) + '?' + encodeURI(result),
+      action: 'lookupInTranslation',
+      actionArgument: {
+        translation: translation,
+        result: result,
+      },
+
+      // url: 'accord://read/' + encodeURI(translation) + '?' + encodeURI(result),
     };
 
     if (translation === Action.preferences.lastUsed) {
@@ -386,4 +392,15 @@ function chooseTranslation(result, argument) {
 
   var translationResult = lastUsedTranslation.concat(otherTranslations);
   return translationResult;
+}
+
+function lookupInTranslation(dict) {
+  var translation = dict.translation;
+  var result = dict.result;
+
+  Action.preferences.lastUsed = translation;
+  LaunchBar.hide();
+  LaunchBar.openURL(
+    'accord://read/' + encodeURI(translation) + '?' + encodeURI(result)
+  );
 }
