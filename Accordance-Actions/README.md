@@ -21,7 +21,6 @@ Options: ⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation
 Options: ⌘⏎ (after entry) = Choose translation
 
 ## Search words
-<img src="accsearch.gif" width="600"/>
 
 Per default spaces are replaced with "AND" tags. Alternatively you can use quotation marks to search for an exact term, or you can fine-tune your search by using "A" (AND), "O" (OR) or "N" (NOT) as shown here:    
 
