@@ -1,11 +1,7 @@
 # LaunchBar Search Actions
 
-<img src="zotero.gif" width="600"/> 
-
-## Full List: 
-
 - Twitter Search
-- Zotero Search
+- ~~Zotero Search~~ (Moved to it's own folder)
 - Notion Search
 - iA Writer Search 
 - Mindnode Search
