@@ -18,6 +18,8 @@ Options: ⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation
 ## Look up scripture 
 <img src="acclookup.gif" width="600"/>
 
+Options: ⌘⏎ (after entry) = Choose translation
+
 ## Search words
 Per default spaces are replaced with "AND" tags or with "OR" tags when holding option. By holding command the string will stay as entered. 
 

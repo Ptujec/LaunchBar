@@ -274,10 +274,11 @@ function run(argument) {
       .replace(/4 Moses|4Moses/, 'Numbers')
       .replace(/5 Moses|5Moses/, 'Deuteronomy');
   }
-  lookUp(result);
+  var output = lookUp(result, argument);
+  return output;
 }
 
-function lookUp(result) {
+function lookUp(result, argument) {
   // UI language check
   var aPlist = File.readPlist(
     '~/Library/Preferences/com.OakTree.Accordance.plist'
@@ -299,27 +300,90 @@ function lookUp(result) {
     var allTextSetting = '[All_Texts];Verses?';
   }
 
-  if (LaunchBar.options.commandKey) {
-    // Force read option
-    LaunchBar.openURL('accord://read/?' + encodeURIComponent(result));
-  } else if (LaunchBar.options.alternateKey) {
-    // Force research option
+  // if (LaunchBar.options.shiftKey) {
+  //   // Force read option
+  //   LaunchBar.openURL('accord://read/?' + encodeURIComponent(result));
+  // } else if (LaunchBar.options.alternateKey) {
+  //   // Force research option
+  //   LaunchBar.openURL(
+  //     'accord://research/' + allTextSetting + encodeURIComponent(result)
+  //   );
+  // } else {
+
+  // Smart option
+  if (
+    LaunchBar.options.commandKey ||
+    result.endsWith('f') ||
+    result.includes('-') ||
+    result.includes(';') ||
+    !result.includes(',')
+  ) {
+    if (LaunchBar.options.commandKey) {
+      var output = chooseTranslation(result, argument);
+      return output;
+    } else {
+      LaunchBar.openURL('accord://read/?' + encodeURIComponent(result));
+    }
+  } else {
     LaunchBar.openURL(
       'accord://research/' + allTextSetting + encodeURIComponent(result)
     );
-  } else {
-    // Smart option
-    if (
-      result.endsWith('f') ||
-      result.includes('-') ||
-      result.includes(';') ||
-      !result.includes(',')
-    ) {
-      LaunchBar.openURL('accord://read/?' + encodeURIComponent(result));
+  }
+  // }
+}
+
+function chooseTranslation(result, argument) {
+  var translations = File.getDirectoryContents(
+    '~/Library/Application Support/Accordance/Modules/Texts'
+  );
+
+  var lastUsedTranslation = [];
+  var otherTranslations = [];
+  for (var i = 0; i < translations.length; i++) {
+    var translation = translations[i].split('.')[0];
+
+    if (translations[i].split('.')[1] == 'atext') {
+      var plistPath =
+        '~/Library/Application Support/Accordance/Modules/Texts/' +
+        translation +
+        '.atext/Info.plist';
+
+      if (!File.exists(plistPath)) {
+        plistPath =
+          '~/Library/Application Support/Accordance/Modules/Texts/' +
+          translation +
+          '.atext/ExtraInfo.plist';
+      }
+
+      var plist = File.readPlist(plistPath);
+      var translationName = plist['com.oaktree.module.humanreadablename'];
+      if (translationName == undefined) {
+        var translationName = plist['com.oaktree.module.fullmodulename'];
+        if (translationName == undefined) {
+          var translationName = translation.trim().replace('°', '');
+        }
+      }
     } else {
-      LaunchBar.openURL(
-        'accord://research/' + allTextSetting + encodeURIComponent(result)
-      );
+      var translationName = translation.trim().replace('°', '');
+    }
+
+    var pushContent = {
+      title: translationName,
+      subtitle: argument,
+      icon: 'bookTemplate',
+      url: 'accord://read/' + encodeURI(translation) + '?' + encodeURI(result),
+    };
+
+    if (translation === Action.preferences.lastUsed) {
+      lastUsedTranslation.push(pushContent);
+    } else {
+      otherTranslations.push(pushContent);
     }
   }
+  otherTranslations.sort(function (a, b) {
+    return a.title > b.title;
+  });
+
+  var translationResult = lastUsedTranslation.concat(otherTranslations);
+  return translationResult;
 }
