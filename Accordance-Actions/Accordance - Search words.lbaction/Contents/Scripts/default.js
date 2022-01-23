@@ -7,24 +7,14 @@
 
 function run(argument) {
   // Mode (search or research)
-  if (argument.includes('#')) {
-    if (argument.includes(':')) {
-      //Translation Suggestion
-      var a = argument.split(':');
-      var translation = encodeURI(a[0]);
-      var query = encodeURI(a[1]);
-      query = searchOptions(query);
-
-      LaunchBar.openURL('accord://search/' + translation + '?' + query);
+  if (argument.includes('#') || LaunchBar.options.commandKey) {
+    if (LaunchBar.options.commandKey) {
+      // Choose Translation
+      var output = chooseTranslation(argument);
+      return output;
     } else {
       LaunchBar.openURL('accord://search/?' + encodeURI(argument));
     }
-  } else if (argument.includes(':')) {
-    var a = argument.split(':');
-    var translation = encodeURI(a[0]);
-    var query = encodeURI(a[1]);
-    query = searchOptions(query);
-    LaunchBar.openURL('accord://search/' + translation + '?' + query);
   } else {
     // UI language check
     var aPlist = File.readPlist(
@@ -42,15 +32,25 @@ function run(argument) {
     }
 
     if (lang.startsWith('de')) {
-      var allSetting = '[Alle];?';
+      var allSetting = '[Alle]';
     } else {
-      var allSetting = '[All];?';
+      var allSetting = '[All]';
     }
 
     var query = argument;
     query = searchOptions(query);
 
-    LaunchBar.openURL('accord://research/' + allSetting + encodeURI(query));
+    // Fix for Slovene Unicode Characters (German Umlaute seem to be ok)
+    const substrings = ['č', 'ž', 'š', 'Č', 'Ž', 'Š'];
+    if (substrings.some((v) => query.includes(v))) {
+      LaunchBar.openURL(
+        'accord://research/' + allSetting + ';Unicode?' + encodeURI(query)
+      );
+    } else {
+      LaunchBar.openURL(
+        'accord://research/' + allSetting + ';?' + encodeURI(query)
+      );
+    }
   }
 }
 
@@ -65,12 +65,80 @@ function searchOptions(query) {
     .replace(/\sA\s/g, '<AND>')
     .replace(/\sN\s/g, '<NOT>');
 
-  if (LaunchBar.options.commandKey) {
-    //
-  } else if (LaunchBar.options.alternateKey) {
-    query = query.replace(/\s/g, '<OR>');
-  } else {
+  // Replace spaces with <AND> except if the query is in quotation marks
+  if (!query.includes('"')) {
     query = query.replace(/\s/g, '<AND>');
   }
   return query;
+}
+
+function chooseTranslation(argument) {
+  var translations = File.getDirectoryContents(
+    '~/Library/Application Support/Accordance/Modules/Texts'
+  );
+
+  var lastUsedTranslation = [];
+  var otherTranslations = [];
+  for (var i = 0; i < translations.length; i++) {
+    var translation = translations[i].split('.')[0];
+
+    if (translations[i].split('.')[1] == 'atext') {
+      var plistPath =
+        '~/Library/Application Support/Accordance/Modules/Texts/' +
+        translation +
+        '.atext/Info.plist';
+
+      if (!File.exists(plistPath)) {
+        plistPath =
+          '~/Library/Application Support/Accordance/Modules/Texts/' +
+          translation +
+          '.atext/ExtraInfo.plist';
+      }
+
+      var plist = File.readPlist(plistPath);
+      var translationName = plist['com.oaktree.module.humanreadablename'];
+      if (translationName == undefined) {
+        var translationName = plist['com.oaktree.module.fullmodulename'];
+        if (translationName == undefined) {
+          var translationName = translation.trim().replace('°', '');
+        }
+      }
+    } else {
+      var translationName = translation.trim().replace('°', '');
+    }
+
+    var pushContent = {
+      title: translationName,
+      subtitle: argument,
+      icon: 'bookTemplate',
+      action: 'searchInTranslation',
+      actionArgument: {
+        translation: translation,
+        argument: argument,
+      },
+    };
+
+    if (translation === Action.preferences.lastUsed) {
+      lastUsedTranslation.push(pushContent);
+    } else {
+      otherTranslations.push(pushContent);
+    }
+  }
+  otherTranslations.sort(function (a, b) {
+    return a.title > b.title;
+  });
+
+  var translationResult = lastUsedTranslation.concat(otherTranslations);
+  return translationResult;
+}
+
+function searchInTranslation(dict) {
+  var translation = dict.translation;
+  var argument = dict.argument;
+
+  Action.preferences.lastUsed = translation;
+  LaunchBar.hide();
+  LaunchBar.openURL(
+    'accord://search/' + encodeURI(translation) + '?' + encodeURI(argument)
+  );
 }

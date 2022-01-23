@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Search words</string>
 	<key>CFBundleVersion</key>
-	<string>5.1.1</string>
+	<string>5.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⏎ = A and B, ⌥⏎ = A or B, ⌘⏎ = A B </string>
+		<string>A = AND, O = OR, N = NOT, Exact search with \"\", ⌘⏎ = Choose translation</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -35,24 +35,7 @@
 			<array>
 				<string>string</string>
 			</array>
-			<key>LBRequiresArgument</key>
-			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
-			<key>LBRunInBackground</key>
-			<true/>
-			<key>LBScriptName</key>
-			<string>default.js</string>
-		</dict>
-		<key>LBSuggestionsScript</key>
-		<dict>
-			<key>LBAcceptedArgumentTypes</key>
-			<array>
-				<string>string</string>
-			</array>
 			<key>LBKeepWindowActive</key>
-			<true/>
-			<key>LBLiveFeedbackEnabled</key>
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
@@ -61,7 +44,7 @@
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>suggestions.js</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>
