@@ -21,11 +21,9 @@ Options: ⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation
 Options: ⌘⏎ (after entry) = Choose translation
 
 ## Search words
-Per default spaces are replaced with "AND" tags or with "OR" tags when holding option. By holding command the string will stay as entered. 
-
 <img src="accsearch.gif" width="600"/>
 
-You also can use "A" (AND), "O" (OR) or "N" (NOT) manually as shown here:    
+Per default spaces are replaced with "AND" tags. Alternatively you can use quotation marks to search for an exact term, or you can fine-tune your search by using "A" (AND), "O" (OR) or "N" (NOT) as shown here:    
 
 <img src="advancedsearchoptions.png" width="600"/>
 
