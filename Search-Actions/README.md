@@ -1,7 +1,7 @@
 # LaunchBar Search Actions
 
 - Twitter Search
-- ~~Zotero Search~~ (Moved to it's own folder)
+- ~~Zotero Search~~ ([Moved to it's own folder](https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions#readme))
 - Notion Search
 - iA Writer Search 
 - Mindnode Search
