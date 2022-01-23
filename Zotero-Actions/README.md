@@ -18,6 +18,12 @@ You can use the following action to show an attachment in the Zotero interface.
 
 <img src="zotero_02.gif" width="720"/> 
 
+
+## Recommendation
+
+You can improve search results if you rename your pdfs with meaningful information. A great help for that is [ZotFile - Advanced PDF management for Zotero](http://zotfile.com/).
+
+
 ## Download
 
 [Download LaunchBar Actions for Zotero](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
