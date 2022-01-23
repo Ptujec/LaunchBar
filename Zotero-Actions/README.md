@@ -2,7 +2,7 @@
 
 Here are two actions that make working with Zotero (attachments) a little more fun. 
 
-## Search 
+## Search Attachments
 
 <img src="zotero_01.gif" width="720"/> 
 
