@@ -1,6 +1,6 @@
 # LaunchBar Actions: Recent Office Documents
 
-**Update 2022-01-24: After tweeting about my actions today I found out that @nriley already built actions for the very same purpose, but without the limitations mentioned below. [So feel free to use his instead](https://github.com/nriley/LBOfficeMRU/releases).** 
+**Update 2022-01-24: After tweeting about my actions today I found out that [@nriley](https://github.com/nriley) already built actions for the very same purpose, but without the limitations mentioned below. [So feel free to use his instead](https://github.com/nriley/LBOfficeMRU/releases).** 
 
 Do you miss recent files when you select Word, Powerpoint or Excel in LaunchBar and press space? 
 
