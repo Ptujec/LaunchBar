@@ -11,7 +11,6 @@ Check for:
 - kMDItemFinderComment
 - kMDItemUserTags 
 - kMDItemAuthors
-
 */
 
 String.prototype.localizationTable = 'de';
@@ -36,19 +35,26 @@ function run(argument) {
       // Search Titel, Display Name, Comment and Tags
       var words = argument.match(/[a-zöäüßžčš]+/gi);
 
+      var excludeFolders = `*'cw)&&!(kMDItemContentType=='public.folder'))`;
+
       if (words.length == 1) {
         var query =
-          `(kMDItemDisplayName=='*` +
+          `((kMDItemDisplayName=='*` +
           argument +
-          `*'cw)||(kMDItemTitle=='*` +
+          excludeFolders +
+          '||' +
+          `(kMDItemTitle=='*` +
           argument +
-          `*'cw)||(kMDItemAuthors=='*` +
+          excludeFolders +
+          `(kMDItemAuthors=='*` +
           argument +
-          `*'cw)||(kMDItemFinderComment=='*` +
+          excludeFolders +
+          `(kMDItemFinderComment=='*` +
           argument +
-          `*'cw)||(kMDItemUserTags=='*` +
+          excludeFolders +
+          `(kMDItemUserTags=='*` +
           argument +
-          `*'cw)`;
+          excludeFolders;
       } else {
         var title = [];
         var displayName = [];
@@ -56,13 +62,17 @@ function run(argument) {
         var userTags = [];
         var authors = [];
 
+        var excludeFolders = `*'cw)&&!(kMDItemContentType=='public.folder')))`;
+
         words.forEach(function (item) {
           // LaunchBar.alert(item);
-          displayName.push(`(kMDItemDisplayName=='*` + item + `*'cw)`);
-          title.push(`(kMDItemTitle=='*` + item + `*'cw)`);
-          authors.push(`(kMDItemAuthors=='*` + item + `*'cw)`);
-          finderComment.push(`(kMDItemFinderComment=='*` + item + `*'cw)`);
-          userTags.push(`(kMDItemUserTags=='*` + item + `*'cw)`);
+          displayName.push(`((kMDItemDisplayName=='*` + item + excludeFolders);
+          title.push(`((kMDItemTitle=='*` + item + excludeFolders);
+          authors.push(`((kMDItemAuthors=='*` + item + excludeFolders);
+          finderComment.push(
+            `((kMDItemFinderComment=='*` + item + excludeFolders
+          );
+          userTags.push(`((kMDItemUserTags=='*` + item + excludeFolders);
         });
 
         var query =
@@ -106,9 +116,11 @@ function run(argument) {
 
     var result = [];
     for (var i = 0; i < output.length; i++) {
+      // if (!File.isDirectory(output[i])) { // cleaner looking code but doesn't perform well
       result.push({
         path: output[i],
       });
+      // }
     }
 
     if (result[0].path == '') {
