@@ -376,9 +376,20 @@ function chooseTranslation(result, argument) {
         translation: translation,
         result: result,
       },
-
-      // url: 'accord://read/' + encodeURI(translation) + '?' + encodeURI(result),
     };
+
+    var translationUsage = Action.preferences.translationUsage;
+
+    if (translationUsage != undefined) {
+      for (var j = 0; j < translationUsage.length; j++) {
+        if (translationUsage[j].translation == translation) {
+          pushContent.usage = translationUsage[j].usage;
+          break;
+        } else {
+          pushContent.usage = 0;
+        }
+      }
+    }
 
     if (translation === Action.preferences.lastUsed) {
       lastUsedTranslation.push(pushContent);
@@ -387,7 +398,7 @@ function chooseTranslation(result, argument) {
     }
   }
   otherTranslations.sort(function (a, b) {
-    return a.title > b.title;
+    return b.usage - a.usage || a.title.localeCompare(b.title);
   });
 
   var translationResult = lastUsedTranslation.concat(otherTranslations);
@@ -397,6 +408,32 @@ function chooseTranslation(result, argument) {
 function lookupInTranslation(dict) {
   var translation = dict.translation;
   var result = dict.result;
+
+  // Write usage data
+  var translationUsage = Action.preferences.translationUsage;
+
+  if (translationUsage == undefined) {
+    Action.preferences.translationUsage = [
+      {
+        translation: translation,
+        usage: 1,
+      },
+    ];
+  } else {
+    for (var i = 0; i < translationUsage.length; i++) {
+      if (translationUsage[i].translation == translation) {
+        var usage = translationUsage[i].usage;
+        Action.preferences.translationUsage[i].usage = usage + 1;
+        var found = true;
+      }
+    }
+    if (found != true) {
+      Action.preferences.translationUsage.push({
+        translation: translation,
+        usage: 1,
+      });
+    }
+  }
 
   Action.preferences.lastUsed = translation;
   LaunchBar.hide();
