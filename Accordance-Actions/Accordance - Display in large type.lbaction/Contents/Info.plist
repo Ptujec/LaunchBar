@@ -5,11 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>flame.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.AccordanceDisplayInLargeType</string>
+	<string>ptujec.LaunchBar.action.AccDisplay</string>
 	<key>CFBundleName</key>
 	<string>Accordance - Display in large type</string>
 	<key>CFBundleVersion</key>
-	<string>3.2.2</string>
+	<string>3.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

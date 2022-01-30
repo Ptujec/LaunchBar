@@ -294,6 +294,9 @@ function displayText(result, argument, translation) {
       '", true}'
   ).trim();
 
+  // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
+  text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
+
   var tL = text.length;
   var lineLength = tL / 7;
 
@@ -370,12 +373,14 @@ function listTranslations(result, argument) {
 
       var plist = File.readPlist(plistPath);
       var translationName = plist['com.oaktree.module.humanreadablename'];
-
       if (translationName == undefined) {
-        var translationName = translation.trim();
+        var translationName = plist['com.oaktree.module.fullmodulename'];
+        if (translationName == undefined) {
+          var translationName = translation.trim().replace('°', '');
+        }
       }
     } else {
-      var translationName = translation.trim();
+      var translationName = translation.trim().replace('°', '');
     }
 
     if (LaunchBar.options.commandKey) {
@@ -389,6 +394,19 @@ function listTranslations(result, argument) {
           translation: translation,
         },
       };
+
+      var translationUsage = Action.preferences.translationUsage;
+
+      if (translationUsage != undefined) {
+        for (var j = 0; j < translationUsage.length; j++) {
+          if (translationUsage[j].translation == translation) {
+            pushContent.usage = translationUsage[j].usage;
+            break;
+          } else {
+            pushContent.usage = 0;
+          }
+        }
+      }
     } else {
       var pushContent = {
         title: translationName,
@@ -403,19 +421,32 @@ function listTranslations(result, argument) {
     ) {
       pushContent.icon = 'bookTemplate';
       lastUsedTranslation.push(pushContent);
-    } else if (translation === Action.preferences.translation) {
+    } else if (
+      translation === Action.preferences.translation &&
+      !LaunchBar.options.commandKey
+    ) {
       pushContent.icon = 'selectedBookTemplate';
       defaultTranslation.push(pushContent);
+    } else if (
+      translation === Action.preferences.translation &&
+      LaunchBar.options.commandKey
+    ) {
+      pushContent.icon = 'selectedBookTemplate';
+      rest.push(pushContent);
     } else {
       pushContent.icon = 'bookTemplate';
       rest.push(pushContent);
     }
   }
   rest.sort(function (a, b) {
-    return a.title > b.title;
+    return b.usage - a.usage || a.title.localeCompare(b.title);
   });
 
-  var result = lastUsedTranslation.concat(defaultTranslation.concat(rest));
+  if (LaunchBar.options.commandKey) {
+    var result = lastUsedTranslation.concat(rest);
+  } else {
+    var result = lastUsedTranslation.concat(defaultTranslation.concat(rest));
+  }
   return result;
 }
 
@@ -429,6 +460,32 @@ function setTranslation(aA) {
   result = aA.result;
   argument = aA.argument;
   translation = aA.translation;
+
+  // Write usage data
+  var translationUsage = Action.preferences.translationUsage;
+
+  if (translationUsage == undefined) {
+    Action.preferences.translationUsage = [
+      {
+        translation: translation,
+        usage: 1,
+      },
+    ];
+  } else {
+    for (var i = 0; i < translationUsage.length; i++) {
+      if (translationUsage[i].translation == translation) {
+        var usage = translationUsage[i].usage;
+        Action.preferences.translationUsage[i].usage = usage + 1;
+        var found = true;
+      }
+    }
+    if (found != true) {
+      Action.preferences.translationUsage.push({
+        translation: translation,
+        usage: 1,
+      });
+    }
+  }
 
   Action.preferences.lastUsed = translation;
 
