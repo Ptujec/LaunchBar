@@ -41,6 +41,8 @@ SSKJ data is from [fran.si](https://www.fran.si/133/sskj2-slovar-slovenskega-knj
 
 <img src="rtv.png" width="600"/>
 
+<img src="rtv2.png" width="600"/>
+
 
 ## Download
 
