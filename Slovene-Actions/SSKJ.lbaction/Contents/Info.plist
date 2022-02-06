@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>SSKJ²</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -25,7 +25,7 @@ https://www.fran.si/133/sskj2-slovar-slovenskega-knjiznega-jezika-2</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Slovene-Actions</string>
 		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Slovene-Actions/SSKJ%C2%B2.lbaction/Contents/Info.plist</string>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Slovene-Actions/SSKJ.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
