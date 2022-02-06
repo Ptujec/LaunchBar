@@ -2,8 +2,6 @@
 
 ## Slovene Language Tools by CJVT
 
-<img src="cjvt_tools.png" width="600"/>
-
 The following actions are a LaunchBar interface to tools from CJVT (Center za jezikovne vire in tehnologije Univerze v Ljubljani). 
 
 [Kolokacije, kolokacijski slovar sodobne slovenščine](https://viri.cjvt.si/kolokacije/slv/about)
