@@ -92,22 +92,26 @@ function getAttributes(dict) {
       for (var i = 9; i < data.length - 1; i++) {
         var columns = data[i].split('\t');
         var gForm = columns[0]; // grammatical form
+        var gMark = columns[1]; // grammatical mark
+
         var gGender = columns[3]; // gender
         var gComparative = columns[5]; // g. positive (e.g. osnovnik)
         var gCase = columns[6]; // g. case
 
-        if (gCase == 'im.') {
-          nom.push(gForm);
-        } else if (gCase == 'rod.') {
-          gen.push(gForm);
-        } else if (gCase == 'daj.') {
-          dat.push(gForm);
-        } else if (gCase == 'tož.') {
-          acc.push(gForm);
-        } else if (gCase == 'mest.') {
-          loc.push(gForm);
-        } else if (gCase == 'or.') {
-          inst.push(gForm);
+        if (gMark != 'nestandardno') {
+          if (gCase == 'im.') {
+            nom.push(gForm);
+          } else if (gCase == 'rod.') {
+            gen.push(gForm);
+          } else if (gCase == 'daj.') {
+            dat.push(gForm);
+          } else if (gCase == 'tož.') {
+            acc.push(gForm);
+          } else if (gCase == 'mest.') {
+            loc.push(gForm);
+          } else if (gCase == 'or.') {
+            inst.push(gForm);
+          }
         }
       }
 
