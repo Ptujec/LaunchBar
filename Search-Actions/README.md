@@ -6,6 +6,7 @@
 - iA Writer Search 
 - Mindnode Search
 - Google Search (with DuckDuckGos version of Feeling Lucky)
+- MuseScore Sheetmusic
 
 ## Download
 
