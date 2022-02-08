@@ -34,17 +34,15 @@ SSKJ data is from [fran.si](https://www.fran.si/133/sskj2-slovar-slovenskega-knj
 
 <img src="cobiss.png" width="600"/>
 
+## RTV 365
+
+<img src="rtv365.png" width="600"/>
 
 ## RTV Slo 4D
 
 <img src="rtv.png" width="600"/>
 
 <img src="rtv2.png" width="600"/>
-
-## RTV 365
-
-<img src="rtv365.png" width="600"/>
-
 
 
 ## Download
