@@ -40,7 +40,7 @@ if (LaunchBar.currentLocale == 'de') {
   var done = 'Fertig!';
 
   var dateStrings = dateStringsJSON.de;
-  stopwords = stopwordsJSON.de;
+  stopwords = stopwordsJSON.de.concat(stopwordsJSON.en);
 } else {
   var p1 = 'Priority 1';
   var p2 = 'Priority 2';
