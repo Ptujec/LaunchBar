@@ -72,7 +72,9 @@ function getAttributes(dict) {
   var mainURL = dict.mainURL;
   var dataURL = dict.dataURL;
 
-  if (LaunchBar.options.alternateKey) {
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(lemma);
+  } else if (LaunchBar.options.alternateKey) {
     LaunchBar.hide();
     LaunchBar.openURL(mainURL);
   } else {
@@ -277,18 +279,21 @@ function getAttributes(dict) {
         var gTense = columns[4]; // category 1
         var cat2 = columns[5]; // gender or person
         var cat3 = columns[6]; //
+        var gMark = columns[1]; // grammatical mark
 
-        if (gTense == 'sedanjik') {
-          if (cat3 == 'prva') {
-            presentFirstPerson.push(gForm);
-          }
-        } else if (gTense == 'deležnik') {
-          if (cat2 == 'moški') {
-            participleMale.push(gForm);
-          }
-        } else if (gTense == 'velelnik') {
-          if (cat3 == 'ednina' && cat2 == 'druga') {
-            imperative.push(gForm);
+        if (gMark != 'nestandardno') {
+          if (gTense == 'sedanjik') {
+            if (cat3 == 'prva') {
+              presentFirstPerson.push(gForm);
+            }
+          } else if (gTense == 'deležnik') {
+            if (cat2 == 'moški') {
+              participleMale.push(gForm);
+            }
+          } else if (gTense == 'velelnik') {
+            if (cat3 == 'ednina' && cat2 == 'druga') {
+              imperative.push(gForm);
+            }
           }
         }
       }
