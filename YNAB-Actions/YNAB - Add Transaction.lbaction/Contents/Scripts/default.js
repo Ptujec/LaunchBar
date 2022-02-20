@@ -421,7 +421,7 @@ function setDateAndContinue(d) {
 
     Action.preferences.tempMailSubject = title;
 
-    var link = result[0];
+    var link = encodeURI(decodeURI(result[0]));
 
     return [
       {
