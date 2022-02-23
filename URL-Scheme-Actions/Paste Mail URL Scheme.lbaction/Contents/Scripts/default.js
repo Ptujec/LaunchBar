@@ -4,7 +4,7 @@ function run(argument) {
   if (argument == undefined) {
     if (LaunchBar.options.shiftKey) {
       var output = LaunchBar.executeAppleScriptFile('./md.applescript').trim();
-    } else if (LaunchBar.options.controlKey) {
+    } else if (LaunchBar.options.alternateKey) {
       var output = LaunchBar.executeAppleScriptFile('./rtf.applescript').trim();
     } else {
       var output = LaunchBar.executeAppleScriptFile('./url.applescript').trim();
@@ -15,7 +15,7 @@ function run(argument) {
         './md_with_argument.applescript',
         argument
       ).trim();
-    } else if (LaunchBar.options.controlKey) {
+    } else if (LaunchBar.options.alternateKey) {
       var output = LaunchBar.executeAppleScriptFile(
         './rtf_with_argument.applescript',
         argument
