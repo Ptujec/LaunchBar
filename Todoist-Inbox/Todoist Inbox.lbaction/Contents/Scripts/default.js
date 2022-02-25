@@ -76,7 +76,7 @@ function run(argument) {
       setApiKey();
     } else {
       // Priority
-      if (/p[1-3]/.test(argument)) {
+      if (/(p[1-3] )|( p[1-3])/.test(argument)) {
         var m = argument.match(/p[1-3]/);
         if (m == 'p1') {
           var prioValue = 4;
@@ -88,7 +88,7 @@ function run(argument) {
           var prioValue = 2;
           var prioText = p3;
         }
-        argument = argument.replace(/p[1-3]/, '');
+        argument = argument.replace(/(p[1-3] )|( p[1-3])/, '');
       } else {
         var prioValue = 1;
         var prioText = '';

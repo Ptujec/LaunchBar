@@ -81,7 +81,7 @@ function runWithString(string) {
       var result = [];
       var show = false;
 
-      if (/p[1-3]/.test(string)) {
+      if (/(p[1-3] )|( p[1-3])/.test(string)) {
         if (string.includes('p1')) {
           var p = p1;
           var icon = 'redFlag';
@@ -94,7 +94,7 @@ function runWithString(string) {
         } else {
           var p = undefined;
         }
-        string = string.replace(/p[1-3]/, '');
+        string = string.replace(/(p[1-3] )|( p[1-3])/, '');
       }
 
       // Due/date String
