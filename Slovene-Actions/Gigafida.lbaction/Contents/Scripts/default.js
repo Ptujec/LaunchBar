@@ -65,6 +65,8 @@ function run(argument) {
           .replace(/&#x160;/g, 'Š')
           .replace(/&#xBB;/g, '»')
           .replace(/&#xAB;/g, '«')
+          .replace(/&#x201C;/g, '“')
+          .replace(/&#x201D;/g, '”')
           .replace(/&quot;/g, '"')
           .replace(/&#x2026;/g, '…')
           .replace(/&#x2022;/g, '•')
