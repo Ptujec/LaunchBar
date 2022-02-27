@@ -4,26 +4,32 @@ function run(argument) {
   if (argument != undefined) {
     argument = argument.trim().replace(/\s+/g, '+');
 
+    if (LaunchBar.options.shiftKey) {
+      argument = '"' + argument + '"';
+    }
+
     //  Main action
     var mainURL =
       'https://viri.cjvt.si/gigafida/Concordance/Search?Query=' +
       encodeURI(argument);
-    var dataURL =
-      'https://viri.cjvt.si/gigafida/Concordance/Export?Rows=15&Query=' +
-      encodeURI(argument) +
-      '&Type=FirstRows';
 
     if (LaunchBar.options.commandKey) {
       LaunchBar.hide();
       LaunchBar.openURL(mainURL);
     } else {
-      var data = HTTP.loadRequest(dataURL, {
+      var data = HTTP.loadRequest(mainURL, {
         timeout: 5.0,
         method: 'GET',
         resultType: 'text',
-      }).data.split('\n');
+      }).data;
 
-      if (data[3].endsWith('0')) {
+      var colocationsSubfragment = data.match(
+        /<div class="colocationsSubfragment">(.|\n|\r)*?<footer>/g
+      );
+
+      // LaunchBar.paste(colocationsSubfragment);
+
+      if (colocationsSubfragment == null) {
         var response = LaunchBar.alert(
           'Gigafida: Ni bilo zadetkov!',
           'Lahko poskusite na spletni strani "Nova beseda" (ZRC SAZU) ali na Googlu?',
@@ -48,48 +54,54 @@ function run(argument) {
             break;
         }
         return;
-      }
+      } else {
+        colocationsSubfragment = colocationsSubfragment
+          .toString()
+          .replace(/&#x17E;/g, 'ž')
+          .replace(/&#x17D;/g, 'Ž')
+          .replace(/&#x10D;/g, 'č')
+          .replace(/&#x10C;/g, 'Č')
+          .replace(/&#x161;/g, 'š')
+          .replace(/&#x160;/g, 'Š')
+          .replace(/&#xBB;/g, '»')
+          .replace(/&#xAB;/g, '«')
+          .replace(/&quot;/g, '"')
+          .replace(/&#x2026;/g, '…')
+          .replace(/&#x2022;/g, '•')
+          .replace(/&#x2013;/g, '–')
+          .replace(/&#x2666/g, '♦')
+          .replace(/&nbsp;/g, '');
 
-      var stats = data[3].split('\t')[1].split('od');
+        var leftText = colocationsSubfragment.match(
+          /<div class="pure-u-1-2 text left">.*?<\/div>/g
+        );
 
-      var shownHits = stats[0];
-      var totalHits = stats[1];
+        var rightText = colocationsSubfragment.match(
+          /<div class="pure-u-1-2 text right">.*?<\/div>/g
+        );
 
-      if (parseInt(shownHits) > parseInt(totalHits)) {
-        var shownHits = totalHits;
-      }
+        var result = [];
+        for (var i = 0; i < rightText.length; i++) {
+          var left = leftText[i].replace(/(<([^>]+)>)/g, '');
+          var right = rightText[i].replace(/(<([^>]+)>)/g, '');
 
-      var result = [
-        {
-          // title: data[3].replace(/\t/, ': '),
-          title: 'Število zapisov: ' + shownHits + ' od ' + totalHits,
-          subtitle: data[4].replace(/\t/, ''),
-          icon: 'pieTemplate',
-          url: mainURL,
-        },
-      ];
-      for (var i = 8; i < data.length - 1; i++) {
-        var columns = data[i].split('\t');
-        var left = columns[0].trim();
-        var middle = columns[1].trim();
-        var right = columns[2].trim();
+          var pushData = {
+            icon: 'resultTemplate',
+            action: 'openURL',
+            actionArgument: mainURL,
+          };
 
-        var pushData = {
-          icon: 'resultTemplate',
-          action: 'openURL',
-          actionArgument: mainURL,
-        };
+          if (left != '') {
+            pushData.title = left;
+            pushData.subtitle = right;
+          } else {
+            pushData.title = right;
+          }
 
-        if (left != '') {
-          pushData.title = left;
-          pushData.subtitle = middle + ' ' + right;
-        } else {
-          pushData.title = middle + ' ' + right;
+          result.push(pushData);
         }
-
-        result.push(pushData);
+        return result;
       }
-      return result;
     }
   } else {
     // No argument passed, just open the website:
