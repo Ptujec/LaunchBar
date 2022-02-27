@@ -48,7 +48,7 @@ function run(argument) {
             /(<span class="color_lightdark strong">.*?<\/span>)|(<span class="color_dark.*"explanation ?">.*?<\/span>)/g
           )
           .join('\n')
-          .replace(/(:|;)(\s?<\/)/g, '$2')
+          .replace(/(:)(\s?<\/)/g, '$2')
           .replace(/(<([^>]+)>)/g, '')
           .replace(/(^\d\..*)\n/gm, '$1')
           .replace(/(^.\).*)\n/gm, '$1')
