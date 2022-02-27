@@ -4,7 +4,7 @@ function run(argument) {
   if (argument != undefined) {
     argument = argument.trim().replace(/\s+/g, '+');
 
-    if (LaunchBar.options.shiftKey) {
+    if (LaunchBar.options.controlKey) {
       argument = '"' + argument + '"';
     }
 
