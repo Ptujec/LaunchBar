@@ -53,9 +53,7 @@ function run(argument) {
 
         var dateString = new Date(
           date.getTime() - date.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .split('T')[0];
+        );
       } else {
         // day of the week
 
