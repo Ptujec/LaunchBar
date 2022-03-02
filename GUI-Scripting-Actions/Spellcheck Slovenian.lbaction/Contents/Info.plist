@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Spellcheck Slovenian</string>
 	<key>CFBundleVersion</key>
-	<string>4.1</string>
+	<string>4.1.1</string>
 	<key>LBAbbreviation</key>
 	<string>slo</string>
 	<key>LBDescription</key>

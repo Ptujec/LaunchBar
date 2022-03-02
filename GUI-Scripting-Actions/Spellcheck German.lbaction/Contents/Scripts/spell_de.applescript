@@ -37,7 +37,7 @@ tell application "System Events"
 	click (the first button of window name_of_spelling_window of application process app_name whose subrole is "AXCloseButton")
 	
 	delay 0.1
-	key code 123 -- using command down
+	key code 124 using command down
 	-- key code 49
 	-- key code 51
 	

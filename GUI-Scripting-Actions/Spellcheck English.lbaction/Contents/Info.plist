@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Spellcheck English</string>
 	<key>CFBundleVersion</key>
-	<string>4.1</string>
+	<string>4.1.1</string>
 	<key>LBAbbreviation</key>
 	<string>en</string>
 	<key>LBDescription</key>
