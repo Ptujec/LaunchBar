@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Spellcheck German</string>
 	<key>CFBundleVersion</key>
-	<string>2021-04</string>
+	<string>4.1</string>
 	<key>LBAbbreviation</key>
 	<string>de</string>
 	<key>LBDescription</key>
@@ -21,7 +21,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/GUI-Scripting-Actions</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/GUI-Scripting-Actions/Spellcheck%20German.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

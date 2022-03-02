@@ -13,7 +13,9 @@ property new_lang : "Deutsch" --change to option given in menu
 set app_name to my get_front_app()
 
 tell application "System Events"
+	
 	tell process app_name
+		
 		set edit_lang to name of menu bar item 4 of menu bar 1
 	end tell
 	
@@ -35,9 +37,9 @@ tell application "System Events"
 	click (the first button of window name_of_spelling_window of application process app_name whose subrole is "AXCloseButton")
 	
 	delay 0.1
-	key code 125 using command down
-	key code 49
-	key code 51
+	key code 123 -- using command down
+	-- key code 49
+	-- key code 51
 	
 end tell
 
