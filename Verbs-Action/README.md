@@ -2,12 +2,7 @@
 
 <img src="verbs.gif" width="600"/> 
 
-This is a simple action for looking up basic verb conjugations. 
-
-Websites used:
-- https://www.theconjugator.com (result)
-- https://www.the-conjugation.com (suggestions)
-- https://conjugator.reverso.net (details)
+This is a simple action for looking up basic english verb conjugations. 
 
 ## Download
 
