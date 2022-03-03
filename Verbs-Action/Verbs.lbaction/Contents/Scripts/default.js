@@ -1,4 +1,5 @@
 /* LaunchBar Action: Verbs
+- List of irregular verbs for testing: https://conjugator.reverso.net/conjugation-irregular-verbs-english.html
  */
 
 function run(argument) {
@@ -17,7 +18,20 @@ function run(argument) {
   var doesNotExist = / does not exist./.test(html);
 
   if (doesNotExist == true) {
-    LaunchBar.alert('No hit!');
+    var response = LaunchBar.alert(
+      'No hit!',
+      'Try on https://dictionary.cambridge.org?',
+      'Open',
+      'Cancel'
+    );
+    switch (response) {
+      case 0:
+        LaunchBar.openURL(
+          'https://dictionary.cambridge.org/dictionary/english/' + argument
+        );
+      case 1:
+        break;
+    }
   } else {
     // Check if what was entered is not the infinitive form
     var reverse = /<h2 id="inv">Reverse conjugation/.test(html);
@@ -39,34 +53,56 @@ function run(argument) {
       .replace(/\.$/, '')
       .trim();
 
+    var detailsURLBase = 'https://dictionary.cambridge.org/dictionary/english/';
+
+    var result = [];
+
+    // Infinitive
     var infinitive = verbs.split('-')[0].trim();
+    result.push({
+      title: infinitive,
+      badge: 'infinitive',
+      url: detailsURLBase + infinitive,
+      icon: 'oneTemplate',
+    });
+
+    // Past Simple
     var past = verbs.split('-')[1].trim();
+
+    var pastPushData = {
+      title: past,
+      badge: 'past (preterite)',
+      icon: 'twoTemplate',
+    };
+
+    var wordCountPast = past.split(', ').length;
+
+    if (wordCountPast > 1) {
+      pastPushData.url = detailsURLBase + past.split(', ')[0];
+    } else {
+      pastPushData.url = detailsURLBase + past;
+    }
+
+    result.push(pastPushData);
+
+    // Past Participle
     var participle = verbs.split('-')[2].trim();
+    var parPushData = {
+      title: participle,
+      badge: 'past participle',
+      icon: 'threeTemplate',
+    };
 
-    var detailsURL =
-      'https://conjugator.reverso.net/conjugation-english-verb-' +
-      infinitive +
-      '.html';
+    var wordCountParticiple = participle.split(', ').length;
 
-    return [
-      {
-        title: infinitive,
-        badge: 'infinitive',
-        url: detailsURL,
-        icon: 'oneTemplate',
-      },
-      {
-        title: past,
-        badge: 'past (preterite)',
-        url: detailsURL,
-        icon: 'twoTemplate',
-      },
-      {
-        title: participle,
-        badge: 'past participle',
-        url: detailsURL,
-        icon: 'threeTemplate',
-      },
-    ];
+    if (wordCountParticiple > 1) {
+      parPushData.url = detailsURLBase + participle.split(', ')[0];
+    } else {
+      parPushData.url = detailsURLBase + participle;
+    }
+
+    result.push(parPushData);
+
+    return result;
   }
 }
