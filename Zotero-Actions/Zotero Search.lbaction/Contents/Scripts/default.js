@@ -35,24 +35,27 @@ function run(argument) {
       // Search Titel, Display Name, Comment and Tags
       var words = argument.match(/[a-zöäüßžčš]+/gi);
 
-      var excludeFolders = `*'cw)&&!(kMDItemContentType=='public.folder'))`;
+      var excludeFolders = `*'cw && ! kMDItemContentType=='public.folder'`;
 
       if (words.length == 1) {
         var query =
-          `((kMDItemDisplayName=='*` +
+          `kMDItemDisplayName=='*` +
           argument +
           excludeFolders +
           '||' +
-          `(kMDItemTitle=='*` +
+          `kMDItemTitle=='*` +
           argument +
           excludeFolders +
-          `(kMDItemAuthors=='*` +
+          '||' +
+          `kMDItemAuthors=='*` +
           argument +
           excludeFolders +
-          `(kMDItemFinderComment=='*` +
+          '||' +
+          `kMDItemFinderComment=='*` +
           argument +
           excludeFolders +
-          `(kMDItemUserTags=='*` +
+          '||' +
+          `kMDItemUserTags=='*` +
           argument +
           excludeFolders;
       } else {
@@ -62,17 +65,15 @@ function run(argument) {
         var userTags = [];
         var authors = [];
 
-        var excludeFolders = `*'cw)&&!(kMDItemContentType=='public.folder')))`;
-
         words.forEach(function (item) {
           // LaunchBar.alert(item);
-          displayName.push(`((kMDItemDisplayName=='*` + item + excludeFolders);
-          title.push(`((kMDItemTitle=='*` + item + excludeFolders);
-          authors.push(`((kMDItemAuthors=='*` + item + excludeFolders);
+          displayName.push(`kMDItemDisplayName=='*` + item + excludeFolders);
+          title.push(`kMDItemTitle=='*` + item + excludeFolders);
+          authors.push(`kMDItemAuthors=='*` + item + excludeFolders);
           finderComment.push(
-            `((kMDItemFinderComment=='*` + item + excludeFolders
+            `kMDItemFinderComment=='*` + item + excludeFolders
           );
-          userTags.push(`((kMDItemUserTags=='*` + item + excludeFolders);
+          userTags.push(`kMDItemUserTags=='*` + item + excludeFolders);
         });
 
         var query =
