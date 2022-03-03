@@ -1,6 +1,6 @@
 # LaunchBar Action: Verbs
 
-This is a simple action for looking up basic english verb conjugations. 
+This is a simple action for looking up basic English verb conjugations. 
 
 <img src="01.png" width="600"/> 
 
