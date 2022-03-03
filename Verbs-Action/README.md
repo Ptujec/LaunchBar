@@ -2,7 +2,9 @@
 
 This is a simple action for looking up basic english verb conjugations. 
 
-<img src="verbs.gif" width="600"/> 
+<img src="01.png" width="600"/> 
+
+You can hit enter on a result to open it on https://conjugator.reverso.net for more details. 
 
 ## Download
 
