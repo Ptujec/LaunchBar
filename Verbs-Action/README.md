@@ -1,8 +1,8 @@
 # LaunchBar Action: Verbs
 
-<img src="verbs.gif" width="600"/> 
-
 This is a simple action for looking up basic english verb conjugations. 
+
+<img src="verbs.gif" width="600"/> 
 
 ## Download
 
