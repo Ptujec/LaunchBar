@@ -68,24 +68,37 @@ function run(argument) {
           );
 
           try {
-            var date = LaunchBar.formatDate(new Date(), {
+            var longDate = LaunchBar.formatDate(new Date(), {
               timeStyle: 'none',
               dateStyle: 'long',
               timeZone: tz,
+              // locale: 'en',
             });
 
             var time = LaunchBar.formatDate(new Date(), {
               timeStyle: 'short',
               dateStyle: 'none',
               timeZone: tz,
+              // locale: 'en',
             });
 
-            var hour = time.split(':')[0];
+            var stampDateTime = LaunchBar.formatDate(new Date(), {
+              timeStyle: 'medium',
+              dateStyle: 'medium',
+              timeZone: tz,
+              locale: 'de',
+            });
 
-            // Convert to 24 hour format
-            if (time.toLowerCase().includes('pm')) {
-              hour = hour + 12;
-            }
+            var stampTime = stampDateTime.split(', ')[1];
+            var stampDate = stampDateTime.split(', ')[0];
+
+            var tYear = stampDate.split('.')[2];
+            var tMonth = stampDate.split('.')[1];
+            var tDay = stampDate.split('.')[0];
+
+            var hour = stampTime.split(':')[0];
+
+            var timestamp = tYear + '-' + tMonth + '-' + tDay + 'T' + stampTime;
 
             // Check for day time setting
             if (Action.preferences.dayTime != undefined) {
@@ -103,7 +116,7 @@ function run(argument) {
             }
 
             cities.push({
-              title: time + ', ' + date,
+              title: time + ', ' + longDate,
               subtitle: localeInfo + ', TZ: ' + tz,
               badge: city,
               icon: icon,
@@ -115,6 +128,7 @@ function run(argument) {
                 lng: lng,
                 cData: cData[i],
               },
+              timestamp: timestamp,
             });
           } catch (error) {
             //
@@ -124,7 +138,7 @@ function run(argument) {
     }
 
     cities.sort(function (a, b) {
-      return a.title > b.title;
+      return a.timestamp > b.timestamp;
     });
 
     return cities;
@@ -195,24 +209,37 @@ function showFavs() {
       );
 
       try {
-        var date = LaunchBar.formatDate(new Date(), {
+        var longDate = LaunchBar.formatDate(new Date(), {
           timeStyle: 'none',
           dateStyle: 'long',
           timeZone: tz,
+          // locale: 'en',
         });
 
         var time = LaunchBar.formatDate(new Date(), {
           timeStyle: 'short',
           dateStyle: 'none',
           timeZone: tz,
+          // locale: 'en',
         });
 
-        var hour = time.split(':')[0];
+        var stampDateTime = LaunchBar.formatDate(new Date(), {
+          timeStyle: 'medium',
+          dateStyle: 'medium',
+          timeZone: tz,
+          locale: 'de',
+        });
 
-        // Convert to 24 hour format
-        if (time.toLowerCase().includes('pm')) {
-          hour = hour + 12;
-        }
+        var stampTime = stampDateTime.split(', ')[1];
+        var stampDate = stampDateTime.split(', ')[0];
+
+        var tYear = stampDate.split('.')[2];
+        var tMonth = stampDate.split('.')[1];
+        var tDay = stampDate.split('.')[0];
+
+        var hour = stampTime.split(':')[0];
+
+        var timestamp = tYear + '-' + tMonth + '-' + tDay + 'T' + stampTime;
 
         // Check for day time setting
         if (Action.preferences.dayTime != undefined) {
@@ -232,18 +259,19 @@ function showFavs() {
         var cityData = cData[i];
 
         cities.push({
-          title: time + ', ' + date,
+          title: time + ', ' + longDate,
           subtitle: localeInfo + ', TZ: ' + tz,
           badge: city,
           icon: icon,
           children: favOptions(mapsURL, city, lat, lng, cityData),
+          timestamp: timestamp,
         });
       } catch (error) {
         //
       }
     }
     cities.sort(function (a, b) {
-      return a.badge > b.badge;
+      return a.timestamp > b.timestamp;
     });
     return cities;
   }
