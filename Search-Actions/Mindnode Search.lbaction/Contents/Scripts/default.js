@@ -3,10 +3,9 @@ Mindnode Search
 by Ptujec 
 2021-07-12
 */
+var folderPath = Action.preferences.folderLocation;
 
 function run(argument) {
-  var folderPath = Action.preferences.folderLocation;
-
   if (folderPath == undefined || folderPath == '') {
     try {
       var plist = File.readPlist(
@@ -42,74 +41,96 @@ function run(argument) {
     return;
   }
 
-  argument = argument.toLowerCase().trim();
+  if (argument == undefined) {
+    var contents = LaunchBar.execute('/bin/ls', '-tA', folderPath)
+      .trim()
+      .split('\n');
 
-  if (LaunchBar.options.commandKey) {
-    var output = LaunchBar.execute(
-      '/usr/bin/mdfind',
-      '-onlyin',
-      folderPath,
-      '-name',
-      argument
-    ).split('\n');
+    var result = [];
+    for (var i = 0; i < contents.length; i++) {
+      var path = folderPath + '/' + contents[i];
+      if (contents[i].includes('.mindnode')) {
+        result.push({
+          title: contents[i],
+          path: path,
+        });
+      }
+    }
+    return result;
   } else {
-    var output = LaunchBar.execute(
-      '/usr/bin/mdfind',
-      '-onlyin',
-      folderPath,
-      argument
-    ).split('\n');
-  }
+    argument = argument.toLowerCase().trim();
 
-  if (output == '') {
-    return [
-      {
-        title: 'No result',
-        icon: 'com.ideasoncanvas.mindnode.macos',
-      },
-    ];
-  } else {
-    var results = [];
-    for (var i = 0; i < output.length; i++) {
-      var result = output[i];
-      if (result != '') {
-        var path = result;
-        var title = File.displayName(path);
+    if (LaunchBar.options.commandKey) {
+      var output = LaunchBar.execute(
+        '/usr/bin/mdfind',
+        '-onlyin',
+        folderPath,
+        '-name',
+        argument
+      ).split('\n');
+    } else {
+      var output = LaunchBar.execute(
+        '/usr/bin/mdfind',
+        '-onlyin',
+        folderPath,
+        argument
+      ).split('\n');
+    }
 
-        if (LaunchBar.options.commandKey) {
-          results.push({
-            title: title,
-            path: path,
-          });
-        } else {
-          try {
-            var content = File.readPlist(path + '/contents.xml');
-            content = JSON.stringify(content);
+    if (output == '') {
+      return [
+        {
+          title: 'No result',
+          icon: 'com.ideasoncanvas.mindnode.macos',
+        },
+      ];
+    } else {
+      var results = [];
+      for (var i = 0; i < output.length; i++) {
+        var result = output[i];
+        if (result != '') {
+          var path = result;
+          var title = File.displayName(path);
 
-            var regex = new RegExp(
-              '([a-zčšžäüöß]* )*?' + argument + '.*?<',
-              'gi'
-            );
-
-            var sub = content.match(regex).toString().replace(/</g, '').trim();
-          } catch (error) {}
-
-          if (sub != null) {
+          if (LaunchBar.options.commandKey) {
             results.push({
-              subtitle: sub,
+              title: title,
               path: path,
             });
           } else {
-            results.push({
-              path: path,
-            });
+            try {
+              var content = File.readPlist(path + '/contents.xml');
+              content = JSON.stringify(content);
+
+              var regex = new RegExp(
+                '([a-zčšžäüöß]* )*?' + argument + '.*?<',
+                'gi'
+              );
+
+              var sub = content
+                .match(regex)
+                .toString()
+                .replace(/</g, '')
+                .trim();
+            } catch (error) {}
+
+            if (sub != null) {
+              results.push({
+                subtitle: sub,
+                path: path,
+              });
+            } else {
+              results.push({
+                path: path,
+              });
+            }
           }
         }
       }
+      results.sort(function (a, b) {
+        return a.path > b.path;
+      });
+      return results;
     }
-    results.sort(function (a, b) {
-      return a.path > b.path;
-    });
-    return results;
   }
 }
