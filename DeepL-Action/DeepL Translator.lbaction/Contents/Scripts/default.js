@@ -2,6 +2,8 @@
 - https://www.deepl.com/de/docs-api/translating-text/request/
 */
 
+String.prototype.localizationTable = 'de';
+
 const apiKey = Action.preferences.apiKey;
 var lang = Action.preferences.lang;
 
@@ -47,7 +49,7 @@ function showLanguages() {
 
   var settings = [
     {
-      title: 'Slovene',
+      title: 'Slovenščina',
       icon: 'sl_Template',
       action: 'setLanguage',
       actionArgument: 'SL',
@@ -64,11 +66,17 @@ function showLanguages() {
       action: 'setLanguage',
       actionArgument: 'EN',
     },
+    {
+      title: 'Français',
+      icon: 'fr_Template',
+      action: 'setLanguage',
+      actionArgument: 'FR',
+    },
   ];
 
   settings.forEach(function (item) {
     if (item.actionArgument == lang) {
-      item.badge = 'current';
+      item.badge = 'selected'.localize();
     } else {
     }
   });
