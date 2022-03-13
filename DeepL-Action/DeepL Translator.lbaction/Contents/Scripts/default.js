@@ -49,12 +49,6 @@ function showLanguages() {
 
   var settings = [
     {
-      title: 'Slovenščina',
-      icon: 'sl_Template',
-      action: 'setLanguage',
-      actionArgument: 'SL',
-    },
-    {
       title: 'Deutsch',
       icon: 'de_Template',
       action: 'setLanguage',
@@ -71,6 +65,18 @@ function showLanguages() {
       icon: 'fr_Template',
       action: 'setLanguage',
       actionArgument: 'FR',
+    },
+    {
+      title: 'Español',
+      icon: 'es_Template',
+      action: 'setLanguage',
+      actionArgument: 'ES',
+    },
+    {
+      title: 'Slovenščina',
+      icon: 'sl_Template',
+      action: 'setLanguage',
+      actionArgument: 'SL',
     },
   ];
 
