@@ -1,5 +1,7 @@
 # LaunchBar Action: Linguee
 
+<img src="00.png" width="680"/> 
+
 This action lets you use linguee.com with LaunchBar. 
 
 Set your preferred language combination with ⏎. Supported languages are German, English, French and Spanish. 
