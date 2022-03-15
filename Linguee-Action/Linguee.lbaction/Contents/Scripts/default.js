@@ -27,6 +27,10 @@ function run(argument) {
       /<div class='main_item'(.|\n|\r)+?<div class='main_row'>/gi
     );
 
+    if (matches == null) {
+      return;
+    }
+
     var result = [];
     matches.forEach(function (item) {
       item = item
