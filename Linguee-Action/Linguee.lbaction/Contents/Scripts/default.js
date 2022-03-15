@@ -261,6 +261,24 @@ function showLanguages(language) {
       icon: 'esEn',
       action: 'setLanguage',
       actionArgument: 'spanish-english',
+    },
+    {
+      title: 'Portuguese ↔ German'.localize(),
+      icon: 'ptDe',
+      action: 'setLanguage',
+      actionArgument: 'german-portuguese',
+    },
+    {
+      title: 'Portuguese ↔ English'.localize(),
+      icon: 'ptEn',
+      action: 'setLanguage',
+      actionArgument: 'english-portuguese',
+    },
+    {
+      title: 'Russian ↔ English'.localize(),
+      icon: 'ruEn',
+      action: 'setLanguage',
+      actionArgument: 'english-russian',
     }
   );
 
