@@ -4,7 +4,7 @@
 
 This action lets you use linguee.com with LaunchBar. 
 
-Set your preferred language combination with ⏎. Supported languages are German, English, French and Spanish. 
+Set your preferred language combination with ⏎. Supported languages are German, English, French, Spanish, Portuguese and Russian (No political statement. Slava Ukraini!). 
 
 <img src="01.png" width="680"/> 
 
