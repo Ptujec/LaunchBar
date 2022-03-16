@@ -25,6 +25,8 @@ Should you see the generic blue bubble icon without being blocked please [create
 
 Website changes may break this action any time. 
 
+Also, there are two more language actions in this repository (not counting the Slovene ones), **[DeepL](https://github.com/Ptujec/LaunchBar/tree/master/DeepL-Action#readme)** and **[Verbs](https://github.com/Ptujec/LaunchBar/tree/master/Verbs-Action#readme)**. 
+
 ## Download
 
 [Download LaunchBar Action: Linguee](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Linguee-Action) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
