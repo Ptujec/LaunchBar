@@ -5,11 +5,11 @@
 ## Setup and options
 
 You need an API key for this action, which you can copy from here after you create an account: [https://www.deepl.com/de/pro-account/summary](https://www.deepl.com/de/pro-account/summary). There is a free plan. You still need to enter your credit card information though.
-You will be prompted to add it on the first run. You can set a new one with "shift-return".
+You will be prompted to add it on the first run. You can set a new one with ⇧⏎ "shift-return".
 
 ## Usage
 
-Enter the phrase you want to translate with "space bar" or set the output language with "enter" 
+Enter the phrase you want to translate with ␣ "space bar" or set the target language with ⏎ "enter".
 
 
 ## Download
