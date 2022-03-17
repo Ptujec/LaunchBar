@@ -4,6 +4,16 @@ This is a simple action associated with the app to access functions with LaunchB
 
 <img src="01.gif" width="800"/> 
 
+## Current Functions
+- Toggles Desktop icons visiblity
+- Restore recently closed item
+- Capture Text
+- Capture Area
+- Capture Previous Area
+- Scrolling Capture
+- Capture Fullscreen
+- Record Screen (Video GIF)
+
 ## Download
 
 [Download LaunchBar Action: CleanShot X Functions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/CleanShot-X-Functions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))

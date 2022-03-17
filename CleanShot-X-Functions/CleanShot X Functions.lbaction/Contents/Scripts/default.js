@@ -3,42 +3,69 @@ CleanShot X Functions
 - https://cleanshot.com/docs/api
 */
 
-function run(argument) {
+function run() {
   return [
     {
       title: 'Toggles Desktop icons visiblity', // .localize()
       icon: 'hideTemplate',
-      url: 'cleanshot://toggle-desktop-icons',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://toggle-desktop-icons',
+      actionRunsInBackground: true,
     },
     {
       title: 'Restore recently closed item', // .localize()
       icon: 'restoreTemplate',
-      url: 'cleanshot://restore-recently-closed',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://restore-recently-closed',
+      actionRunsInBackground: true,
     },
     {
       title: 'Capture Text', // .localize()
       icon: 'ocrTemplate',
-      url: 'cleanshot://capture-text',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-text',
+      actionRunsInBackground: true,
     },
     {
       title: 'Capture Area', // .localize()
       icon: 'areaTemplate',
-      url: 'cleanshot://capture-area',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-area',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Capture Previous Area', // .localize()
+      icon: 'repeatTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-previous-area',
+      actionRunsInBackground: true,
     },
     {
       title: 'Scrolling Capture', // .localize()
       icon: 'arrowTemplate',
-      url: 'cleanshot://scrolling-capture',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://scrolling-capture',
+      actionRunsInBackground: true,
     },
     {
       title: 'Capture Fullscreen', // .localize()
       icon: 'camTemplate',
-      url: 'cleanshot://capture-fullscreen',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-fullscreen',
+      actionRunsInBackground: true,
     },
     {
       title: 'Record Screen (Video/GIF)', // .localize()
       icon: 'videoTemplate',
-      url: 'cleanshot://record-screen',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://record-screen',
+      actionRunsInBackground: true,
     },
   ];
+}
+
+function doStuff(actionArgument) {
+  LaunchBar.hide();
+  LaunchBar.executeAppleScript('delay 0.1');
+  LaunchBar.openURL(actionArgument);
 }
