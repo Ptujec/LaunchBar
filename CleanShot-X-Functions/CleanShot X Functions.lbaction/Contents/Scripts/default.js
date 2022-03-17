@@ -6,6 +6,62 @@ CleanShot X Functions
 function run() {
   return [
     {
+      title: 'Capture Area', // .localize()
+      icon: 'areaTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-area',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Capture Previous Area', // .localize()
+      icon: 'previousTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-previous-area',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Capture Fullscreen', // .localize()
+      icon: 'camTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-fullscreen',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Capture Window', // .localize()
+      icon: 'windowTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-window',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Scrolling Capture', // .localize()
+      icon: 'arrowTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://scrolling-capture',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Self-Timer', // .localize()
+      icon: 'timerTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://self-timer',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Capture Text (OCR)', // .localize()
+      icon: 'textTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://capture-text',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Record Screen (Video/GIF)', // .localize()
+      icon: 'videoTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://record-screen',
+      actionRunsInBackground: true,
+    },
+    {
       title: 'Toggles Desktop icons visiblity', // .localize()
       icon: 'hideTemplate',
       action: 'doStuff',
@@ -17,48 +73,6 @@ function run() {
       icon: 'restoreTemplate',
       action: 'doStuff',
       actionArgument: 'cleanshot://restore-recently-closed',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Capture Text', // .localize()
-      icon: 'ocrTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://capture-text',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Capture Area', // .localize()
-      icon: 'areaTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://capture-area',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Capture Previous Area', // .localize()
-      icon: 'repeatTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://capture-previous-area',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Scrolling Capture', // .localize()
-      icon: 'arrowTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://scrolling-capture',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Capture Fullscreen', // .localize()
-      icon: 'camTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://capture-fullscreen',
-      actionRunsInBackground: true,
-    },
-    {
-      title: 'Record Screen (Video/GIF)', // .localize()
-      icon: 'videoTemplate',
-      action: 'doStuff',
-      actionArgument: 'cleanshot://record-screen',
       actionRunsInBackground: true,
     },
   ];

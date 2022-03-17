@@ -1,18 +1,22 @@
 # LaunchBar Action: CleanShot X Functions
 
-This is a simple action associated with the app to access functions with LaunchBar. [More could be added](https://cleanshot.com/docs/api). 
+This is a simple action associated with the app to access functions with LaunchBar. 
 
 <img src="01.gif" width="800"/> 
 
-## Current Functions
-- Toggles Desktop icons visiblity
-- Restore recently closed item
-- Capture Text
+## Functions
 - Capture Area
 - Capture Previous Area
-- Scrolling Capture
 - Capture Fullscreen
-- Record Screen (Video GIF)
+- Capture Window
+- Scrolling Capture
+- Self-Timer
+- Capture Text (OCR)
+- Record Screen (Video/GIF)
+- Toggles Desktop icons visiblity
+- Restore recently closed item
+
+[Let me know if you are missing something.](https://github.com/Ptujec/LaunchBar/issues/new). 
 
 ## Download
 
