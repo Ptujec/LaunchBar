@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>CleanShot X Functions</string>
 	<key>CFBundleVersion</key>
-	<string>1.3</string>
+	<string>1.3.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>pl.maketheweb.cleanshotx</string>
 	<key>LBDescription</key>
@@ -21,9 +21,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Cleanshot-X-Functions</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/CleanShot-X-Functions#readme</string>
 		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Cleanshot-X-Functions/CleanShot%20X%20Functions.lbaction/Contents/Info.plist</string>
+    <string>https://github.com/Ptujec/LaunchBar/blob/master/CleanShot-X-Functions/CleanShot%20X%20Functions.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>pl.maketheweb.cleanshotx</string>
