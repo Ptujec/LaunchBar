@@ -2,7 +2,7 @@
 
 This is a simple action for looking up basic English verb conjugations. 
 
-<img src="01.gif" width="716"/> 
+<img src="01.gif" width="790"/> 
 
 You can hit enter on a result to open it on [https://dictionary.cambridge.org](https://dictionary.cambridge.org/dictionary/english/meet) for more details (e.g. US and UK pronunciation). 
 
