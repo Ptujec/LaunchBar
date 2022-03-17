@@ -2,7 +2,7 @@
 
 This is a simple action associated with the app to access functions with LaunchBar. [More could be added](https://cleanshot.com/docs/api). 
 
-<img src="01.gif" width="788"/> 
+<img src="01.gif" width="800"/> 
 
 ## Download
 
