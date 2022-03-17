@@ -1,6 +1,6 @@
 # LaunchBar Action: CleanShot X Functions
 
-This is a simple action associated with the app to access functions with LaunchBar. 
+This is a simple action associated with the [app](https://cleanshot.com/) to access functions with LaunchBar. 
 
 <img src="cleanshot.gif" width="800"/> 
 
@@ -16,7 +16,7 @@ This is a simple action associated with the app to access functions with LaunchB
 - Toggles Desktop icons visiblity
 - Restore recently closed item
 
-[Let me know if you are missing something.](https://github.com/Ptujec/LaunchBar/issues/new). 
+[Here is the full list of accessible functions](https://cleanshot.com/docs/api). [Let me know if you are missing something.](https://github.com/Ptujec/LaunchBar/issues/new). 
 
 ## Download
 
