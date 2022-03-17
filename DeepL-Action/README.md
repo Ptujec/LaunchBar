@@ -1,9 +1,6 @@
 # LaunchBar Action: DeepL Translator
 
-<img src="01.png" width="760"/> 
-
-<img src="02.png" width="760"/> 
-
+<img src="01.gif" width="776"/> 
 
 ## Setup and options
 
