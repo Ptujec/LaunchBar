@@ -1,4 +1,4 @@
-# LaunchBar Action: Cleanshot X Functions
+# LaunchBar Action: CleanShot X Functions
 
 This is a simple action associated with the app to access functions with LaunchBar. [More could be added](https://cleanshot.com/docs/api). 
 
