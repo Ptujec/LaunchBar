@@ -2,7 +2,7 @@
 
 This is a simple action associated with the app to access functions with LaunchBar. 
 
-<img src="01.gif" width="800"/> 
+<img src="cleanshot.gif" width="800"/> 
 
 ## Functions
 - Capture Area
