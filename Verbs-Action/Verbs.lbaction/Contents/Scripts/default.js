@@ -62,8 +62,12 @@ function run(argument) {
     result.push({
       title: infinitive,
       badge: 'infinitive',
-      url: detailsURLBase + infinitive,
       icon: 'oneTemplate',
+      action: 'doStuff',
+      actionArgument: {
+        title: infinitive,
+        url: detailsURLBase + infinitive,
+      },
     });
 
     // Past Simple
@@ -73,36 +77,54 @@ function run(argument) {
       title: past,
       badge: 'past (preterite)',
       icon: 'twoTemplate',
+      action: 'doStuff',
+      actionArgument: {
+        title: past,
+      },
     };
 
     var wordCountPast = past.split(', ').length;
 
     if (wordCountPast > 1) {
-      pastPushData.url = detailsURLBase + past.split(', ')[0];
+      pastPushData.actionArgument.url = detailsURLBase + past.split(', ')[0];
     } else {
-      pastPushData.url = detailsURLBase + past;
+      pastPushData.actionArgument.url = detailsURLBase + past;
     }
 
     result.push(pastPushData);
 
     // Past Participle
     var participle = verbs.split('-')[2].trim();
+
     var parPushData = {
       title: participle,
       badge: 'past participle',
       icon: 'threeTemplate',
+      action: 'doStuff',
+      actionArgument: {
+        title: participle,
+      },
     };
 
     var wordCountParticiple = participle.split(', ').length;
 
     if (wordCountParticiple > 1) {
-      parPushData.url = detailsURLBase + participle.split(', ')[0];
+      parPushData.actionArgument.url =
+        detailsURLBase + participle.split(', ')[0];
     } else {
-      parPushData.url = detailsURLBase + participle;
+      parPushData.actionArgument.url = detailsURLBase + participle;
     }
 
     result.push(parPushData);
 
     return result;
+  }
+}
+
+function doStuff(dict) {
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(dict.title);
+  } else {
+    LaunchBar.openURL(dict.url);
   }
 }
