@@ -5,6 +5,7 @@ This is a simple action associated with the [app](https://cleanshot.com/) to acc
 <img src="cleanshot.gif" width="800"/> 
 
 ## Functions
+- All-In-One
 - Capture Area
 - Capture Previous Area
 - Capture Fullscreen
