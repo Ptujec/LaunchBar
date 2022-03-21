@@ -6,6 +6,13 @@ CleanShot X Functions
 function run() {
   return [
     {
+      title: 'All-In-One', // .localize()
+      icon: 'oneTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://all-in-one',
+      actionRunsInBackground: true,
+    },
+    {
       title: 'Capture Area', // .localize()
       icon: 'areaTemplate',
       action: 'doStuff',
