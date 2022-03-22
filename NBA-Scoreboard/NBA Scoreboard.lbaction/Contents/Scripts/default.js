@@ -235,9 +235,10 @@ function run(argument) {
         title: title,
         subtitle: subtitle,
         icon: icon,
+        label: label,
         action: 'open',
         actionArgument: url,
-        label: label,
+        actionRunsInBackground: true,
       };
 
       if (league != 'standard') {
@@ -254,5 +255,6 @@ function run(argument) {
 }
 
 function open(url) {
+  LaunchBar.hide();
   LaunchBar.openURL(url, 'Brave Browser');
 }
