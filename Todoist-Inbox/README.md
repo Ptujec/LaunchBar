@@ -55,7 +55,7 @@ You can even add markdown formatted links for the current website in Safari or a
 
 <img src="06.png" width="800"/> 
 
-If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. Alternatively you can press ⌘⏎ to get to projects and labels.
+If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. Alternatively you can press `⌘ ⏎` (command + return) to get to projects and labels.
 
 <img src="07.png" width="800"/> 
 
@@ -68,7 +68,7 @@ Let's say you frequently add a task containing the word "exercise" to a project 
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
-Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preloaded data (stored in ~/Library/Application Support/LaunchBar/Action Support) or turn off confirmation notifications. 
+Hit `⇧ ⏎` (shift + return) to get to the settings. You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) or turn off confirmation notifications. 
 
 ## Download
 
@@ -76,4 +76,4 @@ Hit ⇧⏎ to get to the settings. You can change the API-Token, refresh preload
 
 ## Updates
 
-The latest version of this action integrates with Action Updates by @prenagha.    You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+The latest version of this action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
