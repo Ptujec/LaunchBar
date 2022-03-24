@@ -43,8 +43,8 @@ This action gives you a quick glance at your recent transactions. You can set th
 On the first run you will need to set your Personal Access Token, which you can get in [YNAB Developer Settings](https://app.youneedabudget.com/settings/developer). 
 
 Options:
-- ⌘⏎ = Open the webapp 
-- ⌥⏎ = Settings (Budget, Days)
+- `⌘⏎` Open the webapp 
+- `⌥⏎` Settings (Budget, Days)
 
 ## Download
 
