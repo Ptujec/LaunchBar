@@ -6,7 +6,7 @@ This action lists all your shortcuts (macOS 12 required). Select one (with arrow
 
 <img src="screenshot_02.png" width="600"/> 
 
-You can limit the list of shortcuts to a specific folder, which you can select by pressing ⌥⏎.
+You can limit the list of shortcuts to a specific folder, which you can select by pressing `⇧⏎`.
 
 <img src="screenshot_03.png" width="600"/> 
 
