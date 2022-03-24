@@ -1,12 +1,14 @@
 # LaunchBar Actions
 
+<img src="header.png" width="640"/> 
+
 ## Preview
 Screenshots and animations in the directories  (subfolders) of this repository should give you at least an idea of what the actions do. Take a look.
 
 ## Download 
 You can download the whole repository …
 
-<img src="download.png" width="600"/> 
+<img src="download.png" width="640"/> 
 
 … or any of the directories separately. **There are download links in the readme of each directory.**  
 
