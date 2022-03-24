@@ -1,6 +1,6 @@
 # LaunchBar Actions
 
-<img src="header.png" width="640"/> 
+<img src="header.jpg" width="640"/> 
 
 ## Preview
 Screenshots and animations in the directories  (subfolders) of this repository should give you at least an idea of what the actions do. Take a look.
