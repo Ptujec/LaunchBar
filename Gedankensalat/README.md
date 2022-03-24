@@ -1,6 +1,6 @@
 # LaunchBar Action: Gedankensalat (Scratchpad)
 
-The use-case of this is for when you working on something and a random thought comes to your mind. As a LaunchBar user hitting cmd-space, space and type away should be the quickest way to capture a random thought. This is what this action is for. 
+The use-case of this is for when you working on something and a random thought comes to your mind. As a LaunchBar user hitting `⌘ ␣` (command-space), `␣` (space) and type away should be the quickest way to capture a random thought. This is what this action is for. 
 
 <img src="01.png" width="600"/>
 
