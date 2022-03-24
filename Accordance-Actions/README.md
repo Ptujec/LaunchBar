@@ -8,17 +8,17 @@ In order to make display and paste actions work properly it is suggested to set 
 ## Display in large type 
 <img src="accdisplay.gif" width="600"/>
 
-Options: ⇧⏎ = Set default translation, ⌘⏎ (after entry) = Choose translation
+Options: `⇧⏎` = Set default translation, `⌘⏎` (after entry) = Choose translation
 
 ## Paste scripture
 <img src="accpaste.gif" width="600"/>
 
-Options: ⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation
+Options: `⇧⏎` = Settings, `⌘⏎` (after entry) = Choose translation
 
 ## Look up scripture 
 <img src="acclookup.gif" width="600"/>
 
-Options: ⌘⏎ (after entry) = Choose translation
+Options: `⌘⏎` (after entry) = Choose translation
 
 ## Search words
 
@@ -26,8 +26,8 @@ Per default spaces are replaced with "AND" tags. Alternatively you can use quota
 
 <img src="advancedsearchoptions.png" width="600"/>
 
-**Advanced**: With # you can scroll to a specific book. For example "Moses#Acts_6:14" will return all verses with "Moses", but scroll to Acts 6:14. 
-You can also choose a specific translation from a list if you press ⌘⏎ after entering your query. 
+**Advanced**: With "#" you can scroll to a specific book. For example "Moses#Acts_6:14" will return all verses with "Moses", but scroll to Acts 6:14. 
+You can also choose a specific translation from a list if you press `⌘⏎` after entering your query. 
 
 ## Download
 [Download LaunchBar Accordance Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
