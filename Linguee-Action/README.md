@@ -4,19 +4,19 @@
 
 This action lets you use linguee.com with LaunchBar. 
 
-Set your preferred language combination with ⏎. Supported languages are German, English, French, Spanish, Portuguese and Russian (No political statement. Slava Ukraini!). 
+Set your preferred language combination with `⏎`. Supported languages are German, English, French, Spanish, Portuguese and Russian (No political statement. Slava Ukraini!). 
 
 <img src="01.png" width="680"/> 
 
-Enter the word you want to translate with ␣ (space bar). You should see suggestions as you type, including some translation items for each suggestion.
+Enter the word you want to translate with `␣` (space bar). You should see suggestions as you type, including some translation items for each suggestion.
 
 <img src="02.png" width="680"/> 
 
-Show all translation results with ⏎ … 
+Show all translation results with `⏎` … 
 
 <img src="03.png" width="680"/> 
 
-… or paste the selected word with ⇧⏎. Pasting works for both  suggestions and results. 
+… or paste the selected word with `⇧⏎`. Pasting works for both  suggestions and results. 
 
 ## Note
 
