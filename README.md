@@ -11,7 +11,7 @@ You can download the whole repository …
 
 
 ## Installation
-These actions are created for use with [LaunchBar](http://www.obdev.at/products/launchbar/). After downloading and unzipping just double click the .lbaction-packages you want to use to install them.  
+The actions in this repository are created for use with [LaunchBar](http://www.obdev.at/products/launchbar/). After downloading and unzipping just double click the `.lbaction` packages you want to use to install them.  
 
 ## Updates
 
