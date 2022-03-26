@@ -2,13 +2,6 @@
 # https://stackoverflow.com/questions/6565703/math-algorithm-fit-image-to-screen-retain-aspect-ratio
 # https://forum.latenightsw.com/t/get-sizes-of-monitor-s-via-applescript/1351/10
 
----
-set _percentWidth to 50 # set percentage relative to screen size
-set _percentHight to 65 # set percentage relative to screen size
-
-set _scaleWindowWidth to _percentWidth / 100
-set _scaleWindowHight to _percentHight / 100
----
 
 # use AppleScript version "2.4" -- Yosemite (10.10) or later
 use framework "Foundation"

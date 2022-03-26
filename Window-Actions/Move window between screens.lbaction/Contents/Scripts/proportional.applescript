@@ -32,7 +32,7 @@ try
 	
 	# detect position of the second screen in relation to the main screen
 	if _mon1Width = _widthoffset then
-		# say "Rechts"
+		#say "Rechts"
 		set _right to true
 	else if _mon1Hight = _hightoffset then
 		set _right to false

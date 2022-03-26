@@ -5,11 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>bottomTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.MovewindowtofilltophalfofthescreenCopy</string>
+	<string>ptujec.LaunchBar.action.Movewindowtofillbottomhalfofthescreen</string>
 	<key>CFBundleName</key>
-	<string>Move window to fill top half of the screen Copy</string>
+	<string>Move window to fill bottom half of the screen</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -19,7 +19,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Window-Actions#readme</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Window-Actions/Move%20window%20to%20fill%20bottom%20half%20of%20the%20screen.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
