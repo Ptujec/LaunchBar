@@ -2,7 +2,7 @@
 
 <img src="windowactions.png" width="745"/> 
 
-Window actions are applied to the currently active window. 
+Window actions are applied to the currently active window on your main screen. The action "Move window between screens" is made for two screens.
 
 ## Download
 
