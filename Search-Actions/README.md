@@ -12,8 +12,6 @@
 
 - Mindnode Search
 
-<img src="ias.gif" width="780"/> 
-
 ## Websites
 
 The added benefit of these actions over a custom search template are the suggestions.
