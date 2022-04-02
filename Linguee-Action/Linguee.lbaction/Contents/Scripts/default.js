@@ -118,6 +118,7 @@ function openURL(dict) {
           badge = badge[0]
             .replace(/(<([^>]+)>)/g, '')
             .replace(/&mdash;/g, '')
+            .replace(/(AE|BE)/, ' [$1]') // TODO: fix on HTML code level
             .trim();
 
           if (/<span class='notascommon'>/.test(item)) {
