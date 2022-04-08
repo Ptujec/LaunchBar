@@ -6,7 +6,8 @@ Window actions are applied to the currently active window on your main screen. T
 
 ## Download
 
-[Download LaunchBar Window Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Window-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+Unfortunately this directory is to big for [DownGit](https://github.com/MinhasKamal/DownGit). 
+Unfortunately to you need to [download the whole repository](https://github.com/Ptujec/LaunchBar#download) for this one.
 
 ## Updates
 
