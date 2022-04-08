@@ -5,7 +5,7 @@
 ## Download 
 You can download the whole repository …
 
-<img src="download.jpg" width=""/> 
+<img src="download.jpg" width="640"/> 
 
 … or any of the directories separately. **There are download links in the readme of each directory.**  
 
