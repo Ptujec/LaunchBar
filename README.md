@@ -3,7 +3,7 @@
 <img src="header.jpg" width="640"/> 
 
 ## Download 
-You can download the whole repository …
+You can download the [whole repository](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) …
 
 <img src="download.jpg" width="640"/> 
 
