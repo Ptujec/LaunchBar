@@ -23,7 +23,10 @@ You can use the following action to show an attachment in the Zotero interface.
 
 You can improve search results if you rename your pdfs with meaningful information. A great help for that is [ZotFile - Advanced PDF management for Zotero](http://zotfile.com/).
 
-Another great plugin is [Zutilo](https://github.com/wshanks/Zutilo#readme), which lets you e.g. copy select item links with a custom shortcut. 
+Another great plugin is [Zutilo](https://github.com/wshanks/Zutilo#readme), which lets you e.g. copy select item links with a custom shortcut.
+
+**Update 2022-04-08**: 
+I came across [this action](https://github.com/jkhnfk/zoterosearch). Unfortunately there is no explanation in English yet. But with Google Translate you can read [this blog post](https://sspai-com.translate.goog/post/72459?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp). 
 
 
 ## Download
