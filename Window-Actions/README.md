@@ -7,7 +7,7 @@ Window actions are applied to the currently active window on your main screen. T
 ## Download
 
 Unfortunately this directory is to big for [DownGit](https://github.com/MinhasKamal/DownGit). 
-You need to [download the whole repository](https://github.com/Ptujec/LaunchBar#download) for this one.
+You need to [download the whole repository](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) for this one.
 
 ## Updates
 
