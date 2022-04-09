@@ -6,11 +6,11 @@ The purpose of this action is to **limit distraction by quitting apps** that are
 You can set up **custom contexts** like e.g. "Work", "Meeting", etc. 
 You can even pick custom emojis in a plain text file `⇧⏎`. 
 
-<img src="03.jpg" width="640"/>   
+<img src="02.jpg" width="640"/>   
 
 For each context you can specify apps that are necessary in that context. The action will quit all other apps. This applies only to apps that show up in the application switcher `⌘⇥`. LaunchBar and Finder are also excluded. 
 
-<img src="04.jpg" width="640"/>   
+<img src="03.jpg" width="640"/>   
 
 There are some additional options you can configure for each context: 
 - Show Alert before quitting
