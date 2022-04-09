@@ -7,11 +7,9 @@ You can set up **custom contexts** like e.g. "Work", "Meeting", etc.. You can ev
 
 <img src="02.jpg" width="640"/>   
 
-For each context you can specify apps that are necessary in that context. 
+For each context you can specify apps that are necessary in that context. The action will quit all other apps. This applies only to apps that show up in the application switcher `⌘⇥`. LaunchBar and Finder are also excluded. 
 
 <img src="03.jpg" width="640"/>   
-
-The action will quit all other apps. This applies only to apps that show up in the application switcher `⌘⇥`. LaunchBar and Finder are also excluded. 
 
 There are some additional options you can configure for each context: 
 - Show Alert before quitting
