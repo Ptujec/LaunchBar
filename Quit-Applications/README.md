@@ -4,10 +4,7 @@
 
 The purpose of this action is to **limit distraction by quitting apps** that are not needed for what you are currently doing. 
 You can set up **custom contexts** like e.g. "Work", "Meeting", etc. 
-
-<img src="02.jpg" width="640"/>   
-
-You can even pick custom emojis.
+You can even pick custom emojis in a plain text file `⇧⏎`. 
 
 <img src="03.jpg" width="640"/>   
 
