@@ -1,7 +1,5 @@
 # LaunchBar Action: Quit Applications (by Context)
 
-<img src="01.gif" width="640"/> 
-
 The purpose of this action is to **limit distraction by quitting apps** that are not needed for what you are currently doing. 
 You can set up **custom contexts** like e.g. "Work", "Meeting", etc.. You can even pick custom emojis.
 
