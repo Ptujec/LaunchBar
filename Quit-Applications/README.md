@@ -1,15 +1,15 @@
 # LaunchBar Action: Quit Applications (by Context)
 
-<img src="01.gif" width="1000"/> 
+<img src="01.gif" width="800"/> 
 
 The purpose of this action is to **limit distraction by quitting apps** that are not needed for what you are currently doing. 
 You can set up **custom contexts** like e.g. "Work", "Meeting", etc.. You can even pick custom emojis.
 
-<img src="02.png" width="640"/>   
+<img src="02.jpg" width="640"/>   
 
 For each context you can specify apps that are necessary in that context. 
 
-<img src="03.png" width="640"/>   
+<img src="03.jpg" width="640"/>   
 
 The action will quit all other apps. This applies only to apps that show up in the application switcher `⌘⇥`. LaunchBar and Finder are also excluded. 
 
