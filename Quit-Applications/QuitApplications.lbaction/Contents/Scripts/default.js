@@ -397,7 +397,7 @@ function alert(exclusions) {
 
   if (closeFinderWindowsOption == true) {
     allAppsAS = allAppsAS + countWindowsAS;
-    returnAS = returnAS + ' & "\n" & windowCount';
+    returnAS = returnAS + ' & windowCount';
   }
 
   if (keepCurrent == true || keepCurrent == undefined) {
@@ -416,12 +416,20 @@ function alert(exclusions) {
 
   var appleScriptResult = LaunchBar.executeAppleScript(appleScript)
     .trim()
-    .split(', \n');
-  var toQuit = appleScriptResult[0];
+    .split(', ');
+
+  var lastItem = appleScriptResult[appleScriptResult.length - 1];
+
+  if (isNaN(lastItem) == false) {
+    // Last time IS a number (-> Finder Windows)
+    var toClose = appleScriptResult.pop();
+    var toQuit = appleScriptResult.join(', ');
+  } else {
+    var toQuit = appleScriptResult.join(', ');
+  }
 
   if (toQuit != '' || closeFinderWindowsOption == true) {
     if (closeFinderWindowsOption == true && toQuit != '') {
-      var toClose = parseInt(appleScriptResult[1].replace(', ', ''));
       if (toClose > 0) {
         var dialog =
           'Quit '.localize() +
@@ -435,9 +443,13 @@ function alert(exclusions) {
     } else if (closeFinderWindowsOption == false && toQuit != '') {
       var dialog = toQuit;
     } else {
-      var toClose = parseInt(appleScriptResult[1].replace(', ', ''));
       if (toClose > 0) {
-        var dialog = 'Close Finder Windows.'.localize();
+        var dialog = toClose + ' Close Finder Windows.'.localize();
+      } else {
+        LaunchBar.alert(
+          'No Application to hide, no window to close.'.localize()
+        );
+        return;
       }
     }
 
@@ -456,7 +468,7 @@ function alert(exclusions) {
         break;
     }
   } else {
-    LaunchBar.hide();
+    LaunchBar.alert('No Application to hide, no window to close.'.localize());
   }
 }
 
@@ -468,6 +480,7 @@ function quitApplications(exclusions) {
   var keepCurrent = contextJSON.keepCurrent;
 
   var closeFinderWindowsAS =
+    'tell application "System Events" to set visible of application process "Finder" to false\n' +
     'tell application "Finder" to close every window\n';
 
   var allAppsAS =
