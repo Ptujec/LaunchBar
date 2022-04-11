@@ -8,10 +8,8 @@
 -- You can set custom icons by using an emoji e.g. "Work:👨🏻‍💻". (If you are using this it would be fun if you could share a screenshot with me @ptujec)
 ------------------------------------------
 -- Contexts:
-Test
 Work:👨🏻‍💻
 Fresh Start:✨
 Meeting:🤝🏼
 Planning:🗓
 Chill:🛋
-Coding:⌨️

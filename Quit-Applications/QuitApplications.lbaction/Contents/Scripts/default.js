@@ -480,8 +480,11 @@ function quitApplications(exclusions) {
   var keepCurrent = contextJSON.keepCurrent;
 
   var closeFinderWindowsAS =
-    'tell application "System Events" to set visible of application process "Finder" to false\n' +
-    'tell application "Finder" to close every window\n';
+    'tell application "Finder"\n' +
+    ' activate\n' +
+    ' close every window\n' +
+    'end tell\n' +
+    'tell application "System Events" to set visible of application process "Finder" to false\n';
 
   var allAppsAS =
     'tell application "System Events" \n' +
