@@ -20,6 +20,7 @@ function run() {
     File.writeText(text, textFilePath);
     LaunchBar.openURL(File.fileURLForPath(textFilePath));
   } else if (LaunchBar.options.shiftKey) {
+    LaunchBar.hide();
     LaunchBar.openURL(File.fileURLForPath(textFilePath));
   } else {
     // Show Contexts
@@ -379,8 +380,12 @@ function toggleExclude(path) {
 
 function alert(exclusions) {
   var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
   var keepCurrent = contextJSON.keepCurrent;
+
+  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  if (closeFinderWindowsOption == undefined) {
+    closeFinderWindowsOption = false;
+  }
 
   var allAppsAS =
     'tell application "System Events" \n' +
