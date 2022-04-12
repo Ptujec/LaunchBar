@@ -223,25 +223,27 @@ function showOptions() {
         infoPlistPath = path + '/Info.plist';
       }
 
-      var infoPlist = File.readPlist(infoPlistPath);
+      if (File.exists(infoPlistPath)) {
+        var infoPlist = File.readPlist(infoPlistPath);
 
-      var agentApp = infoPlist.LSUIElement;
-      // var appType = infoPlist.LSApplicationCategoryType;
-      var appID = infoPlist.CFBundleIdentifier;
+        var agentApp = infoPlist.LSUIElement;
+        // var appType = infoPlist.LSApplicationCategoryType;
+        var appID = infoPlist.CFBundleIdentifier;
 
-      if (
-        !exList.includes(path) &&
-        title != 'LaunchBar' &&
-        // appType != 'public.app-category.utilities' &&
-        agentApp != true
-      ) {
-        result.push({
-          title: title,
-          path: path,
-          icon: appID,
-          action: 'toggleExclude',
-          actionArgument: path,
-        });
+        if (
+          !exList.includes(path) &&
+          title != 'LaunchBar' &&
+          // appType != 'public.app-category.utilities' &&
+          agentApp != true
+        ) {
+          result.push({
+            title: title,
+            path: path,
+            icon: appID,
+            action: 'toggleExclude',
+            actionArgument: path,
+          });
+        }
       }
     }
   });

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Quit Applications (by Context)</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.2</string>
+	<string>1.1.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
