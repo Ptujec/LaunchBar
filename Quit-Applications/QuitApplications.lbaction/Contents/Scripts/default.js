@@ -8,15 +8,18 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 String.prototype.localizationTable = 'default';
 
-const textFilePath = Action.path + '/Contents/Resources/contexts.txt';
+const textFilePath = Action.supportPath + '/contexts.txt';
 
 function run() {
   var firstrun = Action.preferences.firstrun;
 
-  if (firstrun == undefined || LaunchBar.options.shiftKey) {
-    // Open Text File on first run or when using the ⌥ (alt/option) key
+  if (firstrun == undefined || !File.exists(textFilePath)) {
     LaunchBar.hide();
     Action.preferences.firstrun = false;
+    var text = File.readText(Action.path + '/Contents/Resources/contexts.txt');
+    File.writeText(text, textFilePath);
+    LaunchBar.openURL(File.fileURLForPath(textFilePath));
+  } else if (LaunchBar.options.shiftKey) {
     LaunchBar.openURL(File.fileURLForPath(textFilePath));
   } else {
     // Show Contexts
@@ -219,8 +222,17 @@ function showOptions() {
       var infoPlistPath = path + '/Contents/Info.plist';
 
       if (!File.exists(infoPlistPath)) {
-        path = installedAppsPath + item + '/Wrapper/' + item.replace(/\s/g, '');
-        infoPlistPath = path + '/Info.plist';
+        var wrapper = path + '/Wrapper/'; // iOS Apps on Macs with Apple Silicon should have that
+
+        if (File.exists(wrapper)) {
+          var contents = File.getDirectoryContents(wrapper);
+          contents.forEach(function (item) {
+            if (item.endsWith('.app')) {
+              // LaunchBar.alert(item);
+              infoPlistPath = path + '/Wrapper/' + item + '/Info.plist';
+            }
+          });
+        }
       }
 
       if (File.exists(infoPlistPath)) {
