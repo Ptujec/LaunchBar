@@ -487,7 +487,11 @@ function alert(exclusions) {
         break;
     }
   } else {
-    LaunchBar.alert('No Application to hide, no window to close.'.localize());
+    if (closeFinderWindowsOption == false) {
+      LaunchBar.alert('No Application to hide.'.localize());
+    } else {
+      LaunchBar.alert('No Application to hide, no window to close.'.localize());
+    }
   }
 }
 

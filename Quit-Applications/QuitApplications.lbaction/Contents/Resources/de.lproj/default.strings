@@ -18,3 +18,4 @@
 "Windows will not be closed in this context" = "In diesem Kontext werden keine Fenster geschlossen";
 " will keep running" = " wird nicht beendet";
 "No Application to hide, no window to close." = "Kein Programm zum Beenden, kein Fenster zum Schließen.";
+"No Application to hide." = "Kein Programm zum Beenden.";
