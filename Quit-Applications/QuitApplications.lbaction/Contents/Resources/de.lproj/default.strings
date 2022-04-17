@@ -14,7 +14,9 @@
 " and close " = " beenden und ";
 " Finder windows." = " Finder Fenster schließen.";
 "Finder Windows" = "Finder Fenster";
-" Close Finder Windows." = " Finder Fenster schließen.";
+"Close " = "";
+" Finder Window(s)." = " Finder Fenster schließen.";
+"Close Finder Windows." = "Finder Fenster schließen.";
 "Windows will not be closed in this context" = "In diesem Kontext werden keine Fenster geschlossen";
 " will keep running" = " wird nicht beendet";
 "No Application to hide, no window to close." = "Kein Programm zum Beenden, kein Fenster zum Schließen.";

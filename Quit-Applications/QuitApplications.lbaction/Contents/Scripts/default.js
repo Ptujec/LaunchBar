@@ -463,7 +463,8 @@ function alert(exclusions) {
       var dialog = toQuit;
     } else {
       if (toClose > 0) {
-        var dialog = toClose + ' Close Finder Windows.'.localize();
+        var dialog =
+          'Close '.localize() + toClose + ' Finder Window(s).'.localize();
       } else {
         LaunchBar.alert(
           'No Application to hide, no window to close.'.localize()
