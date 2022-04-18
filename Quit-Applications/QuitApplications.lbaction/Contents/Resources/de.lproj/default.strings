@@ -21,3 +21,5 @@
 " will keep running" = " wird nicht beendet";
 "No Application to hide, no window to close." = "Kein Programm zum Beenden, kein Fenster zum Schließen.";
 "No Application to hide." = "Kein Programm zum Beenden.";
+"Add Unlisted Application" = "Fehlendes Programm";
+"Add application missing in this list." = "Progamme, die in der Liste fehlen hinzufügen.";

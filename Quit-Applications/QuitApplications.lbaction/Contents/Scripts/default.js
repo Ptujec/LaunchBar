@@ -141,6 +141,17 @@ function showOptions() {
     finderWindows[0].label = contextTitle.localize() + ': ✔︎';
   }
 
+  // Add Applications manually
+  var addApp = [
+    {
+      title: 'Add Unlisted Application'.localize(),
+      subtitle: 'Add application missing in this list.'.localize(),
+      icon: 'addTemplate',
+      action: 'addApplication',
+      actionRunsInBackground: true,
+    },
+  ];
+
   // Excluded Applications
   var apps = contextJSON.apps;
 
@@ -167,20 +178,35 @@ function showOptions() {
     });
   }
 
+  // Other Applications
+  var result = [];
+
+  // Manually Added Applications
+  var customApps = Action.preferences.customApps;
+
+  if (customApps != undefined) {
+    customApps.forEach(function (item) {
+      var path = item;
+      var title = File.displayName(path).replace('.app', '');
+      var infoPlistPath = path + '/Contents/Info.plist';
+      var infoPlist = File.readPlist(infoPlistPath);
+      var appID = infoPlist.CFBundleIdentifier;
+
+      if (!exList.includes(path)) {
+        result.push({
+          title: title,
+          path: path,
+          icon: appID,
+          action: 'toggleExclude',
+          actionArgument: path,
+        });
+      }
+    });
+  }
+
   // System Applications
   var sysAppsPath = '/System/Applications/';
   var sysApps = File.getDirectoryContents(sysAppsPath);
-
-  var result = [
-    {
-      title: 'Action Editor',
-      path: '/Applications/LaunchBar.app/Contents/Resources/Action Editor.app',
-      icon: 'at.obdev.LaunchBar.ActionEditor',
-      action: 'toggleExclude',
-      actionArgument:
-        '/Applications/LaunchBar.app/Contents/Resources/Action Editor.app',
-    },
-  ];
 
   sysApps.forEach(function (item) {
     if (item.endsWith('.app')) {
@@ -294,7 +320,7 @@ function showOptions() {
   });
 
   var resultAll = alert.concat(
-    current.concat(finderWindows.concat(resultEx.concat(result)))
+    current.concat(finderWindows.concat(addApp.concat(resultEx.concat(result))))
   );
 
   return resultAll;
@@ -551,4 +577,37 @@ function quitApplications(exclusions) {
   }
 
   LaunchBar.executeAppleScript(appleScript);
+}
+
+function addApplication() {
+  LaunchBar.hide();
+  var customApp = LaunchBar.executeAppleScript(
+    'tell application "Finder"',
+    '   activate',
+    '   set _default to "Applications:" as alias',
+    '   set _app to choose file default location _default',
+    '   set _app to POSIX path of _app',
+    'end tell'
+  )
+    .trim()
+    .replace(/\/$/, '');
+
+  if (customApp == '') {
+    return;
+  }
+
+  var customApps = Action.preferences.customApps;
+
+  if (customApps == undefined) {
+    var customApps = [];
+    customApps.push(customApp);
+    Action.preferences.customApps = customApps;
+  } else {
+    if (!customApps.includes(customApp)) {
+      customApps.push(customApp);
+    }
+  }
+
+  var output = showOptions();
+  return output;
 }
