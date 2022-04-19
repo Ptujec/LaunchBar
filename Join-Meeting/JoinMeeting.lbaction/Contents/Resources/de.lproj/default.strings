@@ -1,0 +1,12 @@
+"The meeting has started " = "Meeting hat vor ";
+" minutes ago." = " Minuten angefangen.";
+"The meeting starts in " = "Meeting beginnt in ";
+" minutes." = " Minuten.";
+"No meeting found!" = "Kein Meeting gefunden!";
+"Error!" = "Fehler!";
+"Check if the shortcut \"Get current events\" is correctly installed. Click \"Install\" to install." = "Überprüfe, ob der Kurzbefehl \"Get current events\" korrekt installiert ist. Zum Installieren \"Installieren\" klicken.";
+"Install" = "Installieren";
+"Install" = "Installieren";
+"Cancel" = "Abbrechen";
+"Install Shortcut" = "Kurzbefehl installieren";
+"This action requires the shortcut \"Get current events\"" = "Diese Aktion benötigt den Kurzbefehl \"Get current events\".";
