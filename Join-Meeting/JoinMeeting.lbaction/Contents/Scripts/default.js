@@ -91,8 +91,8 @@ function run() {
             .replace(zoomRE, 'zoommtg://zoom.us/join?confno=$1&pwd=$2');
         } else if (url.includes('teams.microsoft')) {
           var meetingurl = url
-            .match(teamsRE)[1]
-            .toString()
+            // .match(teamsRE)[0]
+            // .toString()
             .replace(/https/, 'msteams');
         } else if (notes.includes('zoom.us')) {
           var meetingurl = notes
