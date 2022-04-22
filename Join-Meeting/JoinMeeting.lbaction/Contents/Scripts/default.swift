@@ -91,6 +91,7 @@ for calendar in calendars {
                 )
                 
             } else if notes.contains("teams.microsoft") {
+                icon = "teamsTemplate"
                 let matched = matches(for: teamsREpattern, in: notes)
                 
                 meetingURL = matched[0].replacingOccurrences(
