@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Join Meeting</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -34,7 +34,7 @@
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.js</string>
+			<string>default.swift</string>
 		</dict>
 	</dict>
 </dict>
