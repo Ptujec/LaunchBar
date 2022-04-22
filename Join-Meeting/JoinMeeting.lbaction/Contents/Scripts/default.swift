@@ -46,7 +46,7 @@ for calendar in calendars {
         var icon = "videoTemplate"
         
         let zoomREpattern = #"https:\/\/us02web.zoom.us\/j\/(\d+)(?:(?:\?pwd=)(.*))?"#
-        let teamsREpattern = #"(https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.*)>"#
+        let teamsREpattern = #"(https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.*[\w@?^=%&/~+#-])"#
         
         func matches(for regex: String, in text: String) -> [String] {
             
@@ -97,12 +97,6 @@ for calendar in calendars {
                 meetingURL = matched[0].replacingOccurrences(
                     of: "https",
                     with: "msteams",
-                    options: []
-                )
-
-                meetingURL = meetingURL.replacingOccurrences(
-                    of: ">",
-                    with: "",
                     options: []
                 )
             }
