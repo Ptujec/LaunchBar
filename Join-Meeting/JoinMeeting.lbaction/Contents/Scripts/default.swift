@@ -80,7 +80,9 @@ for calendar in calendars {
                     options: []
                 )
             }
-        } else {
+        } 
+        
+        if meetingURL == "" {
             let notes = (event.notes ?? "")
             if notes.contains("zoom.us") {
                 let matched = matches(for: zoomREpattern, in: notes)
