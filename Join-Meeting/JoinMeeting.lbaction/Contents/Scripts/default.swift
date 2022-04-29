@@ -37,7 +37,7 @@ for calendar in calendars {
     
     for event in events {
         
-        let startDate = event.startDate    
+        let startDate = event.startDate
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
         let relativeDate = formatter.localizedString(for: startDate!, relativeTo: Date())
@@ -54,7 +54,7 @@ for calendar in calendars {
                 let regex = try NSRegularExpression(pattern: regex)
                 let results = regex.matches(in: text,
                                             range: NSRange(text.startIndex..., in: text))
-                return results.flatMap {
+                return results.compactMap {
                     Range($0.range, in: text).map { String(text[$0]) }
                 }
             } catch let error {
@@ -80,7 +80,7 @@ for calendar in calendars {
                     options: []
                 )
             }
-        } 
+        }
         
         if meetingURL == "" {
             let notes = (event.notes ?? "")
@@ -109,20 +109,20 @@ for calendar in calendars {
                 let eventJSON = [
                     "title" : event.title,
                     "subtitle" : relativeDate,
-                    "badge" : "Teilnehmen", 
+                    "badge" : "Teilnehmen",
                     "url" : meetingURL,
                     "icon" : icon
                 ]
-                resultJSON.append(eventJSON)
+                resultJSON.append(eventJSON as [String : Any])
             } else {
                 let eventJSON = [
                     "title" : event.title,
                     "subtitle" : relativeDate,
-                    "badge" : "Join now", 
+                    "badge" : "Join now",
                     "url" : meetingURL,
                     "icon" : icon
                 ]
-                resultJSON.append(eventJSON)
+                resultJSON.append(eventJSON as [String : Any])
             }
         }
     }
@@ -134,7 +134,7 @@ if resultJSON.count == 0 {
             "title" : "Kein virtuelles Treffen geplant!",
             "icon" : "alertTemplate"
         ])
-    } else { 
+    } else {
         resultJSON.append ([
             "title" : "No virtual meeting scheduled!",
             "icon" : "alertTemplate"
