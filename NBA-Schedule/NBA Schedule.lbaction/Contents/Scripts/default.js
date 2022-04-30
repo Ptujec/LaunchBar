@@ -115,8 +115,7 @@ function getSchedule(team) {
         '-vs-' +
         hTeam.toLowerCase() +
         '-' +
-        item.gid +
-        '/box-score';
+        item.gid;
 
       if (team != undefined) {
         if (vTeam == team || hTeam == team) {
