@@ -110,6 +110,22 @@ function showOptions() {
     alert[0].label = contextTitle.localize() + ': ✔︎';
   }
 
+  // Activate Applications
+  var activate = contextJSON.activate;
+
+  var activateOption = [
+    {
+      title: 'Activate Application'.localize(),
+      subtitle: 'Activate Appliction before closing.'.localize(),
+      action: 'toggleActivate',
+      icon: 'activateTemplate',
+    },
+  ];
+
+  if (activate == true) {
+    activateOption[0].label = contextTitle.localize() + ': ✔︎';
+  }
+
   // Currently Frontmost Application
   var current = [
     {
@@ -320,7 +336,11 @@ function showOptions() {
   });
 
   var resultAll = alert.concat(
-    current.concat(finderWindows.concat(addApp.concat(resultEx.concat(result))))
+    activateOption.concat(
+      current.concat(
+        finderWindows.concat(addApp.concat(resultEx.concat(result)))
+      )
+    )
   );
 
   return resultAll;
@@ -350,6 +370,22 @@ function toggleCurrent() {
     contextJSON.keepCurrent = false;
   } else {
     contextJSON.keepCurrent = true;
+  }
+
+  File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
+
+  var output = showOptions();
+  return output;
+}
+
+function toggleActivate(path) {
+  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  var activate = contextJSON.activate;
+
+  if (activate == true) {
+    contextJSON.activate = false;
+  } else {
+    contextJSON.activate = true;
   }
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
@@ -528,6 +564,7 @@ function quitApplications(exclusions) {
   var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
   var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
   var keepCurrent = contextJSON.keepCurrent;
+  var activate = contextJSON.activate;
 
   var closeFinderWindowsAS =
     'tell application "Finder"\n' +
@@ -549,16 +586,28 @@ function quitApplications(exclusions) {
 
   var exclusionsPlusCurrentAS = 'set exclusions to exclusions & currentApp \n';
 
-  var quitAS =
-    'repeat with thisApp in allApps\n' +
-    '  set thisApp to thisApp as text\n' +
-    '  if thisApp is not in exclusions then\n' +
-    '    tell application id thisApp\n' +
-    '      activate\n' +
-    '      quit\n' +
-    '    end tell\n' +
-    '  end if\n' +
-    'end repeat';
+  if (activate == true) {
+    var quitAS =
+      'repeat with thisApp in allApps\n' +
+      '  set thisApp to thisApp as text\n' +
+      '  if thisApp is not in exclusions then\n' +
+      '    tell application id thisApp\n' +
+      '      activate\n' +
+      '      quit\n' +
+      '    end tell\n' +
+      '  end if\n' +
+      'end repeat';
+  } else {
+    var quitAS =
+      'repeat with thisApp in allApps\n' +
+      '  set thisApp to thisApp as text\n' +
+      '  if thisApp is not in exclusions then\n' +
+      '    tell application id thisApp\n' +
+      '      quit\n' +
+      '    end tell\n' +
+      '  end if\n' +
+      'end repeat';
+  }
 
   if (keepCurrent == true || keepCurrent == undefined) {
     var appleScript =
