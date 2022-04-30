@@ -6,6 +6,8 @@ This action displays the upcoming schedule of NBA games in your local time and l
 
 ## Additional Features
 
+`⏎`: Hit return for a selected game to see the preview page on nba.com 
+
 `⇧⏎`: Pick schedule for a team
 
 In Teams list `⌃⏎`: Select team as your team
