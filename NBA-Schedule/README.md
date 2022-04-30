@@ -1,6 +1,6 @@
 # LaunchBar Action: NBA Schedule
 
-<img src="nba_Schedule_01.png" width="636"/> 
+<img src="01.png" width="636"/> 
 
 This action displays the upcoming schedule of NBA games in your local time and language. 
 
