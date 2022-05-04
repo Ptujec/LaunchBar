@@ -6,6 +6,10 @@ This action checks your recent events for links to Zoom or Microsoft Teams, even
 
 Press `⏎` to join the selected meeting. 
 
+## Note
+You can improve performance by making the `default.swift` file an executable with `swiftc -O default.swift`. You obviously need to change the `LBScriptName` key in `info.plist`, pointing it to the executable. 
+(Unfortunately I can't share the action with the executable at the moment, because I can not sign the action. So the action would be actually unusable.)
+
 ## Download
 [Download LaunchBar Action: Join Meeting](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Join-Meeting) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
 
