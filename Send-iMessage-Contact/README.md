@@ -7,4 +7,8 @@ You can tell LaunchBar to open Messages for a phone number out of the box. This 
 Or you can select the action and type the contacts name.  
 
 ## Download
-[Download LaunchBar Action: Send iMessage](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Send-iMessage) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Download LaunchBar Action: Send iMessage to Contact](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Send-iMessage-Contact) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+
+## Updates
+
+The latest version of this action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
