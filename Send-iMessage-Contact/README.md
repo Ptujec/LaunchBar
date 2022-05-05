@@ -2,7 +2,7 @@
 
 You can tell LaunchBar to open Messages for a phone number out of the box. This action is an alternative way to do it. With this action all you need to do is select a contact and send it to the action. The number is picked automatically. 
 
-<img src="01.jpg" width="676"/>
+<img src="01.gif" width="780"/>
 
 Or you can select the action and type the contacts name.  
 
