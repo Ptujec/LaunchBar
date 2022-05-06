@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Capture Text (OCR)</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2.2</string>
+	<string>2.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -24,7 +24,9 @@ Capture Text uses the great command line app macOCR by Marcus Schappi (@schappi)
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Capture-Text#readme</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Capture-Text/Capture%20Text.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequirements</key>
 	<string>macOCR (https://github.com/schappim/macOCR)</string>
