@@ -119,12 +119,7 @@ function run(argument) {
       Action.preferences.recentAmount = parseInt(amount);
 
       // Check if local data is available
-      if (
-        !File.exists(
-          '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-            budgetID
-        )
-      ) {
+      if (!File.exists(Action.supportPath + '/' + budgetID)) {
         // Update
         LaunchBar.alert('Your data needs to be updated.');
         var output = resetData();
@@ -139,9 +134,7 @@ function run(argument) {
         // var yData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/payees?access_token=' + token, 3)
         // yData = yData.data
         var yData = File.readJSON(
-          '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-            budgetID +
-            '/payees.json'
+          Action.supportPath + '/' + budgetID + '/payees.json'
         );
       } catch (exception) {
         LaunchBar.alert('Error while reading JSON: ' + exception);
@@ -155,6 +148,7 @@ function run(argument) {
         var pId = payees[i].id;
         var pUsage = payees[i].usage;
         var lastUsedCategoryId = payees[i].last_used_category_id;
+        var lastUsedAccountId = payees[i].last_used_account_id;
 
         if (pName.includes('Transfer')) {
           var icon = 'transferTemplate';
@@ -171,6 +165,7 @@ function run(argument) {
             pId: pId,
             pIndex: i,
             lastUsedCategoryId: lastUsedCategoryId,
+            lastUsedAccountId: lastUsedAccountId,
           },
         };
         p.push(pPushData);
@@ -217,21 +212,18 @@ function setPayeeAndContinue(p) {
   Action.preferences.recentPayeeName = pName;
   Action.preferences.recentPayeeId = p.pId;
   Action.preferences.recentPayeeIndex = p.pIndex;
+  Action.preferences.recentPayeeLastUsedAccountId = p.lastUsedAccountId;
 
   // Category
   var pinnedCategoryPath =
-    '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-    budgetID +
-    '/pinnedCategory.json';
+    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
   if (File.exists(pinnedCategoryPath)) {
     var pinnedCategory = File.readJSON(pinnedCategoryPath);
   }
 
   try {
     var cData = File.readJSON(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/categories.json'
+      Action.supportPath + '/' + budgetID + '/categories.json'
     );
   } catch (exception) {
     LaunchBar.alert('Error while reading JSON: ' + exception);
@@ -344,9 +336,7 @@ function setCategoryAndContinue(c) {
     // var aData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts?access_token=' + token, 3)
     // aData = aData.data
     var aData = File.readJSON(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/accounts.json'
+      Action.supportPath + '/' + budgetID + '/accounts.json'
     );
   } catch (exception) {
     LaunchBar.alert('Error while reading JSON: ' + exception);
@@ -354,6 +344,7 @@ function setCategoryAndContinue(c) {
 
   var accounts = aData.data.accounts;
   var a = [];
+  var accountMatchingPayee = [];
 
   for (var i = 0; i < accounts.length; i++) {
     if (accounts[i].closed == false) {
@@ -365,7 +356,7 @@ function setCategoryAndContinue(c) {
         var icon = 'accountTemplate.png';
       }
 
-      a.push({
+      var pushData = {
         title: accounts[i].name,
         icon: icon,
         action: 'setAccountAndContinue',
@@ -374,10 +365,18 @@ function setCategoryAndContinue(c) {
           aType: accounts[i].type,
           aIcon: icon,
         },
-      });
+      };
+
+      if (accounts[i].id == Action.preferences.recentPayeeLastUsedAccountId) {
+        pushData.badge = 'Used Last Time';
+        accountMatchingPayee.push(pushData);
+      } else {
+        a.push(pushData);
+      }
     }
   }
-  return a;
+  var result = accountMatchingPayee.concat(a);
+  return result;
 }
 // Set account and show date options
 function setAccountAndContinue(a) {
@@ -599,9 +598,7 @@ function setMemoAndComplete(m) {
       ).data;
 
       var pLocalData = File.readJSON(
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          budgetID +
-          '/payees.json'
+        Action.supportPath + '/' + budgetID + '/payees.json'
       );
 
       // Compare Online to Local payee data
@@ -618,22 +615,21 @@ function setMemoAndComplete(m) {
 
       File.writeJSON(
         pLocalData,
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          budgetID +
-          '/payees.json'
+        Action.supportPath + '/' + budgetID + '/payees.json'
       );
     } else {
-      // Set last_used_category in payee.json
-      var payeeDataPath =
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/payees.json';
+      // Set last_used_category and last_used_payee in payee.json
+
+      var payeeDataPath = Action.supportPath + '/' + budgetID + '/payees.json';
       var payeeData = File.readJSON(payeeDataPath);
 
       var recentPayeeIndex = Action.preferences.recentPayeeIndex;
 
       payeeData.data.payees[recentPayeeIndex].last_used_category_id =
         Action.preferences.recentCategory;
+
+      payeeData.data.payees[recentPayeeIndex].last_used_account_id =
+        Action.preferences.recentAccountID;
 
       File.writeJSON(payeeData, payeeDataPath);
     }
@@ -860,17 +856,10 @@ function setBudgetID(bId) {
   // Set Budget ID
   Action.preferences.budgetID = bId;
 
-  if (
-    File.exists(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId
-    )
-  ) {
+  if (File.exists(Action.supportPath + '/' + bId)) {
     // File or folder exists
     var bData = File.readJSON(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId +
-        '/budgetSettings.json'
+      Action.supportPath + '/' + bId + '/budgetSettings.json'
     );
     Action.preferences.budgetCurrencySymbol =
       bData.data.settings.currency_format.currency_symbol;
@@ -914,35 +903,21 @@ function setBudgetID(bId) {
       3
     );
 
-    File.createDirectory(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId
-    );
+    File.createDirectory(Action.supportPath + '/' + bId);
 
     File.writeJSON(
       bData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId +
-        '/budgetSettings.json'
+      Action.supportPath + '/' + bId + '/budgetSettings.json'
     );
 
     File.writeJSON(
       cData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId +
-        '/categories.json'
+      Action.supportPath + '/' + bId + '/categories.json'
     );
-    File.writeJSON(
-      pData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId +
-        '/payees.json'
-    );
+    File.writeJSON(pData.data, Action.supportPath + '/' + bId + '/payees.json');
     File.writeJSON(
       aData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        bId +
-        '/accounts.json'
+      Action.supportPath + '/' + bId + '/accounts.json'
     );
   }
 
@@ -1049,12 +1024,7 @@ function setClearedSetting(cInfo) {
 
 function pinCategory() {
   // Check if local data is available
-  if (
-    !File.exists(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID
-    )
-  ) {
+  if (!File.exists(Action.supportPath + '/' + budgetID)) {
     // Update
     LaunchBar.alert('Your data needs to be updated.');
     var output = resetData();
@@ -1066,9 +1036,7 @@ function pinCategory() {
 
   // Pinned Category
   var pinnedCategoryPath =
-    '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-    budgetID +
-    '/pinnedCategory.json';
+    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
   if (File.exists(pinnedCategoryPath)) {
     var pinnedCategory = File.readJSON(pinnedCategoryPath);
   }
@@ -1076,9 +1044,7 @@ function pinCategory() {
   // Category
   try {
     var cData = File.readJSON(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/categories.json'
+      Action.supportPath + '/' + budgetID + '/categories.json'
     );
     // Use object
   } catch (exception) {
@@ -1160,9 +1126,7 @@ function pinCategory() {
 }
 function setPin(pin) {
   var fileLocation =
-    '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-    budgetID +
-    '/pinnedCategory.json';
+    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
 
   if (pin == 'unpin') {
     File.writeJSON([], fileLocation);
@@ -1223,9 +1187,7 @@ function updatePayees() {
   } else {
     LaunchBar.hide();
     var pLocalData = File.readJSON(
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/payees.json'
+      Action.supportPath + '/' + budgetID + '/payees.json'
     );
 
     // Add new payess
@@ -1254,9 +1216,7 @@ function updatePayees() {
 
     File.writeJSON(
       pLocalData,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/payees.json'
+      Action.supportPath + '/' + budgetID + '/payees.json'
     );
 
     var changes = newIds.length + oldIds.length;
@@ -1296,22 +1256,16 @@ function updateRest() {
 
     File.writeJSON(
       bSettingsData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/budgetSettings.json'
+      Action.supportPath + '/' + budgetID + '/budgetSettings.json'
     );
 
     File.writeJSON(
       cData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/categories.json'
+      Action.supportPath + '/' + budgetID + '/categories.json'
     );
     File.writeJSON(
       aData.data,
-      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-        budgetID +
-        '/accounts.json'
+      Action.supportPath + '/' + budgetID + '/accounts.json'
     );
 
     LaunchBar.displayNotification({
@@ -1364,34 +1318,23 @@ function resetData() {
         3
       );
 
-      File.createDirectory(
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          bId
-      );
+      File.createDirectory(Action.supportPath + '/' + bId);
 
       File.writeJSON(
         bSettingsData.data,
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          bId +
-          '/budgetSettings.json'
+        Action.supportPath + '/' + bId + '/budgetSettings.json'
       );
       File.writeJSON(
         cData.data,
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          bId +
-          '/categories.json'
+        Action.supportPath + '/' + bId + '/categories.json'
       );
       File.writeJSON(
         pData.data,
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          bId +
-          '/payees.json'
+        Action.supportPath + '/' + bId + '/payees.json'
       );
       File.writeJSON(
         aData.data,
-        '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.YNABAddTransaction/' +
-          bId +
-          '/accounts.json'
+        Action.supportPath + '/' + bId + '/accounts.json'
       );
     }
 
