@@ -6,8 +6,7 @@ This action enables you to browse through them without opening the app. If you h
 
 <img src="sfs.jpg" width="706"/> 
 
-You can than either paste the symbol `↩` or the name `⌥↩`.
-
+You can then either paste the symbol `↩` or the name `⌥↩`. 
 
 ## Download
 

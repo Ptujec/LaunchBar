@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>SF-Symbols Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.SFSymbols</string>
 	<key>LBDescription</key>
@@ -31,10 +31,6 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
-			<key>LBAcceptedArgumentTypes</key>
-			<array>
-				<string>string</string>
-			</array>
 			<key>LBKeepWindowActive</key>
 			<true/>
 			<key>LBResultType</key>

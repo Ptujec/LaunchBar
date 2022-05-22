@@ -12,7 +12,7 @@ const sfSymbolsLocation = Action.supportPath + '/sfSymbols.json';
 const recentSymbolsLocation = Action.supportPath + '/recentSymbols.json';
 const infoPlistLocation = Action.path + '/Contents/Info.plist';
 
-function run(argument) {
+function run() {
   var actionVersion = File.readPlist(infoPlistLocation).CFBundleVersion;
 
   // Check First Run
