@@ -22,4 +22,4 @@ Paste selected character with `↩`, character marked as code with `⌥↩` or t
 
 ## Updates
 
-This action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+This action integrates with Action Updates by [@prenagha](https://github.com/snchong). You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
