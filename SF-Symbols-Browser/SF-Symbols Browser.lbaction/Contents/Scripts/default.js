@@ -81,7 +81,15 @@ function action(dict) {
     var recentSymbols = [];
   }
 
-  recentSymbols.push({
+  var newRecentSymbols = [];
+
+  recentSymbols.forEach(function (item) {
+    if (item.title != dict.title) {
+      newRecentSymbols.push(item);
+    }
+  });
+
+  newRecentSymbols.push({
     title: dict.title,
     icon: 'character:' + dict.symbol,
     action: 'action',
@@ -92,11 +100,11 @@ function action(dict) {
     },
   });
 
-  if (recentSymbols.length > 3) {
-    recentSymbols.splice(0, 1);
+  if (newRecentSymbols.length > 3) {
+    newRecentSymbols.splice(0, 1);
   }
 
-  File.writeJSON(recentSymbols, recentSymbolsLocation);
+  File.writeJSON(newRecentSymbols, recentSymbolsLocation);
 
   if (LaunchBar.options.alternateKey) {
     LaunchBar.paste(dict.title);
