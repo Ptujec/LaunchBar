@@ -13,7 +13,7 @@ Or you can search after pressing space `␣`. This will allow you to search for 
 Paste selected character with `↩`, character marked as code with `⌥↩` or the html entity with `⇧↩`. 
 
 
-**BTW:** There is an action with many more [Unicode characters](https://github.com/snchong/launchbar-unicode) by @snchong.
+**BTW:** There is an action with many more [Unicode characters](https://github.com/snchong/launchbar-unicode) by [@snchong](https://github.com/snchong).
 
 
 ## Download
@@ -22,4 +22,4 @@ Paste selected character with `↩`, character marked as code with `⌥↩` or t
 
 ## Updates
 
-This action integrates with Action Updates by [@prenagha](https://github.com/snchong). You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+This action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
