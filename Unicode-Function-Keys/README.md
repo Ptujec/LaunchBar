@@ -13,6 +13,9 @@ Or you can search after pressing space `␣`. This will allow you to search for 
 Paste selected character with `↩`, character marked as code with `⌥↩` or the html entity with `⇧↩`. 
 
 
+**BTW:** There is an action with many more [Unicode characters](https://github.com/snchong/launchbar-unicode) by @snchong.
+
+
 ## Download
 
 [Download LaunchBar Action: Unicode Function Keys](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Unicode-Function-Keys) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
