@@ -1,0 +1,373 @@
+[
+  {
+    "title": "Command",
+    "local": {
+      "de": {
+        "title": "Befehlstaste",
+        "altNames": []
+      }
+    },
+    "character": "⌘",
+    "unicodeName": "PLACE OF INTEREST SIGN",
+    "htmlEntity": "&#8984;",
+    "altNames": [
+      "Cmd",
+      "Apple"
+    ]
+  },
+  {
+    "title": "Shift",
+    "local": {
+      "de": {
+        "title": "Umschalttaste",
+        "altNames": []
+      }
+    },
+    "character": "⇧",
+    "unicodeName": "UPWARDS WHITE ARROW",
+    "htmlEntity": "&#8679;",
+    "altNames": []
+  },
+  {
+    "title": "Option",
+    "local": {
+      "de": {
+        "title": "Wahltaste",
+        "altNames": []
+      }
+    },
+    "character": "⌥",
+    "unicodeName": "OPTION KEY",
+    "htmlEntity": "&#8997;",
+    "altNames": [
+      "Alt",
+      "Alternate",
+      "Windows"
+    ]
+  },
+  {
+    "title": "Control",
+    "local": {
+      "de": {
+        "title": "Steuerung",
+        "altNames": [
+          "Strg",
+          "Control-Taste"
+        ]
+      }
+    },
+    "character": "⌃",
+    "unicodeName": "UP ARROWHEAD",
+    "htmlEntity": "&#8963;",
+    "altNames": [
+      "Ctrl"
+    ]
+  },
+  {
+    "title": "Return",
+    "local": {
+      "de": {
+        "title": "Eingabetaste",
+        "altNames": []
+      }
+    },
+    "character": "↩",
+    "unicodeName": "RETURN SYMBOL",
+    "htmlEntity": "&#9166;",
+    "altNames": [
+      "Enter"
+    ]
+  },
+  {
+    "title": "Enter",
+    "local": {
+      "de": {
+        "title": "Enter-Taste",
+        "altNames": []
+      }
+    },
+    "character": "⌤",
+    "unicodeName": "PROJECTIVE",
+    "htmlEntity": "&#8965;",
+    "altNames": []
+  },
+  {
+    "title": "Delete",
+    "local": {
+      "de": {
+        "title": "Löschtaste",
+        "altNames": [
+          "Löschen",
+          "Entfernen"
+        ]
+      }
+    },
+    "character": "⌫",
+    "unicodeName": "ERASE TO THE LEFT",
+    "htmlEntity": "&#9003;",
+    "altNames": [
+      "Erase",
+      "Backspace",
+      "Erase to the Left"
+    ]
+  },
+  {
+    "title": "Forward delete",
+    "local": {
+      "de": {
+        "title": "Vorwärts löschen",
+        "altNames": []
+      }
+    },
+    "character": "⌦",
+    "unicodeName": "ERASE TO THE RIGHT",
+    "htmlEntity": "&#8998;",
+    "altNames": [
+      "Forward erase",
+      "Erase to the Right"
+    ]
+  },
+  {
+    "title": "Clear",
+    "local": {
+      "de": {
+        "title": "Num Lock",
+        "altNames": []
+      }
+    },
+    "character": "⌧",
+    "unicodeName": "X IN A RECTANGLE BOX",
+    "htmlEntity": "&#8999;",
+    "altNames": []
+  },
+  {
+    "title": "Tab",
+    "local": {
+      "de": {
+        "title": "Tabulator",
+        "altNames": []
+      }
+    },
+    "character": "⇥",
+    "unicodeName": "RIGHTWARDS ARROW TO BAR",
+    "htmlEntity": "&#8677;",
+    "altNames": []
+  },
+  {
+    "title": "Backtab",
+    "local": {
+      "de": {
+        "title": "Backtab",
+        "altNames": [
+          "Zurück",
+          "Tabulator zurück",
+          "Tabulator rückwerts"
+        ]
+      }
+    },
+    "character": "⇤",
+    "unicodeName": "LEFTWARDS ARROW TO BAR",
+    "htmlEntity": "&#8676;",
+    "altNames": []
+  },
+  {
+    "title": "Space",
+    "local": {
+      "de": {
+        "title": "Leertaste",
+        "altNames": []
+      }
+    },
+    "character": "␣",
+    "unicodeName": "OPEN BOX",
+    "htmlEntity": "&#9251;",
+    "altNames": [
+      "Spacebar"
+    ]
+  },
+  {
+    "title": "Escape",
+    "local": {
+      "de": {
+        "title": "Escape",
+        "altNames": []
+      }
+    },
+    "character": "⎋",
+    "unicodeName": "BROKEN CIRCLE WITH NORTHWEST ARROW",
+    "htmlEntity": "&#9099;",
+    "altNames": [
+      "Esc"
+    ]
+  },
+  {
+    "title": "Caps lock",
+    "local": {
+      "de": {
+        "title": "Feststelltaste",
+        "altNames": []
+      }
+    },
+    "character": "⇪",
+    "unicodeName": "UPWARDS WHITE ARROW FROM BAR",
+    "htmlEntity": "&#8682;",
+    "altNames": []
+  },
+  {
+    "title": "Eject",
+    "local": {
+      "de": {
+        "title": "Auswurftaste",
+        "altNames": [
+          "Auswerfen"
+        ]
+      }
+    },
+    "character": "⏏",
+    "unicodeName": "EJECT SYMBOL",
+    "htmlEntity": "&#9167;",
+    "altNames": []
+  },
+  {
+    "title": "Page up",
+    "local": {
+      "de": {
+        "title": "Seite hoch",
+        "altNames": []
+      }
+    },
+    "character": "⇞",
+    "unicodeName": "UPWARDS ARROW WITH DOUBLE STROKE",
+    "htmlEntity": "&#8670;",
+    "altNames": []
+  },
+  {
+    "title": "Page down",
+    "local": {
+      "de": {
+        "title": "Seite runter",
+        "altNames": []
+      }
+    },
+    "character": "⇟",
+    "unicodeName": "DOWNWARDS ARROW WITH DOUBLE STROKE",
+    "htmlEntity": "&#8671;",
+    "altNames": []
+  },
+  {
+    "title": "Home",
+    "local": {
+      "de": {
+        "title": "Home",
+        "altNames": []
+      }
+    },
+    "character": "↖",
+    "unicodeName": "NORTH WEST ARROW",
+    "htmlEntity": "&#8598;",
+    "altNames": []
+  },
+  {
+    "title": "End",
+    "local": {
+      "de": {
+        "title": "Ende",
+        "altNames": []
+      }
+    },
+    "character": "↘",
+    "unicodeName": "SOUTH EAST ARROW",
+    "htmlEntity": "&#8600;",
+    "altNames": []
+  },
+  {
+    "title": "Left arrow",
+    "local": {
+      "de": {
+        "title": "Linkspfeil",
+        "altNames": [
+          "Links",
+          "Pfeil links"
+        ]
+      }
+    },
+    "character": "←",
+    "unicodeName": "LEFTWARDS ARROW",
+    "htmlEntity": "&#8592;",
+    "altNames": [
+      "Left",
+      "Leftwards Arrow"
+    ]
+  },
+  {
+    "title": "Right arrow",
+    "local": {
+      "de": {
+        "title": "Rechtspfeil",
+        "altNames": [
+          "Rechts",
+          "Pfeil rechts"
+        ]
+      }
+    },
+    "character": "→",
+    "unicodeName": "RIGHTWARDS ARROW",
+    "htmlEntity": "&#8594;",
+    "altNames": [
+      "Right",
+      "Rightwards Arrow"
+    ]
+  },
+  {
+    "title": "Up arrow",
+    "local": {
+      "de": {
+        "title": "Aufwärtspfeil",
+        "altNames": [
+          "Hoch",
+          "Pfeil hoch"
+        ]
+      }
+    },
+    "character": "↑",
+    "unicodeName": "UPWARDS ARROW",
+    "htmlEntity": "&#8593;",
+    "altNames": [
+      "Up",
+      "Upwards Arrow"
+    ]
+  },
+  {
+    "title": "Down arrow",
+    "local": {
+      "de": {
+        "title": "Abwärtspfeil",
+        "altNames": [
+          "Runter",
+          "Pfeil runter"
+        ]
+      }
+    },
+    "character": "↓",
+    "unicodeName": "DOWNWARDS ARROW",
+    "htmlEntity": "&#8595;",
+    "altNames": [
+      "Down",
+      "Downwards Arrow"
+    ]
+  },
+  {
+    "title": "Apple",
+    
+    "local": {
+      "de": {
+        "title": "Apple",
+        "altNames": []
+      }
+    },
+    "character": "",
+    "unicodeName": "PRIVATE USE AREA-F8FF",
+    "htmlEntity": "&#63743;",
+    "altNames": []
+  }
+]
