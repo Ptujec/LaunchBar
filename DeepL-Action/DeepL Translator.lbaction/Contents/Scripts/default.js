@@ -43,49 +43,34 @@ function run(argument) {
 function showLanguages() {
   var lang = Action.preferences.lang;
 
-  // TODO: get all available languages
+  var target_langs = File.readText(
+    Action.path + '/Contents/Resources/target_langs.txt'
+  ).split('\n');
 
-  var settings = [
-    {
-      title: 'Deutsch',
-      icon: 'de_Template',
-      action: 'setLanguage',
-      actionArgument: 'DE',
-    },
-    {
-      title: 'English',
-      icon: 'en_Template',
-      action: 'setLanguage',
-      actionArgument: 'EN',
-    },
-    {
-      title: 'Français',
-      icon: 'fr_Template',
-      action: 'setLanguage',
-      actionArgument: 'FR',
-    },
-    {
-      title: 'Español',
-      icon: 'es_Template',
-      action: 'setLanguage',
-      actionArgument: 'ES',
-    },
-    {
-      title: 'Slovenščina',
-      icon: 'sl_Template',
-      action: 'setLanguage',
-      actionArgument: 'SL',
-    },
-  ];
+  var all = [];
+  var selected = [];
+  target_langs.forEach(function (item) {
+    var langCode = item.split(',')[0];
+    var langName = item.split(',')[1];
 
-  settings.forEach(function (item) {
-    if (item.actionArgument == lang) {
-      item.label = '✔︎';
+    var pushData = {
+      title: langName,
+      icon: langCode.toLowerCase() + '_Template',
+      action: 'setLanguage',
+      actionArgument: langCode,
+    };
+
+    if (langCode == lang) {
+      pushData.label = '✔︎';
+      selected.push(pushData);
     } else {
+      all.push(pushData);
     }
   });
 
-  return settings;
+  var result = selected.concat(all);
+
+  return result;
 }
 
 function setLanguage(lang) {
