@@ -2,6 +2,8 @@
 - https://www.deepl.com/de/docs-api/translating-text/request/
 */
 
+String.prototype.localizationTable = 'default';
+
 const apiKey = Action.preferences.apiKey;
 var lang = Action.preferences.lang;
 
@@ -59,6 +61,11 @@ function showLanguages() {
       action: 'setLanguage',
       actionArgument: langCode,
     };
+
+    if (Action.preferences.mode == 'translate') {
+      pushData.subtitle =
+        'Translate: '.localize() + '"' + Action.preferences.argument + '"';
+    }
 
     if (langCode == lang) {
       pushData.label = '✔︎';
