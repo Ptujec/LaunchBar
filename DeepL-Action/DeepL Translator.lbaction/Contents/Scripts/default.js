@@ -14,28 +14,24 @@ function run(argument) {
     setApiKey();
   } else {
     if (argument == undefined) {
+      Action.preferences.mode = 'setDefault';
       var output = showLanguages();
       return output;
     } else {
       if (apiKey == undefined) {
         setApiKey();
       } else {
-        var result = HTTP.getJSON(
-          'https://api-free.deepl.com/v2/translate?auth_key=' +
-            apiKey +
-            '&text=' +
-            encodeURI(argument) +
-            '&target_lang=' +
-            lang
-        );
-
-        return [
-          {
-            title: result.data.translations[0].text,
-            subtitle: argument,
-            icon: 'iconTemplate',
-          },
-        ];
+        if (LaunchBar.options.commandKey) {
+          Action.preferences.mode = 'translate';
+          Action.preferences.argument = argument;
+          var output = showLanguages();
+          return output;
+        } else {
+          Action.preferences.mode = 'setDefault';
+          Action.preferences.argument = argument;
+          var output = translate(lang);
+          return output;
+        }
       }
     }
   }
@@ -78,9 +74,36 @@ function showLanguages() {
 }
 
 function setLanguage(lang) {
-  Action.preferences.lang = lang;
-  var output = showLanguages();
-  return output;
+  if (Action.preferences.mode == 'translate') {
+    var output = translate(lang);
+    return output;
+  } else {
+    // set default language
+    Action.preferences.lang = lang;
+    var output = showLanguages();
+    return output;
+  }
+}
+
+function translate(lang) {
+  var argument = Action.preferences.argument;
+
+  var result = HTTP.getJSON(
+    'https://api-free.deepl.com/v2/translate?auth_key=' +
+      apiKey +
+      '&text=' +
+      encodeURI(argument) +
+      '&target_lang=' +
+      lang
+  );
+
+  return [
+    {
+      title: result.data.translations[0].text,
+      subtitle: argument,
+      icon: 'iconTemplate',
+    },
+  ];
 }
 
 function setApiKey() {

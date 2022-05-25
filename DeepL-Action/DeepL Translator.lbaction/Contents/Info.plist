@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>DeepL Translator</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.2</string>
+	<string>1.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Hit return to select a different target language. Press space to enter text.</string>
+		<string>Set default target language with ↩. Choose language for current entry with ⌘↩.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
