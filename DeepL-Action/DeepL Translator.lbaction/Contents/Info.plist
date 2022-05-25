@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>DeepL Translator</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.1</string>
+	<string>1.3.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -41,6 +41,25 @@
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>
+		</dict>
+		<key>LBSuggestionsScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBLiveFeedbackEnabled</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>suggestions.js</string>
 		</dict>
 	</dict>
 </dict>
