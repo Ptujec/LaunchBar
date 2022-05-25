@@ -1,28 +1,28 @@
-BG,Bulgarian
-CS,Czech
-DA,Danish
-DE,German
-EL,Greek
-EN-GB,English (British)
-EN-US,English (American)
-ES,Spanish
-ET,Estonian
-FI,Finnish
-FR,French
-HU,Hungarian
-ID,Indonesian
-IT,Italian
-JA,Japanese
-LT,Lithuanian
-LV,Latvian
-NL,Dutch
-PL,Polish
-PT-PT,Portuguese 
-PT-BR,Portuguese (Brazilian)
-RO,Romanian
-RU,Russian
-SK,Slovak
-SL,Slovenian
-SV,Swedish
-TR,Turkish
-ZH,Chinese
+BG,Bulgarian,Bulgarisch
+CS,Czech,Tschechisch 
+DA,Danish,Dänisch
+DE,German,Deutsch
+EL,Greek,Griechisch
+EN-GB,English (British),Englisch (Britisch),
+EN-US,English (American),Englisch (US)
+ES,Spanish,Spanisch
+ET,Estonian,Estnisch
+FI,Finnish,Finisch
+FR,French,Französisch
+HU,Hungarian,Ungarisch
+ID,Indonesian,Indonesisch
+IT,Italian,Italienisch
+JA,Japanese,Japanisch
+LT,Lithuanian,Litauisch
+LV,Latvian,Lettisch
+NL,Dutch,Niederländisch
+PL,Polish,Polnisch
+PT-PT,Portuguese,Portugiesisch
+PT-BR,Portuguese (Brazilian),Portugiesisch (Brasilien)
+RO,Romanian,Rumänisch
+RU,Russian,Russisch
+SK,Slovak,Slowakisch
+SL,Slovenian,Slowenisch
+SV,Swedish,Schwedisch
+TR,Turkish,Türkisch
+ZH,Chinese,Chinesisch

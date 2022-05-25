@@ -51,7 +51,11 @@ function showLanguages() {
   var selected = [];
   target_langs.forEach(function (item) {
     var langCode = item.split(',')[0];
-    var langName = item.split(',')[1];
+    if (LaunchBar.currentLocale == 'de') {
+      var langName = item.split(',')[2];
+    } else {
+      var langName = item.split(',')[1];
+    }
 
     var pushData = {
       title: langName,
