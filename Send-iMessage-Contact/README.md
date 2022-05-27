@@ -6,9 +6,16 @@ You can tell LaunchBar to open Messages for a phone number out of the box. This 
 
 Or you can select the action and type the contacts name.  
 
-## Note
-The action should run pretty smoothly. If not you can improve the performance by making the `default.swift` file an executable with `swiftc -O default.swift`. You obviously need to change the `LBScriptName` key in `info.plist`, pointing it to the executable. 
-(Unfortunately I can't share the action with the executable at the moment, because I can not sign the action. So the action would be unusable.)
+## Note about Swift scripts
+Swift scripts run faster when compiled. Unfortunately I can't share the action with a compiled script. For security reasons Apple adds a `com.apple.quarantine` attribute to every downloaded file. (You can check that in Terminal with `‌xattr` plus the path to the file.) 
+
+This is not a problem yet. The problem starts when the main script file is an executable. If you want to run that you will get a malware alert.
+
+You can compile `default.swift` file yourself with `swiftc -O default.swift`. You will need Command Line Tools for that. [But it's a fairly easy and small install](https://www.maketecheasier.com/install-command-line-tools-without-xcode/). Obviously you also need to change the `LBScriptName` key in `info.plist`, pointing it to the executable. 
+
+Now you have the compiled executable and you know it matches the source file, because you compiled it yourself. But the action still won't run. This is because of the attribute on every other file of the action bundle. You can remove the attribute with LaunchBars built in `Open Anyways` action. Just be aware that this will remove the attribute from all files in that bundle. Potentially there could be other executables that the main script refers to. So check the whole bundle before you do this. And only do it if you trust the source. 
+
+**I know, that sounds like a lot. That is why I built [an action to make that process easier](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme).** 
 
 ## Download
 [Download LaunchBar Action: Send iMessage to Contact](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Send-iMessage-Contact) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
