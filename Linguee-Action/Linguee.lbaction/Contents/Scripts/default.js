@@ -1,4 +1,9 @@
-/* Linguee LaunchBar Action
+/* 
+Linguee Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-04-03
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Add in v2:
 - tag_wordtype support?
@@ -155,6 +160,7 @@ function openURL(dict) {
                   title: title,
                   url: dict.url,
                 },
+                actionRunsInBackground: true,
                 icon: lang + '_r',
               });
             });
@@ -179,6 +185,7 @@ function openURL(dict) {
                   title: title,
                   url: dict.url,
                 },
+                actionRunsInBackground: true,
                 icon: 'iconTemplate',
                 icon: lang + '_r',
               });
@@ -216,6 +223,7 @@ function openURL(dict) {
             title: item,
             url: dict.url,
           },
+          actionRunsInBackground: true,
         });
       });
       result[0].subtitle =
@@ -227,8 +235,10 @@ function openURL(dict) {
 
 function options(dict) {
   if (LaunchBar.options.shiftKey) {
+    LaunchBar.hide();
     LaunchBar.paste(dict.title);
   } else {
+    LaunchBar.hide();
     LaunchBar.openURL(dict.url);
   }
 }
