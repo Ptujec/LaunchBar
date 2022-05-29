@@ -14,9 +14,13 @@ With `⇧` (shift) you can change defaults for numbers and symbols, that is if t
 
 <img src="03.jpg" width="600"/>
 
+## Clear Clipboard Action
+
+I included a complimentary action that clears the internal clipboard (not LaunchBars clipboard history) after a delay of 30 seconds. The main action runs that automatically. It needed to be an extra action in order to run in the background. Otherwise you would not be able to use LaunchBar again until the delay time has passed.
+
 ## Caution
 
-The action both pastes the password in the active text field and copies it to the clipboard. Since it is not an app it can not be excluded for LaunchBars clipboard history (yet). So you need to remove it manually for now. 
+The action both pastes the password in the active text field and copies it to the clipboard. Since it is not an app it can not be excluded for LaunchBars clipboard history (yet). So you need to remove it manually for now. (The Clear Clipboard action does not do that.)
 
 ## Download
 
