@@ -10,21 +10,23 @@ You can change the length with `␣` (space).
 
 <img src="02.jpg" width="596"/>
 
-With `⇧` (shift) you can change defaults for numbers and symbols, that is if they should be included or not.
+With `⇧↩` (shift-return) you can change defaults for numbers and symbols, that is if they should be included or not.
 
 <img src="03.jpg" width="600"/>
 
+
 ## Clear Clipboard Action
 
-I included a complimentary action that clears the internal clipboard (not LaunchBars clipboard history) after a delay of 30 seconds. The main action runs that automatically. It needed to be an extra action in order to run in the background. Otherwise you would not be able to use LaunchBar again until the delay time has passed.
+I included a complimentary action that clears the internal clipboard (not LaunchBars clipboard history) after a delay of 90 seconds. The main action runs that automatically, when installed. It needed to be an extra action in order to run in the background. Otherwise you would not be able to use LaunchBar again until the delay time has passed.
 
-## Caution
+## Clipboard History
 
-The action both pastes the password in the active text field and copies it to the clipboard. Since it is not an app it can not be excluded for LaunchBars clipboard history (yet). So you need to remove it manually for now. (The Clear Clipboard action does not do that.)
+You might want to use paste and remove from history `⌃⌥⌘V` to remove the password from LaunchBar's Clipboard History! 
+
 
 ## Download
 
-[Download LaunchBar Action: Password Generator](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Password-Generator) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Download LaunchBar Action: Password Generator (incl. Clear Clipboard Action)](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Password-Generator) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
 
 ## Updates
 
