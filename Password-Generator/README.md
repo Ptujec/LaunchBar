@@ -23,7 +23,6 @@ I included a complimentary action that clears the internal clipboard (not Launch
 
 You might want to use paste and remove from history `⌃⌥⌘V` to remove the password from LaunchBar's Clipboard History! 
 
-
 ## Download
 
 [Download LaunchBar Action: Password Generator (incl. Clear Clipboard Action)](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Password-Generator) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
@@ -31,3 +30,8 @@ You might want to use paste and remove from history `⌃⌥⌘V` to remove the p
 ## Updates
 
 This action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+
+## Other password actions
+- Looking for something more memorable? [Try this one](https://github.com/prenagha/launchbar/tree/main/Generate%20Password.lbaction). (Requires [hsxkpasswd](https://github.com/bbusschots/hsxkpasswd))
+- Do you use LastPass? [Give this one a try.](https://github.com/yrocq/launchbar-lastpass)
+
