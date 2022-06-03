@@ -315,6 +315,7 @@ function lookUp(result, argument) {
     LaunchBar.options.commandKey ||
     result.endsWith('f') ||
     result.includes('-') ||
+    result.includes('–') ||
     result.includes(';') ||
     !result.includes(',')
   ) {
