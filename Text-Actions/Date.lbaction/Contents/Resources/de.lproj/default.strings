@@ -1,0 +1,15 @@
+"Monday" = "Montag";
+"Tuesday" = "Dienstag";
+"Wednesday" = "Mittwoch";
+"Thursday" = "Donnerstag";
+"Friday" = "Freitag";
+"Saturday" = "Samstag";
+"Sunday" = "Sonntag";
+"Yesterday" = "Gestern";
+"Tomorrow" = "Morgen";
+"First day of previous month (FDPM)" = "Erster Tag des vergangen Monats (ETVM)";
+"Last day of previous month (LDPM)" = "Letzter Tag des vergangen Monats (LTVM)";
+"First day of this month (FDTM)" = "Erster Tag des aktuellen Monats (ETAM)";
+"Last day of this month (LDTM)" = "Letzter Tag des aktuellen Monats (LTAM)";
+"First day of next month (FDNM)" = "Erster Tag des nächstag Monats (ETNM)";
+"Last day of next month (LDNM)" = "Letzter Tag des nächstag Monats (LTNM)";

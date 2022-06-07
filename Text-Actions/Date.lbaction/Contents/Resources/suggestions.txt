@@ -1,0 +1,15 @@
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
+Yesterday
+Tomorrow
+First day of previous month (FDPM)
+Last day of previous month (LDPM)
+First day of this month (FDTM)
+Last day of this month (LDTM)
+First day of next month (FDNM)
+Last day of next month (LDNM)

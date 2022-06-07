@@ -1,51 +1,88 @@
-// LaunchBar Action Script
+/* 
+Date Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-06-07
 
-// Date Infos:
-// https://stackoverflow.com/a/3818198
-
-// How to interpret argument as number:
-// https://www.w3schools.com/jsref/jsref_parseint.asp
-
-// Paste String with Launchbar:
-// https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
-
-// Parsing ISO 8601 date in Javascript:
-// https://stackoverflow.com/a/22914738/15774924
-// see also NBA action
-
-// Get next date from weekday in JavaScript:
-// https://stackoverflow.com/questions/1579010/get-next-date-from-weekday-in-javascript
-// https://stackoverflow.com/a/43624637/15774924 (best answer)
-
-// https://codereview.stackexchange.com/questions/33527/find-next-occurring-friday-or-any-dayofweek
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
 function run(argument) {
   if (LaunchBar.options.shiftKey) {
     var output = dateFormatOption();
     return output;
   } else {
+    var date = new Date();
+
     if (argument == undefined) {
       // Return current date
-      var date = new Date();
-
       var dateString = new Date(
         date.getTime() - date.getTimezoneOffset() * 60000
       );
     } else {
-      // Date with offset (either number … or an upcoming day of the week)
+      // First and last days of month
+      // https://www.toptal.com/software/definitive-guide-to-datetime-manipulation
+
+      var month = date.getMonth();
+      var year = date.getFullYear();
+
+      if ('First day of previous month (FDPM)'.localize() == argument) {
+        var dateString = new Date(year, month - 1, 1);
+        formatAndPaste(dateString);
+        return;
+        // 2022-05-01
+      }
+
+      if ('Last day of previous month (LDPM)'.localize() == argument) {
+        var dateString = new Date(year, month, 1, -1);
+        formatAndPaste(dateString);
+        return;
+        // 2022-05-31
+      }
+
+      if ('First day of this month (FDTM)'.localize() == argument) {
+        var dateString = new Date(year, month, 1);
+        formatAndPaste(dateString);
+        return;
+        // 2022-06-01
+      }
+
+      if ('Last day of this month (LDTM)'.localize() == argument) {
+        var dateString = new Date(year, month + 1, 0);
+        formatAndPaste(dateString);
+        return;
+        // 2022-06-30
+      }
+
+      if ('First day of next month (FDNM)'.localize() == argument) {
+        var dateString = new Date(year, month + 1, 1);
+        formatAndPaste(dateString);
+        return;
+        // 2022-07-01
+      }
+
+      if ('Last day of next month (LDNM)'.localize() == argument) {
+        var dateString = new Date(year, month + 2, 0);
+        formatAndPaste(dateString);
+        return;
+        // 2022-07-31 31.07.2022
+      }
 
       // relativ days of the week
-      if (argument.toLowerCase() == 'morgen') {
+      if (
+        'Tomorrow'.localize().toLowerCase().startsWith(argument.toLowerCase())
+      ) {
         argument = '1';
-      } else if (argument.toLowerCase() == 'gestern') {
+      } else if (
+        'Yesterday'.localize().toLowerCase().startsWith(argument.toLowerCase())
+      ) {
         argument = '-1';
       }
 
+      // Date with offset (either number … or an upcoming day of the week)
       var checkNum = parseInt(argument);
-
       if (!isNaN(checkNum)) {
         // Number offset
-        var date = new Date();
+        // var date = new Date();
 
         // Add or subtrackt days
         var offsetNumber = parseInt(argument);
@@ -98,7 +135,7 @@ function run(argument) {
           return;
         }
 
-        var date = new Date();
+        // var date = new Date();
 
         var dayOfWeekDate = new Date(date.getTime());
         dayOfWeekDate.setDate(
@@ -111,28 +148,37 @@ function run(argument) {
       }
     }
 
-    var dateFormat = Action.preferences.dateFormat;
-
-    if (LaunchBar.options.alternateKey) {
-      // use the format that is not the default (setting) if "alt"
-      if (dateFormat == undefined || dateFormat == 'iso') {
-        dateFormat = 'local';
-      } else {
-        dateFormat = 'iso';
-      }
-    }
-
-    if (dateFormat == undefined || dateFormat == 'iso') {
-      dateString = dateString.toISOString().split('T')[0];
-    } else {
-      //
-      dateString = LaunchBar.formatDate(new Date(dateString), {
-        timeStyle: 'none',
-        dateStyle: 'medium',
-      });
-    }
-    LaunchBar.paste(dateString);
+    formatAndPaste(dateString);
   }
+}
+
+function formatAndPaste(dateString) {
+  var dateFormat = Action.preferences.dateFormat;
+
+  if (LaunchBar.options.alternateKey) {
+    // use the format that is not the default (setting) if "alt"
+    if (dateFormat == undefined || dateFormat == 'iso') {
+      dateFormat = 'local';
+    } else {
+      dateFormat = 'iso';
+    }
+  }
+
+  if (dateFormat == undefined || dateFormat == 'iso') {
+    // ISO ignores timezone offset. Fix found here: https://stackoverflow.com/a/37661393/15774924
+    dateString = new Date(
+      dateString.getTime() - dateString.getTimezoneOffset() * 60000
+    );
+
+    dateString = dateString.toISOString().split('T')[0];
+  } else {
+    //
+    dateString = LaunchBar.formatDate(new Date(dateString), {
+      timeStyle: 'none',
+      dateStyle: 'medium',
+    });
+  }
+  LaunchBar.paste(dateString);
 }
 
 function dateFormatOption() {
