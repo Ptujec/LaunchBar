@@ -1,6 +1,6 @@
 # LaunchBar Action: Calculate with Soulver
 
-Use the calculating power of the excellent app [Soulver](https://soulver.app). The results will displayed as you type. 
+Use the calculating power of the excellent app [Soulver](https://soulver.app/features/). The results will displayed as you type. 
 
 <img src="01.png" width="600"/> 
 
