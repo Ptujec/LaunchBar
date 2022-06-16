@@ -4,7 +4,11 @@ Use the calculating power of the excellent app [Soulver](https://soulver.app). T
 
 <img src="01.png" width="600"/> 
 
-Press `↓` to select a result and continue calculating. Press `↩` to select the result in LaunchBar. By default the result will be also copied to your clipboard. You can turn that off in settings `⇧↩`.
+Press `↓` to select a result and continue calculating. 
+
+<img src="02.png" width="600"/> 
+
+Press `↩` to select the result in LaunchBar. By default the result will be also copied to your clipboard. You can turn that off in settings `⇧↩`.
 
 ## Requirements
 
