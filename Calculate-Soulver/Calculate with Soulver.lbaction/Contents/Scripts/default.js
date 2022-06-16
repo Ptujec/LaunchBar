@@ -7,11 +7,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://documentation.soulver.app/documentation/command-line-tool-automator-and-services
-
-TODO: Option to Copy or not
 */
 
-const soulverClt = '/usr/local/bin/soulver';
+const soulverClt = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
 const prefs = Action.preferences;
 
 function run(argument) {
@@ -23,7 +21,7 @@ function run(argument) {
   if (!File.exists(soulverClt)) {
     var response = LaunchBar.alert(
       'Missing Soulver Command Line Interface',
-      'The Soulver Command Line Interface was not found in the expected location.',
+      'The Soulver Command Line Interface was not found in the expected location. Press "Help" and read what is written about the Alfred Workflow. This applies for the LaunchBar Action aswell.',
       'Help',
       'Cancel'
     );

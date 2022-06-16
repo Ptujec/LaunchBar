@@ -12,7 +12,10 @@ Press `↩` to select the result in LaunchBar. By default the result will be als
 
 ## Requirements
 
-You need [Soulver 3](https://soulver.app) and the [CLI tool installed](https://documentation.soulver.app/documentation/command-line-tool-automator-and-services). 
+If you have [Soulver 3](https://soulver.app) installed in the default location you are all set. 
+
+(The action relies on the [Soulver CLI](https://documentation.soulver.app/documentation/command-line-tool-automator-and-services), which is located inside Soulver's bundle. It expects to find it at `/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver`.
+If you rename the Soulver application, or put it in a different location you need to update the path in `default.js`.)
 
 ## Download
 

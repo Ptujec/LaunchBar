@@ -1,5 +1,5 @@
 // LaunchBar Action Script
-const soulverClt = '/usr/local/bin/soulver';
+const soulverClt = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
 
 function runWithString(string) {
   if (string == '') {
