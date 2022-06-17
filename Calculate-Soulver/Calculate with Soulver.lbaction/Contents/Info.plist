@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Calculate with Soulver</string>
 	<key>CFBundleVersion</key>
-	<string>1.1</string>
+	<string>1.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>app.soulver.mac</string>
 	<key>LBDescription</key>
@@ -19,7 +19,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⇧↩ = Settings</string>
+		<string>⇧↩ = Settings; ⌘↩ = Open Entry in Soulver</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>

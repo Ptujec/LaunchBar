@@ -10,6 +10,7 @@ function runWithString(string) {
   return [
     {
       title: result,
+      label: '⌘↩ = Open Entry in Soulver',
       icon: 'equal',
     },
   ];

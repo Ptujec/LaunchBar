@@ -18,6 +18,13 @@ function run(argument) {
     return output;
   }
 
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.openURL(
+      'x-soulver://x-callback-url/create?&expression=' + encodeURI(argument)
+    );
+    return;
+  }
+
   if (!File.exists(soulverClt)) {
     var response = LaunchBar.alert(
       'Missing Soulver Command Line Interface',
