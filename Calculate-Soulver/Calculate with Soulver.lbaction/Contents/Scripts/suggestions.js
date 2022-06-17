@@ -7,11 +7,16 @@ function runWithString(string) {
   }
 
   var result = LaunchBar.execute(soulverClt, string).trim();
-  return [
-    {
-      title: result,
-      label: '⌘↩ = Open Entry in Soulver',
-      icon: 'equal',
-    },
-  ];
+
+  var dict = {
+    title: result,
+    label: '⌘↩ = Open Entry in Soulver',
+    icon: 'equal',
+  };
+
+  if (result.startsWith('Error')) {
+    dict.icon = 'error';
+  }
+
+  return [dict];
 }

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Calculate with Soulver</string>
 	<key>CFBundleVersion</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>app.soulver.mac</string>
 	<key>LBDescription</key>

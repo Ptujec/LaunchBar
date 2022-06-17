@@ -49,13 +49,15 @@ function run(argument) {
     LaunchBar.setClipboardString(result);
   }
 
-  return [
-    {
-      title: result,
-      subtitle: argument,
-      icon: 'app.soulver.mac',
-    },
-  ];
+  if (!result.startsWith('Error')) {
+    return [
+      {
+        title: result,
+        subtitle: argument,
+        icon: 'app.soulver.mac',
+      },
+    ];
+  }
 }
 
 function showOptions() {
