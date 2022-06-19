@@ -20,7 +20,6 @@ function run(argument) {
       );
     } else {
       // First and last days of month
-      // https://www.toptal.com/software/definitive-guide-to-datetime-manipulation
 
       var month = date.getMonth();
       var year = date.getFullYear();
@@ -166,9 +165,9 @@ function formatAndPaste(dateString) {
 
   if (dateFormat == undefined || dateFormat == 'iso') {
     // ISO ignores timezone offset. Fix found here: https://stackoverflow.com/a/37661393/15774924
-    dateString = new Date(
-      dateString.getTime() - dateString.getTimezoneOffset() * 60000
-    );
+    // dateString = new Date(
+    //   dateString.getTime() - dateString.getTimezoneOffset() * 60000
+    // );
 
     dateString = dateString.toISOString().split('T')[0];
   } else {
