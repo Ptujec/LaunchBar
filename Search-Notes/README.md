@@ -2,7 +2,7 @@
 
 A simple action to search Apple Notes and open them in the app. 
 
-<img src="01.png" width="602"/> 
+<img src="01.png" width="604"/> 
 
 The action is associated with the Notes app. So you can simply select Notes and press `space` to search.  
 
