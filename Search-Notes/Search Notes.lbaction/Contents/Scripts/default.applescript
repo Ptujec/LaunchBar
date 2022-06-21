@@ -27,5 +27,9 @@ on handle_string(s)
 end handle_string
 
 on openNote(_id)
-	tell application "Notes" to show note id _id
+	tell me to activate
+	tell application "Notes" 
+		activate
+		show note id _id
+	end tell
 end openNote
