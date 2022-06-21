@@ -17,7 +17,10 @@ on handle_string(s)
 			set _name to name of _note
 			set _sub to creation date of _note as string
 			
-			set end of output to {title:_name, subtitle:_sub, icon:"com.apple.Notes", action:"openNote", actionArgument:_id, actionRunsInBackground:true}
+			set _cont to container of _note
+			set _folder to name of _cont
+			
+			set end of output to {title:_name, subtitle:_sub, label:_folder, icon:"com.apple.Notes", action:"openNote", actionArgument:_id, actionRunsInBackground:true}
 		end repeat
 	end tell
 	return output
