@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>urcWindowTemplate</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.Movewindowtofillupperrightquarter</string>
+	<key>CFBundleName</key>
+	<string>Move window to fill upper right quarter</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string>ptujec@me.com</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Window-Actions#readme</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Window-Actions/Move%20window%20to%20fill%20upper%20right%20quarter.lbaction/Contents/Info.plist</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBRunInBackground</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.applescript</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
