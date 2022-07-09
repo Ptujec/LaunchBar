@@ -13,7 +13,7 @@ set _mon1Hight to item 2 of _mon1
 
 set _wW to _mon1Width / 2
 set _wH to _mon1Hight - 25
-set _x to _mon1Width / 2
+set _x to (_mon1Width / 2) +1
 
 try
 	tell application "System Events"
