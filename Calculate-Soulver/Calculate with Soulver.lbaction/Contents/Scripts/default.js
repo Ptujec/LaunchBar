@@ -43,7 +43,7 @@ function run(argument) {
     return;
   }
 
-  let result = LaunchBar.execute(soulverClt, argument);
+  let result = LaunchBar.execute(soulverClt, argument).trim();
 
   if (prefs.copy != false) {
     LaunchBar.setClipboardString(result);
