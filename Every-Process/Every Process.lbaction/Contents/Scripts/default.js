@@ -21,7 +21,7 @@ function list() {
   for (i = 0; i < output.length; i++) {
     var item = output[i];
     var pid = item.replace(/^(.....).(.....).(.*)/, '$1').trim();
-    var percent = item.replace(/^(.....).(.....).(.*)/, '$2');
+    var percent = item.replace(/^(.....).(.....).(.*)/, '$2').trim();
     var path = item.replace(/^(.....).(.....).(.*)/, '$3').trim();
     var title = path.match(/[^/]*[^/]*$/i).toString();
     var val = parseFloat(percent);
