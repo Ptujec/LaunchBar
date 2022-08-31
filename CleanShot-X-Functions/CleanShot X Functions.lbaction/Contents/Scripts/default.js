@@ -82,6 +82,13 @@ function run() {
       actionArgument: 'cleanshot://restore-recently-closed',
       actionRunsInBackground: true,
     },
+    {
+      title: 'Capture History', // .localize()
+      icon: 'historyTemplate',
+      action: 'doStuff',
+      actionArgument: 'cleanshot://open-history',
+      actionRunsInBackground: true,
+    },
   ];
 }
 
