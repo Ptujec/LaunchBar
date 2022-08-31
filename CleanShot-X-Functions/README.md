@@ -16,6 +16,7 @@ This is a simple action associated with the [app](https://cleanshot.com/) to acc
 - Record Screen (Video/GIF)
 - Toggles Desktop icons visiblity
 - Restore recently closed item
+- Capture History
 
 [Here is the full list of accessible functions](https://cleanshot.com/docs/api). [Let me know if you are missing something.](https://github.com/Ptujec/LaunchBar/issues/new). 
 
