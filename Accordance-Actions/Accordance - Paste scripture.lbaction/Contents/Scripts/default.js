@@ -1,13 +1,16 @@
-// 2021-04-22 Ptujec
+/* 
+Accordance Paste Text Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-09-03
 
-/* Accordance Paste Text by Ptujec 2021-07-22
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Sources:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
+
 */
 
-// Use "common.strings" for the current language when calling localize() on Strings:
 String.prototype.localizationTable = 'default';
 
 const GermanBookList = [
@@ -297,6 +300,14 @@ function pasteText(result, argument, translation) {
       '", true}'
   ).trim();
 
+  if (text.startsWith('ERR')) {
+    LaunchBar.alert('Error!', text);
+    // var output = listTranslations(result, argument);
+    // return output;
+    return;
+    // TODO: Pick a different translation
+  }
+
   // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
   text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […]\n');
 
@@ -304,10 +315,12 @@ function pasteText(result, argument, translation) {
   translationName = translation.replace(/°|-LEM/g, '');
   argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
-  if (Action.preferences.format == 'citation') {
+  if (Action.preferences.format == 'markdown') {
     LaunchBar.paste(
       '> ' + text + ' (' + argument + ' ' + translationName + ')'
     );
+  } else if (Action.preferences.format == 'citation') {
+    LaunchBar.paste('„' + text + '“\n\n' + argument + ' ' + translationName);
   } else {
     LaunchBar.paste(text + ' (' + argument + ' ' + translationName + ')');
   }
@@ -315,23 +328,23 @@ function pasteText(result, argument, translation) {
 
 function settings() {
   // TODO: localize
-  if (Action.preferences.format == undefined) {
-    var formatTitle = 'Paste unformatted'.localize();
+  if (
+    Action.preferences.format == undefined ||
+    Action.preferences.format == 'plain'
+  ) {
     var formatIcon = 'plainTemplate';
-    var formatArgument = 'plain';
-  } else {
-    var formatTitle = 'Paste as markdown quote'.localize();
+  } else if (Action.preferences.format == 'citation') {
     var formatIcon = 'citationTemplate';
-    var formatArgument = 'citation';
+  } else {
+    var formatIcon = 'markdownTemplate';
   }
 
   return [
     {
-      title: formatTitle,
-      subtitle: 'Hit return to change!'.localize(),
+      title: 'Format'.localize(),
+      // subtitle: 'Hit return to change!'.localize(),
       icon: formatIcon,
-      action: 'setFormat',
-      actionArgument: formatArgument,
+      children: listFormats(),
     },
     {
       title: 'Choose default translation'.localize(),
@@ -341,12 +354,31 @@ function settings() {
   ];
 }
 
+function listFormats() {
+  return [
+    {
+      title: 'Paste unformatted'.localize(),
+      icon: 'plainTemplate',
+      action: 'setFormat',
+      actionArgument: 'plain',
+    },
+    {
+      title: 'Paste with quotations'.localize(),
+      icon: 'citationTemplate',
+      action: 'setFormat',
+      actionArgument: 'citation',
+    },
+    {
+      title: 'Paste as markdown quote'.localize(),
+      icon: 'markdownTemplate',
+      action: 'setFormat',
+      actionArgument: 'markdown',
+    },
+  ];
+}
+
 function setFormat(format) {
-  if (format == 'citation') {
-    Action.preferences.format = undefined;
-  } else {
-    Action.preferences.format = 'citation';
-  }
+  Action.preferences.format = format;
   var output = settings();
   return output;
 }
