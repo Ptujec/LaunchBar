@@ -25,4 +25,5 @@ SK,Slovak,Slowakisch
 SL,Slovenian,Slowenisch
 SV,Swedish,Schwedisch
 TR,Turkish,Türkisch
+UK,Ukrainian,Ukrainisch
 ZH,Chinese,Chinesisch
