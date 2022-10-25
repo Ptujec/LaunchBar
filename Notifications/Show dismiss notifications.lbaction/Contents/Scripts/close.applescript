@@ -1,30 +1,30 @@
 tell application "System Events"
 	try
-		set _buttons to buttons of UI element 1 of scroll area 1 of window "Notification Center" of application process "NotificationCenter"
 		
-		repeat with _button in _buttons
-			if title of _button is in {"Bestätigen, weniger anzuzeigen", "Confirm Show Less"} then
-				click _button
-			end if
-			delay 0.1
-		end repeat
+		set _buttons to buttons of UI element 1 of scroll area 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
 		
-		set _count to count of groups of UI element 1 of scroll area 1 of window "Notification Center" of application process "NotificationCenter"
+		if (count of _buttons) is not 0 then
+			click item 1 of _buttons
+		end if
 		
-		set _index to _count
+		delay 0.3
 		
-		repeat _count times
-			set _group to group _index of UI element 1 of scroll area 1 of window "Notification Center" of application process "NotificationCenter"
+		
+		set _groups to groups of UI element 1 of scroll area 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+		
+		repeat with _group in _groups
 			
 			set _actions to actions of _group
+			
 			repeat with _action in _actions
-				if description of _action is in {"Close", "Clear All", "Schließen", "Alle entfernen"} then
+				if description of _action is in {"Schließen", "Alle entfernen", "Close", "Clear All"} then
 					perform _action
+					
 				end if
 			end repeat
 			
-			set _index to (_index - 1)
-			delay 0.7 -- without the delay the script gets confused
 		end repeat
+		
 	end try
+	
 end tell
