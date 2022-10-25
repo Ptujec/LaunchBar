@@ -29,8 +29,12 @@ tell application "System Events"
 	end if
 	
 	click menu item name_of_spelling_item of menu name_of_spelling_window of menu item name_of_spelling_window of menu edit_lang of menu bar item edit_lang of menu bar 1 of application process app_name
-	click pop up button 1 of window name_of_spelling_window of application process app_name
+
+	delay 0.2
 	
+	click pop up button 1 of window name_of_spelling_window of application process app_name
+
+
 	keystroke new_lang
 	keystroke return
 	
