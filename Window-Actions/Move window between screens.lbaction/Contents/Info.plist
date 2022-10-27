@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Move window between screens</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

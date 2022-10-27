@@ -24,10 +24,10 @@ try
 	set _screenWar to (_mon2Width / _mon1Width) # width adaption ratio of screen 1 & 2
 	set _screenHar to (_mon2Hight / _mon1Hight) #  hight adaption ratio of screen 1 & 2 
 	
-	tell current application to set _hightoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:0:CurrentInfo:OriginY ' /Library/Preferences/com.apple.windowserver.displays.plist"
+	tell current application to set _hightoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:DisplayConfig:0:CurrentInfo:OriginY ' /Library/Preferences/com.apple.windowserver.displays.plist"
 	set _hightoffset to _hightoffset as feet as number
 	
-	tell current application to set _widthoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:0:CurrentInfo:OriginX ' /Library/Preferences/com.apple.windowserver.displays.plist"
+	tell current application to set _widthoffset to do shell script "/usr/libexec/PlistBuddy -c 'Print :DisplayAnyUserSets:Configs:0:DisplayConfig:0:CurrentInfo:OriginX ' /Library/Preferences/com.apple.windowserver.displays.plist"
 	set _widthoffset to _widthoffset as feet as number
 	
 	# detect position of the second screen in relation to the main screen
