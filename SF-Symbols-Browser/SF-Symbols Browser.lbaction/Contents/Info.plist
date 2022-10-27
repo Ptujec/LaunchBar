@@ -9,9 +9,9 @@
 	<key>CFBundleName</key>
 	<string>SF-Symbols Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.3</string>
+	<string>1.4</string>
 	<key>LBAssociatedApplication</key>
-	<string>com.apple.SFSymbols-beta</string>
+	<string>com.apple.SFSymbols</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -26,7 +26,7 @@
     <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/SF-Symbols-Browser/SF-Symbols%20Browser.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
-	<string>com.apple.SFSymbols-beta</string>
+	<string>com.apple.SFSymbols</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
