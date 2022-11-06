@@ -27,12 +27,15 @@ function run(argument) {
     }
   } else {
     LaunchBar.hide();
+
+    argument = argument.replace(/,/, '.');
+
     if (!isNaN(argument)) {
       // default to minutes
       argument = argument + 'm';
     }
 
-    var m = argument.match(/(\d+)([msh])?/i);
+    var m = argument.match(/((?:\d+)(?:\.\d+)?)([msh])?/i);
 
     var amount = m[1];
     var unit = m[2];
