@@ -12,7 +12,7 @@ function run(argument) {
   if (!list.includes('Set alarm')) {
     var response = LaunchBar.alert(
       'Shortcut missing!',
-      'The action needs the shortcut named "Sett alarm" to run properly. Do you want to install it now?',
+      'The action needs the shortcut named "Set alarm" to run properly. Do you want to install it now?',
       'Yes',
       'Cancel'
     );
