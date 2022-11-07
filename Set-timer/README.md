@@ -2,7 +2,7 @@
 
 <img src="01.jpg" width="641"/> 
 
-This action makes use of the new built-in clock app. It let's you set timers.
+This action makes use of the new built-in clock app. It let's you set timers. (This probably could be written entirely in shortcuts. But it is more fun this way. At least for me.)
 
 Examples: 
 - "1m" or just "1" = 1 minute
