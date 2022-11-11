@@ -19,7 +19,7 @@ function run(argument) {
     switch (response) {
       case 0:
         LaunchBar.openURL(
-          'https://www.icloud.com/shortcuts/fd2253e5855646f98dbf663cf6931097'
+          'https://www.icloud.com/shortcuts/fdb0869ec1f04bab9390ba988d6e2eab'
         );
 
       case 1:
@@ -33,34 +33,49 @@ function run(argument) {
       let result = pattern.test(argument);
 
       if (result == true) {
-        if (!argument.includes(':')) {
-          if (argument.length < 3) {
-            argument = argument + ':00';
-          } else if (argument.length == 3) {
-            argument = argument.replace(/^(\d\d)/, '$1:') + '0';
-          } else if (argument.length == 4) {
-            argument = argument.replace(/^(\d\d)/, '$1:');
+        var title = argument
+          .replace(/(^\d+:?(?:\d+)?)(?:(?:\s)(.*))?/gi, '$2')
+          .trim();
+
+        // Capitalize title
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+
+        var time = argument
+          .replace(/(^\d+:?(?:\d+)?)(?:(?:\s)(.*))?/gi, '$1')
+          .trim();
+
+        if (!time.includes(':')) {
+          if (time.length < 3) {
+            time = time + ':00';
+          } else if (time.length == 3) {
+            time = time.replace(/^(\d\d)/, '$1:') + '0';
+          } else if (time.length == 4) {
+            time = time.replace(/^(\d\d)/, '$1:');
           }
 
           return [
             {
-              title: argument,
+              title: time + ' ' + title,
               icon: 'com.apple.clock',
               action: 'setTime',
-              actionArgument: argument,
+              actionArgument: time + ' ' + title,
               actionRunsInBackground: true,
             },
           ];
         } else {
-          if (argument.length == 3) {
-            argument = argument + '0';
+          if (time.length == 3) {
+            time = time + '0';
           }
+          if (time.length == 2) {
+            time = time + '00';
+          }
+
           return [
             {
-              title: argument,
+              title: time + ' ' + title,
               icon: 'com.apple.clock',
               action: 'setTime',
-              actionArgument: argument,
+              actionArgument: time + ' ' + title,
               actionRunsInBackground: true,
             },
           ];
@@ -85,7 +100,7 @@ function setTime(time) {
   LaunchBar.executeAppleScript(
     'tell application "Shortcuts Events" to run shortcut "Set alarm" with input "' +
       time +
-      '"',
-    'tell application "Clock" to activate'
+      '"\n' +
+      'tell application "Clock" to activate'
   );
 }
