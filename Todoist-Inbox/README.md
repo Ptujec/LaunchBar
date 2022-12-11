@@ -1,7 +1,5 @@
 # LaunchBar Action: Todoist Inbox
 
-<img src="main.gif" width="800"/> 
-
 ## Why? 
 Todoist has its own [quick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good! So what’s the benefit of a LaunchBar action?
 
@@ -11,7 +9,7 @@ The were only a few minor things bugging me with when using my old action:
 
 1) Running the action, when Todoist is not running. My old action does not work in that (rare) case. Neither does the global shortcut. The app needs to run first. The new action does not need the app running, because it is using the API directly. 
 
-2) When working in fullscreen mode the old action would result  in switching to the desktop or the interface would show up on my other (dimmed) screen. 
+2) When working in fullscreen mode the old action would result in switching to the desktop or the interface would show up on my other screen. 
 
 3) My old action would also frequently bring up the main Todoist interface.
 
@@ -25,9 +23,15 @@ So I took another look at the [API](https://developer.todoist.com/rest/v1/#creat
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-<img src="02.png" width="800"/> 
+<img src="01.jpg" width="720"/> 
 
 However, as I enjoyed adding things to Todoist that way, I added a few more features: 
+
+### Descriptions
+
+Simply use a colon to add a description.
+
+<img src="02.jpg" width="720"/> 
 
 ### Due dates and times
 
@@ -35,7 +39,7 @@ Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-
 
 The action will detect a bunch of due strings like "today, next week, …" automatically (German or English depending on the current locale of your system). The action will provide feedback on how it parses your input. 
 
-<img src="04.png" width="800"/> 
+<img src="03.jpg" width="720"/> 
 
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
 
@@ -43,32 +47,31 @@ If what you are typing is not detected automatically, you can add "@" at the beg
 
 Add priorities like you would in Todoists interface with p1-3.
 
-<img src="05.png" width="800"/> 
+<img src="04.jpg" width="720"/> 
 
-### URLs from Safari or Mail
+### Projects, sections and labels
+
+If you press `⌘ ⏎` (command + return), you can select a project, section or label after hitting return. 
+
+<img src="05.jpg" width="720"/> 
+
+Select a project, section or label[^ Due to interface restrictions you are limited to just one tag.] with arrow keys or by typing its name. If you select a label you will be also prompted to select a project/section after confirming with `‌↩`.
+
+I also built some smart into it. Projects, sections and labels you use frequently will rank higher in the list. The same is true if a project, section or label name is part of your entered task. Additionally the action will store used words by project/section/label. If what you type matches one or more previously used words of a project/section/label, that project/section/label will also be ranked higher. 
+Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
+
+### Bonus: URLs from Safari or Mail
 
 You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start with a "." 
 
-<img src="md_links.gif" width="800"/> 
-
-### Projects and labels
-
-<img src="06.png" width="800"/> 
-
-If you add "#" somewhere to what you are writing, you can select a project or label after hitting return. Alternatively you can press `⌘ ⏎` (command + return) to get to projects and labels.
-
-<img src="07.png" width="800"/> 
-
-Select a project or label with arrow keys or by typing its name. 
-Projects and labels you use frequently will rank higher in the list. The same is true if a project or label name is part of your entered task. Additionally the action will store used words by project/label. If what you type matches one or more previously used words of a project/label, that project/label will also be ranked higher. 
-Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/labels. So all you have to do is hit return. 
+<img src="md_links.gif" width="720"/> 
 
 ### Setup & Settings
 
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
-Hit `⇧ ⏎` (shift + return) to get to the settings. You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) or turn off confirmation notifications. 
+Hit `⇧ ↩` (shift + return) to get to the settings. You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) or turn off confirmation notifications. 
 
 ## Download
 
@@ -77,3 +80,4 @@ Hit `⇧ ⏎` (shift + return) to get to the settings. You can change the API-To
 ## Updates
 
 The latest version of this action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+

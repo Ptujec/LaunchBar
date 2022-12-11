@@ -1,28 +1,14 @@
-// Todoist Inbox Suggestion Script
-//
+/* 
+Todoist Inbox Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-12-09
 
-const apiToken = Action.preferences.apiToken;
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
-var dateStrings = File.readJSON(
-  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/dateStrings.json'
-);
-
-// Localization
-if (LaunchBar.currentLocale == 'de') {
-  var p1 = 'Priorität 1';
-  var p2 = 'Priorität 2';
-  var p3 = 'Priorität 3';
-  var advancedOptions = 'Weitere Optionen (Projekte & Etiketten)';
-
-  dateStrings = dateStrings.de;
-} else {
-  var p1 = 'Priority 1';
-  var p2 = 'Priority 2';
-  var p3 = 'Priority 3';
-  var advancedOptions = 'Advanced Options (Projects & Labels)';
-
-  dateStrings = dateStrings.en;
-}
+include('constants.js');
+include('localization.js');
+include('setKey.js');
 
 function runWithString(string) {
   if (apiToken == undefined) {
@@ -119,11 +105,27 @@ function runWithString(string) {
             result.push({
               title: dateTitle,
               icon: 'calTemplate',
-              order: 02,
+              order: 03,
             });
             string = string.replace(re, ' ');
           }
         }
+      }
+
+      // Description
+      if (string.includes(': ')) {
+        show = true;
+        var description = string.match(/(?:\: )(.*)/)[1];
+
+        description =
+          description.charAt(0).toUpperCase() + description.slice(1);
+
+        result.push({
+          title: description,
+          icon: 'descriptionTemplate',
+          order: 02,
+        });
+        string = string.replace(/(?:\: )(.*)/, '');
       }
 
       if (p != undefined) {
@@ -131,21 +133,12 @@ function runWithString(string) {
         result.push({
           title: p,
           icon: icon,
-          order: 03,
-        });
-      }
-
-      if (/#($| )/.test(string)) {
-        show = true;
-        result.push({
-          title: advancedOptions,
-          icon: 'returnTemplate',
           order: 04,
         });
       }
 
       if (show == true) {
-        string = string.replace(/#($| )/, ' ').trim();
+        string = string.trim();
         string = string.charAt(0).toUpperCase() + string.slice(1);
 
         result.push({
@@ -161,58 +154,5 @@ function runWithString(string) {
         return result;
       }
     }
-  }
-}
-
-function setApiKey() {
-  var response = LaunchBar.alert(
-    'API-Token required',
-    '1) Go to Settings/Integrations and copy the API-Token.\n2) Press »Set API-Token«',
-    'Open Settings',
-    'Set API-Token',
-    'Cancel'
-  );
-  switch (response) {
-    case 0:
-      LaunchBar.openURL('https://todoist.com/app/settings/integrations');
-      LaunchBar.hide();
-      break;
-    case 1:
-      var clipboardConent = LaunchBar.getClipboardString().trim();
-
-      if (clipboardConent.length == 40) {
-        // Test API-Token
-        var projects = HTTP.getJSON(
-          'https://api.todoist.com/rest/v1/projects?token=' + clipboardConent
-        );
-
-        if (projects.error != undefined) {
-          LaunchBar.alert(projects.error);
-        } else {
-          Action.preferences.apiToken = clipboardConent;
-
-          Action.preferences.projects = projects;
-
-          var labels = HTTP.getJSON(
-            'https://api.todoist.com/rest/v1/labels?token=' + clipboardConent
-          );
-          Action.preferences.labels = labels;
-
-          LaunchBar.alert(
-            'Success!',
-            'API-Token set to: ' +
-              Action.preferences.apiToken +
-              '.\nProjects and labels loaded.'
-          );
-        }
-      } else {
-        LaunchBar.alert(
-          'The length of the clipboard content does not match the length of a correct API-Token',
-          'Make sure the API-Token is the most recent item in the clipboard!'
-        );
-      }
-      break;
-    case 2:
-      break;
   }
 }

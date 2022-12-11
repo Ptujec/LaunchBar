@@ -1,3 +1,11 @@
+(*  
+Todoist Inbox Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-12-09
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*)
+
 on run
 	tell application "System Events"
 		set allApps to displayed name of (every process whose background only is false) as list

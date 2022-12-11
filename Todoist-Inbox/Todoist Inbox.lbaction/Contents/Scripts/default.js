@@ -1,5 +1,12 @@
-/* Todoist Inbox
-- https://developer.todoist.com/rest/v1/#create-a-new-task
+/* 
+Todoist Inbox Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-12-09
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Sources:
+- https://developer.todoist.com/rest/v2/#create-a-new-task
 - https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 
@@ -8,72 +15,18 @@ Stopwords:
 - https://github.com/stopwords-iso/stopwords-iso/blob/master/python/stopwordsiso/stopwords-iso.json
 */
 
-const apiToken = Action.preferences.apiToken;
-const dateStringsJSON = File.readJSON(
-  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/dateStrings.json'
-);
-const stopwordsJSON = File.readJSON(
-  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/stopwords.json'
-);
-
-// Localization
-if (LaunchBar.currentLocale == 'de') {
-  var p1 = 'Priorität 1';
-  var p2 = 'Priorität 2';
-  var p3 = 'Priorität 3';
-  var lang = 'de';
-  var refresh = 'Projekte & Etiketten aktualisieren';
-  var titleReset = 'Zurücksetzen';
-  var subReset = 'Nutzungsdaten werden zurückgesetzt!';
-  var titleUpdate = 'Aktualisieren';
-  var subUpdate = 'Es werden nur neue Projekte und Etiketten hinzugefügt.';
-  var resetNotificationTitle = 'Projekte & Etiketten wurden zurückgesetzt.';
-  var updateNotificationTitle = 'Projekte & Etiketten wurden aktualisiert.';
-  var updateNotificationString = ' Änderung(en)';
-  var setKey = 'API-Token erneuern';
-  var dueStringTitle = ', Fällig: ';
-  var notiSettings = 'Bestätigungsmitteilungen';
-  var nSubOff = 'Eingabetaste drücken, um Mitteilungen auszuschalten.';
-  var nSubOn = 'Eingabetaste drücken, um Mitteilungen anzuschalten.';
-  var notificationStringFallback = 'wurde zu Todoist hinzugefügt!';
-  var inboxName = 'Eingang';
-  var done = 'Fertig!';
-
-  var dateStrings = dateStringsJSON.de;
-  stopwords = stopwordsJSON.de.concat(stopwordsJSON.en);
-} else {
-  var p1 = 'Priority 1';
-  var p2 = 'Priority 2';
-  var p3 = 'Priority 3';
-  var lang = 'en';
-  var refresh = 'Refresh projects & labels.';
-  var titleReset = 'Reset';
-  var subReset = 'This will overwrite usage data';
-  var titleUpdate = 'Update';
-  var subUpdate = 'Only new projects and lables will be added.';
-  var resetNotificationTitle = 'Projects & labels reset.';
-  var updateNotificationTitle = 'Projects & labels updated.';
-  var updateNotificationString = ' change(s)';
-  var setKey = 'Reset API-Token';
-  var dueStringTitle = ', Due: ';
-  var notiSettings = 'Confirmation Notifications';
-  var nSubOff = 'Hit enter to turn off notifications';
-  var nSubOn = 'Hit enter to turn on notifications';
-  var notificationStringFallback = 'has been added to Todoist!';
-  var inboxName = 'Inbox';
-  var done = 'Done!';
-
-  dateStrings = dateStringsJSON.en;
-  stopwords = stopwordsJSON.de;
-}
+include('constants.js');
+include('localization.js');
+include('setKey.js');
+include('update.js');
 
 function run(argument) {
-  if (LaunchBar.options.shiftKey) {
-    var output = settings();
-    return output;
+  if (apiToken == undefined) {
+    setApiKey();
   } else {
-    if (apiToken == undefined) {
-      setApiKey();
+    if (LaunchBar.options.shiftKey) {
+      var output = settings();
+      return output;
     } else {
       // Priority
       if (/(p[1-3] )|( p[1-3])/.test(argument)) {
@@ -116,12 +69,15 @@ function run(argument) {
         }
       }
 
-      // Advanced Options (projects, labels)
-      if (/#($| )/.test(argument)) {
-        argument = argument.replace(/#($| )/, ' ').trim();
-        var advanced = true;
-      } else {
-        var advanced = false;
+      // Description
+      if (argument.includes(': ')) {
+        var description = argument.match(/(?:\: )(.*)/)[1];
+
+        // Capitalize first character of description
+        description =
+          description.charAt(0).toUpperCase() + description.slice(1);
+
+        argument = argument.replace(/(?:\: )(.*)/, '');
       }
 
       argument = argument.replace(/\s+/g, ' ').trim();
@@ -131,13 +87,14 @@ function run(argument) {
 
       Action.preferences.taskDict = {
         content: argument,
+        description: description,
         dueString: dueString,
         prioValue: prioValue,
         prioText: prioText,
         lang: lang,
       };
 
-      if (advanced == true || LaunchBar.options.commandKey) {
+      if (LaunchBar.options.commandKey) {
         var output = advancedOptions();
         return output;
       } else {
@@ -148,11 +105,22 @@ function run(argument) {
 }
 
 function advancedOptions() {
+  if (
+    !File.exists(projectsPath) ||
+    !File.exists(sectionsPath) ||
+    !File.exists(labelsPath)
+  ) {
+    LaunchBar.alert(updateNeeded);
+    update();
+  }
+
   var taskDict = Action.preferences.taskDict;
 
   var resultProjects = [];
   var resultPrioritized = [];
-  var projects = Action.preferences.projects.data;
+  var projects = File.readJSON(projectsPath).data;
+
+  // Projects
   for (var i = 0; i < projects.length; i++) {
     var name = projects[i].name;
     if (name == 'Inbox') {
@@ -160,15 +128,21 @@ function advancedOptions() {
     }
     var id = projects[i].id;
 
+    if (taskDict.description != undefined) {
+      var content = taskDict.content + ': ' + taskDict.description;
+    } else {
+      var content = taskDict.content;
+    }
+
     if (taskDict.dueString != '') {
       var sub =
-        taskDict.content +
+        content +
         dueStringTitle +
         taskDict.dueString +
         ', ' +
         taskDict.prioText;
     } else {
-      var sub = taskDict.content + ', ' + taskDict.prioText;
+      var sub = content + ', ' + taskDict.prioText;
     }
     sub = sub.trim().replace(/,$/, '');
 
@@ -181,12 +155,11 @@ function advancedOptions() {
     var pushDataProject = {
       title: name,
       subtitle: sub,
-      icon: 'addToProjectTemplate',
+      icon: 'projectTemplate',
       usage: usage,
       action: 'postTask',
       actionArgument: {
         type: 'project',
-        name: name,
         id: id,
         index: i,
       },
@@ -233,20 +206,121 @@ function advancedOptions() {
     }
   }
 
-  var resultLabels = [];
-  var labels = Action.preferences.labels.data;
-  for (var i = 0; i < labels.length; i++) {
-    var name = labels[i].name;
-    var id = labels[i].id;
+  // Sections
+  var resultSections = [];
+  var sections = File.readJSON(sectionsPath).data;
+
+  for (var i = 0; i < sections.length; i++) {
+    var name = sections[i].name;
+    var id = sections[i].id;
+    var sectionProjectId = sections[i].project_id;
+
+    projects.forEach(function (item) {
+      if (item.id == sectionProjectId) {
+        sectionProjectName = item.name;
+      }
+    });
+
+    if (taskDict.description != undefined) {
+      var content = taskDict.content + ': ' + taskDict.description;
+    } else {
+      var content = taskDict.content;
+    }
+
     if (taskDict.dueString != '') {
       var sub =
-        taskDict.content +
+        content +
         dueStringTitle +
         taskDict.dueString +
         ', ' +
         taskDict.prioText;
     } else {
-      var sub = taskDict.content + ', ' + taskDict.prioText;
+      var sub = content + ', ' + taskDict.prioText;
+    }
+    sub = sub.trim().replace(/,$/, '');
+
+    if (sections[i].usage == undefined) {
+      var usage = 0;
+    } else {
+      var usage = sections[i].usage;
+    }
+
+    var pushDataSection = {
+      title: name + ' (' + sectionProjectName + ')',
+      subtitle: sub,
+      icon: 'sectionTemplate',
+      usage: usage,
+      action: 'postTask',
+      actionArgument: {
+        type: 'section',
+        id: id,
+        sectionProjectId: sectionProjectId,
+        index: i,
+      },
+    };
+
+    var words = taskDict.content
+      .replace(/\[(.+)\]\(.+\)/, '$1')
+      .match(/[a-zäüööčžšß]+/gi);
+
+    var taskDictWords = [];
+    for (var j = 0; j < words.length; j++) {
+      taskDictWords.push(words[j].toLowerCase());
+    }
+    Action.preferences.taskDict.words = taskDictWords;
+    words = taskDictWords;
+
+    // Prioritize sections with matching title and/or words
+    if (sections[i].usedWords != undefined) {
+      if (words.includes(sections[i].name.toLowerCase())) {
+        var matchCount = 2; // 2 to prioritize it more … might change back to 1
+      } else {
+        var matchCount = 0;
+      }
+
+      for (var k = 0; k < words.length; k++) {
+        if (sections[i].usedWords.includes(words[k].toLowerCase())) {
+          matchCount = matchCount + 1;
+        }
+      }
+
+      if (matchCount > 0) {
+        pushDataSection.matchCount = matchCount;
+        resultPrioritized.push(pushDataSection);
+      } else {
+        resultSections.push(pushDataSection);
+      }
+    } else {
+      if (words.includes(sections[i].name.toLowerCase())) {
+        pushDataSection.matchCount = 2; // 2 to prioritize it more … might change back to 1
+        resultPrioritized.push(pushDataSection);
+      } else {
+        resultSections.push(pushDataSection);
+      }
+    }
+  }
+
+  var resultLabels = [];
+  var labels = File.readJSON(labelsPath).data;
+  for (var i = 0; i < labels.length; i++) {
+    var name = labels[i].name;
+    var id = labels[i].id;
+
+    if (taskDict.description != undefined) {
+      var content = taskDict.content + ': ' + taskDict.description;
+    } else {
+      var content = taskDict.content;
+    }
+
+    if (taskDict.dueString != '') {
+      var sub =
+        content +
+        dueStringTitle +
+        taskDict.dueString +
+        ', ' +
+        taskDict.prioText;
+    } else {
+      var sub = content + ', ' + taskDict.prioText;
     }
     sub = sub.trim().replace(/,$/, '');
 
@@ -303,71 +377,145 @@ function advancedOptions() {
     return b.matchCount - a.matchCount || b.usage - a.usage;
   });
 
-  var both = resultProjects.concat(resultLabels);
+  var all = resultProjects.concat(resultSections.concat(resultLabels));
 
-  both.sort(function (a, b) {
+  all.sort(function (a, b) {
     return b.usage - a.usage;
   });
 
-  var result = resultPrioritized.concat(both);
+  var result = resultPrioritized.concat(all);
   return result;
 }
 
 function addProject(labelDict) {
   var labelName = labelDict.name;
-  var labelId = labelDict.id;
   var labelIndex = labelDict.index;
   var taskDict = Action.preferences.taskDict;
+  var labels = File.readJSON(labelsPath).data;
+  var lastUsed = labels[labelIndex].lastUsed;
+  var lastUsedCategoryId = labels[labelIndex].lastUsedCategoryId;
+  var lastUsedSectionId = labels[labelIndex].lastUsedSectionId;
 
-  var pinnedProject = [];
-  var otherProjects = [];
-  var projects = Action.preferences.projects.data;
+  var pinnedItem = [];
+  var projectItems = [];
+  var sectionItems = [];
+
+  // Projects
+  var projects = File.readJSON(projectsPath).data;
   for (var i = 0; i < projects.length; i++) {
     var name = projects[i].name;
     if (name == 'Inbox') {
       name = inboxName;
     }
     var id = projects[i].id;
+
+    if (taskDict.description != undefined) {
+      var content = taskDict.content + ': ' + taskDict.description;
+    } else {
+      var content = taskDict.content;
+    }
+
     if (taskDict.dueString != '') {
       var sub =
         '@' +
         labelName +
         ': ' +
-        taskDict.content +
+        content +
         dueStringTitle +
         taskDict.dueString +
         ', ' +
         taskDict.prioText;
     } else {
-      var sub =
-        '@' + labelName + ': ' + taskDict.content + ', ' + taskDict.prioText;
+      var sub = '@' + labelName + ': ' + content + ', ' + taskDict.prioText;
     }
     sub = sub.trim().replace(/,$/, '');
 
     var projectPushData = {
       title: name,
       subtitle: sub,
-      icon: 'addToProjectTemplate',
+      icon: 'projectTemplate',
       action: 'postTask',
       actionArgument: {
         type: 'projectAndLabel',
-        name: name,
         id: id,
         index: i,
-        labelId: labelId,
+        labelName: labelName,
         labelIndex: labelIndex,
       },
     };
 
-    var labels = Action.preferences.labels.data;
-    var lastUsedCategoryId = labels[labelIndex].lastUsedCategoryId;
-    if (lastUsedCategoryId != undefined && lastUsedCategoryId == id) {
-      pinnedProject.push(projectPushData);
+    if (lastUsed == 'project' || lastUsed == undefined) {
+      if (lastUsedCategoryId != undefined && lastUsedCategoryId == id) {
+        pinnedItem.push(projectPushData);
+      } else {
+        projectItems.push(projectPushData);
+      }
     } else {
-      otherProjects.push(projectPushData);
+      projectItems.push(projectPushData);
     }
   }
-  var result = pinnedProject.concat(otherProjects);
+
+  // Sections
+  var sections = File.readJSON(sectionsPath).data;
+  for (var i = 0; i < sections.length; i++) {
+    var name = sections[i].name;
+    var id = sections[i].id;
+    var sectionProjectId = sections[i].project_id;
+
+    projects.forEach(function (item) {
+      if (item.id == sectionProjectId) {
+        sectionProjectName = item.name;
+      }
+    });
+
+    if (taskDict.description != undefined) {
+      var content = taskDict.content + ': ' + taskDict.description;
+    } else {
+      var content = taskDict.content;
+    }
+
+    if (taskDict.dueString != '') {
+      var sub =
+        '@' +
+        labelName +
+        ': ' +
+        content +
+        dueStringTitle +
+        taskDict.dueString +
+        ', ' +
+        taskDict.prioText;
+    } else {
+      var sub = '@' + labelName + ': ' + content + ', ' + taskDict.prioText;
+    }
+    sub = sub.trim().replace(/,$/, '');
+
+    var sectionPushData = {
+      title: name + ' (' + sectionProjectName + ')',
+      subtitle: sub,
+      icon: 'sectionTemplate',
+      action: 'postTask',
+      actionArgument: {
+        type: 'sectionAndLabel',
+        id: id,
+        sectionProjectId: sectionProjectId,
+        index: i,
+        labelName: labelName,
+        labelIndex: labelIndex,
+      },
+    };
+
+    if (lastUsed == 'section') {
+      if (lastUsedSectionId != undefined && lastUsedSectionId == id) {
+        pinnedItem.push(sectionPushData);
+      } else {
+        sectionItems.push(sectionPushData);
+      }
+    } else {
+      sectionItems.push(sectionPushData);
+    }
+  }
+
+  var result = pinnedItem.concat(projectItems.concat(sectionItems));
   return result;
 }
 
@@ -375,35 +523,105 @@ function postTask(advancedData) {
   LaunchBar.hide();
 
   var taskDict = Action.preferences.taskDict;
+  var sections = File.readJSON(sectionsPath);
+  var projects = File.readJSON(projectsPath);
+  var labels = File.readJSON(labelsPath);
 
   if (advancedData != undefined) {
-    var projectIndex = advancedData.index;
-    var projectUsageCount =
-      Action.preferences.projects.data[projectIndex].usage;
-    var projectUsedWords =
-      Action.preferences.projects.data[projectIndex].usedWords;
+    if (advancedData.type.includes('section')) {
+      // Sections & Section with Labels
+      var sectionIndex = advancedData.index;
 
-    if (projectUsageCount == undefined) {
-      Action.preferences.projects.data[projectIndex].usage = 1;
+      // Remember used words
+      var sectionUsedWords = sections.data[sectionIndex].usedWords;
+      if (sectionUsedWords == undefined) {
+        sections.data[sectionIndex].usedWords = [];
+        var sectionUsedWords = sections.data[sectionIndex].usedWords;
+      }
+      for (var i = 0; i < taskDict.words.length; i++) {
+        if (
+          !sectionUsedWords.includes(taskDict.words[i]) &&
+          !stopwords.includes(taskDict.words[i].toLowerCase())
+        ) {
+          sectionUsedWords.push(taskDict.words[i].toLowerCase());
+        }
+      }
+
+      // Count usage
+      var sectionUsageCount = sections.data[sectionIndex].usage;
+      if (sectionUsageCount == undefined) {
+        sections.data[sectionIndex].usage = 1;
+      } else {
+        var newSectionCount = sectionUsageCount + 1;
+        sections.data[sectionIndex].usage = newSectionCount;
+      }
+
+      if (advancedData.type == 'section') {
+        var body = {
+          content: taskDict.content,
+          description: taskDict.description,
+          due_lang: taskDict.lang,
+          due_string: taskDict.dueString,
+          priority: taskDict.prioValue,
+          project_id: advancedData.sectionProjectId,
+          section_id: advancedData.id,
+        };
+      } else if (advancedData.type == 'sectionAndLabel') {
+        var labelName = advancedData.labelName;
+
+        var body = {
+          content: taskDict.content,
+          description: taskDict.description,
+          due_lang: taskDict.lang,
+          due_string: taskDict.dueString,
+          labels: [labelName],
+          priority: taskDict.prioValue,
+          project_id: advancedData.sectionProjectId,
+          section_id: advancedData.id,
+        };
+
+        var labelIndex = advancedData.labelIndex;
+
+        // Remember section used for the label
+        labels.data[labelIndex].lastUsed = 'section';
+        labels.data[labelIndex].lastUsedSectionId = advancedData.id;
+
+        // Remember used words
+        var labelUsedWords = labels.data[labelIndex].usedWords;
+        if (labelUsedWords == undefined) {
+          labels.data[labelIndex].usedWords = [];
+          labelUsedWords = labels.data[labelIndex].usedWords;
+        }
+        for (var i = 0; i < taskDict.words.length; i++) {
+          if (
+            !labelUsedWords.includes(taskDict.words[i]) &&
+            !stopwords.includes(taskDict.words[i].toLowerCase())
+          ) {
+            labelUsedWords.push(taskDict.words[i].toLowerCase());
+          }
+        }
+
+        // Count usage
+        var labelUsageCount = labels.data[labelIndex].usage;
+        if (labelUsageCount == undefined) {
+          labels.data[labelIndex].usage = 1;
+        } else {
+          var newLabelCount = labelUsageCount + 1;
+          labels.data[labelIndex].usage = newLabelCount;
+        }
+
+        File.writeJSON(labels, labelsPath);
+      }
+      File.writeJSON(sections, sectionsPath);
     } else {
-      var newProjectCount = projectUsageCount + 1;
-      Action.preferences.projects.data[projectIndex].usage = newProjectCount;
-    }
+      // Projects & Projects with Labels
+      var projectIndex = advancedData.index;
 
-    if (advancedData.type == 'project') {
-      var body = {
-        content: taskDict.content,
-        due_lang: taskDict.lang,
-        due_string: taskDict.dueString,
-        priority: taskDict.prioValue,
-        project_id: advancedData.id,
-      };
-
-      // remember used words
+      // Remember used words
+      var projectUsedWords = projects.data[projectIndex].usedWords;
       if (projectUsedWords == undefined) {
-        Action.preferences.projects.data[projectIndex].usedWords = [];
-        var projectUsedWords =
-          Action.preferences.projects.data[projectIndex].usedWords;
+        projects.data[projectIndex].usedWords = [];
+        var projectUsedWords = projects.data[projectIndex].usedWords;
       }
       for (var i = 0; i < taskDict.words.length; i++) {
         if (
@@ -413,59 +631,86 @@ function postTask(advancedData) {
           projectUsedWords.push(taskDict.words[i].toLowerCase());
         }
       }
-    } else if (advancedData.type == 'projectAndLabel') {
-      var labelId = advancedData.labelId;
-      var labelIndex = advancedData.labelIndex;
 
-      Action.preferences.labels.data[labelIndex].lastUsedCategoryId =
-        advancedData.id;
-
-      var labelUsageCount = Action.preferences.labels.data[labelIndex].usage;
-
-      if (labelUsageCount == undefined) {
-        Action.preferences.labels.data[labelIndex].usage = 1;
+      // Count usage
+      var projectUsageCount = projects.data[projectIndex].usage;
+      if (projectUsageCount == undefined) {
+        projects.data[projectIndex].usage = 1;
       } else {
-        var newLabelCount = labelUsageCount + 1;
-        Action.preferences.labels.data[labelIndex].usage = newLabelCount;
+        var newProjectCount = projectUsageCount + 1;
+        projects.data[projectIndex].usage = newProjectCount;
       }
 
-      var body = {
-        content: taskDict.content,
-        due_lang: taskDict.lang,
-        due_string: taskDict.dueString,
-        label_ids: [labelId],
-        priority: taskDict.prioValue,
-        project_id: advancedData.id,
-      };
+      if (advancedData.type == 'project') {
+        var body = {
+          content: taskDict.content,
+          description: taskDict.description,
+          due_lang: taskDict.lang,
+          due_string: taskDict.dueString,
+          priority: taskDict.prioValue,
+          project_id: advancedData.id,
+        };
+      } else if (advancedData.type == 'projectAndLabel') {
+        var labelName = advancedData.labelName;
 
-      // remember used words
-      var labelUsedWords = Action.preferences.labels.data[labelIndex].usedWords;
+        var body = {
+          content: taskDict.content,
+          description: taskDict.description,
+          due_lang: taskDict.lang,
+          due_string: taskDict.dueString,
+          labels: [labelName],
+          priority: taskDict.prioValue,
+          project_id: advancedData.id,
+        };
 
-      if (labelUsedWords == undefined) {
-        Action.preferences.labels.data[labelIndex].usedWords = [];
-        var labelUsedWords =
-          Action.preferences.labels.data[labelIndex].usedWords;
-      }
-      for (var i = 0; i < taskDict.words.length; i++) {
-        if (
-          !labelUsedWords.includes(taskDict.words[i]) &&
-          !stopwords.includes(taskDict.words[i].toLowerCase())
-        ) {
-          labelUsedWords.push(taskDict.words[i].toLowerCase());
+        var labelIndex = advancedData.labelIndex;
+
+        // Remember project used for the label
+        labels.data[labelIndex].lastUsed = 'project';
+        labels.data[labelIndex].lastUsedCategoryId = advancedData.id;
+
+        // Remember used words
+        var labelUsedWords = labels.data[labelIndex].usedWords;
+        if (labelUsedWords == undefined) {
+          labels.data[labelIndex].usedWords = [];
+          var labelUsedWords = labels.data[labelIndex].usedWords;
         }
+        for (var i = 0; i < taskDict.words.length; i++) {
+          if (
+            !labelUsedWords.includes(taskDict.words[i]) &&
+            !stopwords.includes(taskDict.words[i].toLowerCase())
+          ) {
+            labelUsedWords.push(taskDict.words[i].toLowerCase());
+          }
+        }
+
+        // Count usage
+        var labelUsageCount = labels.data[labelIndex].usage;
+        if (labelUsageCount == undefined) {
+          labels.data[labelIndex].usage = 1;
+        } else {
+          var newLabelCount = labelUsageCount + 1;
+          labels.data[labelIndex].usage = newLabelCount;
+        }
+
+        File.writeJSON(labels, labelsPath);
       }
+      File.writeJSON(projects, projectsPath);
     }
   } else {
     var body = {
       content: taskDict.content,
+      description: taskDict.description,
       due_lang: taskDict.lang,
       due_string: taskDict.dueString,
       priority: taskDict.prioValue,
     };
   }
 
+  // Post
+
   var result = HTTP.postJSON(
-    'https://api.todoist.com/rest/v1/tasks?token=' + apiToken,
+    'https://api.todoist.com/rest/v2/tasks?token=' + apiToken,
     {
       body: body,
     }
@@ -493,7 +738,7 @@ function postTask(advancedData) {
         var link = 'todoist://showTask?id=' + taskId;
 
         var projectId = data.project_id;
-        var projects = Action.preferences.projects.data;
+        var projects = File.readJSON(projectsPath).data;
         for (var i = 0; i < projects.length; i++) {
           var id = projects[i].id;
           if (projectId == id) {
@@ -506,6 +751,18 @@ function postTask(advancedData) {
           var projectString = '#' + projectName;
         } else {
           var projectString = '';
+        }
+
+        if (data.section_id != undefined) {
+          var sections = File.readJSON(sectionsPath).data;
+          for (var i = 0; i < sections.length; i++) {
+            var id = sections[i].id;
+            if (data.section_id == id) {
+              var sectionName = sections[i].name;
+              break;
+            }
+          }
+          projectString = projectString + '/' + sectionName;
         }
 
         var dueInfo = data.due;
@@ -535,17 +792,8 @@ function postTask(advancedData) {
           var notificationString = projectString;
         }
 
-        var labelId = data.label_ids[0];
-        if (labelId != undefined) {
-          var labels = Action.preferences.labels.data;
-          for (var i = 0; i < labels.length; i++) {
-            var id = labels[i].id;
-            if (labelId == id) {
-              var labelName = labels[i].name;
-              break;
-            }
-          }
-          notificationString = notificationString + ' @' + labelName;
+        if (data.labels[0] != undefined) {
+          notificationString = notificationString + ' @' + data.labels[0];
         }
 
         if (data.priority == 4) {
@@ -556,6 +804,20 @@ function postTask(advancedData) {
           notificationString = '🔵 ' + notificationString;
         }
 
+        // Description
+        if (data.description != undefined) {
+          var descriptionString = data.description;
+
+          // truncate
+          if (descriptionString.length > 40) {
+            var m = descriptionString.match(/.{1,40}/g);
+            descriptionString = m[0] + '…';
+          }
+
+          notificationString = descriptionString + '\n' + notificationString;
+        }
+
+        // Fallback
         if (notificationString == '') {
           notificationString = notificationStringFallback;
         }
@@ -618,59 +880,6 @@ function notificationSetting(nArgument) {
   return output;
 }
 
-function setApiKey() {
-  var response = LaunchBar.alert(
-    'API-Token required',
-    '1) Go to Settings/Integrations and copy the API-Token.\n2) Press »Set API-Token«',
-    'Open Settings',
-    'Set API-Token',
-    'Cancel'
-  );
-  switch (response) {
-    case 0:
-      LaunchBar.openURL('https://todoist.com/app/settings/integrations');
-      LaunchBar.hide();
-      break;
-    case 1:
-      var clipboardConent = LaunchBar.getClipboardString().trim();
-
-      if (clipboardConent.length == 40) {
-        // Test API-Token
-        var projects = HTTP.getJSON(
-          'https://api.todoist.com/rest/v1/projects?token=' + clipboardConent
-        );
-
-        if (projects.error != undefined) {
-          LaunchBar.alert(projects.error);
-        } else {
-          Action.preferences.apiToken = clipboardConent;
-
-          Action.preferences.projects = projects;
-
-          var labels = HTTP.getJSON(
-            'https://api.todoist.com/rest/v1/labels?token=' + clipboardConent
-          );
-          Action.preferences.labels = labels;
-
-          LaunchBar.alert(
-            'Success!',
-            'API-Token set to: ' +
-              Action.preferences.apiToken +
-              '.\nProjects and labels loaded.'
-          );
-        }
-      } else {
-        LaunchBar.alert(
-          'The length of the clipboard content does not match the length of a correct API-Token',
-          'Make sure the API-Token is the most recent item in the clipboard!'
-        );
-      }
-      break;
-    case 2:
-      break;
-  }
-}
-
 function refreshData() {
   if (apiToken == undefined) {
     setApiKey();
@@ -692,106 +901,32 @@ function refreshData() {
   }
 }
 
-function update() {
-  // Compare local with online data
-  LaunchBar.hide();
-
-  var projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v1/projects?token=' + apiToken
-  );
-
-  if (projectsOnline.error != undefined) {
-    LaunchBar.alert(projectsOnline.error);
-  } else {
-    var projectsLocal = Action.preferences.projects;
-
-    // Add new projects
-    var localProjectIds = projectsLocal.data.map((ch) => ch.id);
-    var newProjectIds = projectsOnline.data.filter(
-      (ch) => !localProjectIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < newProjectIds.length; i++) {
-      projectsLocal.data.push(newProjectIds[i]);
-    }
-
-    // Remove old projects
-    var onlineProjectIds = projectsOnline.data.map((ch) => ch.id);
-    var oldProjectIds = projectsLocal.data.filter(
-      (ch) => !onlineProjectIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < oldProjectIds.length; i++) {
-      for (var j = 0; j < projectsLocal.data.length; j++) {
-        if (projectsLocal.data[j] == oldProjectIds[i]) {
-          projectsLocal.data.splice(j, 1);
-        }
-      }
-    }
-
-    // Labels
-    var labelsOnline = HTTP.getJSON(
-      'https://api.todoist.com/rest/v1/labels?token=' + apiToken
-    );
-
-    var labelsLocal = Action.preferences.labels;
-
-    // Add new labels
-    var localLabelIds = labelsLocal.data.map((ch) => ch.id);
-    var newLabelIds = labelsOnline.data.filter(
-      (ch) => !localLabelIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < newLabelIds.length; i++) {
-      labelsLocal.data.push(newLabelIds[i]);
-    }
-
-    // Remove old labels
-    var onlineLabelIds = labelsOnline.data.map((ch) => ch.id);
-    var oldLabelIds = labelsLocal.data.filter(
-      (ch) => !onlineLabelIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < oldLabelIds.length; i++) {
-      for (var j = 0; j < labelsLocal.data.length; j++) {
-        if (labelsLocal.data[j] == oldLabelIds[i]) {
-          labelsLocal.data.splice(j, 1);
-        }
-      }
-    }
-
-    var changes =
-      newLabelIds.length +
-      oldLabelIds.length +
-      newProjectIds.length +
-      oldProjectIds.length;
-
-    LaunchBar.displayNotification({
-      title: updateNotificationTitle,
-      string: changes + updateNotificationString,
-    });
-  }
-}
-
 function reset() {
   LaunchBar.hide();
 
+  // Projects & Check
   var projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v1/projects?token=' + apiToken
+    'https://api.todoist.com/rest/v2/projects?token=' + apiToken
   );
+
   if (projectsOnline.error != undefined) {
     LaunchBar.alert(projectsOnline.error);
   } else {
-    // Projects
-    Action.preferences.projects = projectsOnline;
+    File.writeJSON(projectsOnline, projectsPath);
+
+    // Sections
+    var sectionsOnline = HTTP.getJSON(
+      'https://api.todoist.com/rest/v2/sections?token=' + apiToken
+    );
+    File.writeJSON(sectionsOnline, sectionsPath);
 
     // Labels
     var labelsOnline = HTTP.getJSON(
-      'https://api.todoist.com/rest/v1/labels?token=' + apiToken
+      'https://api.todoist.com/rest/v2/labels?token=' + apiToken
     );
+    File.writeJSON(labelsOnline, labelsPath);
 
-    Action.preferences.labels = labelsOnline;
-
+    // Notification
     LaunchBar.displayNotification({
       title: resetNotificationTitle,
     });
