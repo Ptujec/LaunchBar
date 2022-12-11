@@ -55,7 +55,7 @@ If you press `⌘ ⏎` (command + return), you can select a project, section or 
 
 <img src="05.jpg" width="720"/> 
 
-Select a project, section or label[^ Due to interface restrictions you are limited to just one tag.] with arrow keys or by typing its name. If you select a label you will be also prompted to select a project/section after confirming with `‌↩`.
+Select a project, section or label with arrow keys or by typing its name. If you select a label you will be also prompted to select a project/section after confirming with `‌↩`. (Due to interface restrictions you are limited to just one tag.)
 
 I also built some smart into it. Projects, sections and labels you use frequently will rank higher in the list. The same is true if a project, section or label name is part of your entered task. Additionally the action will store used words by project/section/label. If what you type matches one or more previously used words of a project/section/label, that project/section/label will also be ranked higher. 
 Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
