@@ -23,7 +23,7 @@ So I took another look at the [API](https://developer.todoist.com/rest/v1/#creat
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-<img src="01.jpg" width="720"/> 
+<img src="01.jpg" width="764"/> 
 
 However, as I enjoyed adding things to Todoist that way, I added a few more features: 
 
@@ -31,7 +31,7 @@ However, as I enjoyed adding things to Todoist that way, I added a few more feat
 
 Simply use a colon to add a description.
 
-<img src="02.jpg" width="720"/> 
+<img src="02.jpg" width="764"/> 
 
 ### Due dates and times
 
@@ -39,7 +39,7 @@ Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-
 
 The action will detect a bunch of due strings like "today, next week, …" automatically (German or English depending on the current locale of your system). The action will provide feedback on how it parses your input. 
 
-<img src="03.jpg" width="720"/> 
+<img src="03.jpg" width="764"/> 
 
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
 
@@ -47,13 +47,13 @@ If what you are typing is not detected automatically, you can add "@" at the beg
 
 Add priorities like you would in Todoists interface with p1-3.
 
-<img src="04.jpg" width="720"/> 
+<img src="04.jpg" width="764"/> 
 
 ### Projects, sections and labels
 
 If you press `⌘ ⏎` (command + return), you can select a project, section or label after hitting return. 
 
-<img src="05.jpg" width="720"/> 
+<img src="05.jpg" width="764"/> 
 
 Select a project, section or label with arrow keys or by typing its name. If you select a label you will be also prompted to select a project/section after confirming with `‌↩`. (Due to interface restrictions you are limited to just one tag.)
 
@@ -64,7 +64,7 @@ Let's say you frequently add a task containing the word "exercise" to a project 
 
 You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start with a "." 
 
-<img src="md_links.gif" width="720"/> 
+<img src="md_links.gif" width="764"/> 
 
 ### Setup & Settings
 
