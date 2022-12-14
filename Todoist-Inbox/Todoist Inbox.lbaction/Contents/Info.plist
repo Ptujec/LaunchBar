@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.todoist.mac.Todoist</string>
+	<string>todoist.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.TodoistInbox</string>
 	<key>CFBundleName</key>
 	<string>Todoist Inbox</string>
 	<key>CFBundleVersion</key>
-	<string>2.0</string>
+	<string>2.0.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.todoist.mac.Todoist</string>
 	<key>LBDescription</key>
@@ -27,8 +27,6 @@
 		<key>LBUpdateURL</key>
     <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Todoist-Inbox/Todoist%20Inbox.lbaction/Contents/Info.plist</string>
 	</dict>
-	<key>LBRequiredApplication</key>
-	<string>com.todoist.mac.Todoist</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>

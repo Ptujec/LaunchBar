@@ -98,7 +98,6 @@ function update() {
       }
 
       // Add new sections
-
       var localSectionIds = sectionsLocal.data.map((ch) => ch.id);
       var newSectionIds = sectionsOnline.data.filter(
         (ch) => !localSectionIds.includes(ch.id)
