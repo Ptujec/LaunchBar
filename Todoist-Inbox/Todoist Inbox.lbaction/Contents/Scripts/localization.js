@@ -7,6 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 if (LaunchBar.currentLocale == 'de') {
+  var missingArg = 'Die Aufgabe hat keinen Namen!';
   var p1 = 'Priorität 1';
   var p2 = 'Priorität 2';
   var p3 = 'Priorität 3';
@@ -36,6 +37,7 @@ if (LaunchBar.currentLocale == 'de') {
   var dateStrings = dateStringsJSON.de;
   var stopwords = stopwordsJSON.de.concat(stopwordsJSON.en);
 } else {
+  var missingArg = 'This task has no name!';
   var p1 = 'Priority 1';
   var p2 = 'Priority 2';
   var p3 = 'Priority 3';

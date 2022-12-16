@@ -28,6 +28,8 @@ function run(argument) {
       var output = settings();
       return output;
     } else {
+      argument = argument + ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
+
       // Priority
       if (/(p[1-3] )|( p[1-3])/.test(argument)) {
         var m = argument.match(/p[1-3]/);
@@ -95,9 +97,17 @@ function run(argument) {
       };
 
       if (LaunchBar.options.commandKey) {
+        if (argument == '') {
+          LaunchBar.alert(missingArg);
+          return;
+        }
         var output = advancedOptions();
         return output;
       } else {
+        if (argument == '') {
+          LaunchBar.alert(missingArg);
+          return;
+        }
         postTask();
       }
     }
