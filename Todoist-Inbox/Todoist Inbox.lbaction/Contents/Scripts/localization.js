@@ -35,7 +35,9 @@ if (LaunchBar.currentLocale == 'de') {
     'Einen Moment, bitte! Lokale Daten müssen aktualisiert werden.';
 
   var dateStrings = dateStringsJSON.de;
-  var stopwords = stopwordsJSON.de.concat(stopwordsJSON.en);
+  var stopwords = stopwordsJSON.de.concat(
+    stopwordsJSON.en.concat(stopwordsJSON.social)
+  );
 } else {
   var missingArg = 'This task has no name!';
   var p1 = 'Priority 1';
@@ -62,5 +64,5 @@ if (LaunchBar.currentLocale == 'de') {
   var updateNeeded = 'Just a second! Local data needs to be updated';
 
   var dateStrings = dateStringsJSON.en;
-  var stopwords = stopwordsJSON.de;
+  var stopwords = stopwordsJSON.en.concat(stopwordsJSON.social);
 }
