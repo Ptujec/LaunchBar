@@ -22,19 +22,24 @@ function setApiKey() {
       LaunchBar.hide();
       break;
     case 1:
-      var clipboardConent = LaunchBar.getClipboardString().trim();
+      var clipboardContent = LaunchBar.getClipboardString().trim();
 
-      if (clipboardConent.length == 40) {
+      if (clipboardContent.length == 40) {
         // Test API-Token
         var projectsOnline = HTTP.getJSON(
-          'https://api.todoist.com/rest/v2/projects?token=' + clipboardConent
+          'https://api.todoist.com/rest/v2/projects',
+          {
+            headerFields: {
+              Authorization: 'Bearer ' + clipboardContent,
+            },
+          }
         );
 
         if (projectsOnline.error != undefined) {
           LaunchBar.alert(projectsOnline.error);
         } else {
           // Write new API-Token in Action preferences
-          Action.preferences.apiToken = clipboardConent;
+          Action.preferences.apiToken = clipboardContent;
 
           LaunchBar.alert(
             'Success!',

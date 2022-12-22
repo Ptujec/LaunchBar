@@ -13,7 +13,12 @@ function update() {
 
   // Projects
   var projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v2/projects?token=' + apiToken
+    'https://api.todoist.com/rest/v2/projects',
+    {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    }
   );
 
   if (projectsOnline.error != undefined) {
@@ -70,7 +75,12 @@ function update() {
 
   // Sections
   var sectionsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v2/sections?token=' + apiToken
+    'https://api.todoist.com/rest/v2/sections',
+    {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    }
   );
 
   if (sectionsOnline.error != undefined) {
@@ -126,9 +136,11 @@ function update() {
   }
 
   // Labels
-  var labelsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v2/labels?token=' + apiToken
-  );
+  var labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
+    headerFields: {
+      Authorization: 'Bearer ' + apiToken,
+    },
+  });
 
   if (labelsOnline.error != undefined) {
     LaunchBar.alert(labelsOnline.error);

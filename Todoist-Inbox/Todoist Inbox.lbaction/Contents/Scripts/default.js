@@ -718,13 +718,12 @@ function postTask(advancedData) {
   }
 
   // Post
-
-  var result = HTTP.postJSON(
-    'https://api.todoist.com/rest/v2/tasks?token=' + apiToken,
-    {
-      body: body,
-    }
-  );
+  var result = HTTP.postJSON('https://api.todoist.com/rest/v2/tasks', {
+    body: body,
+    headerFields: {
+      Authorization: 'Bearer ' + apiToken,
+    },
+  });
 
   if (result.error == undefined) {
     if (result.response.status != 200) {
@@ -916,7 +915,12 @@ function reset() {
 
   // Projects & Check
   var projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/rest/v2/projects?token=' + apiToken
+    'https://api.todoist.com/rest/v2/projects',
+    {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    }
   );
 
   if (projectsOnline.error != undefined) {
@@ -926,14 +930,21 @@ function reset() {
 
     // Sections
     var sectionsOnline = HTTP.getJSON(
-      'https://api.todoist.com/rest/v2/sections?token=' + apiToken
+      'https://api.todoist.com/rest/v2/sections',
+      {
+        headerFields: {
+          Authorization: 'Bearer ' + apiToken,
+        },
+      }
     );
     File.writeJSON(sectionsOnline, sectionsPath);
 
     // Labels
-    var labelsOnline = HTTP.getJSON(
-      'https://api.todoist.com/rest/v2/labels?token=' + apiToken
-    );
+    var labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    });
     File.writeJSON(labelsOnline, labelsPath);
 
     // Notification
