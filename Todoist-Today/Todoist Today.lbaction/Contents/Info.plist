@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Todoist Today</string>
 	<key>CFBundleVersion</key>
-	<string>2.3</string>
+	<string>2.4</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.todoist.mac.Todoist</string>
 	<key>LBDescription</key>

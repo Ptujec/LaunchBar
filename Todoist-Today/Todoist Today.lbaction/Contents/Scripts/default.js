@@ -10,7 +10,12 @@ function run(argument) {
     setApiKey();
   } else {
     var todayData = HTTP.getJSON(
-      'https://api.todoist.com/rest/v2/tasks?filter=today&token=' + apiToken
+      'https://api.todoist.com/rest/v2/tasks?filter=today',
+      {
+        headerFields: {
+          Authorization: 'Bearer ' + apiToken,
+        },
+      }
     );
 
     if (todayData.error != undefined) {
