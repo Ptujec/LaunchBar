@@ -18,7 +18,9 @@ function setApiKey() {
   );
   switch (response) {
     case 0:
-      LaunchBar.openURL('https://todoist.com/app/settings/integrations');
+      LaunchBar.openURL(
+        'https://todoist.com/app/settings/integrations/developer'
+      );
       LaunchBar.hide();
       break;
     case 1:
