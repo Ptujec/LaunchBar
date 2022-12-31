@@ -1,6 +1,8 @@
 # LaunchBar Action: Duden
 
-<img src="02.jpg" width="709"/> 
+<img src="01.jpg" width="544"/> 
+
+<img src="02.jpg" width="544"/> 
 
 ## Download
 
