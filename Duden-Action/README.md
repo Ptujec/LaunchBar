@@ -1,4 +1,4 @@
-# LaunchBar Action: Duden
+# LaunchBar Action: Duden <img src="https://github.com/Ptujec/LaunchBar/blob/master/Duden-Action/Duden.lbaction/Contents/Resources/duden1.png?raw=true" width="32"/>
 
 <img src="02.jpg" width="544"/> 
 
