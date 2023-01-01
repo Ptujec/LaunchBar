@@ -132,14 +132,16 @@ function showGames(startDateString, endDateString) {
       endDateString
   );
 
-  if (scoreData.error != undefined) {
-    LaunchBar.alert(scoreData.error);
-    return;
-  }
-
   // File.writeJSON(scoreData, Action.supportPath + '/test.json');
   // return;
   // var scoreData = File.readJSON(Action.supportPath + '/test.json');
+
+  if (scoreData.response.status != 200) {
+    LaunchBar.alert(
+      scoreData.response.status + ': ' + scoreData.response.localizedStatus
+    );
+    return;
+  }
 
   var games = scoreData.data.data;
 
