@@ -1,260 +1,316 @@
-// NBA Scoreboard by @Ptujec
+/* 
+NBA Scoreboard Action for LaunchBar
+by Christian Bender (@ptujec)
+2022-12-28
 
-// Data
-// http://nbasense.com/nba-api/Data/Prod/Scores/Scoreboard
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-// weiter Optionen
-// https://rapidapi.com/api-sports/api/api-nba (angemeldet)
-// https://sportsdata.io/developers/api-documentation/nba
-
-// ESPN
-// https://www.espn.com/apis/devcenter/docs/scores.html#using-the-api
+Documentation:
+- https://www.balldontlie.io/
+- https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+*/
 
 function run(argument) {
   // Date
   if (argument == undefined) {
-    var date = new Date();
+    argument = '0';
+  }
+  // Date with offset (either number … or an upcoming day of the week)
 
-    var dateString = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-      .toISOString()
-      .split('T')[0];
+  // relativ days of the week
+  if (argument.toLowerCase() == 'morgen') {
+    argument = '1';
+  } else if (argument.toLowerCase() == 'gestern') {
+    argument = '-1';
+  }
 
-    var dateY = new Date();
-    dateY.setDate(dateY.getDate() - 1);
+  var checkNum = parseInt(argument);
 
-    var dateStringY = new Date(
-      dateY.getTime() - dateY.getTimezoneOffset() * 60000
+  if (!isNaN(checkNum)) {
+    // Number offset
+    var startDate = new Date();
+    var endDate = new Date();
+
+    // Add or subtrackt days
+    var offsetNumber = parseInt(argument);
+    startDate.setDate(startDate.getDate() + (offsetNumber - 1));
+    endDate.setDate(endDate.getDate() + offsetNumber);
+
+    var startDateString = new Date(
+      startDate.getTime() - startDate.getTimezoneOffset() * 60000
     )
       .toISOString()
       .split('T')[0];
 
-    // LaunchBar.alert(dateStringY)
-    dateStringY = dateStringY.replace(/-/g, '');
+    var endDateString = new Date(
+      endDate.getTime() - endDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split('T')[0];
   } else {
-    // Date with offset (either number … or an upcoming day of the week)
+    // day of the week
 
-    // relativ days of the week
-    if (argument.toLowerCase() == 'morgen') {
-      argument = '1';
-    } else if (argument.toLowerCase() == 'gestern') {
-      argument = '-1';
+    var weekdaysEN = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
+
+    var weekdaysDE = [
+      'sonntag',
+      'montag',
+      'dienstag',
+      'mittwoch',
+      'donnerstag',
+      'freitag',
+      'samstag',
+    ];
+
+    for (var i = 0; i < weekdaysEN.length; i++) {
+      var dayOfWeekEN = weekdaysEN[i];
+      if (dayOfWeekEN.startsWith(argument.toLowerCase())) {
+        var dayOfWeek = i;
+      }
     }
 
-    var checkNum = parseInt(argument);
-
-    if (!isNaN(checkNum)) {
-      // Number offset
-      var date = new Date();
-
-      // Add or subtrackt days
-      var offsetNumber = parseInt(argument);
-      date.setDate(date.getDate() + offsetNumber);
-
-      var dateString = new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .split('T')[0];
-    } else {
-      // day of the week
-
-      var weekdaysEN = [
-        'sunday',
-        'monday',
-        'tuesday',
-        'wednesday',
-        'thursday',
-        'friday',
-        'saturday',
-      ];
-
-      var weekdaysDE = [
-        'sonntag',
-        'montag',
-        'dienstag',
-        'mittwoch',
-        'donnerstag',
-        'freitag',
-        'samstag',
-      ];
-
-      for (var i = 0; i < weekdaysEN.length; i++) {
-        var dayOfWeekEN = weekdaysEN[i];
-        if (dayOfWeekEN.startsWith(argument.toLowerCase())) {
+    if (dayOfWeek == undefined) {
+      for (i = 0; i < weekdaysDE.length; i++) {
+        var dayOfWeekDE = weekdaysDE[i];
+        if (dayOfWeekDE.startsWith(argument.toLowerCase())) {
           var dayOfWeek = i;
         }
       }
-
-      if (dayOfWeek == undefined) {
-        for (i = 0; i < weekdaysDE.length; i++) {
-          var dayOfWeekDE = weekdaysDE[i];
-          if (dayOfWeekDE.startsWith(argument.toLowerCase())) {
-            var dayOfWeek = i;
-          }
-        }
-      }
-
-      if (dayOfWeek == undefined) {
-        LaunchBar.alert('No valid entry');
-        return;
-      }
-
-      var date = new Date();
-
-      var dayOfWeekDate = new Date(date.getTime());
-      // dayOfWeekDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
-      dayOfWeekDate.setDate(
-        date.getDate() + ((dayOfWeek - 1 - date.getDay() + 7) % 7) + 1
-      );
-
-      var dateString = new Date(
-        dayOfWeekDate.getTime() - dayOfWeekDate.getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .split('T')[0];
     }
-  }
-  dateString = dateString.replace(/-/g, '');
 
-  // LaunchBar.alert(dateString)
+    if (dayOfWeek == undefined) {
+      LaunchBar.alert('No valid entry');
+      return;
+    }
 
-  // return
-  //   if (LaunchBar.options.commandKey) {
-  //     LaunchBar.openURL(
-  //       'http://data.nba.net/prod/v2/' + dateString + '/scoreboard.json'
-  //     );
-  //   }
-  if (LaunchBar.options.shiftKey) {
-    LaunchBar.openURL(
-      'https://www.espn.com/nba/scoreboard/_/date/' + dateString
+    var date = new Date();
+
+    var dayOfWeekDate = new Date(date.getTime());
+    // dayOfWeekDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+    dayOfWeekDate.setDate(
+      date.getDate() + ((dayOfWeek - 1 - date.getDay() + 7) % 7) + 1
     );
-  } else {
-    if (argument == undefined) {
-      var scoreData = HTTP.getJSON(
-        'http://data.nba.net/prod/v2/' + dateString + '/scoreboard.json'
-      );
-      var games = scoreData.data.games;
-      var scoreDataY = HTTP.getJSON(
-        'http://data.nba.net/prod/v2/' + dateStringY + '/scoreboard.json'
-      );
-      var gamesY = scoreDataY.data.games;
-      games = gamesY.concat(games);
-    } else {
-      var scoreData = HTTP.getJSON(
-        'http://data.nba.net/prod/v2/' + dateString + '/scoreboard.json'
-      );
-      var games = scoreData.data.games;
-    }
 
-    games = games.sort(function (a, b) {
-      return b.isGameActivated - a.isGameActivated;
-    });
+    var dayBeforeDayOfWeekDate = new Date(date.getTime());
+    dayBeforeDayOfWeekDate.setDate(
+      date.getDate() + ((dayOfWeek - 1 - date.getDay() + 7) % 7)
+    );
 
-    var results = [];
-    var i = 0;
-    for (i = 0; i < games.length; i++) {
-      var game = games[i];
-      var clock = game.clock;
-      var period = game.period.current;
-      var vTeam = game.vTeam.triCode;
-      var vTeamScore = game.vTeam.score;
-      var hTeam = game.hTeam.triCode;
-      var hTeamScore = game.hTeam.score;
-      var league = game.leagueName;
+    var startDateString = new Date(
+      dayBeforeDayOfWeekDate.getTime() -
+        dayBeforeDayOfWeekDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split('T')[0];
 
-      // Subtitle
-      var playoffs = game.playoffs;
-      if (playoffs != undefined) {
-        var subtitle =
-          'Game ' +
-          playoffs.gameNumInSeries +
-          ' (' +
-          playoffs.seriesSummaryText +
-          ')';
-      } else {
-        var subtitle = '';
-      }
-
-      // Title and Icon
-      if (vTeamScore == 0 && hTeamScore == 0) {
-        // Date and Time
-        // https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
-        // https://stackoverflow.com/a/22914738/15774924
-
-        var utc = new Date(game.startTimeUTC).toString();
-        var relativeDate = LaunchBar.formatDate(new Date(utc), {
-          relativeDateFormatting: true,
-        });
-
-        // Title
-        if (LaunchBar.currentLocale == 'de') {
-          var title =
-            hTeam +
-            ' vs. ' +
-            vTeam +
-            ' (' +
-            relativeDate.toLowerCase() +
-            ' Uhr)';
-        } else {
-          var title =
-            hTeam + ' vs. ' + vTeam + ' (' + relativeDate.toLowerCase() + ')';
-        }
-
-        // Icon
-        var icon = hTeam.toLowerCase();
-      } else {
-        // Title
-        var title = hTeam + ' ' + hTeamScore + ' : ' + vTeam + ' ' + vTeamScore;
-
-        // Icon
-        if (parseInt(vTeamScore) > parseInt(hTeamScore)) {
-          var icon = vTeam.toLowerCase();
-        } else {
-          var icon = hTeam.toLowerCase();
-        }
-      }
-
-      // URL (Boxscore)
-      // https://www.nba.com/game/lac-vs-dal-0042000176/box-score
-      var url =
-        'https://www.nba.com/game/' +
-        vTeam.toLowerCase() +
-        '-vs-' +
-        hTeam.toLowerCase() +
-        '-' +
-        game.gameId +
-        '/box-score';
-
-      // Label
-      var label = '';
-      if (clock != '') {
-        label = 'Q' + period + ' ' + clock;
-      }
-
-      var pushData = {
-        title: title,
-        subtitle: subtitle,
-        icon: icon,
-        label: label,
-        action: 'open',
-        actionArgument: url,
-        actionRunsInBackground: true,
-      };
-
-      if (league != 'standard') {
-        if (league == 'vegas') {
-          pushData.badge = 'Summer League';
-        } else {
-          pushData.badge = league;
-        }
-      }
-      results.push(pushData);
-    }
-    return results;
+    var endDateString = new Date(
+      dayOfWeekDate.getTime() - dayOfWeekDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split('T')[0];
   }
+
+  var output = showGames(startDateString, endDateString);
+  return output;
 }
 
-function open(url) {
+function showGames(startDateString, endDateString) {
+  const ducky = 'https://duckduckgo.com/?q=!ducky+';
+
+  var scoreData = HTTP.getJSON(
+    'https://www.balldontlie.io/api/v1/games?start_date=' +
+      startDateString +
+      '&end_date=' +
+      endDateString
+  );
+
+  if (scoreData.error != undefined) {
+    LaunchBar.alert(scoreData.error);
+    return;
+  }
+
+  // File.writeJSON(scoreData, Action.supportPath + '/test.json');
+  // return;
+  // var scoreData = File.readJSON(Action.supportPath + '/test.json');
+
+  var games = scoreData.data.data;
+
+  var scheduledGames = [];
+  var otherGames = [];
+
+  var i = 0;
+  for (i = 0; i < games.length; i++) {
+    var espnSearchURL = undefined;
+    var ytSearchURL = undefined;
+    var nbaComSearchURL = undefined;
+
+    var game = games[i];
+    var time = game.time;
+    var status = game.status;
+    var gameDate = game.date.split('T')[0];
+    var vTeam = game.visitor_team.abbreviation;
+    var vTeamScore = game.visitor_team_score;
+    var hTeam = game.home_team.abbreviation;
+    var hTeamScore = game.home_team_score;
+
+    var espnDate = LaunchBar.formatDate(new Date(gameDate), {
+      dateStyle: 'long',
+      locale: 'en',
+      timeStyle: 'none',
+    });
+
+    espnSearchURL =
+      ducky +
+      encodeURIComponent(
+        game.visitor_team.name +
+          ' vs. ' +
+          game.home_team.name +
+          ' NBA Game Summary ' +
+          espnDate +
+          ' ESPN'
+      );
+
+    var nbaComDate = LaunchBar.formatDate(new Date(gameDate), {
+      dateStyle: 'medium',
+      locale: 'en',
+      timeStyle: 'none',
+    });
+
+    // If the game status starts with a time - meaning it did not start yet
+    if (/^\d+:\d+/.test(status)) {
+      // Date
+      var minutes = status.match(/:(\d+)/)[1];
+      var hours = status.match(/^\d+/);
+      if (status.includes('PM')) {
+        hours = parseInt(hours) + 12;
+      }
+
+      var dateTime = gameDate.replace(/-/g, '') + hours + minutes; // for Sorting
+
+      var etISODate = gameDate + 'T' + hours + ':' + minutes + ':00.000Z';
+      var timeoffset = 5;
+      var utc = new Date(etISODate);
+      utc.setTime(utc.getTime() + timeoffset * 60 * 60 * 1000);
+
+      var relativeDate = LaunchBar.formatDate(new Date(utc), {
+        relativeDateFormatting: true,
+      });
+
+      // Title
+      var title = hTeam + ' vs. ' + vTeam + ' - ' + relativeDate;
+
+      // Icon
+      var icon = hTeam.toLowerCase();
+
+      nbaComSearchURL =
+        ducky +
+        encodeURIComponent(
+          // Example: Dallas Mavericks vs San Antonio Spurs Dec 31, 2022 Game Summary | NBA.com
+          'site:nba.com ' +
+            game.visitor_team.full_name +
+            ' vs ' +
+            game.home_team.full_name +
+            ' ' +
+            nbaComDate +
+            ' Game Summary | NBA.com'
+        );
+    } else {
+      // Games that are currently played or have finished
+      if (time == 'Final') {
+        ytSearchURL =
+          'https://www.youtube.com/results?search_query=' +
+          encodeURIComponent(
+            // Example: Game Recap: Mavericks 126, Spurs 125
+            'Game Recap: ' +
+              game.visitor_team.name +
+              ' ' +
+              hTeamScore +
+              ', ' +
+              game.home_team.name +
+              ' ' +
+              vTeamScore
+          );
+      } else {
+        nbaComSearchURL =
+          ducky +
+          encodeURIComponent(
+            'site:nba.com ' +
+              game.visitor_team.full_name +
+              ' vs ' +
+              game.home_team.full_name +
+              ' ' +
+              nbaComDate +
+              ' Game Summary | NBA.com'
+          );
+      }
+
+      // Title
+      var title = hTeam + ' ' + hTeamScore + ' : ' + vTeam + ' ' + vTeamScore;
+
+      // Icon
+      if (parseInt(vTeamScore) > parseInt(hTeamScore)) {
+        var icon = vTeam.toLowerCase();
+      } else {
+        var icon = hTeam.toLowerCase();
+      }
+    }
+
+    var pushData = {
+      title: title,
+      icon: icon,
+      action: 'open',
+      id: game.id,
+      actionArgument: {
+        espnSearchURL: espnSearchURL,
+        ytSearchURL: ytSearchURL,
+        nbaComSearchURL: nbaComSearchURL,
+      },
+      actionRunsInBackground: true,
+    };
+
+    if (time != 'Final' && time != '') {
+      pushData.label = time;
+    }
+
+    if (/^\d+:\d+/.test(status)) {
+      pushData.date = dateTime;
+      scheduledGames.push(pushData);
+    } else {
+      otherGames.push(pushData);
+    }
+  }
+
+  otherGames = otherGames.sort(function (a, b) {
+    return a.id - b.id;
+  });
+
+  scheduledGames = scheduledGames.sort(function (a, b) {
+    return a.date - b.date;
+  });
+
+  results = otherGames.concat(scheduledGames);
+
+  return results;
+}
+
+function open(dict) {
   LaunchBar.hide();
-  LaunchBar.openURL(url, 'Brave Browser');
+
+  if (LaunchBar.options.alternateKey) {
+    if (dict.ytSearchURL != undefined) {
+      LaunchBar.openURL(dict.ytSearchURL);
+    } else if (dict.nbaComSearchURL != undefined) {
+      LaunchBar.openURL(dict.nbaComSearchURL);
+    }
+  } else {
+    LaunchBar.openURL(dict.espnSearchURL);
+  }
 }
