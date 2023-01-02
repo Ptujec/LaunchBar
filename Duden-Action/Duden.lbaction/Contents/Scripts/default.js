@@ -7,6 +7,10 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
+  if (argument == '') {
+    return;
+  }
+
   var suggestions = HTTP.getJSON(
     'https://www.duden.de/search_api_autocomplete/dictionary_search?display=page_1&&filter=search_api_fulltext&q=' +
       encodeURI(argument) +
@@ -34,7 +38,7 @@ function run(argument) {
       wordlist.push(suggestion);
       results.push({
         title: suggestion,
-        icon: 'duden1',
+        icon: 'dTemplate',
         action: 'openSuggestion',
         actionArgument: {
           url: url,
@@ -68,22 +72,6 @@ function openSuggestion(dict) {
       .replace('österreichisch auch', 'ö.a.')
       .trim();
 
-    var subtitleWords = link
-      .replace('/rechtschreibung/', '')
-      .replace(/oe/, 'ö')
-      .replace(/ue/, 'ü')
-      .replace(/ae/, 'ä')
-      .replace(/sz/, 'ß')
-      .split('_');
-
-    var subtitle = [];
-
-    subtitleWords.forEach(function (item) {
-      if (!title.includes(item)) {
-        subtitle.push(item);
-      }
-    });
-
     var snippet = item
       .match(/ <p class="vignette__snippet">(.|\n)*?<\/p>/)[0]
       .replace(/(<([^>]+)>)/g, '')
@@ -94,19 +82,47 @@ function openSuggestion(dict) {
       //   .replace(/Neutrum/g, 'N.')
       .trim();
 
+    var label = [];
+    var labelWords = link.replace('/rechtschreibung/', '').split('_');
+    labelWords.forEach(function (item) {
+      if (!title.includes(item)) {
+        label.push(item);
+      }
+    });
+
     var pushData = {
       title: title,
-      label: snippet,
+      subtitle: snippet,
+      label: label.join(' '),
       badge: dict.suggestion,
-      icon: 'duden1',
-      url: url,
+      icon: 'dTemplate',
+      // url: url,
+      action: 'showMore',
+      actionArgument: url,
     };
-
-    if (subtitle != undefined) {
-      pushData.subtitle = subtitle.join(', ');
-    }
 
     results.push(pushData);
   });
+
+  // Filter out unnecessary labels
+  results.forEach(function (item) {
+    var hits = 0;
+    for (var i = 0; i < results.length; i++) {
+      if (item.title == results[i].title) {
+        hits++;
+      }
+    }
+
+    if (hits < 2) {
+      item.label = '';
+    }
+  });
+
   return results;
+}
+
+function showMore(url) {
+  // LaunchBar.openQuickLook(url);
+  LaunchBar.hide();
+  LaunchBar.openURL(url);
 }
