@@ -172,7 +172,8 @@ function showGames(startDateString, endDateString) {
     espnSearchURL =
       ducky +
       encodeURIComponent(
-        game.visitor_team.name +
+        'site:espn.com ' +
+          game.visitor_team.name +
           ' vs. ' +
           game.home_team.name +
           ' NBA Game Summary ' +
@@ -198,8 +199,8 @@ function showGames(startDateString, endDateString) {
       var dateTime = gameDate.replace(/-/g, '') + hours + minutes; // for Sorting
 
       var etISODate = gameDate + 'T' + hours + ':' + minutes + ':00.000Z';
-      var timeoffset = 5;
       var utc = new Date(etISODate);
+      var timeoffset = 5;
       utc.setTime(utc.getTime() + timeoffset * 60 * 60 * 1000);
 
       var relativeDate = LaunchBar.formatDate(new Date(utc), {
@@ -207,7 +208,7 @@ function showGames(startDateString, endDateString) {
       });
 
       // Title
-      var title = hTeam + ' vs. ' + vTeam + ' - ' + relativeDate;
+      var title = vTeam + ' vs. ' + hTeam + ' - ' + relativeDate;
 
       // Icon
       var icon = hTeam.toLowerCase();
@@ -222,7 +223,7 @@ function showGames(startDateString, endDateString) {
             game.home_team.full_name +
             ' ' +
             nbaComDate +
-            ' Game Summary | NBA.com'
+            ' Game Summary Preview'
         );
     } else {
       // Games that are currently played or have finished
@@ -234,11 +235,11 @@ function showGames(startDateString, endDateString) {
             'Game Recap: ' +
               game.visitor_team.name +
               ' ' +
-              hTeamScore +
+              vTeamScore +
               ', ' +
               game.home_team.name +
               ' ' +
-              vTeamScore
+              hTeamScore
           );
       } else {
         nbaComSearchURL =
@@ -250,7 +251,7 @@ function showGames(startDateString, endDateString) {
               game.home_team.full_name +
               ' ' +
               nbaComDate +
-              ' Game Summary | NBA.com'
+              ' Game Summary'
           );
       }
 
@@ -305,7 +306,6 @@ function showGames(startDateString, endDateString) {
 
 function open(dict) {
   LaunchBar.hide();
-
   if (LaunchBar.options.alternateKey) {
     if (dict.ytSearchURL != undefined) {
       LaunchBar.openURL(dict.ytSearchURL);
