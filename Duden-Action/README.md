@@ -2,7 +2,7 @@
 
 <img src="01.jpg" width="633"/> 
 
-Diese Aktion vervollständigt Suchbegriffe, so wie wenn man einen Begriff auf duden.de eingibt. Dadurch vermeidet man Suchen, die keinen Treffer auf duden.de haben. Nach Bestätigung durch `‌↩` werden die Suchtreffer incl. kurzer Bestimmung angezeigt. Nach erneuter Bestätigung durch `↩` wird die Website für den ausgewählten Suchtreffer (mit Rechtschreibung, Bedeutungen etc.) angezeigt.  
+Diese Aktion vervollständigt Suchbegriffe, so wie wenn man einen Begriff auf duden.de eingibt. Dadurch vermeidet man Suchen, die keinen Treffer auf duden.de haben. Nach Bestätigung durch `‌↩` werden die Suchtreffer incl. kurzer Bestimmung angezeigt (s. Screenshot). Nach erneuter Bestätigung durch `↩` wird die Website für den ausgewählten Suchtreffer (mit Rechtschreibung, Bedeutungen etc.) angezeigt.  
 
 ## Download
 
