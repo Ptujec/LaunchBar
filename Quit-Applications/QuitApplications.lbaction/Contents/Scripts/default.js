@@ -175,19 +175,27 @@ function showOptions() {
   var exList = [];
 
   if (apps != undefined) {
-    apps.forEach(function (item) {
-      var title = File.displayName(item.path).replace('.app', '');
-      resultEx.push({
-        title: title,
-        subtitle: title + ' will keep running'.localize(),
-        path: item.path,
-        icon: item.id,
-        action: 'toggleExclude',
-        actionArgument: item.path,
-        label: contextTitle.localize() + ': ✔︎',
-      });
-      exList.push(item.path);
+    apps.forEach(function (item, index, apps) {
+      if (!File.exists(item.path)) {
+        // remove deleted apps from the list
+        apps.splice(index, 1);
+      } else {
+        var title = File.displayName(item.path).replace('.app', '');
+        resultEx.push({
+          title: title,
+          subtitle: title + ' will keep running'.localize(),
+          path: item.path,
+          icon: item.id,
+          action: 'toggleExclude',
+          actionArgument: item.path,
+          label: contextTitle.localize() + ': ✔︎',
+        });
+        exList.push(item.path);
+      }
     });
+
+    contextJSON.apps = apps;
+    File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
 
     resultEx.sort(function (a, b) {
       return a.title > b.title;
@@ -201,21 +209,27 @@ function showOptions() {
   var customApps = Action.preferences.customApps;
 
   if (customApps != undefined) {
-    customApps.forEach(function (item) {
+    customApps.forEach(function (item, index, customApps) {
       var path = item;
       var title = File.displayName(path).replace('.app', '');
       var infoPlistPath = path + '/Contents/Info.plist';
-      var infoPlist = File.readPlist(infoPlistPath);
-      var appID = infoPlist.CFBundleIdentifier;
 
-      if (!exList.includes(path)) {
-        result.push({
-          title: title,
-          path: path,
-          icon: appID,
-          action: 'toggleExclude',
-          actionArgument: path,
-        });
+      if (!File.exists(infoPlistPath)) {
+        // remove deleted apps from the list
+        customApps.splice(index, 1);
+      } else {
+        var infoPlist = File.readPlist(infoPlistPath);
+        var appID = infoPlist.CFBundleIdentifier;
+
+        if (!exList.includes(path)) {
+          result.push({
+            title: title,
+            path: path,
+            icon: appID,
+            action: 'toggleExclude',
+            actionArgument: path,
+          });
+        }
       }
     });
   }
