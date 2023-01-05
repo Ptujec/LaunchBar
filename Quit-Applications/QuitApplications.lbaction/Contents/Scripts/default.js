@@ -13,6 +13,20 @@ const textFilePath = Action.supportPath + '/contexts.txt';
 function run() {
   var firstrun = Action.preferences.firstrun;
 
+  // Add Safari Location on Ventura and Above
+  if (parseInt(LaunchBar.systemVersion) > 12) {
+    const safariLocation =
+      '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app';
+    var customApps = Action.preferences.customApps;
+    if (customApps == undefined) {
+      var customApps = [];
+    }
+    if (!customApps.includes(safariLocation)) {
+      customApps.push(safariLocation);
+    }
+    Action.preferences.customApps = customApps;
+  }
+
   if (firstrun == undefined || !File.exists(textFilePath)) {
     LaunchBar.hide();
     Action.preferences.firstrun = false;
