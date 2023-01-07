@@ -3,7 +3,7 @@
 <img src="01.jpg" width="820"/> 
 
 
-**Create SVG from Website:** This will pull .svg files and svg code from the current website in Safari and place them at your fingertips. 
+**Create SVG from Website:** This will pull .svg files and svg code from the current website in Safari and place them at your fingertips. From here it is super easy to preview them with Quicklook (`‌␣`) or open them in your graphic tool or editor of choice (`⇥`). 
 
 **Split SVG into Symbols:** Sometimes there are multiple icons bundled in one file. This action can help split them up in single files.
 
