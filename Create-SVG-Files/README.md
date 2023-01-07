@@ -3,15 +3,15 @@
 <img src="01.jpg" width="820"/> 
 
 
-## Create SVG from Website
+1) Create SVG from Website
 
 This will pull .svg files and svg code from the current website in Safari and place them at your fingertips. 
 
-## Split SVG into Symbols
+2) Split SVG into Symbols
 
 Sometimes there are multiple icons bundled in one file. This action can help split them up in single files.
 
-## Create SVG from Clipboard
+3) Create SVG from Clipboard
 
 If you copied some svg code and want to turn it into a file this action should help. 
 
