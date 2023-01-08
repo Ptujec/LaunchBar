@@ -48,14 +48,23 @@ function run() {
   }
 
   // Get code and name from linked SVG files as JSON
-  var svgUrlPaths = html.match(/"((?:\\.|[^"\\])+\.svg)"/g);
+
+  if (LaunchBar.options.alternateKey) {
+    var svgUrlPaths = html.match(/[^="( ]+\.svg/g);
+  } else {
+    var svgUrlPaths = html.match(/"((?:\\.|[^"\\])+\.svg)"/g);
+  }
 
   if (svgUrlPaths != undefined) {
     // Avoid duplicates
     svgUrlPaths = [...new Set(svgUrlPaths)];
 
     svgUrlPaths.forEach(function (item) {
-      var svgUrlPath = item.match(/"(.*?\.svg)"/)[1];
+      if (LaunchBar.options.alternateKey) {
+        var svgUrlPath = item.replace(/\\/g, '');
+      } else {
+        var svgUrlPath = item.match(/[^="( ]+\.svg/)[0].replace(/\\/g, '');
+      }
 
       var svgName = svgUrlPath.split('/');
       svgName = siteName + '_' + svgName[svgName.length - 1];
