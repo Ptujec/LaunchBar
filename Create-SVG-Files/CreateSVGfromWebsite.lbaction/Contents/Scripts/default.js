@@ -61,9 +61,11 @@ function run() {
 
     svgUrlPaths.forEach(function (item) {
       if (LaunchBar.options.alternateKey) {
-        var svgUrlPath = item.replace(/\\/g, '');
+        // var svgUrlPath = item.replace(/\\/g, '');
+        var svgUrlPath = decodeURIComponent(JSON.parse('"' + item + '"'));
       } else {
-        var svgUrlPath = item.match(/[^="( ]+\.svg/)[0].replace(/\\/g, '');
+        var svgUrlPath = item.match(/[^="( ]+\.svg/)[0]; //.replace(/\\/g, '');
+        svgUrlPath = decodeURIComponent(JSON.parse('"' + svgUrlPath + '"'));
       }
 
       var svgName = svgUrlPath.split('/');
