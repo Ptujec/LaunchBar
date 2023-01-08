@@ -59,7 +59,7 @@ function run() {
     // Avoid duplicates
     svgUrlPaths = [...new Set(svgUrlPaths)];
 
-    svgUrlPaths.forEach(function (item) {
+    svgUrlPaths.forEach(function (item, index) {
       if (LaunchBar.options.alternateKey) {
         // var svgUrlPath = item.replace(/\\/g, '');
         var svgUrlPath = decodeURIComponent(JSON.parse('"' + item + '"'));
@@ -69,7 +69,12 @@ function run() {
       }
 
       var svgName = svgUrlPath.split('/');
-      svgName = siteName + '_' + svgName[svgName.length - 1];
+      svgName =
+        siteName +
+        '_file_' +
+        pad(index + 1) +
+        '_' +
+        svgName[svgName.length - 1];
 
       if (svgUrlPath.startsWith('http')) {
         var svgUrl = svgUrlPath;
@@ -119,7 +124,7 @@ function run() {
       if (item.includes('<title>') && !item.includes('<symbol')) {
         var svgName =
           siteName +
-          '_' +
+          '_tag_' +
           pad(index + 1) +
           '_' +
           item
@@ -129,7 +134,7 @@ function run() {
             .replace(/:/g, '') +
           '.svg';
       } else {
-        var svgName = siteName + '_' + pad(index + 1) + '.svg';
+        var svgName = siteName + '_tag_' + pad(index + 1) + '.svg';
       }
 
       svgJSON.push({
