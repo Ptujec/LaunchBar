@@ -72,6 +72,9 @@ function run() {
       if (svgUrlPath.startsWith('http')) {
         var svgUrl = svgUrlPath;
       } else {
+        if (!svgUrlPath.startsWith('/')) {
+          svgUrlPath = '/' + svgUrlPath;
+        }
         var svgUrl = baseUrl + svgUrlPath;
       }
 
