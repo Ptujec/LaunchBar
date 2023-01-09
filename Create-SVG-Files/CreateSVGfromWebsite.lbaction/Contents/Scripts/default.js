@@ -78,6 +78,8 @@ function run() {
 
       if (svgUrlPath.startsWith('http')) {
         var svgUrl = svgUrlPath;
+      } else if (svgUrlPath.startsWith('//')) {
+        var svgUrl = 'https:' + svgUrlPath;
       } else {
         if (!svgUrlPath.startsWith('/')) {
           svgUrlPath = '/' + svgUrlPath;
@@ -188,11 +190,6 @@ function createSVGs(svgJSON) {
         '<svg xmlns="http://www.w3.org/2000/svg" '
       );
     }
-
-    // Fix to avoid white on white - uncomment if you want to preserve the original color
-    // svgTag = svgTag
-    //   .replace(/fill=".*?"/gi, '')
-    //   .replace(/<style(.|\n|\r)*?<\/style>/g, '');
 
     var fileLocation = '/private/tmp/' + item.svgName;
 
