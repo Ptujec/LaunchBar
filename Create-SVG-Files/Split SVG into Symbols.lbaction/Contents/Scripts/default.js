@@ -18,6 +18,8 @@ function run(path) {
 
   var paths = [];
   symbols.forEach(function (item) {
+    item = item.replace(/\\\'/g, '"');
+
     if (item.includes('<path')) {
       if (item.includes('<title>')) {
         var name = item

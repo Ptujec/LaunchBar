@@ -8,6 +8,8 @@
 	<string>ptujec.LaunchBar.action.SplitSVGIntoSymbols</string>
 	<key>CFBundleName</key>
 	<string>Split SVG into Symbols</string>
+	<key>CFBundleVersion</key>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
