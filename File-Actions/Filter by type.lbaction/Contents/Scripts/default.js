@@ -86,76 +86,83 @@ function run(folder) {
   for (var iG = 0; iG < typeDeclarationsGroups.length; iG++) {
     var typeDeclarations = typeDeclarationsGroups[iG];
 
-    for (var i = 0; i < typeDeclarations.length; i++) {
-      var typeConformsTo = typeDeclarations[i].UTTypeConformsTo;
+    if (typeDeclarations != undefined) {
+      for (var i = 0; i < typeDeclarations.length; i++) {
+        var typeConformsTo = typeDeclarations[i].UTTypeConformsTo;
 
-      if (typeof typeConformsTo === 'object') {
-        typeConformsTo = JSON.stringify(typeConformsTo);
-      }
-
-      if (typeConformsTo != undefined) {
-        // images
-        if (
-          typeConformsTo.includes('public.image') ||
-          typeConformsTo.includes('public.camera-raw-image')
-        ) {
-          var typeTagSpecification = typeDeclarations[i].UTTypeTagSpecification;
-          if (typeTagSpecification != undefined) {
-            imageExtensions.push(
-              typeTagSpecification['public.filename-extension']
-            );
-          }
+        if (typeof typeConformsTo === 'object') {
+          typeConformsTo = JSON.stringify(typeConformsTo);
         }
 
-        // movies, videos
-        if (
-          typeConformsTo.includes('public.movie') ||
-          typeConformsTo.includes('public.video')
-        ) {
-          var typeTagSpecification = typeDeclarations[i].UTTypeTagSpecification;
-          if (typeTagSpecification != undefined) {
-            movieExtensions.push(
-              typeTagSpecification['public.filename-extension']
-            );
+        if (typeConformsTo != undefined) {
+          // images
+          if (
+            typeConformsTo.includes('public.image') ||
+            typeConformsTo.includes('public.camera-raw-image')
+          ) {
+            var typeTagSpecification =
+              typeDeclarations[i].UTTypeTagSpecification;
+            if (typeTagSpecification != undefined) {
+              imageExtensions.push(
+                typeTagSpecification['public.filename-extension']
+              );
+            }
           }
-        }
-        // audio
-        if (
-          typeConformsTo.includes('public.audio') ||
-          typeConformsTo.includes('public.mpeg-4-audio')
-        ) {
-          var typeTagSpecification = typeDeclarations[i].UTTypeTagSpecification;
-          if (typeTagSpecification != undefined) {
-            audioExtensions.push(
-              typeTagSpecification['public.filename-extension']
-            );
-          }
-        }
 
-        // presentations
-        if (typeConformsTo.includes('public.presentation')) {
-          var typeTagSpecification = typeDeclarations[i].UTTypeTagSpecification;
-          if (typeTagSpecification != undefined) {
-            presentationExtensions.push(
-              typeTagSpecification['public.filename-extension']
-            );
+          // movies, videos
+          if (
+            typeConformsTo.includes('public.movie') ||
+            typeConformsTo.includes('public.video')
+          ) {
+            var typeTagSpecification =
+              typeDeclarations[i].UTTypeTagSpecification;
+            if (typeTagSpecification != undefined) {
+              movieExtensions.push(
+                typeTagSpecification['public.filename-extension']
+              );
+            }
           }
-        }
+          // audio
+          if (
+            typeConformsTo.includes('public.audio') ||
+            typeConformsTo.includes('public.mpeg-4-audio')
+          ) {
+            var typeTagSpecification =
+              typeDeclarations[i].UTTypeTagSpecification;
+            if (typeTagSpecification != undefined) {
+              audioExtensions.push(
+                typeTagSpecification['public.filename-extension']
+              );
+            }
+          }
 
-        // documents
-        if (
-          typeConformsTo.includes('public.composite-content') ||
-          typeConformsTo.includes('public.spreadsheet') ||
-          typeConformsTo.includes('public.text') ||
-          typeConformsTo.includes('public.source-code') ||
-          typeConformsTo.includes('public.script') ||
-          typeConformsTo.includes('public.plain-text')
-        ) {
-          var typeTagSpecification = typeDeclarations[i].UTTypeTagSpecification;
-          if (typeTagSpecification != undefined) {
-            documentExtensions.push(
-              typeTagSpecification['public.filename-extension']
-            );
+          // presentations
+          if (typeConformsTo.includes('public.presentation')) {
+            var typeTagSpecification =
+              typeDeclarations[i].UTTypeTagSpecification;
+            if (typeTagSpecification != undefined) {
+              presentationExtensions.push(
+                typeTagSpecification['public.filename-extension']
+              );
+            }
+          }
+
+          // documents
+          if (
+            typeConformsTo.includes('public.composite-content') ||
+            typeConformsTo.includes('public.spreadsheet') ||
+            typeConformsTo.includes('public.text') ||
+            typeConformsTo.includes('public.source-code') ||
+            typeConformsTo.includes('public.script') ||
+            typeConformsTo.includes('public.plain-text')
+          ) {
+            var typeTagSpecification =
+              typeDeclarations[i].UTTypeTagSpecification;
+            if (typeTagSpecification != undefined) {
+              documentExtensions.push(
+                typeTagSpecification['public.filename-extension']
+              );
+            }
           }
         }
       }
