@@ -1,6 +1,6 @@
 # LaunchBar Actions for Managing Notifications
 
-*Note: The following actions work for German and English user interfaces only. I developed them on macOS 12 Montery, but Big Sur should work also.*
+*Note: The lastest version require macOS 13.*
 
 ## Action: Notification Actions
 
