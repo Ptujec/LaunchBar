@@ -1,12 +1,12 @@
-/* Filter files in a folder by type
+/* Filter files in a folder by extension
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-file
 */
 
 function run(folder) {
     var contents = File.getDirectoryContents(folder)
 
-    var types = []
-    var typesCheck = []
+    var extensions = []
+    var extensionsCheck = []
     var files = []
 
     for (var i = 0; i < contents.length; i++) {
@@ -14,47 +14,47 @@ function run(folder) {
         var p = folder + '/' + item
 
         if (!File.isDirectory(p)) {
-            var t = item
+            var e = item
                 .match(/\.([\w]+$)/)
 
-            if (t != null) {
-                var type = t[1]
+            if (e != null) {
+                var extension = e[1]
                     .toLowerCase()
             } else {
-                var type = 'blank'
+                var extension = 'blank'
             }
 
             files.push({
                 'title': item,
-                'type': type,
+                'extension': extension,
                 'path': p
             })
 
-            if (!typesCheck.includes(type)) {
-                typesCheck.push(type)
-                types.push({
-                    'title': type + ' files',
+            if (!extensionsCheck.includes(extension)) {
+                extensionsCheck.push(extension)
+                extensions.push({
+                    'title': extension + ' files',
                     'icon': 'iconTemplate',
                     'action': 'showSelection',
-                    'actionArgument': type
+                    'actionArgument': extension
                 })
             }
         }
     }
     Action.preferences.recent = files
 
-    types.sort(function (a, b) {
+    extensions.sort(function (a, b) {
         return a.title > b.title;
     });
 
-    return types
+    return extensions
 }
 
-function showSelection(type) {
+function showSelection(extension) {
     var files = Action.preferences.recent
 
     files = files.filter(function (el) {
-        return el.type == type;
+        return el.extension == extension;
     });
     
     return files
