@@ -1,4 +1,7 @@
 # LaunchBar URL Scheme Actions
+
+The following actions are great for what David Sparks calls [contextual computing](https://www.macsparky.com/blog/2020/12/linking-and-contextual-computing/).
+
 ## Mindnode (iA Writer)
 
 <img src="mindnodeURL.gif" width="600"/> 
