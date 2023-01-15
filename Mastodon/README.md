@@ -8,7 +8,9 @@ If you hit return `↩` on a selected account it will open the account on the Ma
 
 You can change your preferred Mastodon instance with `⇧↩`.
 
-Hashtags work fine, too. But their benefit is somewhat limited, because of the way Mastodon works.   
+Hashtags work fine, too. But their benefit is somewhat limited, because of the way Mastodon works.
+
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
 ## Download
 
