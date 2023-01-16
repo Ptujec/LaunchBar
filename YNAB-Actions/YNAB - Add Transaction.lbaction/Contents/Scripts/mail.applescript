@@ -29,5 +29,6 @@ on run
 			set _title to ""
 		end if
 	end tell
-	set result to _default & "\n" & _title
+	set result to _default & "
+" & _title
 end run

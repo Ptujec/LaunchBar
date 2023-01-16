@@ -195,11 +195,11 @@ function setPayeeAndContinue(p) {
   var pName = p.pName;
 
   if (pName == 'Enter New Payee') {
+    LaunchBar.hide();
     pName = LaunchBar.executeAppleScript(
       'set result to display dialog "Payee" with title "Payee" default answer ""',
       'set result to text returned of result'
     ).trim();
-    LaunchBar.hide();
 
     if (pName == '') {
       return;
@@ -465,12 +465,11 @@ function setMemoAndComplete(m) {
   if (m == 'No Memo') {
     Action.preferences.recentMemo = '';
   } else if (m == 'Add Memo') {
+    LaunchBar.hide();
     var memo = LaunchBar.executeAppleScript(
       'set result to display dialog "Memo" with title "Memo" default answer ""',
       'set result to text returned of result'
     ).trim();
-
-    LaunchBar.hide();
 
     if (memo == '') {
       return;
@@ -479,10 +478,25 @@ function setMemoAndComplete(m) {
     Action.preferences.recentMemo = memo;
     Action.preferences.recentMemoIcon = 'memoTemplate';
   } else {
-    Action.preferences.recentMemo =
-      Action.preferences.tempMailSubject + ' ' + m;
+    // AppleScript Link
+    // Truncate if more than 200 characters
+    var subject = Action.preferences.tempMailSubject;
+
+    var length = (subject + m).length;
+
+    if (length > 199) {
+      var difference = length - 199;
+      var subjectLength = subject.length - difference - 1;
+      subject = subject.substring(0, subjectLength) + '…';
+    }
+
+    Action.preferences.recentMemo = subject + ' ' + m;
     Action.preferences.recentMemoIcon = 'linkTemplate';
   }
+
+  // LaunchBar.alert(Action.preferences.recentMemo.length);
+
+  // return;
 
   // Cleared Settings
   if (Action.preferences.recentAccountType == 'otherAsset') {
