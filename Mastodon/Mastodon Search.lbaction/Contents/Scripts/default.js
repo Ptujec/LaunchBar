@@ -5,26 +5,43 @@ by Christian Bender (@ptujec)
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
+String.prototype.localizationTable = 'default';
 
 function run(argument) {
   var server = Action.preferences.server;
 
   // Set Mastodon Server/Instance
   if (LaunchBar.options.shiftKey || server == undefined || server == '') {
+    LaunchBar.hide();
+
     if (server == undefined || server == '') {
       var defaultAnswer = 'mastodon.social';
     } else {
       var defaultAnswer = server;
     }
 
+    var dialog =
+      'Enter the name of the Mastodon instance or server where your account is hosted!'.localize();
+    var dialogTitle = 'Mastodon Instance'.localize();
+
     var server = LaunchBar.executeAppleScript(
-      'set result to display dialog "Enter the server name where your account is hosted" with title "Server Name" default answer "' +
+      'set result to display dialog "' +
+        dialog +
+        '" with title "' +
+        dialogTitle +
+        '" default answer "' +
         defaultAnswer +
         '"',
       'set result to text returned of result'
     ).trim();
     Action.preferences.server = server;
+    return;
+  }
+
+  // Open Mastodon Website with ↩
+  if (argument == undefined) {
     LaunchBar.hide();
+    LaunchBar.openURL('https://' + server + '/home');
     return;
   }
 
@@ -32,11 +49,13 @@ function run(argument) {
     return;
   }
 
-  // Search Accounts & Hashtags
+  // Search Accounts & Hashtags with ␣ (space)
   var searchURL =
     'https://' + server + '/api/v2/search?q=' + encodeURIComponent(argument);
 
   var searchData = HTTP.getJSON(searchURL);
+  // File.writeJSON(searchData, Action.supportPath + '/test.json');
+  // return;
 
   //  Error Message
   if (searchData.response.status != 200) {
@@ -61,6 +80,7 @@ function run(argument) {
       var user = account.username;
       var displayName = account.display_name;
       var accountServer = account.url.split('/')[2];
+
       var url = account.url;
       var follower = followersCount.toString() + ' follower(s)';
 

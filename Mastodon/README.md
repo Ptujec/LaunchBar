@@ -2,9 +2,9 @@
 
 <img src="01.jpg" width="587"/> 
 
-Search Mastodon accounts and hashtags with this action. 
+Press `␣` (space) to search Mastodon accounts and hashtags. `↩` will open your the website of your home instance.
 
-If you hit return `↩` on a selected account it will open the account on the Mastodon instance you entered on the first run (assuming that is where you are signed in). Hit `⌘↩` to open the account page on it's own home instance. Or `⌥↩` to copy the userhandle to your clipboard.
+If you hit return `↩` on a selected account it will open the account on the Mastodon instance you entered on the first run (assuming that is where you are signed in). Use `⌘↩` to open the account page on it's own home instance. Or `⌥↩` to copy the userhandle to your clipboard.
 
 You can change your preferred Mastodon instance with `⇧↩`.
 
