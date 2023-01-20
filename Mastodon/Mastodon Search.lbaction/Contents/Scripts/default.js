@@ -79,7 +79,12 @@ function run(argument) {
       var follower = followersCount.toString() + ' follower(s)';
 
       var title = displayName;
-      var userhandle = '@' + user + '@' + accountServer;
+
+      if (server == accountServer) {
+        var userhandle = '@' + user;
+      } else {
+        var userhandle = '@' + user + '@' + accountServer;
+      }
 
       accountResults.push({
         title: title,
@@ -134,6 +139,7 @@ function actAccount(dict) {
     LaunchBar.setClipboardString(dict.userhandle);
   } else {
     // Open page on your preferred server/instance
+
     LaunchBar.openURL('https://' + dict.server + '/' + dict.userhandle);
   }
 }
