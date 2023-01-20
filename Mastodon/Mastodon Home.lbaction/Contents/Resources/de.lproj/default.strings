@@ -1,0 +1,11 @@
+'Enter the name of the Mastodon instance or server where your account is hosted!' = 'Gib den Namen der Mastodon Instanz bzw. des Servers ein, auf dem dein Konto gehostet wird!';
+'Mastodon Instance' = 'Mastodon Instanz';
+"No current website found in Safari!" = "Es wurde keine Website in Safari gefunden!";
+"Your are already at home!" = "Du bist schon zu Hause!";
+"Seems to be no valid account or post!" = "Das ist scheinbar kein richtiger Nutzer oder Post!";
+"On" = "An";
+"Off" = "Aus";
+"Close Original Site" = "Ursprungsseite schließen";
+"Set Instance" = "Instanz festlegen";
+"Set API Key" = "API Key festlegen";
+"Current Instance: " = "Aktuelle Instanz: ";
