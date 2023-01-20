@@ -4,6 +4,7 @@ by Christian Bender (@ptujec)
 2023-01-14
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
 */
 String.prototype.localizationTable = 'default';
 
@@ -35,13 +36,6 @@ function run(argument) {
       'set result to text returned of result'
     ).trim();
     Action.preferences.server = server;
-    return;
-  }
-
-  // Open Mastodon Website with ↩
-  if (argument == undefined) {
-    LaunchBar.hide();
-    LaunchBar.openURL('https://' + server + '/home');
     return;
   }
 
@@ -91,7 +85,7 @@ function run(argument) {
         title: title,
         subtitle: userhandle,
         label: follower,
-        action: 'act',
+        action: 'actAccount',
         actionArgument: {
           url: url,
           userhandle: userhandle,
@@ -115,7 +109,12 @@ function run(argument) {
 
     hashtagResults.push({
       title: title,
-      url: url,
+      action: 'actHashtag',
+      actionArgument: {
+        hashtag: hName,
+        url: url,
+      },
+      actionRunsInBackground: true,
       icon: 'hashtagTemplate',
     });
   });
@@ -125,16 +124,26 @@ function run(argument) {
   return results;
 }
 
-function act(dict) {
+function actAccount(dict) {
   LaunchBar.hide();
   if (LaunchBar.options.commandKey) {
-    // Open page on your preferred server/instance
+    // Open page on the account's home server
     LaunchBar.openURL(dict.url);
   } else if (LaunchBar.options.alternateKey) {
     // Copy userhandle
     LaunchBar.setClipboardString(dict.userhandle);
   } else {
-    // Open page on the account's home server
+    // Open page on your preferred server/instance
     LaunchBar.openURL('https://' + dict.server + '/' + dict.userhandle);
+  }
+}
+
+function actHashtag(dict) {
+  LaunchBar.hide();
+  if (LaunchBar.options.commandKey) {
+    // open on mastodon.social
+    LaunchBar.openURL('https://mastodon.social/tags/' + dict.hashtag);
+  } else {
+    LaunchBar.openURL(dict.url);
   }
 }

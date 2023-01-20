@@ -2,13 +2,18 @@
 
 <img src="01.jpg" width="587"/> 
 
-Press `␣` (space) to search Mastodon accounts and hashtags. `↩` will open the website of the instance where your account is hosted.
+Search Mastodon accounts and hashtags easily with LaunchBar. 
+
+On first run you will have to choose your Mastodon instance. You can change your preferred Mastodon instance any time with `⇧↩`.
+
+**1) Accounts**
 
 If you hit return `↩` on a selected account it will open the account on the Mastodon instance you entered on the first run (assuming that is where you are signed in). Use `⌘↩` to open the account page on it's own home instance. Or `⌥↩` to copy the userhandle to your clipboard.
 
-You can change your preferred Mastodon instance with `⇧↩`.
 
-Hashtags work fine, too. But their benefit is somewhat limited, because of the way Mastodon works.
+**2) Hashtags**
+
+Hashtags open per default on your home instance. Use `⌘↩` to view results on mastodon.social (which usually has a lot more).
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
