@@ -1,5 +1,7 @@
 # LaunchBar Actions for Mastodon
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
 ## 1) Search Action
 
 <img src="01.jpg" width="582"/> 
@@ -17,9 +19,6 @@ If you hit return `↩` on a selected account it will open the account on the Ma
 ### Hashtags
 
 Hashtags open per default on your home instance. Use `⌘↩` to view results on mastodon.social (which usually has a lot more).
-
-*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
-
 
 ## 2) Home Action
 
@@ -40,3 +39,4 @@ There are a couple of settings, that you can access with `⇧↩`
 ## Updates
 
 This action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+
