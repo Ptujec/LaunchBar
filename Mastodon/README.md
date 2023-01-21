@@ -30,7 +30,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="03.jpg" width="582"/> 
 
-**Note**: In order to redirect posts, you will need to create an API-Token. Go to "https//:`your server`/settings/applications/". Click the `New application` button. The only requirement for this action is `read: search`. You can leave everything else unchecked. Click `Submit`. After that you need just need to copy the access token from your newly created "Application".
+**Note**: In order to redirect posts, you will need to create an API-Token. Go to "https//:`your server`/settings/applications/". Click the `New application` button. The only requirement for this action is `read: search`. You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "Application".
 
 <img src="04.jpg" width="582"/> 
 
