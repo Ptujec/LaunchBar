@@ -70,7 +70,8 @@ function run(argument) {
     var followersCount = account.followers_count;
     var followingCount = account.following_count;
 
-    if (bot == false && followersCount + followingCount > 0) {
+    // if (bot == false && followersCount + followingCount > 0) {
+    if (followersCount + followingCount > 0) {
       var user = account.username;
       var displayName = account.display_name;
       var accountServer = account.url.split('/')[2];
@@ -86,9 +87,17 @@ function run(argument) {
         var userhandle = '@' + user + '@' + accountServer;
       }
 
+      if (bot == true) {
+        var sub = userhandle + ' (bot)';
+        var icon = 'botTemplate';
+      } else {
+        var sub = userhandle;
+        var icon = 'accountTemplate';
+      }
+
       accountResults.push({
         title: title,
-        subtitle: userhandle,
+        subtitle: sub,
         label: follower,
         action: 'actAccount',
         actionArgument: {
@@ -97,7 +106,7 @@ function run(argument) {
           server: server,
         },
         actionRunsInBackground: true,
-        icon: 'accountTemplate',
+        icon: icon,
       });
     }
   });
