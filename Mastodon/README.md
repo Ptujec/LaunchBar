@@ -42,6 +42,8 @@ This is a simple action to post a status (toot) on Mastodon. If you type a lot a
 
 <img src="05.jpg" width="582"/> 
 
+You can use `⌘↩` to view your timeline after a successful post.
+
 **Note**: This action requires an API-Token. See 2) for how to create an API-Token. For this action you need to check `write:statuses`. (If you use the same application as above you need to regenerate the token for the new permissions to take effect.)
 
 

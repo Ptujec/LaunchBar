@@ -67,6 +67,11 @@ function run(argument) {
     LaunchBar.executeAppleScript(
       'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/SentMessage.caf"'
     ); // Play Sound
+
+    if (LaunchBar.options.commandKey) {
+      // Open Mastodon Timeline
+      LaunchBar.openURL('https://' + server + '/home');
+    }
   }
 }
 
