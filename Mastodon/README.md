@@ -24,13 +24,28 @@ Hashtags open per default on your home instance. Use `⌘↩` to view results on
 
 <img src="02.jpg" width="582"/> 
 
-This action is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). It opens the current post or profile in Safari on your home instance.
+This action opens the current post or profile in Safari on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
 
-In order to redirect posts, you will need to create an API key/token. The process is fairly easy and [well explained by Federico](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/).  
-
-There are a couple of settings, that you can access with `⇧↩`
+There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="03.jpg" width="582"/> 
+
+**Note**: In order to redirect posts, you will need to create an API-Token. Go to "https//:`your server`/settings/applications/". Click the `New application` button. The only requirement for this action is `read: search`. You can leave everything else unchecked.
+
+Click `Submit`. After that you need just need to copy the access token from your newly created "Application".
+
+<img src="04.jpg" width="582"/> 
+
+
+
+## 3) Post Action (Toot)
+
+This is a simple action to post a status (toot) on Mastodon. If you type a lot a counter will show …
+
+<img src="05.jpg" width="582"/> 
+
+**Note**: This action requires a API-Token. See 2) for how to create an API-Token. For this action you need to check `write:statuses`. (If you use the same application as above you need to regenerate the token for the new permissions to take effect.)
+
 
 ## Download
 
