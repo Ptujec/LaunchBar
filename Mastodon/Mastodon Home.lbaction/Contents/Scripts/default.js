@@ -106,17 +106,19 @@ function setApiKey() {
   var server = Action.preferences.server;
   var response = LaunchBar.alert(
     'API-Token required',
-    '1) Follow Federico Viticcis instructions to create an API-Token.\n2) Press »Set API-Token«\n\nThe API-Token will be stored in the action preferences (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.MastodonHome/Preferences.plist)',
-    'Open Instructions',
+    '1) Read the instructions on how to create an API-Token.\n2) Press "Set API-Token"\n\nThe API-Token will be stored in the action preferences (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.MastodonHome/Preferences.plist)',
+    'Open Instructions & Mastodon Settings',
     'Set API-Token',
     'Cancel'
   );
   switch (response) {
     case 0:
-      LaunchBar.openURL(
-        'https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/'
-      );
       LaunchBar.hide();
+      LaunchBar.openURL('https://' + server + '/settings/applications');
+      LaunchBar.executeAppleScript('delay 0.2');
+      LaunchBar.openURL(
+        'https://github.com/Ptujec/LaunchBar/tree/master/Mastodon#api-token'
+      );
       break;
     case 1:
       var clipboardContent = LaunchBar.getClipboardString().trim();
