@@ -8,6 +8,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 Documentation: 
 - https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/
 - https://docs.joinmastodon.org/methods/search/
+
+Test: https://mstdn.plus/@lapcatsoftware/109718227833446585
   
 */
 String.prototype.localizationTable = 'default';
@@ -45,25 +47,25 @@ function run() {
     return;
   }
 
-  // Test: https://mstdn.plus/@lapcatsoftware/109718227833446585
-
   var res = url.split('/');
   var instance = res[2];
   var user = res[3];
   var post = res[4];
 
-  if (instance == server && apiToken != undefined) {
+  if (instance == server) {
     LaunchBar.alert('Your are already at home!'.localize());
+    return;
+  }
+
+  if (apiToken == undefined) {
+    setApiKey();
     return;
   }
 
   var homeURL = 'https://' + server + '/' + user + '@' + instance;
 
   if (post != undefined) {
-    if (apiToken == undefined) {
-      setApiKey();
-      return;
-    }
+    // Post (Toot) Page
 
     var statusData = HTTP.getJSON(
       'https://' +
@@ -93,9 +95,49 @@ function run() {
     var id = statusData.data.statuses[0].id;
 
     homeURL = homeURL + '/' + id;
+    LaunchBar.hide();
+    LaunchBar.openURL(homeURL);
+  } else {
+    // Account Page
+    LaunchBar.hide();
+    LaunchBar.openURL(homeURL);
+
+    // Check homeURL via API … if not correct replace it -- it's faster for most accounts not using the API straight away. But some won't work like e.g. https://mastodon.macstories.net/@viticci
+
+    var searchURL =
+      'https://' +
+      server +
+      '/api/v2/search?q=' +
+      encodeURIComponent(url) +
+      '&type=accounts&resolve=true';
+
+    var accountData = HTTP.getJSON(searchURL, {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    });
+
+    //  Error Message
+    if (accountData.response.status != 200) {
+      LaunchBar.alert(
+        'Error: ' + accountData.response.status,
+        accountData.response.localizedStatus
+      );
+      return;
+    }
+
+    // File.writeJSON(accountData, Action.supportPath + '/test.json');
+    // return;
+
+    var acct = accountData.data.accounts[0].acct;
+    var homeURLAPI = 'https://' + server + '/' + '@' + acct;
+
+    if (homeURL != homeURLAPI) {
+      LaunchBar.openURL(homeURLAPI);
+      closeURL(homeURL);
+    }
   }
-  LaunchBar.hide();
-  LaunchBar.openURL(homeURL);
+
   if (closeOption == 'true') {
     closeURL(url);
   }
