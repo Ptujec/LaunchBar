@@ -15,13 +15,17 @@ On first run you will have to choose your preferred Mastodon instance (the one, 
 
 If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. 
 
-You can **follow** a selected account right from LaunchBar with `⌥↩`. This requires a (free) **[API-Token](#api-token)**. 
+You can **follow** a selected account right from LaunchBar with `⌥↩`. 
+
+**Note**: Following requires a (free) **[API-Token](#api-token)**. 
 
 ### Hashtags
 
 Hashtags open per default on mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance.
 
-You can **follow** a selected hashtag right from LaunchBar with `⌥↩`.  This requires an [API-Token](#api-token).
+You can **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
+
+**Note**: Following requires a (free) **[API-Token](#api-token)**.
 
 ## 2) Home Action
 
@@ -33,7 +37,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="03.jpg" width="582"/> 
 
-**Note**: In order to redirect posts, you will need to create an [API-Token](#api-token).
+**Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not created correctly without it, e.g. "https://mastodon.macstories.net/@viticci". 
 
 ## 3) Post Action (Toot)
 
@@ -43,7 +47,7 @@ This is a simple action to post a status (toot) on Mastodon. If you type a lot a
 
 You can use `⌘↩` to view your timeline after a successful post.
 
-**Note**: This action requires an [API-Token](#api-token).
+**Note**: This action requires a (free) [API-Token](#api-token).
 
 ## API-Token 
 
@@ -53,10 +57,10 @@ Then click the `New application` button.
 You need the following permissions:
 
 - Search: `follow`
-- Home: `read: search`
+- Home: `read:search`
 - Post: `write:statuses`
 
-You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "Application".  
+You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "application".  
 
 <img src="04.jpg" width="582"/> 
 
