@@ -90,7 +90,7 @@ function setApiKey() {
       LaunchBar.openURL('https://' + server + '/settings/applications');
       LaunchBar.executeAppleScript('delay 0.2');
       LaunchBar.openURL(
-        'https://github.com/Ptujec/LaunchBar/tree/master/Mastodon#2-home-action'
+        'https://github.com/Ptujec/LaunchBar/tree/master/Mastodon#api-token'
       );
       break;
     case 1:
