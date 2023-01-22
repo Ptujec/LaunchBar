@@ -55,9 +55,9 @@ Go to "https//:`your.server`/settings/applications/". (If you came here from the
 
 You need the following permissions:
 
-- Search: `follow`
-- Home: `read:search`
-- Post: `write:statuses`
+- Search action: `follow`
+- Home action: `read:search`
+- Post action: `write:statuses`
 
 You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "application".  
 
