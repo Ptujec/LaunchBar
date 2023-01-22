@@ -47,7 +47,8 @@ You can use `⌘↩` to view your timeline after a successful post.
 
 ## API-Token 
 
-Go to "https//:`your.server`/settings/applications/". Click the `New application` button. 
+Go to "https//:`your.server`/settings/applications/". If you came here from the dialog in the Action the link should have opened automatically. 
+Then click the `New application` button. 
 
 You need the following permissions:
 
