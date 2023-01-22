@@ -37,7 +37,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="03.jpg" width="582"/> 
 
-**Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not created correctly without it, e.g. "https://mastodon.macstories.net/@viticci". 
+**Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not be created correctly without it, e.g. "https://mastodon.macstories.net/@viticci". 
 
 ## 3) Post Action (Toot)
 
@@ -51,8 +51,7 @@ You can use `⌘↩` to view your timeline after a successful post.
 
 ## API-Token 
 
-Go to "https//:`your.server`/settings/applications/". If you came here from the dialog in the action that link should have opened automatically along with this one. 
-Then click the `New application` button. 
+Go to "https//:`your.server`/settings/applications/". (If you came here from the dialog in the action that link should have opened automatically along with this one.) Then click the `New application` button. 
 
 You need the following permissions:
 
