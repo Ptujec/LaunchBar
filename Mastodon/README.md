@@ -15,16 +15,13 @@ On first run you will have to choose your preferred Mastodon instance (the one, 
 
 If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account page on it's original page. 
 
-You can **follow** a selected account right from LaunchBar with `⌥↩`. This requires a (free) **API-Token**. 
-
-Go to "https//:`your.server`/settings/applications/". Click the `New application` button. The only requirement for this action is `follow`. You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "Application".  
-
+You can **follow** a selected account right from LaunchBar with `⌥↩`. This requires a (free) **[API-Token](#api-token)**. 
 
 ### Hashtags
 
 Hashtags open per default on mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance.
 
-You can **follow** a selected hashtag right from LaunchBar with `⌥↩`.  This requires an API-Token (see above).
+You can **follow** a selected hashtag right from LaunchBar with `⌥↩`.  This requires an [API-Token](#api-token).
 
 ## 2) Home Action
 
@@ -36,11 +33,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="03.jpg" width="582"/> 
 
-**Note**: In order to redirect posts, you will need to create an API-Token. Go to "https//:`your.server`/settings/applications/". Click the `New application` button. The only requirement for this action is `read: search`. You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "Application".
-
-<img src="04.jpg" width="582"/> 
-
-
+**Note**: In order to redirect posts, you will need to create an [API-Token](#api-token).
 
 ## 3) Post Action (Toot)
 
@@ -50,8 +43,23 @@ This is a simple action to post a status (toot) on Mastodon. If you type a lot a
 
 You can use `⌘↩` to view your timeline after a successful post.
 
-**Note**: This action requires an API-Token. See 2) for how to create an API-Token. For this action you need to check `write:statuses`. (If you use the same application as above you need to regenerate the token for the new permissions to take effect.)
+**Note**: This action requires an [API-Token](#api-token).
 
+## API-Token 
+
+Go to "https//:`your.server`/settings/applications/". Click the `New application` button. 
+
+You need the following permissions:
+
+- Search: `follow`
+- Home: `read: search`
+- Post: `write:statuses`
+
+You can leave everything else unchecked. Click `Submit`. After that you just need to copy the access token from your newly created "Application".  
+
+<img src="04.jpg" width="582"/> 
+
+If you change permissions in an existing application you need to regenerate the token for the new permissions to take effect.
 
 ## Download
 
