@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Mastodon Search</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.6</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
