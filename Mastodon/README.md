@@ -13,7 +13,7 @@ On first run you will have to choose your preferred Mastodon instance (the one, 
 
 ### Accounts
 
-If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account page on it's original page. 
+If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. 
 
 You can **follow** a selected account right from LaunchBar with `⌥↩`. This requires a (free) **[API-Token](#api-token)**. 
 
@@ -47,7 +47,7 @@ You can use `⌘↩` to view your timeline after a successful post.
 
 ## API-Token 
 
-Go to "https//:`your.server`/settings/applications/". If you came here from the dialog in the Action the link should have opened automatically. 
+Go to "https//:`your.server`/settings/applications/". If you came here from the dialog in the action the link should have opened automatically. 
 Then click the `New application` button. 
 
 You need the following permissions:
