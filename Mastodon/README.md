@@ -6,24 +6,19 @@
 
 <img src="01.jpg" width="582"/> 
 
-Search Mastodon accounts and hashtags easily with LaunchBar. 
+Search Mastodon accounts and hashtags easily with LaunchBar. You can limit results to just accounts by starting with `@` or just hashtags with `#`.
 
-On first run you will have to choose your preferred Mastodon instance (the one, you are signed in). You can change your preferred Mastodon instance any time with `⇧↩`.
+On first run you will have to choose your preferred Mastodon instance, the one, you are signed in on. You can change your preferred Mastodon instance any time in settings `⇧↩`. 
 
+**Note**: You get better search results, if you use an [API-Token](#api-token). You can set your token in settings `⇧↩`.  
 
 ### Accounts
 
-If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. 
-
-You can **follow** a selected account right from LaunchBar with `⌥↩`. 
-
-**Note**: Following requires a (free) **[API-Token](#api-token)**. 
+If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. You can even **follow** a selected account right from LaunchBar with `⌥↩`. 
 
 ### Hashtags
 
-Hashtags open per default on mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance.
-
-You can **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
+Hashtags open per default on mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance. You can even **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
 
 **Note**: Following requires a (free) **[API-Token](#api-token)**.
 
@@ -63,7 +58,7 @@ You can leave everything else unchecked. Click `Submit`. After that you just nee
 
 <img src="04.jpg" width="582"/> 
 
-If you change permissions in an existing application you need to regenerate the token for the new permissions to take effect.
+If you change permissions in an existing application, you need to regenerate the token for the new permissions to take effect.
 
 ## Download
 
