@@ -24,7 +24,7 @@ function run(argument) {
 
   // Set API Token
   if (apiToken == undefined) {
-    setApiKey();
+    setApiToken();
     return;
   }
 
@@ -75,7 +75,7 @@ function run(argument) {
   }
 }
 
-function setApiKey() {
+function setApiToken() {
   var server = Action.preferences.server;
   var response = LaunchBar.alert(
     'API-Token required',
@@ -176,8 +176,8 @@ function settings() {
       icon: 'serverTemplate',
     },
     {
-      title: 'Set API Key'.localize(),
-      action: 'setApiKey',
+      title: 'Set API-Token'.localize(),
+      action: 'setApiToken',
       icon: 'keyTemplate',
     },
   ];
