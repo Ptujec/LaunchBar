@@ -6,6 +6,7 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
+- https://docs.joinmastodon.org/methods/search/
 - https://docs.joinmastodon.org/methods/follow_requests/
 - https://docs.joinmastodon.org/methods/tags/#follow
 
@@ -14,11 +15,10 @@ String.prototype.localizationTable = 'default';
 
 function run(argument) {
   var server = Action.preferences.server;
+  var apiToken = Action.preferences.apiToken;
 
   // Settings
   if (LaunchBar.options.shiftKey) {
-    var apiToken = Action.preferences.apiToken;
-
     var output = settings(server, apiToken);
     return output;
   }
@@ -33,11 +33,27 @@ function run(argument) {
     return;
   }
 
-  // Search Accounts & Hashtags with ␣ (space)
-  var searchURL =
-    'https://' + server + '/api/v2/search?q=' + encodeURIComponent(argument);
+  // Set API Token
+  if (apiToken != undefined) {
+    // Search Accounts & Hashtags with ␣ (space)
+    var searchURL =
+      'https://' +
+      server +
+      '/api/v2/search?q=' +
+      encodeURIComponent(argument) +
+      '&resolve=true';
 
-  var searchData = HTTP.getJSON(searchURL);
+    var searchData = HTTP.getJSON(searchURL, {
+      headerFields: {
+        Authorization: 'Bearer ' + apiToken,
+      },
+    });
+  } else {
+    var searchURL =
+      'https://' + server + '/api/v2/search?q=' + encodeURIComponent(argument);
+    var searchData = HTTP.getJSON(searchURL);
+  }
+
   // File.writeJSON(searchData, Action.supportPath + '/test.json');
   // return;
 
@@ -146,7 +162,7 @@ function actHashtag(dict) {
   }
 }
 
-function setApiKey() {
+function setApiToken() {
   var server = Action.preferences.server;
   var response = LaunchBar.alert(
     'API-Token required',
@@ -247,8 +263,8 @@ function settings() {
       icon: 'serverTemplate',
     },
     {
-      title: 'Set API Key'.localize(),
-      action: 'setApiKey',
+      title: 'Set API-Token'.localize(),
+      action: 'setApiToken',
       icon: 'keyTemplate',
     },
   ];
@@ -262,7 +278,7 @@ function followAccount(dict) {
 
   // Set API Token
   if (apiToken == undefined) {
-    setApiKey();
+    setApiToken();
     return;
   }
 
@@ -302,7 +318,7 @@ function followHashtag(dict) {
 
   // Set API Token
   if (apiToken == undefined) {
-    setApiKey();
+    setApiToken();
     return;
   }
 

@@ -1,4 +1,5 @@
 'Enter the name of the Mastodon instance or server where your account is hosted!' = 'Gib den Namen der Mastodon Instanz bzw. des Servers ein, auf dem dein Konto gehostet wird!';
 'Mastodon Instance' = 'Mastodon Instanz';
-
-
+"Set Instance" = "Instanz festlegen";
+"Set API-Token" = "API-Token festlegen";
+"Current Instance: " = "Aktuelle Instanz: ";
