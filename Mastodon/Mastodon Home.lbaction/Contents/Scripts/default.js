@@ -263,7 +263,7 @@ function settings() {
       icon: 'serverTemplate',
     },
     {
-      title: 'Set API Key'.localize(),
+      title: 'Set API-Token'.localize(),
       action: 'setApiKey',
       icon: 'keyTemplate',
     },

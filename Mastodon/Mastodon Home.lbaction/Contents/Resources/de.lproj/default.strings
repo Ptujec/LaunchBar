@@ -7,5 +7,5 @@
 "Off" = "Aus";
 "Close Original Site" = "Ursprungsseite schließen";
 "Set Instance" = "Instanz festlegen";
-"Set API Key" = "API Key festlegen";
+"Set API-Token" = "API-Token festlegen";
 "Current Instance: " = "Aktuelle Instanz: ";
