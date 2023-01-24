@@ -44,6 +44,12 @@ You can use `⌘↩` to view your timeline after a successful post.
 
 **Note**: This action requires a (free) [API-Token](#api-token).
 
+## 4) Elk
+
+Elk.zone is a web client for Mastodon. This action combines [search](#1-search-action) (triggered by `␣`) and [home](#2-home-action) (triggered by `⌘↩`) into one action. The only difference is that selected search results will open in Elk. You can also use the action to simply open https://elk.zone/home (with `↩`). 
+
+<img src="06.jpg" width="582"/> 
+
 ## API-Token 
 
 Go to "https//:`your.server`/settings/applications/". (If you came here from the dialog in the action that link should have opened automatically along with this one.) Then click the `New application` button. 
