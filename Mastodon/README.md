@@ -46,7 +46,7 @@ You can use `⌘↩` to view your timeline after a successful post.
 
 ## 4) Elk
 
-Elk.zone is a web client for Mastodon. This action combines [search](#1-search-action) (triggered by `␣`) and [home](#2-home-action) (triggered by `⌘↩`) into one action. The only difference is that selected search results will open in Elk. You can also use the action to simply open https://elk.zone/home (with `↩`). 
+Elk.zone is a web client for Mastodon. This action combines [search](#1-search-action) (triggered by `␣`) and [home/redirect](#2-home-redirect-action) (triggered by `⌘↩`) into one action. The only difference is that selected search results will open in Elk. You can also use the action to simply open https://elk.zone/home (with `↩`). 
 
 <img src="06.jpg" width="582"/> 
 
