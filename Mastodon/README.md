@@ -22,7 +22,7 @@ Hashtags open per default on mastodon.social, which usually has a lot more resul
 
 **Note**: Following requires a (free) **[API-Token](#api-token)**.
 
-## 2) Home Action
+## 2) Home (Redirect) Action
 
 <img src="02.jpg" width="582"/> 
 
