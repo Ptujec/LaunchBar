@@ -4,6 +4,11 @@ by Christian Bender (@ptujec)
 2023-01-23
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Documentation:
+- https://docs.joinmastodon.org/methods/search/
+- https://docs.joinmastodon.org/methods/follow_requests/
+- https://docs.joinmastodon.org/methods/tags/#follow
 */
 
 String.prototype.localizationTable = 'default';
@@ -28,6 +33,11 @@ function run(argument) {
         LaunchBar.hide();
         return;
       }
+
+      if (url.endsWith('home')) {
+        url = '';
+      }
+
       var elkUrl = 'https://elk.zone/' + url;
 
       LaunchBar.executeAppleScript(
@@ -88,11 +98,23 @@ function run(argument) {
       var searchData = HTTP.getJSON(searchURL);
     }
 
-    //  Error Handling
+    // File.writeJSON(searchData, Action.supportPath + '/test.json');
+    // return;
+
+    //  Error Message
     if (searchData.response.status != 200) {
+      if (searchData.data.error != undefined) {
+        var e = searchData.data.error;
+      } else {
+        var e = '';
+      }
+
       LaunchBar.alert(
-        'Error: ' + searchData.response.status,
-        searchData.response.localizedStatus
+        'Error ' +
+          searchData.response.status +
+          ': ' +
+          searchData.response.localizedStatus,
+        e
       );
       return;
     }
@@ -183,13 +205,13 @@ function actAccount(dict) {
 function actHashtag(dict) {
   LaunchBar.hide();
   if (LaunchBar.options.commandKey) {
-    // Open on Elk
-    LaunchBar.openURL('https://elk.zone/mastodon.social/tags/' + dict.hashtag);
+    // Open on mastodon.social
+    LaunchBar.openURL('https://mastodon.social/tags/' + dict.hashtag);
   } else if (LaunchBar.options.alternateKey) {
     followHashtag(dict);
   } else {
-    // Open on mastodon.social
-    LaunchBar.openURL('https://mastodon.social/tags/' + dict.hashtag);
+    // Open on Elk
+    LaunchBar.openURL('https://elk.zone/mastodon.social/tags/' + dict.hashtag);
   }
 }
 
