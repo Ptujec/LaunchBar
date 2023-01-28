@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Mastodon Post (Toot)</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

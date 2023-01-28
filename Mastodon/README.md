@@ -36,9 +36,13 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 ## 3) Post Action (Toot)
 
-This is a simple action to post a status (toot) on Mastodon. If you type a lot a counter will show …
+This is a simple action to post a status (toot) on Mastodon. If you type a lot a counter will show.
 
 <img src="05.jpg" width="582"/> 
+
+You can share a link with `..`. 
+
+<img src="07.jpg" width="582"/> 
 
 You can use `⌘↩` to view your timeline after a successful post.
 
