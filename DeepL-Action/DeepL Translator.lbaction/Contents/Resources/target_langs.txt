@@ -26,4 +26,6 @@ SL,Slovenian,Slowenisch
 SV,Swedish,Schwedisch
 TR,Turkish,Türkisch
 UK,Ukrainian,Ukrainisch
-ZH,Chinese,Chinesisch
+ZH,Chinese (simplified),Chinesisch (vereinfacht)
+KO,Korean,Koreanisch
+NB,Norwegian (Bokmål),Norwegisch (Bokmål)
