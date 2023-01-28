@@ -17,7 +17,7 @@ Enter the phrase you want to translate with `␣` (space bar) or set the target 
 The action supports all available target languages listed here: 
 https://www.deepl.com/de/docs-api/translating-text/request/ 
 
-(Last update: 2022-09-30)
+(Last update: 2023-01-28)
 
 ## Download
 
