@@ -36,17 +36,18 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 ## 3) Post Action (Toot)
 
-This is a simple action to post a status (toot) on Mastodon. If you type a lot a counter will show.
+This is a simple action to post a status (toot) on Mastodon.
 
 <img src="05.jpg" width="582"/> 
 
-You can include a link from Safari with `..`. 
+Additional features: 
+- Include a link from Safari with `..`. 
+- Add a content warning with `⌘↩`. 
 
-<img src="07.jpg" width="582"/> 
-
-In settings (`⇧↩`) you can choose to open your timeline  in Safari, Elk or Ice Cubes after a successful post.
-
-<img src="08.jpg" width="582"/> 
+Settings (`⇧↩`): 
+- Set Instance
+- Set API-Token
+- Choose to open your timeline in Safari, Elk or Ice Cubes after a successful post.
 
 **Note**: This action requires a (free) [API-Token](#api-token).
 
