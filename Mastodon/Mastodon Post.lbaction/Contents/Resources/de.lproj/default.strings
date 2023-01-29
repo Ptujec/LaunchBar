@@ -4,3 +4,11 @@
 "Set API-Token" = "API-Token festlegen";
 "Current Instance: " = "Aktuelle Instanz: ";
 "You excited the 500 character limit!" = "Du hast das 500 Zeichen Limit überschritten!";
+"Content Warning" = "Inhaltswarnung";
+"Content: " = "Inhalt: ";
+"Off" = "Aus";
+"Opens: " = "Öffnet: ";
+"Open: Ice Cubes" = "Ice Cubes öffnen";
+"Open: Elk" = "Elk öffnen";
+"Open: Website" = "Website öffnen";
+"Open after done" = "Danach öffnen";

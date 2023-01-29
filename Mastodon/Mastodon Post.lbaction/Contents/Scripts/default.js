@@ -40,12 +40,50 @@ function run(argument) {
     return;
   }
 
+  // if (Action.preferences.openIn == true) {
+  //   // Open Mastodon Timeline
+  //   LaunchBar.openURL(Action.preferences.openInURL);
+  // } else {
+  //   LaunchBar.alert('lba');
+  // }
+
+  // return;
+
   // Post
   var postURL =
     'https://' +
     server +
     '/api/v1/statuses?status=' +
     encodeURIComponent(argument);
+
+  if (LaunchBar.options.commandKey) {
+    // Content Warning
+    LaunchBar.hide();
+
+    var dialog = 'Content: '.localize() + '\\"' + argument + '\\"';
+    var dialogTitle = 'Content Warning'.localize();
+    var defaultAnswer = 'Content Warning'.localize();
+
+    var spoilerText = LaunchBar.executeAppleScript(
+      'set result to display dialog "' +
+        dialog +
+        '" with title "' +
+        dialogTitle +
+        '" default answer "' +
+        defaultAnswer +
+        '"',
+      'set result to text returned of result'
+    ).trim();
+
+    if (spoilerText == '') {
+      return;
+    }
+
+    postURL =
+      postURL +
+      '&sensitive=true&spoiler_text=' +
+      encodeURIComponent(spoilerText);
+  }
 
   var result = HTTP.postJSON(postURL, {
     headerFields: {
@@ -68,9 +106,9 @@ function run(argument) {
       'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/SentMessage.caf"'
     ); // Play Sound
 
-    if (LaunchBar.options.commandKey) {
+    if (Action.preferences.openIn == true) {
       // Open Mastodon Timeline
-      LaunchBar.openURL('https://' + server + '/home');
+      LaunchBar.openURL(Action.preferences.openInURL);
     }
   }
 }
@@ -165,9 +203,22 @@ function setInstance(server) {
 
 function settings() {
   var server = Action.preferences.server;
-  var apiToken = Action.preferences.apiToken;
+
+  if (Action.preferences.openIn != true) {
+    var openInLabel = 'Off'.localize();
+    var openIcon = 'openTemplate';
+  } else {
+    var openInLabel = 'Opens: '.localize() + Action.preferences.openInName;
+    var openIcon = Action.preferences.openInIcon;
+  }
 
   options = [
+    {
+      title: 'Open after done'.localize(),
+      action: 'openSetting',
+      label: openInLabel,
+      icon: openIcon,
+    },
     {
       title: 'Set Instance'.localize(),
       action: 'setInstance',
@@ -183,4 +234,64 @@ function settings() {
   ];
 
   return options;
+}
+
+function openSetting() {
+  var server = Action.preferences.server;
+
+  options = [
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: 'IceCubesApp://' + server + '/home',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
+    },
+    {
+      title: 'Open: Elk'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: 'https://elk.zone/home',
+        name: 'Elk',
+        icon: 'elkTemplate',
+      },
+      icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Website'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: 'https://' + server + '/home',
+        name: 'Website',
+        icon: 'safariTemplate',
+      },
+      icon: 'safariTemplate',
+    },
+    {
+      title: 'Off'.localize(),
+      action: 'openInOff',
+      icon: 'xTemplate',
+    },
+  ];
+
+  return options;
+}
+
+function openIn(dict) {
+  Action.preferences.openIn = true;
+  Action.preferences.openInURL = dict.url;
+  Action.preferences.openInName = dict.name;
+  Action.preferences.openInIcon = dict.icon;
+
+  var output = settings();
+  return output;
+}
+
+function openInOff(dict) {
+  Action.preferences.openIn = false;
+  var output = settings();
+  return output;
 }

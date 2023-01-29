@@ -40,11 +40,13 @@ This is a simple action to post a status (toot) on Mastodon. If you type a lot a
 
 <img src="05.jpg" width="582"/> 
 
-You can share a link with `..`. 
+You can include a link from Safari with `..`. 
 
 <img src="07.jpg" width="582"/> 
 
-You can use `⌘↩` to view your timeline after a successful post.
+In settings (`⇧↩`) you can choose to open your timeline  in Safari, Elk or Ice Cubes after a successful post.
+
+<img src="08.jpg" width="582"/> 
 
 **Note**: This action requires a (free) [API-Token](#api-token).
 
