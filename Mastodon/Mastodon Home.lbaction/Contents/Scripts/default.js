@@ -52,21 +52,22 @@ function run() {
   var user = res[3];
   var post = res[4];
 
-  if (instance == server) {
+  // Open in prefered client
+  if (Action.preferences.openIn != true) {
+    var urlscheme = 'https://';
+  } else {
+    var urlscheme = Action.preferences.openInURLScheme;
+  }
+
+  if (instance == server && urlscheme == 'https://') {
     LaunchBar.alert('Your are already at home!'.localize());
     return;
   }
 
-  if (apiToken == undefined) {
-    setApiKey();
-    return;
-  }
-
-  var homeURL = 'https://' + server + '/' + user + '@' + instance;
+  var homeURL = urlscheme + server + '/' + user + '@' + instance;
 
   if (post != undefined) {
-    // Post (Toot) Page
-
+    // Post/Status URL
     var statusData = HTTP.getJSON(
       'https://' +
         server +
@@ -98,11 +99,24 @@ function run() {
     LaunchBar.hide();
     LaunchBar.openURL(homeURL);
   } else {
-    // Account Page
+    // Account URL
     LaunchBar.hide();
     LaunchBar.openURL(homeURL);
 
     // Check homeURL via API … if not correct replace it -- it's faster for most accounts not using the API straight away. But some won't work like e.g. https://mastodon.macstories.net/@viticci
+
+    // Exception for Ice Cubes … not necessary
+    if (urlscheme == 'icecubesapp://') {
+      if (closeOption == 'true') {
+        closeURL(url);
+      }
+      return;
+    }
+
+    if (apiToken == undefined) {
+      setApiKey();
+      return;
+    }
 
     var searchURL =
       'https://' +
@@ -130,7 +144,7 @@ function run() {
     // return;
 
     var acct = accountData.data.accounts[0].acct;
-    var homeURLAPI = 'https://' + server + '/' + '@' + acct;
+    var homeURLAPI = urlscheme + server + '/' + '@' + acct;
 
     if (homeURL != homeURLAPI) {
       LaunchBar.openURL(homeURLAPI);
@@ -142,6 +156,136 @@ function run() {
     closeURL(url);
   }
   return;
+}
+
+function settings() {
+  var server = Action.preferences.server;
+
+  if (Action.preferences.openIn != true) {
+    var openInLabel = 'Open: Website'.localize();
+    var openIcon = 'safariTemplate';
+  } else {
+    var openInLabel = 'Opens: '.localize() + Action.preferences.openInName;
+    var openIcon = Action.preferences.openInIcon;
+  }
+
+  if (Action.preferences.closeOption != 'true') {
+    var xArg = 'true';
+    var xIcon = 'xOffTemplate';
+    var label = 'Off'.localize();
+  } else {
+    var xArg = 'false';
+    var xIcon = 'xTemplate';
+    var label = 'On'.localize();
+  }
+
+  options = [
+    {
+      title: 'Close Original Site'.localize(),
+      action: 'closeOriginalToggle',
+      actionArgument: xArg,
+      label: label,
+      icon: xIcon,
+    },
+    {
+      title: 'Open'.localize(),
+      action: 'openSetting',
+      label: openInLabel,
+      icon: openIcon,
+    },
+    {
+      title: 'Set Instance'.localize(),
+      action: 'setInstance',
+      label: 'Current Instance: '.localize() + server,
+      actionArgument: server,
+      icon: 'serverTemplate',
+    },
+    {
+      title: 'Set API-Token'.localize(),
+      action: 'setApiKey',
+      icon: 'keyTemplate',
+    },
+  ];
+
+  return options;
+}
+
+function closeOriginalToggle(xArg) {
+  if (xArg == 'true') {
+    Action.preferences.closeOption = 'true';
+  } else {
+    Action.preferences.closeOption = 'false';
+  }
+
+  var output = settings();
+  return output;
+}
+
+function closeURL(url) {
+  LaunchBar.executeAppleScript(
+    'tell application "Safari"',
+    '	repeat with _window in windows',
+    '		set _tabs to tabs of _window',
+    '		repeat with _tab in _tabs',
+    '			if URL of _tab is "' + url + '" then',
+    '				set _tabtoclose to _tab',
+    '				exit repeat',
+    '			end if',
+    '		end repeat',
+    '	end repeat',
+    '	try',
+    '		close _tabtoclose',
+    '	end try',
+    'end tell'
+  );
+  return;
+}
+
+function openSetting() {
+  options = [
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'icecubesapp://',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
+    },
+    {
+      title: 'Open: Elk'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'https://elk.zone/',
+        name: 'Elk',
+        icon: 'elkTemplate',
+      },
+      icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Website'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'https://',
+        name: 'Website',
+        icon: 'safariTemplate',
+      },
+      icon: 'safariTemplate',
+    },
+  ];
+
+  return options;
+}
+
+function openIn(dict) {
+  Action.preferences.openIn = true;
+  Action.preferences.openInURLScheme = dict.urlscheme;
+  Action.preferences.openInName = dict.name;
+  Action.preferences.openInIcon = dict.icon;
+
+  var output = settings();
+  return output;
 }
 
 function setApiKey() {
@@ -229,76 +373,5 @@ function setInstance(server) {
     'set result to text returned of result'
   ).trim();
   Action.preferences.server = server;
-  return;
-}
-
-function settings() {
-  var closeOption = Action.preferences.closeOption;
-  var server = Action.preferences.server;
-  var apiToken = Action.preferences.apiToken;
-
-  if (closeOption != 'true') {
-    var xArg = 'true';
-    var xIcon = 'xOffTemplate';
-    var label = 'Off'.localize();
-  } else {
-    var xArg = 'false';
-    var xIcon = 'xTemplate';
-    var label = 'On'.localize();
-  }
-
-  options = [
-    {
-      title: 'Close Original Site'.localize(),
-      action: 'closeOriginalToggle',
-      actionArgument: xArg,
-      label: label,
-      icon: xIcon,
-    },
-    {
-      title: 'Set Instance'.localize(),
-      action: 'setInstance',
-      label: 'Current Instance: '.localize() + server,
-      actionArgument: server,
-      icon: 'serverTemplate',
-    },
-    {
-      title: 'Set API-Token'.localize(),
-      action: 'setApiKey',
-      icon: 'keyTemplate',
-    },
-  ];
-
-  return options;
-}
-
-function closeOriginalToggle(xArg) {
-  if (xArg == 'true') {
-    Action.preferences.closeOption = 'true';
-  } else {
-    Action.preferences.closeOption = 'false';
-  }
-
-  var output = settings();
-  return output;
-}
-
-function closeURL(url) {
-  LaunchBar.executeAppleScript(
-    'tell application "Safari"',
-    '	repeat with _window in windows',
-    '		set _tabs to tabs of _window',
-    '		repeat with _tab in _tabs',
-    '			if URL of _tab is "' + url + '" then',
-    '				set _tabtoclose to _tab',
-    '				exit repeat',
-    '			end if',
-    '		end repeat',
-    '	end repeat',
-    '	try',
-    '		close _tabtoclose',
-    '	end try',
-    'end tell'
-  );
   return;
 }
