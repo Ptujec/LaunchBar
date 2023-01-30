@@ -50,23 +50,27 @@ function run() {
   var res = url.split('/');
   var instance = res[2];
   var user = res[3];
-  var post = res[4];
+  var unknown = res[4];
 
-  // Open in prefered client
+  // Check client setting
   if (Action.preferences.openIn != true) {
     var urlscheme = 'https://';
   } else {
     var urlscheme = Action.preferences.openInURLScheme;
   }
 
-  if (instance == server && urlscheme == 'https://') {
+  // Check if url includes home instance/server
+  if (url.includes(server)) {
     LaunchBar.alert('Your are already at home!'.localize());
+    LaunchBar.hide();
     return;
   }
 
   var homeURL = urlscheme + server + '/' + user + '@' + instance;
 
-  if (post != undefined) {
+  var isNoPostId = isNaN(parseInt(unknown));
+
+  if (isNoPostId == false) {
     // Post/Status URL
     var statusData = HTTP.getJSON(
       'https://' +
@@ -96,10 +100,12 @@ function run() {
     var id = statusData.data.statuses[0].id;
 
     homeURL = homeURL + '/' + id;
+
     LaunchBar.hide();
     LaunchBar.openURL(homeURL);
   } else {
     // Account URL
+
     LaunchBar.hide();
     LaunchBar.openURL(homeURL);
 
