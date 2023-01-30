@@ -14,13 +14,21 @@ On first run you will have to choose your preferred Mastodon instance, the one, 
 
 ### Accounts
 
-If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. You can even **follow** a selected account right from LaunchBar with `⌥↩`. 
+If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. You can also **follow** a selected account right from LaunchBar with `⌥↩`. 
 
 ### Hashtags
 
-Hashtags open per default on mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance. You can even **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
+Hashtags open per default on http://mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance. You can also **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
 
 **Note**: Following requires a (free) **[API-Token](#api-token)**.
+
+### Settings
+
+There are a couple of settings, that you can access with `⇧↩`:
+- Open results in your favorite client (e.g. Elk or Ice Cubes)
+- Set Instance
+- Set API-Token
+
 
 ## 2) Home (Redirect) Action
 
@@ -29,8 +37,10 @@ Hashtags open per default on mastodon.social, which usually has a lot more resul
 This action opens the current post or profile in Safari on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
 
 There are a couple of settings, that you can access with `⇧↩`:
-
-<img src="03.jpg" width="582"/> 
+- Close Original Site
+- Redirect to your favorite client (e.g. Elk or Ice Cubes)
+- Set Instance
+- Set API-Token
 
 **Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not be created correctly without it, e.g. "https://mastodon.macstories.net/@viticci". 
 
@@ -45,9 +55,9 @@ Additional features:
 - Add a content warning with `⌘↩`. 
 
 Settings (`⇧↩`): 
+- Choose to open your timeline in Safari, Elk or Ice Cubes after a successful post.
 - Set Instance
 - Set API-Token
-- Choose to open your timeline in Safari, Elk or Ice Cubes after a successful post.
 
 **Note**: This action requires a (free) [API-Token](#api-token).
 
