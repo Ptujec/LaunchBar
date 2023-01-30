@@ -33,7 +33,7 @@ function run(argument) {
     return;
   }
 
-  // Set API Token
+  // Search
   if (apiToken != undefined) {
     // Search Accounts & Hashtags with ␣ (space)
     var searchURL =
@@ -59,9 +59,18 @@ function run(argument) {
 
   //  Error Message
   if (searchData.response.status != 200) {
+    if (searchData.data.error != undefined) {
+      var e = searchData.data.error;
+    } else {
+      var e = '';
+    }
+
     LaunchBar.alert(
-      'Error: ' + searchData.response.status,
-      searchData.response.localizedStatus
+      'Error ' +
+        searchData.response.status +
+        ': ' +
+        searchData.response.localizedStatus,
+      e
     );
     return;
   }
@@ -144,22 +153,203 @@ function actAccount(dict) {
     // LaunchBar.setClipboardString(dict.userhandle);
     followAccount(dict);
   } else {
-    // Open page on your preferred server/instance
-    LaunchBar.openURL('https://' + dict.server + '/' + dict.userhandle);
+    // Open in prefered client
+    if (Action.preferences.openIn != true) {
+      var urlscheme = 'https://';
+    } else {
+      var urlscheme = Action.preferences.openInURLScheme;
+    }
+    LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
   }
 }
 
 function actHashtag(dict) {
   LaunchBar.hide();
   if (LaunchBar.options.commandKey) {
-    // Open in home instance
-    LaunchBar.openURL(dict.url);
+    // Open in prefered client
+    if (Action.preferences.openIn != true) {
+      var urlscheme = 'https://';
+    } else {
+      var urlscheme = Action.preferences.openInURLScheme;
+    }
+    LaunchBar.openURL(urlscheme + 'mastodon.social/tags/' + dict.hashtag);
   } else if (LaunchBar.options.alternateKey) {
     followHashtag(dict);
   } else {
     // Open on mastodon.social
-    LaunchBar.openURL('https://mastodon.social/tags/' + dict.hashtag);
+    LaunchBar.openURL('http://mastodon.social/tags/' + dict.hashtag);
   }
+}
+
+function followAccount(dict) {
+  var apiToken = Action.preferences.apiToken;
+  var server = Action.preferences.server;
+
+  // Set API Token
+  if (apiToken == undefined) {
+    setApiToken();
+    return;
+  }
+
+  // Follow
+  var followURL =
+    'https://' + server + '/api/v1/accounts/' + dict.userId + '/follow';
+
+  var result = HTTP.postJSON(followURL, {
+    headerFields: {
+      Authorization: 'Bearer ' + apiToken,
+    },
+  });
+
+  // File.writeJSON(result, Action.supportPath + '/test.json');
+
+  //  Error Message
+  if (result.response.status != 200) {
+    LaunchBar.alert(
+      'Error: ' + result.response.status,
+      result.response.localizedStatus
+    );
+    return;
+  } else {
+    LaunchBar.hide();
+    LaunchBar.executeAppleScript(
+      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
+    ); // Play Sound
+
+    // Open … maybe will remove that … or make it a setting
+    if (Action.preferences.openIn != true) {
+      var urlscheme = 'https://';
+    } else {
+      var urlscheme = Action.preferences.openInURLScheme;
+    }
+    LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
+  }
+}
+
+function followHashtag(dict) {
+  var apiToken = Action.preferences.apiToken;
+  var server = Action.preferences.server;
+
+  // Set API Token
+  if (apiToken == undefined) {
+    setApiToken();
+    return;
+  }
+
+  // Follow
+  var followURL =
+    'https://' + server + '/api/v1/tags/' + dict.hashtag + '/follow';
+
+  var result = HTTP.postJSON(followURL, {
+    headerFields: {
+      Authorization: 'Bearer ' + apiToken,
+    },
+  });
+
+  // File.writeJSON(result, Action.supportPath + '/test.json');
+
+  //  Error Message
+  if (result.response.status != 200) {
+    LaunchBar.alert(
+      'Error: ' + result.response.status,
+      result.response.localizedStatus
+    );
+    return;
+  } else {
+    LaunchBar.hide();
+    LaunchBar.executeAppleScript(
+      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
+    ); // Play Sound
+
+    // Open … maybe will remove that … or make it a setting
+    var url = dict.url;
+    if (Action.preferences.openIn == true) {
+      url = url.replace('https://', Action.preferences.openInURLScheme);
+    }
+    LaunchBar.openURL(url);
+  }
+}
+
+function settings() {
+  var server = Action.preferences.server;
+
+  if (Action.preferences.openIn != true) {
+    var openInLabel = 'Open: Website'.localize();
+    var openIcon = 'safariTemplate';
+  } else {
+    var openInLabel = 'Opens: '.localize() + Action.preferences.openInName;
+    var openIcon = Action.preferences.openInIcon;
+  }
+
+  options = [
+    {
+      title: 'Open'.localize(),
+      action: 'openSetting',
+      label: openInLabel,
+      icon: openIcon,
+    },
+    {
+      title: 'Set Instance'.localize(),
+      action: 'setInstance',
+      label: 'Current Instance: '.localize() + server,
+      actionArgument: server,
+      icon: 'serverTemplate',
+    },
+    {
+      title: 'Set API-Token'.localize(),
+      action: 'setApiToken',
+      icon: 'keyTemplate',
+    },
+  ];
+
+  return options;
+}
+
+function openSetting() {
+  options = [
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'icecubesapp://',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
+    },
+    {
+      title: 'Open: Elk'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'https://elk.zone/',
+        name: 'Elk',
+        icon: 'elkTemplate',
+      },
+      icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Website'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'https://',
+        name: 'Website',
+        icon: 'safariTemplate',
+      },
+      icon: 'safariTemplate',
+    },
+  ];
+
+  return options;
+}
+
+function openIn(dict) {
+  Action.preferences.openIn = true;
+  Action.preferences.openInURLScheme = dict.urlscheme;
+  Action.preferences.openInName = dict.name;
+  Action.preferences.openInIcon = dict.icon;
+
+  var output = settings();
+  return output;
 }
 
 function setApiToken() {
@@ -248,106 +438,4 @@ function setInstance(server) {
   ).trim();
   Action.preferences.server = server;
   return;
-}
-
-function settings() {
-  var server = Action.preferences.server;
-  var apiToken = Action.preferences.apiToken;
-
-  options = [
-    {
-      title: 'Set Instance'.localize(),
-      action: 'setInstance',
-      label: 'Current Instance: '.localize() + server,
-      actionArgument: server,
-      icon: 'serverTemplate',
-    },
-    {
-      title: 'Set API-Token'.localize(),
-      action: 'setApiToken',
-      icon: 'keyTemplate',
-    },
-  ];
-
-  return options;
-}
-
-function followAccount(dict) {
-  var apiToken = Action.preferences.apiToken;
-  var server = Action.preferences.server;
-
-  // Set API Token
-  if (apiToken == undefined) {
-    setApiToken();
-    return;
-  }
-
-  // Follow
-  var followURL =
-    'https://' + server + '/api/v1/accounts/' + dict.userId + '/follow';
-
-  var result = HTTP.postJSON(followURL, {
-    headerFields: {
-      Authorization: 'Bearer ' + apiToken,
-    },
-  });
-
-  // File.writeJSON(result, Action.supportPath + '/test.json');
-
-  //  Error Message
-  if (result.response.status != 200) {
-    LaunchBar.alert(
-      'Error: ' + result.response.status,
-      result.response.localizedStatus
-    );
-    return;
-  } else {
-    LaunchBar.hide();
-    LaunchBar.executeAppleScript(
-      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
-    ); // Play Sound
-
-    // Open the site … maybe will remove that … or make it a setting
-    LaunchBar.openURL('https://' + dict.server + '/' + dict.userhandle);
-  }
-}
-
-function followHashtag(dict) {
-  var apiToken = Action.preferences.apiToken;
-  var server = Action.preferences.server;
-
-  // Set API Token
-  if (apiToken == undefined) {
-    setApiToken();
-    return;
-  }
-
-  // Follow
-  var followURL =
-    'https://' + server + '/api/v1/tags/' + dict.hashtag + '/follow';
-
-  var result = HTTP.postJSON(followURL, {
-    headerFields: {
-      Authorization: 'Bearer ' + apiToken,
-    },
-  });
-
-  // File.writeJSON(result, Action.supportPath + '/test.json');
-
-  //  Error Message
-  if (result.response.status != 200) {
-    LaunchBar.alert(
-      'Error: ' + result.response.status,
-      result.response.localizedStatus
-    );
-    return;
-  } else {
-    LaunchBar.hide();
-    LaunchBar.executeAppleScript(
-      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
-    ); // Play Sound
-
-    // Open the site … maybe will remove that … or make it a setting
-    LaunchBar.openURL(dict.url);
-  }
 }
