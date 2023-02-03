@@ -40,15 +40,6 @@ function run(argument) {
     return;
   }
 
-  // if (Action.preferences.openIn == true) {
-  //   // Open Mastodon Timeline
-  //   LaunchBar.openURL(Action.preferences.openInURL);
-  // } else {
-  //   LaunchBar.alert('lba');
-  // }
-
-  // return;
-
   // Post
   var postURL =
     'https://' +
@@ -241,16 +232,6 @@ function openSetting() {
 
   options = [
     {
-      title: 'Open: Ice Cubes'.localize(),
-      action: 'openIn',
-      actionArgument: {
-        url: 'IceCubesApp://' + server + '/home',
-        name: 'Ice Cubes',
-        icon: 'icecubesTemplate',
-      },
-      icon: 'icecubesTemplate',
-    },
-    {
       title: 'Open: Elk'.localize(),
       action: 'openIn',
       actionArgument: {
@@ -259,6 +240,26 @@ function openSetting() {
         icon: 'elkTemplate',
       },
       icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Mammoth'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: File.fileURLForPath('/Applications/Mammoth.app'),
+        name: 'Mammoth',
+        icon: 'mammothTemplate',
+      },
+      icon: 'mammothTemplate',
+    },
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: 'IceCubesApp://' + server + '/home',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
     },
     {
       title: 'Open: Website'.localize(),
