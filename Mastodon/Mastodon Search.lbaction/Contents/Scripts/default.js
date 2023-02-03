@@ -7,7 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://docs.joinmastodon.org/methods/search/
-- https://docs.joinmastodon.org/methods/follow_requests/
+- https://docs.joinmastodon.org/methods/accounts/#follow
 - https://docs.joinmastodon.org/methods/tags/#follow
 
 */
@@ -148,9 +148,10 @@ function actAccount(dict) {
   if (LaunchBar.options.commandKey) {
     // Open page on the account's home server
     LaunchBar.openURL(dict.url);
-  } else if (LaunchBar.options.alternateKey) {
+  } else if (LaunchBar.options.controlKey) {
     // Copy userhandle
-    // LaunchBar.setClipboardString(dict.userhandle);
+    LaunchBar.setClipboardString(dict.userhandle);
+  } else if (LaunchBar.options.alternateKey) {
     followAccount(dict);
   } else {
     // Open in prefered client
@@ -159,6 +160,13 @@ function actAccount(dict) {
     } else {
       var urlscheme = Action.preferences.openInURLScheme;
     }
+
+    // Fix for Mammoth
+    if (urlscheme == 'mammoth://') {
+      LaunchBar.openURL(dict.url.replace('https://', urlscheme));
+      return;
+    }
+
     LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
   }
 }
@@ -308,16 +316,6 @@ function settings() {
 function openSetting() {
   options = [
     {
-      title: 'Open: Ice Cubes'.localize(),
-      action: 'openIn',
-      actionArgument: {
-        urlscheme: 'icecubesapp://',
-        name: 'Ice Cubes',
-        icon: 'icecubesTemplate',
-      },
-      icon: 'icecubesTemplate',
-    },
-    {
       title: 'Open: Elk'.localize(),
       action: 'openIn',
       actionArgument: {
@@ -326,6 +324,26 @@ function openSetting() {
         icon: 'elkTemplate',
       },
       icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Mammoth'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'mammoth://',
+        name: 'Mammoth',
+        icon: 'mammothTemplate',
+      },
+      icon: 'mammothTemplate',
+    },
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'icecubesapp://',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
     },
     {
       title: 'Open: Website'.localize(),
