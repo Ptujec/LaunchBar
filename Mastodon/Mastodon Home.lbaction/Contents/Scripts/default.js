@@ -107,6 +107,13 @@ function run() {
     // Account URL
 
     LaunchBar.hide();
+
+    // Fix for Mammoth
+    if (urlscheme == 'mammoth://') {
+      LaunchBar.openURL(url.replace('https://', urlscheme));
+      return;
+    }
+
     LaunchBar.openURL(homeURL);
 
     // Check homeURL via API … if not correct replace it -- it's faster for most accounts not using the API straight away. But some won't work like e.g. https://mastodon.macstories.net/@viticci
@@ -250,16 +257,6 @@ function closeURL(url) {
 function openSetting() {
   options = [
     {
-      title: 'Open: Ice Cubes'.localize(),
-      action: 'openIn',
-      actionArgument: {
-        urlscheme: 'icecubesapp://',
-        name: 'Ice Cubes',
-        icon: 'icecubesTemplate',
-      },
-      icon: 'icecubesTemplate',
-    },
-    {
       title: 'Open: Elk'.localize(),
       action: 'openIn',
       actionArgument: {
@@ -268,6 +265,26 @@ function openSetting() {
         icon: 'elkTemplate',
       },
       icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Mammoth'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'mammoth://',
+        name: 'Mammoth',
+        icon: 'mammothTemplate',
+      },
+      icon: 'mammothTemplate',
+    },
+    {
+      title: 'Open: Ice Cubes'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'icecubesapp://',
+        name: 'Ice Cubes',
+        icon: 'icecubesTemplate',
+      },
+      icon: 'icecubesTemplate',
     },
     {
       title: 'Open: Website'.localize(),
