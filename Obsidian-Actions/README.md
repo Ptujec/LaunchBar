@@ -2,6 +2,8 @@
 
 ## New Obsidian Note
 
+**Note**: I am not a regular Obsidian user. Let me know if you run into issues or you would expect the actions to work differently.
+
 <img src="non_vault.png" width="600"/> 
 <img src="non_vault_set.png" width="600"/> 
 <img src="non_title.png" width="600"/> 
