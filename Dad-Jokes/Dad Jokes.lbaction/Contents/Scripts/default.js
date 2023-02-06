@@ -6,6 +6,10 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 API: https://icanhazdadjoke.com/
+
+TODO: 
+- Next funktion for favs?
+- Reverse order for favs
 */
 
 String.prototype.localizationTable = 'default';
@@ -69,25 +73,25 @@ function getJoke() {
     joke,
     '',
     'Next'.localize(),
-    'Save'.localize(),
+    'Copy & Save'.localize(),
     'Cancel'.localize()
   );
 
   switch (response) {
     case 0:
-      // Ok
+      // Next
       getJoke();
       break;
 
     case 1:
-      // Sichern
+      // Copy & Save
       save(joke);
-      getJoke();
+      LaunchBar.setClipboardString(joke);
       break;
 
     case 2:
       // Cancel
-      LaunchBar.hide();
+      // LaunchBar.hide();
       break;
   }
 }
@@ -138,25 +142,21 @@ function displayJoke(joke) {
   var response = LaunchBar.alert(
     joke,
     '',
-    'Ok',
-    'Save'.localize(),
+    'Copy & Save'.localize(),
     'Cancel'.localize()
   );
 
   switch (response) {
     case 0:
-      // remove
-      break;
-
-    case 1:
-      // remove
+      // Copy & Save
       save(joke);
+      LaunchBar.setClipboardString(joke);
       var output = showFavs();
       return output;
 
-    case 2:
+    case 1:
       // Cancel
-      LaunchBar.hide();
+      // LaunchBar.hide();
       break;
   }
 }
@@ -165,25 +165,26 @@ function displayFav(joke) {
   var response = LaunchBar.alert(
     joke,
     '',
-    'Ok',
+    'Copy'.localize(),
     'Remove'.localize(),
     'Cancel'.localize()
   );
 
   switch (response) {
     case 0:
-      // remove
+      // Copy
+      LaunchBar.setClipboardString(joke);
       break;
 
     case 1:
-      // remove
+      // Remove
       remove(joke);
       var output = showFavs();
       return output;
 
     case 2:
       // Cancel
-      LaunchBar.hide();
+      // LaunchBar.hide();
       break;
   }
 }
