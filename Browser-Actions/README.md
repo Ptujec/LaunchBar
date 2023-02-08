@@ -4,7 +4,7 @@
 
 <img src="01.jpg" width="633"/>
 
-Open current URL in different Browser. Supported browsers: 
+Open current tab or window in different Browser. Supported browsers: 
 - Safari
 - Brave
 - Arc
