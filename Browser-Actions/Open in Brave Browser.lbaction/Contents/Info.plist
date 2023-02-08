@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Open in Brave Browser</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>1.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -23,7 +23,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions#launchbar-browser-actions</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Brave%20Browser.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.brave.Browser</string>
@@ -38,7 +40,7 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.scpt</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
 </dict>
