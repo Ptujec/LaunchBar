@@ -3,44 +3,38 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>SafariBraveTemplate.pdf</string>
+	<string>iconTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.OpeninBrave</string>
+	<string>ptujec.LaunchBar.action.OpeninBraveBrowser</string>
 	<key>CFBundleName</key>
 	<string>Open in Brave Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.4</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
-		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
-		<key>LBRequirements</key>
-		<string>Requires an active internet connection.</string>
 		<key>LBSummary</key>
-		<string>Opens current Safari tab/window in Brave Browser. At the same time it closes the current tab/window in Safari. If there was just one tab, window it will also quit Safari alltogether.</string>
+		<string>Opens current browser tab or window in Brave Browser. ⇧↩ = Settings</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions#launchbar-browser-actions</string>
+		<string>https://ptujec.github.io/launchbar</string>
 		<key>LBUpdateURL</key>
     <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Brave%20Browser.lbaction/Contents/Info.plist</string>
 	</dict>
-	<key>LBRequiredApplication</key>
-	<string>com.brave.Browser</string>
-	<key>LBRequirements</key>
-	<string>Requires an active internet connection.</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
+			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>

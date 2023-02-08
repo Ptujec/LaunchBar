@@ -2,34 +2,40 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIconFile</key>
+	<string>iconTemplate.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.OpeninSafari</string>
 	<key>CFBundleName</key>
 	<string>Open in Safari</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.1</string>
-	<key>CFBundleIdentifier</key>
-	<string>eu.ptujec.LaunchBar.action.OpeninSafari</string>
-	<key>CFBundleIconFile</key>
-	<string>ChromeSafariTemplate</string>
+	<string>2.0</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBSummary</key>
+		<string>Opens current browser tab or window in Safari. ⇧↩ = Settings</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://ptujec.github.io/launchbar</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Info.plist</string>
+	</dict>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
-			<key>LBScriptName</key>
-			<string>Open in Safari.scpt</string>
-			<key>LBRunInBackground</key>
+			<key>LBKeepWindowActive</key>
 			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
 		</dict>
-	</dict>
-	<key>LBDescription</key>
-	<dict>
-		<key>LBSummary</key>
-		<string>Opens current Google Chrome tab/window in Safari. At the same time it closes the current tab/window in Chrome. If there was just one tab, window it will also quit Google Chrome alltogether.</string>
-		<key>LBRequirements</key>
-		<string>Requires an active internet connection.</string>
-		<key>LBAuthor</key>
-		<string>Christian Bender</string>
-		<key>LBTwitter</key>
-		<string>@ptujec</string>
 	</dict>
 </dict>
 </plist>
