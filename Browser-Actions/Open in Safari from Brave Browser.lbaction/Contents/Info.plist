@@ -9,9 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Open in Safari from Brave Browser</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
-	<key>LBAbbreviation</key>
-	<string>ois</string>
+	<string>1.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -25,7 +23,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions#readme</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Safari%20from%20Brave%20Browser.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequirements</key>
 	<string>Requires an active internet connection.</string>
@@ -38,7 +38,7 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>Open in Safari.scpt</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
 </dict>
