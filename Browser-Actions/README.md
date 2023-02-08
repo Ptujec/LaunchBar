@@ -4,7 +4,9 @@
 
 <img src="01.jpg" width="633"/>
 
-Open current tab or window in different Browser. Supported browsers: 
+Open the current tab or window in a different Browser. 
+
+Supported browsers: 
 - Safari
 - Brave
 - Arc
