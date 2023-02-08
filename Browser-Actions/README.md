@@ -2,7 +2,7 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-<img src="browser.jpg" width="656"/>
+<img src="01.jpg" width="656"/>
 
 Open current URL in different Browser. Supported browsers: 
 - Safari
