@@ -30,10 +30,41 @@ function run() {
     return output;
   }
 
+  // Get default browser
+  var plist = File.readPlist(
+    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
+  );
+
+  var lsHandlers = plist.LSHandlers;
+  var defaultBrowser = '';
+
+  lsHandlers.forEach(function (item) {
+    if (item.LSHandlerURLScheme == 'http') {
+      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
+    }
+  });
+
+  // AS for browsers
+  if (
+    defaultBrowser == 'company.thebrowser.browser' ||
+    defaultBrowser == 'com.google.chrome' ||
+    defaultBrowser == 'com.vivaldi.vivaldi' ||
+    defaultBrowser == 'com.brave.browser'
+  ) {
+    var appleScript =
+      'tell application id "' +
+      defaultBrowser +
+      '" to set _url to URL of active tab of front window';
+  } else if (defaultBrowser == 'com.apple.safari') {
+    var appleScript =
+      'tell application "Safari" to set _url to URL of front document';
+  } else {
+    LaunchBar.alert(defaultBrowser + ' not supported');
+    return;
+  }
+
   // Get current website from Safari
-  var url = LaunchBar.executeAppleScript(
-    'tell application "Safari" to set _URL to URL of front document'
-  ).trim();
+  var url = LaunchBar.executeAppleScript(appleScript).trim();
 
   if (url == 'missing value' || url == 'favorites://' || url == '') {
     LaunchBar.alert('No current website found in Safari!'.localize());

@@ -34,7 +34,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 <img src="02.jpg" width="582"/> 
 
-This action opens the current post or profile in Safari on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
+This action opens the current post or profile on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
 
 There are a couple of settings, that you can access with `⇧↩`:
 - Close Original Site
@@ -42,7 +42,17 @@ There are a couple of settings, that you can access with `⇧↩`:
 - Set Instance
 - Set API-Token
 
-**Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not be created correctly without it, e.g. "https://mastodon.macstories.net/@viticci". 
+The action assumes that you are using your default browser. 
+
+Supported browser:
+- Safari
+- Brave
+- Arc
+- Chrome
+- Vivaldi
+
+**Note**: This action requires a (free) [API-Token](#api-token) to redirect posts. Account pages open quicker without using the API. But the API is still needed as a fallback. This is because in some cases the user handle can not be created correctly without it, e.g. "https://mastodon.macstories.net/@viticci".
+ 
 
 ## 3) Post Action (Toot)
 
