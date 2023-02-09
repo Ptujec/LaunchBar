@@ -12,6 +12,7 @@ const target = 'Safari';
 const supportedBrowers = [
   'Brave Browser',
   'Safari',
+  'Vivaldi',
   'Google Chrome',
   'firefox',
   'Arc',
@@ -79,6 +80,13 @@ function run() {
     if (closeSetting == true || LaunchBar.options.commandKey) {
       closeArc();
     }
+  } else if (frontmost == 'Vivaldi') {
+    var url = getURLVivaldi();
+    LaunchBar.openURL(url, target);
+
+    if (closeSetting == true || LaunchBar.options.commandKey) {
+      closeVivaldi();
+    }
   } else if (frontmost == 'firefox') {
     var url = getURLFirefox();
     LaunchBar.openURL(url, target);
@@ -126,6 +134,20 @@ function closeToggle(arg) {
 function getURLBrave() {
   var url = LaunchBar.executeAppleScript(
     'tell application "Brave Browser"',
+    '	if (count windows) ≠ 0 then',
+    '		set vURL to URL of active tab of window 1',
+    '	end if',
+    'end tell'
+  );
+  if (url != undefined) {
+    url = url.trim();
+  }
+  return url;
+}
+
+function getURLVivaldi() {
+  var url = LaunchBar.executeAppleScript(
+    'tell application "Vivaldi"',
     '	if (count windows) ≠ 0 then',
     '		set vURL to URL of active tab of window 1',
     '	end if',
@@ -203,7 +225,19 @@ function closeBrave() {
     '	close active tab of window 1',
     '	delay 0.5',
     '	if (count windows) = 0 then',
-    '		quit application "Brave Browser"',
+    '		quit',
+    '	end if',
+    'end tell'
+  );
+}
+
+function closeVivaldi() {
+  LaunchBar.executeAppleScript(
+    'tell application "Vivaldi"',
+    '	close active tab of window 1',
+    '	delay 0.5',
+    '	if (count windows) = 0 then',
+    '		quit',
     '	end if',
     'end tell'
   );
@@ -227,7 +261,7 @@ function closeChrome() {
     '	close active tab of window 1',
     '	delay 0.5',
     '	if (count windows) = 0 then',
-    '		quit application "Brave Browser"',
+    '		quit',
     '	end if',
     'end tell'
   );
@@ -256,7 +290,7 @@ function closeArc() {
     '		',
     '	else if (count of windows) = 1 then',
     '		if title of window 1 begins with "Space" then',
-    '			quit application "Arc"',
+    '			quit',
     '		end if',
     '	end if',
     'end tell'
