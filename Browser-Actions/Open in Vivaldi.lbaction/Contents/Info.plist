@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>iconTemplate.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.OpeninVivaldi</string>
+	<key>CFBundleName</key>
+	<string>Open in Vivaldi</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBSummary</key>
+		<string>Opens current browser tab or window in Vivaldi. ⇧↩ = Settings</string>
+		<key>LBTwitter</key>
+		<string>@ptujec</string>
+		<key>LBWebsiteURL</key>
+		<string>https://ptujec.github.io/launchbar</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Vivaldi.lbaction/Contents/Info.plist</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
