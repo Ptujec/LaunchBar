@@ -4,16 +4,21 @@
 
 <img src="01.jpg" width="633"/>
 
-Open the current tab or window in a different Browser. 
+The actions are meant for opening the current tab or window in another browser. 
 
 Supported browsers: 
 - Safari
 - Brave
 - Arc
-- Firefox (**Note**: FF can be buggy because it has not sufficient AppleScript support!)
+- Firefox 
 - Chrome
 
-You can also close the site in the browser you came from with `⌘↩` (cmd-return). Set default behavior in settings `⇧↩` (shift-return). **Note**: Firefox can not close individual tabs, just windows! 
+You can also close the site in the browser you came from with `⌘↩` (cmd-return). Set default behavior in settings `⇧↩` (shift-return). 
+
+### Good to know
+- If you use the close option be aware that Firefox can not close individual tabs, just windows! 
+- Getting an URL from Firefox might be buggy, because it lacks sufficient AppleScript support! If it's not working properly it might help to [increase delay times](https://github.com/Ptujec/LaunchBar/blob/1c6609e474f8916d9d65f83793f48ffbdc277f74/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Scripts/default.js#L171).
+- If you can, avoid using Chrome. [It's bad](https://chromeisbad.com). Brave seems like a good replacement.
 
 ## Download
 [Download LaunchBar Browser Actions](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
