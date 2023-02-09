@@ -12,6 +12,7 @@ Supported browsers:
 - Arc
 - Firefox 
 - Chrome
+- Vivaldi
 
 You can also close the site in the browser you came from with `⌘↩` (cmd-return). Set default behavior in settings `⇧↩` (shift-return). 
 
