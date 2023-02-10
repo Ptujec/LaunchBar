@@ -30,41 +30,32 @@ function run() {
     return output;
   }
 
-  // Get default browser
-  var plist = File.readPlist(
-    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
-  );
+  // Get frontmost app
+  var frontmost = LaunchBar.executeAppleScript(
+    'tell application "System Events" to set _frontmoste to name of application processes whose frontmost is true as string'
+  ).trim();
 
-  var lsHandlers = plist.LSHandlers;
-  var defaultBrowser = '';
-
-  lsHandlers.forEach(function (item) {
-    if (item.LSHandlerURLScheme == 'http') {
-      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
-    }
-  });
-
-  // AS for browsers
+  // Broswer specific Applescripts
   if (
-    defaultBrowser == 'company.thebrowser.browser' ||
-    defaultBrowser == 'com.google.chrome' ||
-    defaultBrowser == 'com.vivaldi.vivaldi' ||
-    defaultBrowser == 'com.brave.browser'
+    frontmost == 'Brave Browser' ||
+    frontmost == 'Google Chrome' ||
+    frontmost == 'Arc' ||
+    frontmost == 'Vivaldi'
   ) {
-    var appleScript =
-      'tell application id "' +
-      defaultBrowser +
+    var getUrlAS =
+      'tell application "' +
+      frontmost +
       '" to set _url to URL of active tab of front window';
-  } else if (defaultBrowser == 'com.apple.safari') {
-    var appleScript =
+  } else if (frontmost == 'Safari') {
+    var getUrlAS =
       'tell application "Safari" to set _url to URL of front document';
   } else {
-    LaunchBar.alert(defaultBrowser + ' not supported');
+    LaunchBar.alert(frontmost + ' is not a supported browser!'.localize());
     return;
   }
 
   // Get current website from Safari
-  var url = LaunchBar.executeAppleScript(appleScript).trim();
+  var url = LaunchBar.executeAppleScript(getUrlAS).trim();
 
   if (url == 'missing value' || url == 'favorites://' || url == '') {
     LaunchBar.alert('No current website found!'.localize());
@@ -133,7 +124,7 @@ function run() {
     homeURL = homeURL + '/' + id;
 
     LaunchBar.hide();
-    LaunchBar.openURL(homeURL);
+    LaunchBar.openURL(homeURL, frontmost);
   } else {
     // Account URL
 
@@ -142,17 +133,20 @@ function run() {
     // Fix for Mammoth
     if (urlscheme == 'mammoth://') {
       LaunchBar.openURL(url.replace('https://', urlscheme));
+      if (closeOption == 'true') {
+        closeURL(url, frontmost);
+      }
       return;
     }
 
-    LaunchBar.openURL(homeURL);
+    LaunchBar.openURL(homeURL, frontmost);
 
     // Check homeURL via API … if not correct replace it -- it's faster for most accounts not using the API straight away. But some won't work like e.g. https://mastodon.macstories.net/@viticci
 
     // Exception for Ice Cubes … not necessary
     if (urlscheme == 'icecubesapp://') {
       if (closeOption == 'true') {
-        closeURL(url);
+        closeURL(url, frontmost);
       }
       return;
     }
@@ -191,13 +185,13 @@ function run() {
     var homeURLAPI = urlscheme + server + '/' + '@' + acct;
 
     if (homeURL != homeURLAPI) {
-      LaunchBar.openURL(homeURLAPI);
-      closeURL(homeURL);
+      LaunchBar.openURL(homeURLAPI, frontmost);
+      closeURL(homeURL, frontmost);
     }
   }
 
   if (closeOption == 'true') {
-    closeURL(url);
+    closeURL(url, frontmost);
   }
   return;
 }
@@ -265,24 +259,41 @@ function closeOriginalToggle(xArg) {
   return output;
 }
 
-function closeURL(url) {
-  LaunchBar.executeAppleScript(
-    'tell application "Safari"',
-    '	repeat with _window in windows',
-    '		set _tabs to tabs of _window',
-    '		repeat with _tab in _tabs',
-    '			if URL of _tab is "' + url + '" then',
-    '				set _tabtoclose to _tab',
-    '				exit repeat',
-    '			end if',
-    '		end repeat',
-    '	end repeat',
-    '	try',
-    '		close _tabtoclose',
-    '	end try',
-    'end tell'
-  );
-  return;
+function closeURL(url, frontmost) {
+  // Broswer specific Applescripts
+  if (
+    frontmost == 'Brave Browser' ||
+    frontmost == 'Google Chrome' ||
+    frontmost == 'Arc' ||
+    frontmost == 'Vivaldi'
+  ) {
+    LaunchBar.executeAppleScript(
+      'tell application "' + frontmost + '"',
+      '	repeat with _window in windows',
+      '		tell _window',
+      '			close (every tab whose URL is "' + url + '")',
+      '		end tell',
+      '	end repeat',
+      'end tell'
+    );
+  } else if (frontmost == 'Safari') {
+    LaunchBar.executeAppleScript(
+      'tell application "Safari"',
+      '	repeat with _window in windows',
+      '		set _tabs to tabs of _window',
+      '		repeat with _tab in _tabs',
+      '			if URL of _tab is "' + url + '" then',
+      '				set _tabtoclose to _tab',
+      '				exit repeat',
+      '			end if',
+      '		end repeat',
+      '	end repeat',
+      '	try',
+      '		close _tabtoclose',
+      '	end try',
+      'end tell'
+    );
+  }
 }
 
 function openSetting() {
