@@ -67,7 +67,7 @@ function run() {
   var url = LaunchBar.executeAppleScript(appleScript).trim();
 
   if (url == 'missing value' || url == 'favorites://' || url == '') {
-    LaunchBar.alert('No current website found in Safari!'.localize());
+    LaunchBar.alert('No current website found!'.localize());
     LaunchBar.hide();
     return;
   }
