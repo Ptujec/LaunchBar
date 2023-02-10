@@ -53,12 +53,17 @@ function run() {
   LaunchBar.hide();
 
   // Open URL in target brower and close it in source browser if set up in settings (default is false)
-  if (frontmost == 'Brave Browser') {
-    var url = getURLBrave();
+  if (
+    frontmost == 'Brave Browser' ||
+    frontmost == 'Google Chrome' ||
+    frontmost == 'Arc' ||
+    frontmost == 'Vivaldi'
+  ) {
+    var url = getURLChromium(frontmost);
     LaunchBar.openURL(url, target);
 
     if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeBrave();
+      closeChromium(frontmost);
     }
   } else if (frontmost == 'Safari') {
     var url = getURLSafari();
@@ -66,27 +71,6 @@ function run() {
 
     if (closeSetting == true || LaunchBar.options.commandKey) {
       closeSafari();
-    }
-  } else if (frontmost == 'Google Chrome') {
-    var url = getURLChrome();
-    LaunchBar.openURL(url, target);
-
-    if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeChrome();
-    }
-  } else if (frontmost == 'Arc') {
-    var url = getURLArc();
-    LaunchBar.openURL(url, target);
-
-    if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeArc();
-    }
-  } else if (frontmost == 'Vivaldi') {
-    var url = getURLVivaldi();
-    LaunchBar.openURL(url, target);
-
-    if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeVivaldi();
     }
   } else if (frontmost == 'firefox') {
     var url = getURLFirefox();
@@ -132,53 +116,11 @@ function closeToggle(arg) {
 }
 
 // Get URL Functions
-function getURLBrave() {
-  var url = LaunchBar.executeAppleScript(
-    'tell application "Brave Browser"',
-    '	if (count windows) ≠ 0 then',
-    '		set vURL to URL of active tab of window 1',
-    '	end if',
-    'end tell'
-  );
-  if (url != undefined) {
-    url = url.trim();
-  }
-  return url;
-}
-
-function getURLVivaldi() {
-  var url = LaunchBar.executeAppleScript(
-    'tell application "Vivaldi"',
-    '	if (count windows) ≠ 0 then',
-    '		set vURL to URL of active tab of window 1',
-    '	end if',
-    'end tell'
-  );
-  if (url != undefined) {
-    url = url.trim();
-  }
-  return url;
-}
-
 function getURLSafari() {
   var url = LaunchBar.executeAppleScript(
     'tell application "Safari"',
     '	if exists URL of current tab of window 1 then',
     '		set vURL to URL of current tab of window 1',
-    '	end if',
-    'end tell'
-  );
-  if (url != undefined) {
-    url = url.trim();
-  }
-  return url;
-}
-
-function getURLChrome() {
-  var url = LaunchBar.executeAppleScript(
-    'tell application "Google Chrome"',
-    '	if (count windows) ≠ 0 then',
-    '		set vURL to URL of active tab of window 1',
     '	end if',
     'end tell'
   );
@@ -205,10 +147,10 @@ function getURLFirefox() {
   return url;
 }
 
-function getURLArc() {
+function getURLChromium(frontmost) {
   var url = LaunchBar.executeAppleScript(
-    'tell application "Arc"',
-    '	if windows ≠ {} then',
+    'tell application "' + frontmost + '"',
+    '	if (count windows) ≠ 0 then',
     '		set vURL to URL of active tab of window 1',
     '	end if',
     'end tell'
@@ -220,29 +162,6 @@ function getURLArc() {
 }
 
 // Close Functions
-function closeBrave() {
-  LaunchBar.executeAppleScript(
-    'tell application "Brave Browser"',
-    '	close active tab of window 1',
-    '	delay 0.5',
-    '	if (count windows) = 0 then',
-    '		quit',
-    '	end if',
-    'end tell'
-  );
-}
-
-function closeVivaldi() {
-  LaunchBar.executeAppleScript(
-    'tell application "Vivaldi"',
-    '	close active tab of window 1',
-    '	delay 0.5',
-    '	if (count windows) = 0 then',
-    '		quit',
-    '	end if',
-    'end tell'
-  );
-}
 
 function closeSafari() {
   LaunchBar.executeAppleScript(
@@ -251,18 +170,6 @@ function closeSafari() {
     '	delay 0.1',
     '	if (count documents) = 0 then',
     '		quit application "Safari"',
-    '	end if',
-    'end tell'
-  );
-}
-
-function closeChrome() {
-  LaunchBar.executeAppleScript(
-    'tell application "Google Chrome"',
-    '	close active tab of window 1',
-    '	delay 0.5',
-    '	if (count windows) = 0 then',
-    '		quit',
     '	end if',
     'end tell'
   );
@@ -281,16 +188,19 @@ function closeFirefox() {
   );
 }
 
-function closeArc() {
+function closeChromium(frontmost) {
   LaunchBar.executeAppleScript(
-    'tell application "Arc"',
+    'tell application "' + frontmost + '"',
     '	close active tab of window 1',
     '	delay 0.5',
     '	if (count of windows) = 0 then',
-    '		quit application "Arc"',
-    '		',
+    '		quit',
     '	else if (count of windows) = 1 then',
     '		if title of window 1 begins with "Space" then',
+    '			quit',
+    '		else if title of window 1 is "Neuer Tab" then',
+    '			quit',
+    '		else if title of window 1 is "New Tab" then',
     '			quit',
     '		end if',
     '	end if',
