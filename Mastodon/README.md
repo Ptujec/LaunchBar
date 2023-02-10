@@ -42,8 +42,6 @@ There are a couple of settings, that you can access with `⇧↩`:
 - Set Instance
 - Set API-Token
 
-The action assumes that you are using your default browser. 
-
 Supported browser:
 - Safari
 - Brave
