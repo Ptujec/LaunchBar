@@ -1,5 +1,6 @@
 # LaunchBar Search Actions
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
 ## Apps
 
@@ -14,8 +15,10 @@
 
 ## Websites
 
-The added benefit of these actions over a custom search template are the suggestions.
+The added benefit of these actions over a custom search template are the suggestions. There are built in versions of Google and DuckDuckGo, but without some of the features.
 
+- DuckDuckGo (with "Feeling ducky")
+- Kagi Search
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
 - Google Search (with DuckDuckGos version of Feeling Lucky)
