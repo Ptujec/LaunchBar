@@ -64,6 +64,7 @@ function run(argument) {
     'com.google.chrome',
     'com.vivaldi.vivaldi',
     'com.microsoft.edgemac',
+    'company.thebrowser.Browser',
     'org.mozilla.firefox',
   ];
 
@@ -92,6 +93,9 @@ function run(argument) {
   } else if (
     browserId == 'com.brave.browser' ||
     browserId == 'org.chromium.chromium' ||
+    browserId == 'company.thebrowser.browser' ||
+    browserId == 'com.vivaldi.vivaldi' ||
+    browserId == 'com.microsoft.edgemac' ||
     browserId == 'com.google.chrome'
   ) {
     var name = LaunchBar.executeAppleScript(
@@ -103,20 +107,6 @@ function run(argument) {
       'tell application id "' +
         browserId +
         '" to set _var to the URL of the active tab of the front window'
-    ).trim();
-  } else if (
-    browserId == 'com.microsoft.edgemac' ||
-    browserId == 'com.vivaldi.vivaldi'
-  ) {
-    var name = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to the name of the «class acTa» of the front window'
-    ).trim();
-    var link = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to the «class URL » of the «class acTa» of the front window'
     ).trim();
   } else if (browserId == 'org.mozilla.firefox') {
     var responseFirefox = LaunchBar.alert(
