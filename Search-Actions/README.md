@@ -8,9 +8,6 @@
 - ~~Zotero Search~~ ([Moved to it's own folder](https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions#readme))
 - Notion Search
 - iA Writer Search (with an excerpt of the content found in subtitle)
-
-<img src="ias.gif" width="780"/> 
-
 - Mindnode Search (with excerpt)
 
 ## Websites
