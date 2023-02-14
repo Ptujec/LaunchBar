@@ -326,6 +326,16 @@ function openSetting() {
       icon: 'elkTemplate',
     },
     {
+      title: 'Open: Mona'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'mona://',
+        name: 'Mona',
+        icon: 'monaTemplate',
+      },
+      icon: 'monaTemplate',
+    },
+    {
       title: 'Open: Mammoth'.localize(),
       action: 'openIn',
       actionArgument: {
