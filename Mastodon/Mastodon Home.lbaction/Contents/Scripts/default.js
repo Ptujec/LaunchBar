@@ -88,6 +88,15 @@ function run() {
     return;
   }
 
+  // Ivory
+  if (urlscheme == 'ivory://') {
+    LaunchBar.openURL(urlscheme + 'acct/openURL?url=' + url);
+    if (closeOption == 'true') {
+      closeURL(url, frontmost);
+    }
+    return;
+  }
+
   var homeURL = urlscheme + server + '/' + user + '@' + instance;
 
   var isNoPostId = isNaN(parseInt(unknown));
@@ -307,6 +316,16 @@ function openSetting() {
         icon: 'elkTemplate',
       },
       icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Ivory'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'ivory://',
+        name: 'Ivory',
+        icon: 'ivoryTemplate',
+      },
+      icon: 'ivoryTemplate',
     },
     {
       title: 'Open: Mona'.localize(),
