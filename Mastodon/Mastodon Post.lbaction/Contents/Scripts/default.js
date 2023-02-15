@@ -242,6 +242,16 @@ function openSetting() {
       icon: 'elkTemplate',
     },
     {
+      title: 'Open: Ivory'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        url: 'ivory://acct/home',
+        name: 'Ivory',
+        icon: 'ivoryTemplate',
+      },
+      icon: 'ivoryTemplate',
+    },
+    {
       title: 'Open: Mona'.localize(),
       action: 'openIn',
       actionArgument: {
