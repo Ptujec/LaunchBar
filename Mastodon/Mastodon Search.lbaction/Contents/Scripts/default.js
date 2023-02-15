@@ -161,6 +161,12 @@ function actAccount(dict) {
       var urlscheme = Action.preferences.openInURLScheme;
     }
 
+    // Ivory
+    if (urlscheme == 'ivory://') {
+      LaunchBar.openURL(urlscheme + 'acct/openURL?url=' + dict.url);
+      return;
+    }
+
     // Fix for Mammoth
     if (urlscheme == 'mammoth://') {
       LaunchBar.openURL(dict.url.replace('https://', urlscheme));
@@ -180,6 +186,12 @@ function actHashtag(dict) {
     } else {
       var urlscheme = Action.preferences.openInURLScheme;
     }
+    // Ivory
+    if (urlscheme == 'ivory://') {
+      LaunchBar.openURL(urlscheme + 'acct/search?q=' + dict.hashtag);
+      return;
+    }
+
     LaunchBar.openURL(urlscheme + 'mastodon.social/tags/' + dict.hashtag);
   } else if (LaunchBar.options.alternateKey) {
     followHashtag(dict);
@@ -324,6 +336,16 @@ function openSetting() {
         icon: 'elkTemplate',
       },
       icon: 'elkTemplate',
+    },
+    {
+      title: 'Open: Ivory'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'ivory://',
+        name: 'Ivory',
+        icon: 'ivoryTemplate',
+      },
+      icon: 'ivoryTemplate',
     },
     {
       title: 'Open: Mona'.localize(),
