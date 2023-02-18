@@ -29,7 +29,7 @@ function run() {
       contents.forEach(function (item) {
         var path = folderPath + '/' + item;
 
-        if (!item.startsWith('.')) {
+        if (!item.startsWith('.') && !item.endsWith('autosave')) {
           results.push({
             title: item,
             // subtitle: '',
