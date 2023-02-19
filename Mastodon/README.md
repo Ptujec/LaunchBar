@@ -63,6 +63,7 @@ Additional features:
 - Add a content warning with `⌘↩`. 
 
 Settings (`⇧↩`): 
+- Toggle to always show counter or just above 400 characters.
 - Choose to open your timeline in Safari, Elk or Ice Cubes after a successful post.
 - Set Instance
 - Set API-Token
