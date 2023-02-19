@@ -203,7 +203,23 @@ function settings() {
     var openIcon = Action.preferences.openInIcon;
   }
 
+  if (Action.preferences.count != 'always') {
+    var showTitle = 'Only show count if above 400 characters'.localize();
+    var countArg = 'always';
+    var countIcon = 'countIconOffTemplate';
+  } else {
+    var showTitle = 'Always show count'.localize();
+    var countArg = '';
+    var countIcon = 'countIconOnTemplate';
+  }
+
   options = [
+    {
+      title: showTitle,
+      action: 'countToggle',
+      actionArgument: countArg,
+      icon: countIcon,
+    },
     {
       title: 'Open after done'.localize(),
       action: 'openSetting',
@@ -313,6 +329,12 @@ function openIn(dict) {
 
 function openInOff(dict) {
   Action.preferences.openIn = false;
+  var output = settings();
+  return output;
+}
+
+function countToggle(countArg) {
+  Action.preferences.count = countArg;
   var output = settings();
   return output;
 }

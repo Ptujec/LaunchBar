@@ -17,14 +17,25 @@ function runWithString(string) {
       },
     ];
   }
+
+  if (Action.preferences.count != 'always') {
+    if (string.length < 400) {
+      return;
+    }
+  }
+
+  if (string.length > 500) {
+    var icon = 'countRed';
+  } else {
+    var icon = 'postTemplate';
+  }
+
   var count = [
     {
       title: string.length + '/500',
-      icon: 'postTemplate',
+      icon: icon,
     },
   ];
 
-  if (string.length > 400) {
-    return count;
-  }
+  return count;
 }

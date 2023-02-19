@@ -15,3 +15,5 @@
 "Open: Mona" = "Mona öffnen";
 "Open: Website" = "Website öffnen";
 "Open after done" = "Danach öffnen";
+"Always show count" = "Zähler immer anzeigen";
+"Only show count if above 400 characters" = "Zähler nur bei über 400 Zeichen anzeigen";
