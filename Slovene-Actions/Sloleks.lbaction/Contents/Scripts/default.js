@@ -84,7 +84,7 @@ function getAttributes(dict) {
       resultType: 'text',
     }).data.split('\n');
 
-    File.writeJSON(data, Action.supportPath + '/test.json');
+    // File.writeJSON(data, Action.supportPath + '/test.json');
 
     if (category == 'noun') {
       var nom = [];
