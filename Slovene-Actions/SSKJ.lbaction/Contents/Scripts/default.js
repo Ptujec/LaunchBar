@@ -7,7 +7,8 @@ function run(argument) {
     'https://www.fran.si/iskanje?FilteredDictionaryIds=133&View=1&Query=' +
     encodeURIComponent(argument);
 
-  if (LaunchBar.options.alternateKey) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.hide();
     LaunchBar.openURL(url);
   } else {
     var html = HTTP.loadRequest(url, {
@@ -20,6 +21,14 @@ function run(argument) {
       var groups = html.match(/<div class="entry-content">(.|\n|\r)*?<\/div>/g); //  list-group results
 
       if (groups == undefined) {
+        LaunchBar.hide();
+        LaunchBar.openURL(
+          'https://www.fran.si/iskanje?View=1&Query=' +
+            encodeURIComponent(argument) +
+            '&AllNoHeadword=' +
+            encodeURIComponent(argument) +
+            '&FilteredDictionaryIds=133'
+        );
         return;
       }
 
@@ -176,6 +185,7 @@ function run(argument) {
       } else {
         var result = groupsResult;
       }
+
       return result;
     } else {
       var response = LaunchBar.alert(
