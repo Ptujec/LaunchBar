@@ -1,0 +1,375 @@
+{
+  "booknames": [
+    {
+      "english": "Moses",
+      "alt": [
+        "Mojzes",
+        "Mose",
+        "Mz"
+      ]
+    },
+    {
+      "english": "Genesis",
+      "alt": [
+        "Geneza",
+        "Genesis"
+      ]
+    },
+    {
+      "english": "Exodus",
+      "alt": [
+        "Eksodus",
+        "Exodus"
+      ]
+    },
+    {
+      "english": "Leviticus",
+      "alt": [
+        "Levitik",
+        "Levitikus"
+      ]
+    },
+    {
+      "english": "Numbers",
+      "alt": [
+        "Numeri",
+        "Numeri"
+      ]
+    },
+    {
+      "english": "Deuteronomy",
+      "alt": [
+        "Devteronomij",
+        "Deuternomium"
+      ]
+    },
+    {
+      "english": "Joshua",
+      "alt": [
+        "Jozue",
+        "Josua"
+      ]
+    },
+    {
+      "english": "Judges",
+      "alt": [
+        "Sodniki",
+        "Richter"
+      ]
+    },
+    {
+      "english": "Ruth",
+      "alt": [
+        "Ruta",
+        "Rut"
+      ]
+    },
+    {
+      "english": "Kings",
+      "alt": [
+        "Kralji",
+        "Könige"
+      ]
+    },
+    {
+      "english": "Chronicles",
+      "alt": [
+        "Kroniška",
+        "Chronik"
+      ]
+    },
+    {
+      "english": "Ezra",
+      "alt": [
+        "Ezra",
+        "Esra"
+      ]
+    },
+    {
+      "english": "Nehemiah",
+      "alt": [
+        "Nehemija",
+        "Nehemia"
+      ]
+    },
+    {
+      "english": "Esther",
+      "alt": [
+        "Estera",
+        "Ester"
+      ]
+    },
+    {
+      "english": "Job",
+      "alt": [
+        "Job",
+        "Hiob"
+      ]
+    },
+    {
+      "english": "Psalms",
+      "alt": [
+        "Psalmi",
+        "Psalmen"
+      ]
+    },
+    {
+      "english": "Proverbs",
+      "alt": [
+        "Pregovori",
+        "Sprichwörter",
+        "Pregovori",
+        "Sprüche"
+      ]
+    },
+    {
+      "english": "Ecclesiastes",
+      "alt": [
+        "Kohelet",
+        "Kohelet",
+        "Prediger",
+        "Pridigar"
+      ]
+    },
+    {
+      "english": "Song",
+      "alt": [
+        "Visoka pesem",
+        "Hohelied"
+      ]
+    },
+    {
+      "english": "Isaiah",
+      "alt": [
+        "Izaija",
+        "Jesaja"
+      ]
+    },
+    {
+      "english": "Jeremiah",
+      "alt": [
+        "Jeremija",
+        "Jeremia"
+      ]
+    },
+    {
+      "english": "Lamentations",
+      "alt": [
+        "Žalostinke",
+        "Klagelieder"
+      ]
+    },
+    {
+      "english": "Ezekiel",
+      "alt": [
+        "Ezekiel",
+        "Hesekiel"
+      ]
+    },
+    {
+      "english": "Hosea",
+      "alt": [
+        "Ozej",
+        "Hosea"
+      ]
+    },
+    {
+      "english": "Obadiah",
+      "alt": [
+        "Abdija",
+        "Obadja"
+      ]
+    },
+    {
+      "english": "Jonah",
+      "alt": [
+        "Jona",
+        "Jona"
+      ]
+    },
+    {
+      "english": "Micah",
+      "alt": [
+        "Mihej",
+        "Micha"
+      ]
+    },
+    {
+      "english": "Habakkuk",
+      "alt": [
+        "Habakuk",
+        "Habakuk"
+      ]
+    },
+    {
+      "english": "Zephaniah",
+      "alt": [
+        "Sofonija",
+        "Zefanja"
+      ]
+    },
+    {
+      "english": "Haggai",
+      "alt": [
+        "Agej",
+        "Haggai"
+      ]
+    },
+    {
+      "english": "Zechariah",
+      "alt": [
+        "Zaharija",
+        "Sacharja"
+      ]
+    },
+    {
+      "english": "Malachi",
+      "alt": [
+        "Malahija",
+        "Maleachi"
+      ]
+    },
+    {
+      "english": "Matthew",
+      "alt": [
+        "Matej",
+        "Matthäus",
+        "Mt"
+      ]
+    },
+    {
+      "english": "Mark",
+      "alt": [
+        "Marko",
+        "Mr",
+        "Markus"
+      ]
+    },
+    {
+      "english": "Luke",
+      "alt": [
+        "Luka",
+        "Lk",
+        "Lukas"
+      ]
+    },
+    {
+      "english": "John",
+      "alt": [
+        "Janez",
+        "Johannes",
+        "Jn"
+      ]
+    },
+    {
+      "english": "Acts",
+      "alt": [
+        "Apd",
+        "Apg",
+        "Apostolska dela",
+        "Apostelgeschichte"
+      ]
+    },
+    {
+      "english": "Romans",
+      "alt": [
+        "Rimljanom",
+        "Römer"
+      ]
+    },
+    {
+      "english": "Corinthians",
+      "alt": [
+        "Korinčanom",
+        "Korinther"
+      ]
+    },
+    {
+      "english": "Galatians",
+      "alt": [
+        "Galačanom",
+        "Galater"
+      ]
+    },
+    {
+      "english": "Ephesians",
+      "alt": [
+        "Efežanom",
+        "Epheser"
+      ]
+    },
+    {
+      "english": "Philippians",
+      "alt": [
+        "Filipljanom",
+        "Philipper",
+        "Flp"
+      ]
+    },
+    {
+      "english": "Colossians",
+      "alt": [
+        "Kološanom",
+        "Kolosser"
+      ]
+    },
+    {
+      "english": "Thessalonians",
+      "alt": [
+        "Tesaloničanom",
+        "Thessalonicher"
+      ]
+    },
+    {
+      "english": "Timothy",
+      "alt": [
+        "Timoteju",
+        "Timotheus"
+      ]
+    },
+    {
+      "english": "Philemon",
+      "alt": [
+        "Filemonu",
+        "Flm",
+        "Philemon"
+      ]
+    },
+    {
+      "english": "Hebrews",
+      "alt": [
+        "Hebrejcem",
+        "Hebräer"
+      ]
+    },
+    {
+      "english": "James",
+      "alt": [
+        "Jakob",
+        "Jakobus"
+      ]
+    },
+    {
+      "english": "Peter",
+      "alt": [
+        "Peter",
+        "Pt",
+        "Petrus"
+      ]
+    },
+    {
+      "english": "Jude",
+      "alt": [
+        "Juda",
+        "Judas"
+      ]
+    },
+    {
+      "english": "Revelation",
+      "alt": [
+        "Razodetje",
+        "Offenbarung"
+      ]
+    }
+  ]
+}
