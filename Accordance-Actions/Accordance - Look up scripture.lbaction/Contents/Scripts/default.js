@@ -7,176 +7,9 @@ Sources:
 - https://stackoverflow.com/a/13012698 (if contains statement)
 */
 
-const GermanBookList = [
-  'Mose',
-  'Genesis',
-  'Exodus',
-  'Levitikus',
-  'Numeri',
-  'Deuternomium',
-  'Josua',
-  'Richter',
-  'Rut',
-  'Könige',
-  'Chronik',
-  'Esra',
-  'Nehemia',
-  'Ester',
-  'Hiob',
-  'Psalmen',
-  'Sprichwörter',
-  'Sprüche',
-  'Kohelet',
-  'Prediger',
-  'Hohelied',
-  'Jesaja',
-  'Jeremia',
-  'Klagelieder',
-  'Hesekiel',
-  'Hosea',
-  'Obadja',
-  'Jona',
-  'Micha',
-  'Habakuk',
-  'Zefanja',
-  'Haggai',
-  'Sacharja',
-  'Maleachi',
-  'Matthäus',
-  'Markus',
-  'Lukas',
-  'Johannes',
-  'Apg',
-  'Apostelgeschichte',
-  'Römer',
-  'Korinther',
-  'Galater',
-  'Epheser',
-  'Philipper',
-  'Kolosser',
-  'Thessalonicher',
-  'Timotheus',
-  'Philemon',
-  'Hebräer',
-  'Jakobus',
-  'Petrus',
-  'Judas',
-  'Offenbarung',
-];
-
-const SloveneBookList = [
-  'Mojzes',
-  'Geneza',
-  'Eksodus',
-  'Levitik',
-  'Numeri',
-  'Devteronomij',
-  'Jozue',
-  'Sodniki',
-  'Ruta',
-  'Kralji',
-  'Kroniška',
-  'Ezra',
-  'Nehemija',
-  'Estera',
-  'Job',
-  'Psalmi',
-  'Pregovori',
-  'Pregovori',
-  'Kohelet',
-  'Pridigar',
-  'Visoka pesem',
-  'Izaija',
-  'Jeremija',
-  'Žalostinke',
-  'Ezekiel',
-  'Ozej',
-  'Abdija',
-  'Jona',
-  'Mihej',
-  'Habakuk',
-  'Sofonija',
-  'Agej',
-  'Zaharija',
-  'Malahija',
-  'Matej',
-  'Marko',
-  'Luka',
-  'Janez',
-  'Apd',
-  'Apostolska dela',
-  'Rimljanom',
-  'Korinčanom',
-  'Galačanom',
-  'Efežanom',
-  'Filipljanom',
-  'Kološanom',
-  'Tesaloničanom',
-  'Timoteju',
-  'Filemonu',
-  'Hebrejcem',
-  'Jakob',
-  'Peter',
-  'Juda',
-  'Razodetje',
-];
-
-const EnglishBookList = [
-  'Moses',
-  'Genesis',
-  'Exodus',
-  'Leviticus',
-  'Numbers',
-  'Deuteronomy',
-  'Joshua',
-  'Judges',
-  'Ruth',
-  'Kings',
-  'Chronicles',
-  'Ezra',
-  'Nehemiah',
-  'Esther',
-  'Job',
-  'Psalms',
-  'Proverbs',
-  'Proverbs',
-  'Ecclesiastes',
-  'Ecclesiastes',
-  'Song',
-  'Isaiah',
-  'Jeremiah',
-  'Lamentations',
-  'Ezekiel',
-  'Hosea',
-  'Obadiah',
-  'Jonah',
-  'Micah',
-  'Habakkuk',
-  'Zephaniah',
-  'Haggai',
-  'Zechariah',
-  'Malachi',
-  'Matthew',
-  'Mark',
-  'Luke',
-  'John',
-  'Acts',
-  'Acts',
-  'Romans',
-  'Corinthians',
-  'Galatians',
-  'Ephesians',
-  'Philippians',
-  'Colossians',
-  'Thessalonians',
-  'Timothy',
-  'Philemon',
-  'Hebrews',
-  'James',
-  'Peter',
-  'Jude',
-  'Revelation',
-];
+const bookNameDictionary = File.readJSON(
+  Action.path + '/Contents/Resources/booknames.json'
+); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
 
 const AccordancePrefs = eval(
   File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
@@ -215,7 +48,7 @@ function run(argument) {
     } else {
       var result = [];
       for (var i = 0; i < mA.length; i++) {
-        var scrip = mA[i].toString().trim();
+        var scrip = mA[i].trim();
 
         // makes sure non-european styles get converted
         if (scrip.includes(':')) {
@@ -241,20 +74,22 @@ function run(argument) {
         } else {
           bookName = bookName.trim().replace(/\./, '').toLowerCase();
 
-          var iBN = GermanBookList.findIndex((element) =>
-            element.toLowerCase().startsWith(bookName)
-          );
+          // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
+          var newBookName = '';
+          bookNameDictionary.booknames.forEach(function (item) {
+            var altNames = item.alt;
+            for (var i = 0; i < altNames.length; i++) {
+              var name = altNames[i].toLowerCase();
+              if (name.startsWith(bookName)) {
+                newBookName = item.english;
+                break;
+              }
+            }
+          });
 
-          if (iBN == -1) {
-            iBN = SloveneBookList.findIndex((element) =>
-              element.toLowerCase().startsWith(bookName)
-            );
+          if (newBookName != '') {
+            bookName = newBookName + ' ';
           }
-
-          if (iBN != -1) {
-            bookName = EnglishBookList[iBN];
-          }
-          bookName = bookName + ' ';
         }
         var suffix = mB[3];
 
@@ -323,11 +158,11 @@ function lookUp(result, argument) {
       var output = chooseTranslation(result, argument);
       return output;
     } else {
-      LaunchBar.openURL('accord://read/?' + encodeURIComponent(result));
+      LaunchBar.openURL('accord://read/?' + encodeURI(result));
     }
   } else {
     LaunchBar.openURL(
-      'accord://research/' + allTextSetting + encodeURIComponent(result)
+      'accord://research/' + allTextSetting + encodeURI(result)
     );
   }
   // }
@@ -437,6 +272,10 @@ function lookupInTranslation(dict) {
   }
 
   Action.preferences.lastUsed = translation;
+
+  // LaunchBar.alert(encodeURI(translation));
+  // return;
+
   LaunchBar.hide();
   LaunchBar.openURL(
     'accord://read/' + encodeURI(translation) + '?' + encodeURI(result)
