@@ -40,6 +40,7 @@
       "english": "Deuteronomy",
       "alt": [
         "Devteronomij",
+        "Dtn",
         "Deuternomium"
       ]
     },
@@ -61,6 +62,7 @@
       "english": "Ruth",
       "alt": [
         "Ruta",
+        "Rt",
         "Rut"
       ]
     },
@@ -75,6 +77,7 @@
       "english": "Chronicles",
       "alt": [
         "Kroniška",
+        "Krn",
         "Chronik"
       ]
     },
@@ -103,6 +106,7 @@
       "english": "Job",
       "alt": [
         "Job",
+        "Ijob",
         "Hiob"
       ]
     },
@@ -118,7 +122,7 @@
       "alt": [
         "Pregovori",
         "Sprichwörter",
-        "Pregovori",
+        "Prg",
         "Sprüche"
       ]
     },
@@ -126,8 +130,8 @@
       "english": "Ecclesiastes",
       "alt": [
         "Kohelet",
-        "Kohelet",
         "Prediger",
+        "Prd",
         "Pridigar"
       ]
     },
@@ -135,6 +139,9 @@
       "english": "Song",
       "alt": [
         "Visoka pesem",
+        "Vp",
+        "Hl",
+        "Hld",
         "Hohelied"
       ]
     },
@@ -156,6 +163,7 @@
       "english": "Lamentations",
       "alt": [
         "Žalostinke",
+        "Klgl",
         "Klagelieder"
       ]
     },
@@ -163,6 +171,7 @@
       "english": "Ezekiel",
       "alt": [
         "Ezekiel",
+        "Ezk",
         "Hesekiel"
       ]
     },
@@ -171,6 +180,12 @@
       "alt": [
         "Ozej",
         "Hosea"
+      ]
+    },
+    {
+      "english": "Joel",
+      "alt": [
+        "Jl"
       ]
     },
     {
@@ -241,6 +256,7 @@
       "english": "Mark",
       "alt": [
         "Marko",
+        "Mk",
         "Mr",
         "Markus"
       ]
@@ -332,6 +348,8 @@
       "alt": [
         "Filemonu",
         "Flm",
+        "Phlm",
+        "Phim",
         "Philemon"
       ]
     },
@@ -368,6 +386,7 @@
       "english": "Revelation",
       "alt": [
         "Razodetje",
+        "Offb",
         "Offenbarung"
       ]
     }
