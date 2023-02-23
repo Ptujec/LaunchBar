@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Look up scripture</string>
 	<key>CFBundleVersion</key>
-	<string>4.4.2</string>
+	<string>4.4.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.OakTree.Accordance</string>
 	<key>LBDescription</key>
