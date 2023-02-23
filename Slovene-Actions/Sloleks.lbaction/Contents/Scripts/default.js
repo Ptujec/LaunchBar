@@ -84,6 +84,8 @@ function getAttributes(dict) {
       resultType: 'text',
     }).data.split('\n');
 
+    // File.writeJSON(data, Action.supportPath + '/test.json');
+
     if (category == 'noun') {
       var nom = [];
       var gen = [];
@@ -122,7 +124,7 @@ function getAttributes(dict) {
         url: mainURL,
       };
 
-      return [
+      result = [
         {
           title: nom.join(', '),
           badge: 'imenovalnik',
@@ -196,7 +198,7 @@ function getAttributes(dict) {
       };
 
       if (comp != '') {
-        return [
+        result = [
           {
             title: ad.join(', '),
             badge: 'osnovnik',
@@ -244,7 +246,7 @@ function getAttributes(dict) {
       };
 
       if (comp != '') {
-        return [
+        result = [
           {
             title: ad.join(', '),
             badge: 'osnovnik',
@@ -325,8 +327,15 @@ function getAttributes(dict) {
           actionArgument: actionArgument,
         },
       ];
-      return result;
     }
+
+    if (result == undefined) {
+      LaunchBar.hide();
+      LaunchBar.openURL(data[3].split('\t')[1]);
+      return;
+    }
+
+    return result;
   }
 }
 
