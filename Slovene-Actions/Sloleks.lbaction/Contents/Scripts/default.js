@@ -74,7 +74,7 @@ function getAttributes(dict) {
 
   if (LaunchBar.options.shiftKey) {
     LaunchBar.paste(lemma);
-  } else if (LaunchBar.options.alternateKey) {
+  } else if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
     LaunchBar.openURL(mainURL);
   } else {
@@ -84,7 +84,7 @@ function getAttributes(dict) {
       resultType: 'text',
     }).data.split('\n');
 
-    // File.writeJSON(data, Action.supportPath + '/test.json');
+    File.writeJSON(data, Action.supportPath + '/test.json');
 
     if (category == 'noun') {
       var nom = [];
@@ -221,6 +221,7 @@ function getAttributes(dict) {
             actionArgument: actionArgument,
           },
         ];
+      } else {
       }
     } else if (category == 'adverb') {
       var ad = [];
@@ -331,7 +332,7 @@ function getAttributes(dict) {
 
     if (result == undefined) {
       LaunchBar.hide();
-      LaunchBar.openURL(data[3].split('\t')[1]);
+      LaunchBar.openURL(mainURL);
       return;
     }
 
