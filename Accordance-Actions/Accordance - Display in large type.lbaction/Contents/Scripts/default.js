@@ -45,8 +45,11 @@ function run(argument) {
         .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2');
 
       var mA = argument.match(
-        /(?:[1-5]\.?\s?)?(?:[a-zžščöäü]+\.?\s?)?[0-9,.:\-–f]+/gi
+        /(?:[1-5]\.?\s?)?(?:[a-zžščöäü ]+\.?\s?)?[0-9,.:\-–f]+/gi
       );
+
+      // LaunchBar.alert(JSON.stringify(mA));
+      // return;
 
       var result = [];
       for (var i = 0; i < mA.length; i++) {
@@ -58,7 +61,7 @@ function run(argument) {
         }
 
         var mB = scrip.match(
-          /([1-5]\.?\s?)?([a-zžščöäü]+\.?\s?)?([0-9,.:\-–f]+)/i
+          /([1-5]\.?\s?)?([a-zžščöäü ]+\.?\s?)?([0-9,.:\-–f]+)/i
         );
 
         var prefix = mB[1];
@@ -74,24 +77,7 @@ function run(argument) {
         if (bookName == undefined) {
           bookName = '';
         } else {
-          bookName = bookName.trim().replace(/\./, '').toLowerCase();
-
-          // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
-          var newBookName = '';
-          bookNameDictionary.booknames.forEach(function (item) {
-            var altNames = item.alt;
-            for (var i = 0; i < altNames.length; i++) {
-              var name = altNames[i].toLowerCase();
-              if (name.startsWith(bookName)) {
-                newBookName = item.english;
-                break;
-              }
-            }
-          });
-
-          if (newBookName != '') {
-            bookName = newBookName + ' ';
-          }
+          bookName = replaceBookName(bookName);
         }
         var suffix = mB[3];
 
@@ -324,4 +310,50 @@ function setTranslation(aA) {
   Action.preferences.lastUsed = translation;
 
   displayText(result, argument, translation);
+}
+
+function replaceBookName(bookName) {
+  // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
+  var newBookName = '';
+  bookName = bookName.trim().replace(/\./, '').toLowerCase();
+
+  var bookNames = bookNameDictionary.booknames;
+
+  for (var i = 0; i < bookNames.length; i++) {
+    var englishName = bookNames[i].english.toLowerCase();
+    var altNames = bookNames[i].alt;
+
+    if (englishName.startsWith(bookName)) {
+      newBookName = bookNames[i].english;
+      break;
+    }
+
+    for (var j = 0; j < altNames.length; j++) {
+      var altName = altNames[j].toLowerCase();
+
+      if (altName.startsWith(bookName)) {
+        newBookName = bookNames[i].english;
+        var isBreak = true;
+        break;
+      }
+    }
+    var abbrs = bookNames[i].abbr;
+    for (var k = 0; k < abbrs.length; k++) {
+      var abbr = abbrs[k].toLowerCase();
+      if (bookName == abbr) {
+        newBookName = bookNames[i].english;
+        var isBreak = true;
+        break;
+      }
+    }
+
+    if (isBreak == true) {
+      break;
+    }
+  }
+
+  if (newBookName != '') {
+    bookName = newBookName + ' ';
+  }
+  return bookName;
 }

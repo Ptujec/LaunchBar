@@ -3,45 +3,56 @@
     {
       "english": "Moses",
       "alt": [
-        "Mojzes",
-        "Mose",
+        "Mojzes"
+      ],
+      "abbr": [
         "Mz"
       ]
     },
     {
       "english": "Genesis",
       "alt": [
-        "Geneza",
-        "Genesis"
+        "Geneza"
+      ],
+      "abbr": [
+        "Gn"
       ]
     },
     {
       "english": "Exodus",
       "alt": [
-        "Eksodus",
-        "Exodus"
-      ]
+        "Eksodus"
+      ],
+      "abbr": []
     },
     {
       "english": "Leviticus",
       "alt": [
-        "Levitik",
-        "Levitikus"
+        "Levitikus",
+        "Levitik"
+      ],
+      "abbr": [
+        "Lv"
       ]
     },
     {
       "english": "Numbers",
       "alt": [
-        "Numeri",
         "Numeri"
+      ],
+      "abbr": [
+        "Nm"
       ]
     },
     {
       "english": "Deuteronomy",
       "alt": [
-        "Devteronomij",
+        "Deuternomium",
+        "Devteronomij"
+      ],
+      "abbr": [
         "Dtn",
-        "Deuternomium"
+        "Du"
       ]
     },
     {
@@ -49,21 +60,35 @@
       "alt": [
         "Jozue",
         "Josua"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Judges",
       "alt": [
         "Sodniki",
         "Richter"
+      ],
+      "abbr": [
+        "Jdg",
+        "Jds"
       ]
     },
     {
       "english": "Ruth",
       "alt": [
-        "Ruta",
-        "Rt",
-        "Rut"
+        "Ruta"
+      ],
+      "abbr": [
+        "Rth",
+        "Rt"
+      ]
+    },
+    {
+      "english": "Samuel",
+      "alt": [],
+      "abbr": [
+        "Sm"
       ]
     },
     {
@@ -71,14 +96,19 @@
       "alt": [
         "Kralji",
         "Könige"
+      ],
+      "abbr": [
+        "Kgs"
       ]
     },
     {
       "english": "Chronicles",
       "alt": [
         "Kroniška",
-        "Krn",
         "Chronik"
+      ],
+      "abbr": [
+        "Krn"
       ]
     },
     {
@@ -86,21 +116,24 @@
       "alt": [
         "Ezra",
         "Esra"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Nehemiah",
       "alt": [
         "Nehemija",
         "Nehemia"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Esther",
       "alt": [
         "Estera",
         "Ester"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Job",
@@ -108,6 +141,9 @@
         "Job",
         "Ijob",
         "Hiob"
+      ],
+      "abbr": [
+        "Jb"
       ]
     },
     {
@@ -115,6 +151,9 @@
       "alt": [
         "Psalmi",
         "Psalmen"
+      ],
+      "abbr": [
+        "Pss"
       ]
     },
     {
@@ -122,27 +161,39 @@
       "alt": [
         "Pregovori",
         "Sprichwörter",
-        "Prg",
         "Sprüche"
+      ],
+      "abbr": [
+        "Prv",
+        "Prg"
       ]
     },
     {
       "english": "Ecclesiastes",
       "alt": [
+        "Qoheleth",
         "Kohelet",
         "Prediger",
-        "Prd",
         "Pridigar"
+      ],
+      "abbr": [
+        "Prd"
       ]
     },
     {
       "english": "Song",
       "alt": [
         "Visoka pesem",
+        "Canticles",
+        "Hohelied"
+      ],
+      "abbr": [
+        "Sng",
+        "Sg",
+        "SS",
         "Vp",
         "Hl",
-        "Hld",
-        "Hohelied"
+        "Hld"
       ]
     },
     {
@@ -150,41 +201,58 @@
       "alt": [
         "Izaija",
         "Jesaja"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Jeremiah",
       "alt": [
         "Jeremija",
         "Jeremia"
+      ],
+      "abbr": [
+        "Jr"
       ]
     },
     {
       "english": "Lamentations",
       "alt": [
         "Žalostinke",
-        "Klgl",
         "Klagelieder"
+      ],
+      "abbr": [
+        "Lm",
+        "Klgl"
       ]
     },
     {
       "english": "Ezekiel",
       "alt": [
         "Ezekiel",
-        "Ezk",
         "Hesekiel"
+      ],
+      "abbr": [
+        "Ezk"
+      ]
+    },
+    {
+      "english": "Daniel",
+      "alt": [],
+      "abbr": [
+        "Dn"
       ]
     },
     {
       "english": "Hosea",
       "alt": [
-        "Ozej",
-        "Hosea"
-      ]
+        "Ozej"
+      ],
+      "abbr": []
     },
     {
       "english": "Joel",
-      "alt": [
+      "alt": [],
+      "abbr": [
         "Jl"
       ]
     },
@@ -193,6 +261,9 @@
       "alt": [
         "Abdija",
         "Obadja"
+      ],
+      "abbr": [
+        "Obd"
       ]
     },
     {
@@ -200,6 +271,9 @@
       "alt": [
         "Jona",
         "Jona"
+      ],
+      "abbr": [
+        "Jnh"
       ]
     },
     {
@@ -207,13 +281,25 @@
       "alt": [
         "Mihej",
         "Micha"
+      ],
+      "abbr": [
+        "Mch"
+      ]
+    },
+    {
+      "english": "Nahum",
+      "alt": [],
+      "abbr": [
+        "Nam"
       ]
     },
     {
       "english": "Habakkuk",
       "alt": [
-        "Habakuk",
         "Habakuk"
+      ],
+      "abbr": [
+        "Hb"
       ]
     },
     {
@@ -221,13 +307,16 @@
       "alt": [
         "Sofonija",
         "Zefanja"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Haggai",
       "alt": [
-        "Agej",
-        "Haggai"
+        "Agej"
+      ],
+      "abbr": [
+        "Hg"
       ]
     },
     {
@@ -235,6 +324,9 @@
       "alt": [
         "Zaharija",
         "Sacharja"
+      ],
+      "abbr": [
+        "Zch"
       ]
     },
     {
@@ -242,13 +334,18 @@
       "alt": [
         "Malahija",
         "Maleachi"
+      ],
+      "abbr": [
+        "Ml"
       ]
     },
     {
       "english": "Matthew",
       "alt": [
         "Matej",
-        "Matthäus",
+        "Matthäus"
+      ],
+      "abbr": [
         "Mt"
       ]
     },
@@ -256,34 +353,44 @@
       "english": "Mark",
       "alt": [
         "Marko",
+        "Markus"
+      ],
+      "abbr": [
         "Mk",
         "Mr",
-        "Markus"
+        "Mrk"
       ]
     },
     {
       "english": "Luke",
       "alt": [
         "Luka",
-        "Lk",
         "Lukas"
+      ],
+      "abbr": [
+        "Lk"
       ]
     },
     {
       "english": "John",
       "alt": [
         "Janez",
-        "Johannes",
+        "Johannes"
+      ],
+      "abbr": [
+        "Jhn",
         "Jn"
       ]
     },
     {
       "english": "Acts",
       "alt": [
-        "Apd",
-        "Apg",
         "Apostolska dela",
         "Apostelgeschichte"
+      ],
+      "abbr": [
+        "Apg",
+        "Apd"
       ]
     },
     {
@@ -291,6 +398,9 @@
       "alt": [
         "Rimljanom",
         "Römer"
+      ],
+      "abbr": [
+        "Rm"
       ]
     },
     {
@@ -298,27 +408,33 @@
       "alt": [
         "Korinčanom",
         "Korinther"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Galatians",
       "alt": [
         "Galačanom",
         "Galater"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Ephesians",
       "alt": [
         "Efežanom",
         "Epheser"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Philippians",
       "alt": [
         "Filipljanom",
-        "Philipper",
+        "Philipper"
+      ],
+      "abbr": [
+        "Php",
         "Flp"
       ]
     },
@@ -327,30 +443,43 @@
       "alt": [
         "Kološanom",
         "Kolosser"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Thessalonians",
       "alt": [
         "Tesaloničanom",
         "Thessalonicher"
-      ]
+      ],
+      "abbr": []
     },
     {
       "english": "Timothy",
       "alt": [
         "Timoteju",
         "Timotheus"
+      ],
+      "abbr": []
+    },
+    {
+      "english": "Titus",
+      "alt": [],
+      "abbr": [
+        "Tt"
       ]
     },
     {
       "english": "Philemon",
       "alt": [
         "Filemonu",
-        "Flm",
-        "Phlm",
-        "Phim",
         "Philemon"
+      ],
+      "abbr": [
+        "Flm",
+        "Phm",
+        "Phlm",
+        "Phim"
       ]
     },
     {
@@ -358,6 +487,9 @@
       "alt": [
         "Hebrejcem",
         "Hebräer"
+      ],
+      "abbr": [
+        "Hbr"
       ]
     },
     {
@@ -365,14 +497,19 @@
       "alt": [
         "Jakob",
         "Jakobus"
+      ],
+      "abbr": [
+        "Jas"
       ]
     },
     {
       "english": "Peter",
       "alt": [
         "Peter",
-        "Pt",
         "Petrus"
+      ],
+      "abbr": [
+        "Pt"
       ]
     },
     {
@@ -380,14 +517,21 @@
       "alt": [
         "Juda",
         "Judas"
+      ],
+      "abbr": [
+        "Jd"
       ]
     },
     {
       "english": "Revelation",
       "alt": [
+        "Apocalypse",
         "Razodetje",
-        "Offb",
         "Offenbarung"
+      ],
+      "abbr": [
+        "Offb",
+        "Rv"
       ]
     }
   ]
