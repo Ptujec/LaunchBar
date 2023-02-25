@@ -23,11 +23,46 @@ function run(argument) {
 
     if (result != undefined) {
       result = result.replace(/\n/g, ' ');
-      LaunchBar.performAction('Text vergrößern', result);
+      display(result);
     } else {
       LaunchBar.openURL(
         'http://de.wikipedia.org/wiki/' + encodeURIComponent(argument)
       );
     }
   }
+}
+
+const lineLength = 68;
+const max = 948;
+
+function display(argument) {
+  var argumentLength = argument.length;
+
+  if (argumentLength > max) {
+    argument = argument.substring(0, 949) + '…';
+  }
+
+  var lines = fold(argument, lineLength);
+
+  LaunchBar.displayInLargeType({
+    string: lines.join('\n').replace(/^\s/gm, ''),
+  });
+}
+
+function fold(s, n, a) {
+  a = a || [];
+  if (s.length <= n) {
+    a.push(s);
+    return a;
+  }
+  var line = s.substring(0, n);
+  var lastSpaceRgx = /\s(?!.*\s)/;
+  var idx = line.search(lastSpaceRgx);
+  var nextIdx = n;
+  if (idx > 0) {
+    line = line.substring(0, idx);
+    nextIdx = idx;
+  }
+  a.push(line);
+  return fold(s.substring(nextIdx), n, a);
 }
