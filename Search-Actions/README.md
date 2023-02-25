@@ -14,6 +14,7 @@
 
 - DuckDuckGo (with "Feeling ducky")
 - Kagi Search
+- Wikipedia (EN, DE)
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
 - Google Search (with DuckDuckGos version of Feeling Lucky)
