@@ -9,7 +9,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
-  if (!LaunchBar.options.commandKey) {
+  if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(
       'http://de.wikipedia.org/wiki/' + encodeURIComponent(argument)
     );
