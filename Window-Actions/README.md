@@ -16,7 +16,9 @@ For more options press `space` or `⌘↩`.
 
 The action is looking for windows that belong to the frontmost app first and follows the order of apps in the app switcher after that. Hidden windows/apps will not be included. 
 
-**Disclaimer**: Some windows may not resize properly for varying reasons. It depends on available screen space and required minimum window size. I also experienced some inconsistent weirdness with Safari in my testing.  
+## Disclaimer 
+
+Some windows may not resize properly for varying reasons. It depends on available screen space and required minimum window size. I also experienced some inconsistent weirdness with Safari in my testing. For the most part the actions should run very well though.  
 
 ## Download
 
