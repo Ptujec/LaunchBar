@@ -8,6 +8,10 @@
 
 <img src="like.png" width="600"/> 
 
+## Repeat
+
+<img src="repeat.png" width="600"/> 
+
 ## Add to Playlist
 
 I wish Apple would have better support for this in AppleScript. But with some GUI scripting it is possible to add the currently playing song to a playlist of your choice. 
