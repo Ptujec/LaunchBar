@@ -509,7 +509,11 @@ function alert(exclusions) {
     returnAS = returnAS + ' & windowCount';
   }
 
-  if (keepCurrent == true || keepCurrent == undefined) {
+  if (
+    keepCurrent == true ||
+    keepCurrent == undefined ||
+    LaunchBar.options.commandKey
+  ) {
     var appleScript =
       allAppsAS +
       currentAppAS +
@@ -559,6 +563,7 @@ function alert(exclusions) {
         LaunchBar.alert(
           'No Application to hide, no window to close.'.localize()
         );
+        LaunchBar.hide();
         return;
       }
     }
@@ -580,8 +585,12 @@ function alert(exclusions) {
   } else {
     if (closeFinderWindowsOption == false) {
       LaunchBar.alert('No Application to hide.'.localize());
+      LaunchBar.hide();
+      return;
     } else {
       LaunchBar.alert('No Application to hide, no window to close.'.localize());
+      LaunchBar.hide();
+      return;
     }
   }
 }
