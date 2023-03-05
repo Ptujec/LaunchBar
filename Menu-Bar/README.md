@@ -14,6 +14,8 @@ In addition to that the action remembers the last used item per application. So 
 
 **Note**: Version 1.0 excludes some menu bar items like e.g. "Apple", "Open recent" to avoid clutter. In an updated version the action will respect the rules you set up in Finbar.  
 
+Lastly, I feel I should mention [Ed's action](https://github.com/ewlcheng/launchbar-actions#launchbar-menu-bar-search). It sparked my interest in the functionality. It is a little bit slower because of it's reliance on AppleScript, but doesn't have any dependencies. 
+
 ## Download
 
 [Download LaunchBar Action: Menu Bar](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
