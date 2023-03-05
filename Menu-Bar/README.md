@@ -1,6 +1,6 @@
 # LaunchBar Action: Menu Bar (powered by Finbar)
 
-<img src="menubar.png" width="660"/> 
+<img src="menubar.jpg" width="637"/> 
 
 This action allows to trigger menu bar items right from within LaunchBar. **It requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran**. 
 
