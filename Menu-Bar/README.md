@@ -2,7 +2,7 @@
 
 <img src="menubar.jpg" width="637"/> 
 
-This action allows to trigger menu bar items right from within LaunchBar. **It requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran**. 
+This action allows to trigger [menu bar items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) right from within LaunchBar. **It requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran**. 
 
 The action will list all menu bar items of the frontmost application. You can then type to narrow down results. 
 
