@@ -6,7 +6,7 @@ This action allows to trigger [menu bar items](https://developer.apple.com/desig
 
 The action will list all menu bar items of the frontmost application. You can then type to narrow down results. 
 
-The main benefit of this approach is that it utilizes the superpower of LaunchBar. You’ll find stuff more easily without knowing the exact name. And LaunchBar learns and remembers your preferences. 
+**The main benefit of this approach is that it utilizes the superpower of LaunchBar.** You’ll find stuff more easily without knowing the exact name. And LaunchBar learns and remembers your preferences. 
 
 Let's say you want to export a PDF in Pages. You type `P` to find `PDF …` more easily, select the item and hit enter. The next time you type `P` the PDF export item will be on top of the list.
 
