@@ -18,7 +18,13 @@ The action is looking for windows that belong to the frontmost app first and fol
 
 ## Disclaimer 
 
-Some windows may not resize properly for varying reasons. It depends on available screen space and required minimum window size. I also experienced some inconsistent weirdness with Safari in my testing. For the most part the actions should run very well though.  
+Some windows may not resize properly for varying reasons. It depends on available screen space and required minimum window size. I also experienced some inconsistent weirdness with Safari in my testing. For the most part the actions should run very well though. 
+
+## Other useful information
+
+I know we are all about the keyboard. But I also like my trackpad gestures. So in addition to these I use a cool tool called [Swish](https://highlyopinionated.co/swish/). 
+
+Also it might be helpful to [learn how windows function](https://macmost.com/a-beginners-guide-to-resizing-mac-windows.html) in general and how to manipulate them with a mouse or trackpad. 
 
 ## Download
 
