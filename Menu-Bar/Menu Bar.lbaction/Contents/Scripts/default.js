@@ -72,7 +72,9 @@ function run() {
 }
 
 function click(item) {
-  LaunchBar.hide();
+  if (item.bundleID != 'at.obdev.LaunchBar') {
+    LaunchBar.hide();
+  }
 
   /// Remember Used Menu Item (per App)
   var recentItems = Action.preferences.recentItems;
