@@ -25,6 +25,8 @@
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.roeybiran.Finbar</string>
+	<key>LBAssociatedApplication</key>
+	<string>com.roeybiran.Finbar</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
