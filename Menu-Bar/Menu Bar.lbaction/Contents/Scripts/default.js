@@ -10,6 +10,7 @@ const finbarCLI = '/Applications/Finbar.app/Contents/MacOS/finbar-cli';
 
 function run() {
   var list = JSON.parse(LaunchBar.execute(finbarCLI, 'list'));
+
   var recentItems = Action.preferences.recentItems;
 
   var resultRecent = [];
@@ -44,7 +45,7 @@ function run() {
 
       if (item.shortcut != undefined) {
         // A thin space character (U+2009) is added between every character in the keyboard shortcut to mimic the menubar appearance and make the shortcut easier to read.
-        pushData.badge = item.shortcut.split("").join(" ");
+        pushData.badge = item.shortcut.split('').join(' ');
       }
 
       // Priorize recent item
