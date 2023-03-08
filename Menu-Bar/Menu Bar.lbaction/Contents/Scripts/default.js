@@ -45,7 +45,7 @@ function run() {
 
       if (item.shortcut != undefined) {
         // A thin space character (U+2009) is added between every character in the keyboard shortcut to mimic the menubar appearance and make the shortcut easier to read.
-        pushData.badge = item.shortcut.split('').join(' ');
+        pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
       }
 
       // Priorize recent item
