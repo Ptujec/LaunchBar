@@ -13,10 +13,18 @@ function run() {
 
   var recentItems = Action.preferences.recentItems;
 
+  var recentUIDs = [];
+  if (recentItems != undefined) {
+    recentItems.forEach(function (item) {
+      recentUIDs.push(item.bundleID + '.' + item.indices.join('.'));
+    });
+  }
+
   var resultRecent = [];
   var resultAll = [];
 
   list.forEach(function (item) {
+    var uID = item.bundleID + '.' + item.indices.join('.');
     var sub = item.path.join(' > ');
     var title = item.title;
 
@@ -39,7 +47,11 @@ function run() {
         subtitle: sub,
         icon: item.bundleID,
         action: 'click',
-        actionArgument: item,
+        actionArgument: {
+          bundleID: item.bundleID,
+          indices: item.indices,
+          title: item.title,
+        },
         actionRunsInBackground: true,
       };
 
@@ -48,20 +60,8 @@ function run() {
         pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
       }
 
-      // Priorize recent item
-      var recent = false;
-      var uID = item.bundleID + item.path.join(' ');
-
-      if (recentItems != undefined) {
-        recentItems.forEach(function (item) {
-          var recentUID = item.bundleID + item.path.join(' ');
-          if (recentUID == uID) {
-            recent = true;
-          }
-        });
-      }
-
-      if (recent == true) {
+      // Priorize recent items
+      if (recentUIDs.includes(uID)) {
         resultRecent.push(pushData);
       } else {
         resultAll.push(pushData);
