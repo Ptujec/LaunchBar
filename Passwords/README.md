@@ -6,11 +6,14 @@ You can view items also when 1Password is selected simply by pressing `space`.
 
 <img src="01.png" width="552"/>
 
+**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in a JSON file in the action's support folder, which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
+
+## Features 
+
 If you hit enter on a selected **login item** it will by default **open the url** and try to **autofill** the relevant information securely in your default browser. If you want to view the item in 1Password instead hit `⌘↩`.
 
 Other items will open in 1Password by default. If there is an url connected to an item (that is not a login item) you can open that with `⌘↩`. 
 
-**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in a JSON file in the action's support folder, which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
 
 ## Setup
 
