@@ -27,6 +27,7 @@ TODO:
   - require login?
   - update on open item
   - show/hide additional_information (subtitles)
+- Support for alternative Browser
 */
 
 const localJSONFile = Action.supportPath + '/list.json';
@@ -138,10 +139,18 @@ function actions(item) {
 }
 
 function setAccoundID() {
-  LaunchBar.hide();
   LaunchBar.execute(op, 'signin');
 
   var accountID = LaunchBar.execute(op, 'whoami', '--format=json');
+
+  if (accountID == '') {
+    LaunchBar.alert(
+      'Error',
+      'Something seems to have gone wrong. Try again to authenticate!'
+    );
+    LaunchBar.execute(op, 'signout');
+    return;
+  }
 
   accountID = JSON.parse(accountID).account_uuid;
   Action.preferences.accountID = accountID;
@@ -158,8 +167,14 @@ function getRandomID() {
 }
 
 function updateLocalData() {
+  LaunchBar.execute(op, 'signin');
   var list = LaunchBar.execute(op, 'item', 'list', '--format=json');
   if (list == '') {
+    LaunchBar.alert(
+      'Error',
+      'Something seems to have gone wrong. Try again to authenticate!'
+    );
+    LaunchBar.execute(op, 'signout');
     return;
   }
   File.writeText(list, localJSONFile);
@@ -190,6 +205,13 @@ function openURL(item) {
   }
 
   url = url + '?' + getRandomID() + '=' + item.id;
-  LaunchBar.openURL(url);
+
+  // TODO: alternative Browser support
+  if (LaunchBar.options.alternateKey) {
+    LaunchBar.openURL(url, 'Brave Browser');
+  } else {
+    LaunchBar.openURL(url);
+  }
+
   // updateLocalData();
 }
