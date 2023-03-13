@@ -36,11 +36,16 @@ TODO:
 */
 
 const localJSONFile = Action.supportPath + '/list.json';
+const op = '/usr/local/bin/op';
 
 function run() {
   var accountID = Action.preferences.accountID;
 
-  if (accountID == undefined || LaunchBar.options.controlKey) {
+  if (
+    !File.exists(op) ||
+    accountID == undefined ||
+    LaunchBar.options.controlKey
+  ) {
     var response = LaunchBar.alert(
       'First run info',
       'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\nOn first run your account ID will be stored in Action Preferences. You can reset your account ID any time with "⌃↩".\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh with "⌥↩".\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
@@ -140,13 +145,9 @@ function actions(item) {
 
 function setAccoundID() {
   LaunchBar.hide();
-  LaunchBar.execute('/usr/local/bin/op', 'signin');
+  LaunchBar.execute(op, 'signin');
 
-  var accountID = LaunchBar.execute(
-    '/usr/local/bin/op',
-    'whoami',
-    '--format=json'
-  );
+  var accountID = LaunchBar.execute(op, 'whoami', '--format=json');
 
   accountID = JSON.parse(accountID).account_uuid;
   Action.preferences.accountID = accountID;
@@ -163,12 +164,7 @@ function getRandomID() {
 }
 
 function updateLocalData() {
-  var list = LaunchBar.execute(
-    '/usr/local/bin/op',
-    'item',
-    'list',
-    '--format=json'
-  );
+  var list = LaunchBar.execute(op, 'item', 'list', '--format=json');
   if (list == '') {
     return;
   }
