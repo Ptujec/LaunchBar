@@ -1,5 +1,7 @@
 # LaunchBar Action: Menu Bar (powered by Finbar)
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
 <img src="menubar.jpg" width="637"/> 
 
 This action allows to trigger [menu bar items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) right from within LaunchBar. **It requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran**. 

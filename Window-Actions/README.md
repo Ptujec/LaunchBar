@@ -1,5 +1,7 @@
 # LaunchBar Window Actions
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
 <img src="windowactions.png" width="745"/> 
 
 Window actions are applied to the currently active window on your main screen. The action "Move window between screens" is made for two screens.
