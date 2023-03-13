@@ -27,12 +27,6 @@ TODO:
   - require login?
   - update on open item
   - show/hide additional_information (subtitles)
-- Warnung: 
-  - lokal aber unverschlüsselte Daten (keine Passwörter)
-  - wenn locked get autofill nicht … erst beim zweiten mal danach
-  - autofill geht manchmal nicht
-  - some category icons missing 
-- JSON verschlüsseln?
 */
 
 const localJSONFile = Action.supportPath + '/list.json';
