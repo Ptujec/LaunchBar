@@ -1,5 +1,7 @@
 # LaunchBar Action: Passwords for 1Password 8
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
 After a little setup (see below) you can view a list of all your login and other items from 1Password 8 in LaunchBar. 
 
 You can view items also when 1Password is selected simply by pressing `space`. 
