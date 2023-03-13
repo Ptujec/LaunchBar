@@ -38,12 +38,13 @@ function run() {
 
   if (
     !File.exists(op) ||
+    !File.exists(localJSONFile) ||
     accountID == undefined ||
     LaunchBar.options.controlKey
   ) {
     var response = LaunchBar.alert(
-      'First run info',
-      'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\nOn first run your account ID will be stored in Action Preferences. You can reset your account ID any time with "⌃↩".\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh with "⌥↩".\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
+      'First run info:',
+      'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\nOn first run your account ID will be stored in Action Preferences. You can reset your account ID in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nRetrieving data may take a while.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
       'Open Guide',
       'Get Started',
       'Cancel'
@@ -55,7 +56,15 @@ function run() {
         );
         break;
       case 1:
-        setAccoundID();
+        return [
+          {
+            title: 'Confirm and wait for notification',
+            action: 'setAccountID',
+            icon: 'com.1password.1password',
+            actionRunsInBackground: true,
+          },
+        ];
+        // setAccountID();
         break;
       case 2:
         break;
@@ -63,14 +72,27 @@ function run() {
     return;
   }
 
-  if (LaunchBar.options.alternateKey || !File.exists(localJSONFile)) {
-    list = JSON.parse(updateLocalData());
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
-  } else {
-    var list = File.readJSON(localJSONFile);
+  if (LaunchBar.options.alternateKey) {
+    return [
+      {
+        title: 'Update data',
+        icon: 'com.1password.1password',
+        action: 'updateLocalData',
+        actionRunsInBackground: true,
+      },
+      {
+        title: 'Reset account ID and data',
+        icon: 'com.1password.1password',
+        action: 'setAccountID',
+        actionRunsInBackground: true,
+      },
+    ];
   }
 
+  var list = File.readJSON(localJSONFile);
+
   var results = [];
+  var logins = [];
   list.forEach(function (item) {
     // Choose icon per category
     var category = item.category.toLowerCase();
@@ -104,15 +126,80 @@ function run() {
       // pushData.subtitle = category;
     }
 
-    results.push(pushData);
+    if (category == 'login') {
+      logins.push(pushData);
+    } else {
+      results.push(pushData);
+    }
   });
 
   results.sort(function (a, b) {
     return a.icon.localeCompare(b.icon) || a.title.localeCompare(b.title);
   });
 
-  return results;
+  logins.sort(function (a, b) {
+    return a.title > b.title;
+  });
+
+  var all = logins.concat(results);
+  return all;
 }
+
+// Set up and maintainance functions
+
+function setAccountID() {
+  LaunchBar.hide();
+  var test = signIn();
+
+  if (test != 'exit') {
+    LaunchBar.alert(test);
+    LaunchBar.hide();
+    LaunchBar.execute(op, 'signout');
+    return;
+  }
+
+  var accountID = LaunchBar.execute(op, 'whoami', '--format=json');
+  accountID = JSON.parse(accountID).account_uuid;
+  Action.preferences.accountID = accountID;
+
+  updateLocalData();
+}
+
+function updateLocalData() {
+  LaunchBar.hide();
+  var test = signIn();
+
+  if (test != 'exit') {
+    LaunchBar.alert(test);
+    LaunchBar.hide();
+    LaunchBar.execute(op, 'signout');
+    return;
+  }
+
+  var list = LaunchBar.execute(op, 'item', 'list', '--format=json');
+  File.writeText(list, localJSONFile);
+
+  LaunchBar.displayNotification({
+    title: 'Passwords Action',
+    string: 'Data is up to date.',
+  });
+  // return list;
+}
+
+function signIn() {
+  var test = LaunchBar.executeAppleScript(
+    'try',
+    '	set _e to do shell script "/usr/local/bin/op signin"',
+    'on error _e',
+    '	return _e as string',
+    '	tell application "LaunchBar" to activate',
+    'end try',
+    'tell me to "exit"'
+  ).trim();
+  return test;
+}
+
+// Action functions
 
 function actions(item) {
   LaunchBar.hide();
@@ -136,49 +223,6 @@ function actions(item) {
     }
   }
   return;
-}
-
-function setAccoundID() {
-  LaunchBar.execute(op, 'signin');
-
-  var accountID = LaunchBar.execute(op, 'whoami', '--format=json');
-
-  if (accountID == '') {
-    LaunchBar.alert(
-      'Error',
-      'Something seems to have gone wrong. Try again to authenticate!'
-    );
-    LaunchBar.execute(op, 'signout');
-    return;
-  }
-
-  accountID = JSON.parse(accountID).account_uuid;
-  Action.preferences.accountID = accountID;
-}
-
-function getRandomID() {
-  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-  let result = '';
-  for (var i = 0; i < 26; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-function updateLocalData() {
-  LaunchBar.execute(op, 'signin');
-  var list = LaunchBar.execute(op, 'item', 'list', '--format=json');
-  if (list == '') {
-    LaunchBar.alert(
-      'Error',
-      'Something seems to have gone wrong. Try again to authenticate!'
-    );
-    LaunchBar.execute(op, 'signout');
-    return;
-  }
-  File.writeText(list, localJSONFile);
-  return list;
 }
 
 function viewItem(item) {
@@ -214,4 +258,14 @@ function openURL(item) {
   }
 
   // updateLocalData();
+}
+
+function getRandomID() {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+  let result = '';
+  for (var i = 0; i < 26; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
 }
