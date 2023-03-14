@@ -44,9 +44,9 @@ function run() {
   ) {
     var response = LaunchBar.alert(
       'First run info:',
-      'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\n If you have multiple accounts you will need to choose one on first run. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nRetrieving data may take a while.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
-      'Open Guide',
-      'Get Started',
+      '1) This actions requires 1Password\'s CLI.\nPress "Open guide" for how to install and enable it.\n2) Then press "Get started" and choose your account. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nYou will get a notification when the setup/refresh is completed.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
+      'Open guide',
+      'Get started',
       'Cancel'
     );
     switch (response) {
@@ -152,10 +152,10 @@ function showAccounts() {
 
   accounts = JSON.parse(accounts);
 
-  if (accounts.length == 1) {
-    setAccountID(accounts[0].account_uuid);
-    return;
-  }
+  // if (accounts.length == 1) {
+  //   setAccountID(accounts[0].account_uuid);
+  //   return;
+  // }
 
   var results = [];
   accounts.forEach(function (item) {
@@ -163,6 +163,7 @@ function showAccounts() {
       title: item.url,
       subtitle: item.email,
       icon: 'accountTemplate',
+      badge: 'account',
       action: 'setAccountID',
       actionArgument: item.account_uuid,
       actionRunsInBackground: true,
@@ -179,6 +180,7 @@ function showAccounts() {
 }
 
 function setAccountID(accountID) {
+  LaunchBar.hide();
   Action.preferences.accountID = accountID;
   updateLocalData();
 }
