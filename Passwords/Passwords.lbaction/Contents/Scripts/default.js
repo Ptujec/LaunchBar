@@ -8,7 +8,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 Documentation: 
 - https://developer.1password.com/docs/cli/create-item/#retrieve-an-item
 - https://developer.1password.com/docs/cli/reference/management-commands/item#item-get
-- https://github.com/dteare/opbookmarks#app-integration
+- https://github.com/dteare/opbookmarks#app-integration (for url schemes and autofill info)
 
 Alfed Workflow: 
 - https://github.com/alfredapp/1password-workflow
@@ -24,8 +24,8 @@ TODO:
   - Social Security Number    
 - Detect if app is locked (waiting on info how to)
 - Settings
-  - require login?
-  - update on open item
+  - require login every time?
+  - update on open item?
   - show/hide additional_information (subtitles)
 - Support for alternative Browser
 */
@@ -44,7 +44,7 @@ function run() {
   ) {
     var response = LaunchBar.alert(
       'First run info:',
-      'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\nOn first run your account ID will be stored in Action Preferences. You can reset your account ID in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nRetrieving data may take a while.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
+      'This actions requires 1Password\'s CLI.\nPress "Open Guide" for how to install and enable it.\n If you have multiple accounts you will need to choose one on first run. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nRetrieving data may take a while.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
       'Open Guide',
       'Get Started',
       'Cancel'
@@ -56,16 +56,8 @@ function run() {
         );
         break;
       case 1:
-        return [
-          {
-            title: 'Confirm and wait for notification',
-            action: 'setAccountID',
-            icon: 'com.1password.1password',
-            actionRunsInBackground: true,
-          },
-        ];
-        // setAccountID();
-        break;
+        var output = showAccounts();
+        return output;
       case 2:
         break;
     }
@@ -75,15 +67,15 @@ function run() {
   if (LaunchBar.options.alternateKey) {
     return [
       {
-        title: 'Update data',
+        title: 'Choose account',
+        subtitle: 'This will also reset action data',
         icon: 'com.1password.1password',
-        action: 'updateLocalData',
-        actionRunsInBackground: true,
+        action: 'showAccounts',
       },
       {
-        title: 'Reset account ID and data',
+        title: 'Update action data',
         icon: 'com.1password.1password',
-        action: 'setAccountID',
+        action: 'updateLocalData',
         actionRunsInBackground: true,
       },
     ];
@@ -146,22 +138,48 @@ function run() {
 }
 
 // Set up and maintainance functions
+function showAccounts() {
+  var accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
 
-function setAccountID() {
-  LaunchBar.hide();
-  var test = signIn();
-
-  if (test != 'exit') {
-    LaunchBar.alert(test);
+  if (accounts == '') {
+    LaunchBar.alert(
+      'Error',
+      'Something went wrong. Please try again or contact me.'
+    );
     LaunchBar.hide();
-    LaunchBar.execute(op, 'signout');
     return;
   }
 
-  var accountID = LaunchBar.execute(op, 'whoami', '--format=json');
-  accountID = JSON.parse(accountID).account_uuid;
-  Action.preferences.accountID = accountID;
+  accounts = JSON.parse(accounts);
 
+  if (accounts.length == 1) {
+    setAccountID(accounts[0].account_uuid);
+    return;
+  }
+
+  var results = [];
+  accounts.forEach(function (item) {
+    var pushData = {
+      title: item.url,
+      subtitle: item.email,
+      icon: 'accountTemplate',
+      action: 'setAccountID',
+      actionArgument: item.account_uuid,
+      actionRunsInBackground: true,
+    };
+
+    if (item.account_uuid == Action.preferences.accountID) {
+      pushData.icon = 'selectedAccountTemplate';
+    }
+
+    results.push(pushData);
+  });
+
+  return results;
+}
+
+function setAccountID(accountID) {
+  Action.preferences.accountID = accountID;
   updateLocalData();
 }
 
@@ -181,15 +199,23 @@ function updateLocalData() {
 
   LaunchBar.displayNotification({
     title: 'Passwords Action',
-    string: 'Data is up to date.',
+    string: 'All set. Data is up to date.',
   });
   // return list;
 }
 
 function signIn() {
+  if (Action.preferences.accountID == undefined) {
+    var output = showAccounts();
+    return output;
+  }
+
+  var cmd =
+    '/usr/local/bin/op signin --account ' + Action.preferences.accountID;
+
   var test = LaunchBar.executeAppleScript(
     'try',
-    '	set _e to do shell script "/usr/local/bin/op signin"',
+    '	set _e to do shell script "' + cmd + '"',
     'on error _e',
     '	return _e as string',
     '	tell application "LaunchBar" to activate',
