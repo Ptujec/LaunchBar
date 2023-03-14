@@ -6,9 +6,15 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation: 
-- https://developer.1password.com/docs/cli/create-item/#retrieve-an-item
-- https://developer.1password.com/docs/cli/reference/management-commands/item#item-get
-- https://github.com/dteare/opbookmarks#app-integration (for url schemes and autofill info)
+
+  1Password:
+  - https://developer.1password.com/docs/cli/create-item/#retrieve-an-item
+  - https://developer.1password.com/docs/cli/reference/management-commands/item#item-get
+  - https://github.com/dteare/opbookmarks#app-integration (for url schemes and autofill info)
+
+  LaunchBar:
+  - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+  - https://www.obdev.at/resources/launchbar/help/URLCommands.html
 
 Alfed Workflow: 
 - https://github.com/alfredapp/1password-workflow
@@ -67,14 +73,13 @@ function run() {
   if (LaunchBar.options.alternateKey) {
     return [
       {
-        title: 'Choose account',
-        subtitle: 'This will also reset action data',
-        icon: 'com.1password.1password',
+        title: 'Choose account and update action data',
+        icon: 'accountsTemplate',
         action: 'showAccounts',
       },
       {
         title: 'Update action data',
-        icon: 'com.1password.1password',
+        icon: 'updateTemplate',
         action: 'updateLocalData',
         actionRunsInBackground: true,
       },
@@ -92,7 +97,6 @@ function run() {
 
     var pushData = {
       title: item.title,
-      subtitle: item.additional_information,
       label: item.vault.name,
       icon: category,
       updated: item.updated_at,
@@ -104,6 +108,10 @@ function run() {
       },
       actionRunsInBackground: true,
     };
+
+    if (item.additional_information != '—') {
+      pushData.subtitle = item.additional_information;
+    }
 
     if (item.urls != undefined) {
       item.urls.forEach(function (item) {
@@ -141,10 +149,10 @@ function run() {
 function showAccounts() {
   var accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
 
-  if (accounts == '') {
+  if (accounts.trim() == '[]') {
     LaunchBar.alert(
-      'Error',
-      'Something went wrong. Please try again or contact me.'
+      'Something went wrong!',
+      "Please check if you have 1Password-CLI enabled in 1Password settings.\nIf you have and it still doesn't work feel free to contact me."
     );
     LaunchBar.hide();
     return;
@@ -213,7 +221,13 @@ function updateLocalData() {
     title: 'Passwords Action',
     string: 'All set. Data is up to date.',
   });
-  // return list;
+
+  LaunchBar.execute(
+    '/usr/bin/afplay',
+    '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
+  );
+
+  LaunchBar.openURL('x-launchbar:select?abbreviation=Passwords');
 }
 
 function signIn() {
