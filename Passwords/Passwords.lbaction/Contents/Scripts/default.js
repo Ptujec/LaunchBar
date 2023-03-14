@@ -192,11 +192,21 @@ function updateLocalData() {
   if (test != 'exit') {
     LaunchBar.alert(test);
     LaunchBar.hide();
-    LaunchBar.execute(op, 'signout');
+    LaunchBar.execute(
+      op,
+      'signout',
+      '--account=' + Action.preferences.accountID
+    );
     return;
   }
 
-  var list = LaunchBar.execute(op, 'item', 'list', '--format=json');
+  var list = LaunchBar.execute(
+    op,
+    'item',
+    'list',
+    '--account=' + Action.preferences.accountID,
+    '--format=json'
+  );
   File.writeText(list, localJSONFile);
 
   LaunchBar.displayNotification({

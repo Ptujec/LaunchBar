@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Passwords</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.5</string>
+	<string>1.0.6</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.1password.1password</string>
 	<key>LBDescription</key>
@@ -19,7 +19,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBSummary</key>
-		<string>⌥↩ = Settings </string>
+		<string>⌥↩ = Settings</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
