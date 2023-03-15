@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>todoist.png</string>
+	<string>com.todoist.mac.Todoist</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.TodoistInbox</string>
 	<key>CFBundleName</key>
 	<string>Todoist Inbox</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.5</string>
+	<string>2.0.6</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.todoist.mac.Todoist</string>
 	<key>LBDescription</key>
