@@ -14,12 +14,12 @@ You can view items also when 1Password is selected simply by pressing `space`.
 
 If you hit enter on a selected **login item** it will by default **open the url** and try to **autofill** the relevant information securely in your default browser. If you want to view the item in 1Password instead hit `⌘↩`.
 
-Other items will open in 1Password by default. If there is an url connected to an item (that is not a login item) you can open that with `⌘↩`. 
+Other items will **open in 1Password** by default. If there is an url connected to an item (that is not a login item) you can open that with `⌘↩`. 
 
 
 ## Setup
 
-This action requires 1Password's CLI. [Learn how to install and set it up on their website!](https://developer.1password.com/docs/cli/get-started#install). 
+This action requires 1Password's CLI. [Learn how to install and set it up on their website!](https://developer.1password.com/docs/cli/get-started#install). (Follow the "Install" instructions and also make sure you do step 1 of "Sign in".)
 
 ## Limitations
 
