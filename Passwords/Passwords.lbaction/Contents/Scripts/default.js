@@ -21,13 +21,12 @@ Alfed Workflow:
 Raycast Extension:
 - https://github.com/khasbilegt/1Password/tree/main
 
+
+
+
+
+
 TODO:
-- Missing Icons: 
-  - Database  
-  - Driver License                 
-  - Outdoor License              
-  - Server
-  - Social Security Number    
 - Detect if app is locked (waiting on info how to)
 - Settings
   - require login every time?
@@ -248,6 +247,7 @@ function signIn() {
     'end try',
     'tell me to "exit"'
   ).trim();
+
   return test;
 }
 
@@ -279,8 +279,8 @@ function actions(item) {
 
 function viewItem(item) {
   // TODO: Detec if 1Password is locked and only use this when locked
-  var fileURL = File.fileURLForPath('/Applications/1Password.app');
-  LaunchBar.openURL(fileURL);
+  LaunchBar.openURL('file:///Applications/1Password.app/');
+  //
 
   var urlScheme =
     'onepassword://view-item/i?a=' +
@@ -295,6 +295,9 @@ function viewItem(item) {
 }
 
 function openURL(item) {
+  // TODO: Detec if 1Password is locked and only use this when locked
+  // signIn();
+
   var url = item.url;
   if (!url.startsWith('http')) {
     url = 'https://' + url;
