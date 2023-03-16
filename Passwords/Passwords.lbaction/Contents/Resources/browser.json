@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Safari",
+    "bundleID": "com.apple.safari"
+  },
+  {
+    "title": "Arc",
+    "bundleID": "company.thebrowser.browser"
+  },
+  {
+    "title": "Brave",
+    "bundleID": "com.brave.browser"
+  },
+  {
+    "title": "Vivaldi",
+    "bundleID": "com.vivaldi.vivaldi"
+  },
+  {
+    "title": "Firefox",
+    "bundleID": "org.mozilla.firefox"
+  },
+  {
+    "title": "Edge",
+    "bundleID": "com.microsoft.msedge"
+  },
+  {
+    "title": "Chrome",
+    "bundleID": "com.google.chrome"
+  },
+  {
+    "title": "Chromium",
+    "bundleID": "org.chromium.Chromium"
+  },
+  {
+    "title": "Opera",
+    "bundleID": "com.operasoftware.Opera"
+  }
+]

@@ -1,12 +1,11 @@
-/* 
+/*
 Passwords - 1Password 8 Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-03-10
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-Documentation: 
-
+Documentation:
   1Password:
   - https://developer.1password.com/docs/cli/create-item/#retrieve-an-item
   - https://developer.1password.com/docs/cli/reference/management-commands/item#item-get
@@ -16,27 +15,23 @@ Documentation:
   - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
   - https://www.obdev.at/resources/launchbar/help/URLCommands.html
 
-Alfed Workflow: 
+Alfed Workflow:
 - https://github.com/alfredapp/1password-workflow
 Raycast Extension:
 - https://github.com/khasbilegt/1Password/tree/main
 
-
-
-
-
-
 TODO:
-- Detect if app is locked (waiting on info how to)
+- German localization
 - Settings
-  - require login every time?
   - update on open item?
   - show/hide additional_information (subtitles)
-- Support for alternative Browser
 */
 
 const localJSONFile = Action.supportPath + '/list.json';
 const op = '/usr/local/bin/op';
+const altBrowser = File.readJSON(
+  Action.path + '/Contents/Resources/browser.json'
+);
 
 function run() {
   var accountID = Action.preferences.accountID;
@@ -49,7 +44,7 @@ function run() {
   ) {
     var response = LaunchBar.alert(
       'First run info:',
-      '1) This actions requires 1Password\'s CLI.\nPress "Open guide" for how to install and enable it.\n2) Then press "Get started" and choose your account. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nYou will get a notification when the setup/refresh is completed.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
+      '1) This actions requires 1Password\'s CLI.\nPress "Open guide" for how to install and enable it. (Follow the "Install" instructions and also make sure you do step 1 of "Sign in".)\n2) Then press "Get started" and choose your account. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nYou will get a notification when the setup/refresh is completed.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
       'Open guide',
       'Get started',
       'Cancel'
@@ -70,19 +65,8 @@ function run() {
   }
 
   if (LaunchBar.options.alternateKey) {
-    return [
-      {
-        title: 'Choose account and update action data',
-        icon: 'accountsTemplate',
-        action: 'showAccounts',
-      },
-      {
-        title: 'Update action data',
-        icon: 'updateTemplate',
-        action: 'updateLocalData',
-        actionRunsInBackground: true,
-      },
-    ];
+    var output = settings();
+    return output;
   }
 
   var list = File.readJSON(localJSONFile);
@@ -122,7 +106,6 @@ function run() {
 
     if (!File.exists(iconPath)) {
       pushData.icon = 'genericTemplate';
-      // pushData.subtitle = category;
     }
 
     if (category == 'login') {
@@ -144,7 +127,34 @@ function run() {
   return all;
 }
 
-// Set up and maintainance functions
+// SET UP AND MAINTAINANCE FUNCTIONS
+
+function settings() {
+  if (Action.preferences.secondaryBrowser != undefined) {
+    var browserIcon = Action.preferences.secondaryBrowser;
+  } else {
+    var browserIcon = 'browserTemplate';
+  }
+  return [
+    {
+      title: 'Choose account and update action data',
+      icon: 'accountsTemplate',
+      action: 'showAccounts',
+    },
+    {
+      title: 'Update action data',
+      icon: 'updateTemplate',
+      action: 'updateLocalData',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Secondary browser',
+      icon: browserIcon,
+      children: chooseSecondaryBrowser(),
+    },
+  ];
+}
+
 function showAccounts() {
   var accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
 
@@ -158,11 +168,6 @@ function showAccounts() {
   }
 
   accounts = JSON.parse(accounts);
-
-  // if (accounts.length == 1) {
-  //   setAccountID(accounts[0].account_uuid);
-  //   return;
-  // }
 
   var results = [];
   accounts.forEach(function (item) {
@@ -196,7 +201,7 @@ function updateLocalData() {
   LaunchBar.hide();
   var test = signIn();
 
-  if (test != 'exit') {
+  if (test != 'success') {
     LaunchBar.alert(test);
     LaunchBar.hide();
     LaunchBar.execute(
@@ -238,20 +243,39 @@ function signIn() {
   var cmd =
     '/usr/local/bin/op signin --account ' + Action.preferences.accountID;
 
-  var test = LaunchBar.executeAppleScript(
+  return LaunchBar.executeAppleScript(
     'try',
     '	set _e to do shell script "' + cmd + '"',
     'on error _e',
     '	return _e as string',
     '	tell application "LaunchBar" to activate',
     'end try',
-    'tell me to "exit"'
+    'tell me to "exit"',
+    'return "success"'
   ).trim();
-
-  return test;
 }
 
-// Action functions
+function chooseSecondaryBrowser() {
+  var result = [];
+  altBrowser.forEach(function (item) {
+    result.push({
+      title: item.title,
+      icon: item.bundleID,
+      action: 'setSecondaryBrowser',
+      actionArgument: item.bundleID,
+    });
+  });
+  return result;
+}
+
+function setSecondaryBrowser(bID) {
+  Action.preferences.secondaryBrowser = bID;
+
+  var output = settings();
+  return output;
+}
+
+// ACTION FUNCTIONS
 
 function actions(item) {
   LaunchBar.hide();
@@ -278,9 +302,7 @@ function actions(item) {
 }
 
 function viewItem(item) {
-  // TODO: Detec if 1Password is locked and only use this when locked
   LaunchBar.openURL('file:///Applications/1Password.app/');
-  //
 
   var urlScheme =
     'onepassword://view-item/i?a=' +
@@ -291,12 +313,21 @@ function viewItem(item) {
     item.id;
 
   LaunchBar.openURL(urlScheme);
-  // updateLocalData();
 }
 
 function openURL(item) {
-  // TODO: Detec if 1Password is locked and only use this when locked
-  // signIn();
+  // Checks if the menu bar item to lock 1P is enabled. So 'true' means 1P is unlocked. If it is false it will try to sign in. The current method is not ideal because it relies on GUI scripting. But it seems currently the only possible way.
+  var test = checkLocked();
+  if (test != 'success') {
+    LaunchBar.alert(test);
+    LaunchBar.hide();
+    LaunchBar.execute(
+      op,
+      'signout',
+      '--account=' + Action.preferences.accountID
+    );
+    return;
+  }
 
   var url = item.url;
   if (!url.startsWith('http')) {
@@ -305,9 +336,10 @@ function openURL(item) {
 
   url = url + '?' + getRandomID() + '=' + item.id;
 
-  // TODO: alternative Browser support
+  // Secondary Browser
   if (LaunchBar.options.alternateKey) {
-    LaunchBar.openURL(url, 'Brave Browser');
+    // LaunchBar falls back to default browser is no secondary browser is set up in action preferences
+    LaunchBar.openURL(url, Action.preferences.secondaryBrowser);
   } else {
     LaunchBar.openURL(url);
   }
@@ -323,4 +355,39 @@ function getRandomID() {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
+}
+
+function checkLocked() {
+  if (Action.preferences.accountID == undefined) {
+    var output = showAccounts();
+    return output;
+  }
+
+  var cmd =
+    '/usr/local/bin/op signin --account ' + Action.preferences.accountID;
+
+  return LaunchBar.executeAppleScript(
+    'tell application "System Events"',
+    '	if (name of processes) contains "1Password" then',
+    '		try',
+    '			tell process "1Password"',
+    '				set AXEnabled to value of attribute "AXEnabled" of menu item 5 of menu "1Password" of menu bar item "1Password" of menu bar 1 of application process "1Password" of application "System Events"',
+    '			end tell',
+    '		end try',
+    '	else',
+    '		set AXEnabled to false',
+    '	end if',
+    '	',
+    '	if AXEnabled is false then',
+    '		try',
+    '			set _e to do shell script "' + cmd + '"',
+    '		on error _e',
+    '			return _e as string',
+    '			tell application "LaunchBar" to activate',
+    '		end try',
+    '		tell me to "exit"',
+    '	end if',
+    'end tell',
+    'return "success"'
+  ).trim();
 }

@@ -2,32 +2,36 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-After a little setup (see below) you can view a list of all your login and other items from 1Password 8 in LaunchBar. 
+<img src="01.png" width="634"/>
 
-You can view items also when 1Password is selected simply by pressing `space`. 
-
-<img src="01.png" width="552"/>
-
-**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in a JSON file in the action's support folder, which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
+After a little setup ([see below](#setup)) you can view a list of all your login and other items from 1Password 8 in LaunchBar. 
 
 ## Features 
 
-If you hit enter on a selected **login item** it will by default **open the url** and try to **autofill** the relevant information securely in your default browser. If you want to view the item in 1Password instead hit `⌘↩`.
+- You can view items also when 1Password is selected simply by pressing `space` or `→`. 
+- Login items will open and autofill by default. 
+- Other items will open in 1Password by default. 
+- You can alter the default behavior with `⌘↩`. 
+- You can open login items in a secondary browser with `⌥↩`. (Other items that contain an URL with `⌥⌘↩`.) 
 
-Other items will **open in 1Password** by default. If there is an url connected to an item (that is not a login item) you can open that with `⌘↩`. 
+## Settings 
 
+In action settings you can choose a secondary browser and refresh data. Access the settings by selecting the action and then press `⌥↩`.
+
+<img src="02.png" width="634"/>
 
 ## Setup
 
-This action requires 1Password's CLI. [Learn how to install and set it up on their website!](https://developer.1password.com/docs/cli/get-started#install). (Follow the "Install" instructions and also make sure you do step 1 of "Sign in".)
+This action requires 1Password's CLI. [Learn how to install and set it up on their website!](https://developer.1password.com/docs/cli/get-started#install). \
+Follow the "Install" instructions and also make sure you do step 1 of "Sign in".
+
+**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in a JSON file in the action's support folder, which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
 
 ## Limitations
 
-1) The action does not copy any passwords. In theory it would be possible to copy passwords to the clipboard. But those would also appear in your clipboard history. You would need to exclude LaunchBar from the clipboard history to prevent that. But this in turn would effect every other built in or custom action. 
-
-2) Because this is just a standard user action there is no indexing going on in the background. To refresh data press `⌥↩`. (You need to do that with the action selected. I won't work if you have 1Password selected.)
-
-3) Autofill and view item in 1Password actions won't work if 1Password 8 is locked.  
+- The action does not copy any passwords. In theory it would be possible to copy passwords to the clipboard. But those would also appear in your clipboard history. You would need to exclude LaunchBar from the clipboard history to prevent that. But this in turn would effect every other built in or custom action. 
+- Because this is just a standard user action there is no indexing going on in the background. You need to refresh data manually in the action settings. `⌥↩`. Access the settings by selecting the action and then press `⌥↩`.
+- You need to be signed-in either in the CLI or 1Password for autofill to work. You get a prompt if that is not the case. But it may still fail if you use it for the first time after a sign-in. Just open the item again. It should be still selected in LaunchBar. (The 1Password team is looking into this issue.)  
 
 ## Download
 
