@@ -159,10 +159,23 @@ function showAccounts() {
   var accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
 
   if (accounts.trim() == '[]') {
-    LaunchBar.alert(
+    var response = LaunchBar.alert(
       'Something went wrong!',
-      "Please check if you have 1Password-CLI enabled in 1Password settings.\nIf you have and it still doesn't work feel free to contact me."
+      "Please check if you have 1Password-CLI enabled in 1Password Settings/Developer.\nIf you have and it still doesn't work let me know.",
+      'Open 1Password Settings',
+      'Report Issue',
+      'Cancel'
     );
+    switch (response) {
+      case 0:
+        LaunchBar.openURL('onepassword://settings');
+        break;
+      case 1:
+        LaunchBar.openURL('https://github.com/Ptujec/LaunchBar/issues');
+        break;
+      case 2:
+        break;
+    }
     LaunchBar.hide();
     return;
   }
