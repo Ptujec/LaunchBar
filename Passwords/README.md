@@ -9,7 +9,7 @@ After a little setup ([see below](#setup)) you can view a list of all your login
 ## Features 
 
 - You can view items also when 1Password is selected simply by pressing `space` or `→`. 
-- Login items will open and autofill by default. 
+- Login items will open and autofill by default in your default browser (as long as they have an URL). 
 - Other items will open in 1Password by default. 
 - You can alter the default behavior with `⌘↩`. 
 - You can open login items in a secondary browser with `⌥↩`. (Other items that contain an URL with `⌥⌘↩`.) 
