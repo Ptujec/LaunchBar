@@ -27,7 +27,7 @@ TODO:
   - show/hide additional_information (subtitles)
 */
 
-const localJSONFile = Action.supportPath + '/list.json';
+const localDataFile = Action.supportPath + '/list';
 const op = '/usr/local/bin/op';
 const altBrowser = File.readJSON(
   Action.path + '/Contents/Resources/browser.json'
@@ -38,7 +38,7 @@ function run() {
 
   if (
     !File.exists(op) ||
-    !File.exists(localJSONFile) ||
+    !File.exists(localDataFile) ||
     accountID == undefined ||
     LaunchBar.options.controlKey
   ) {
@@ -69,7 +69,9 @@ function run() {
     return output;
   }
 
-  var list = File.readJSON(localJSONFile);
+  var list = JSON.parse(
+    File.readText(localDataFile).toStringFromBase64String()
+  );
 
   var results = [];
   var logins = [];
@@ -232,7 +234,10 @@ function updateLocalData() {
     '--account=' + Action.preferences.accountID,
     '--format=json'
   );
-  File.writeText(list, localJSONFile);
+
+  // Convert to a Base64 String
+  list = list.toBase64Data();
+  File.writeData(list, localDataFile);
 
   LaunchBar.displayNotification({
     title: 'Passwords Action',
@@ -384,7 +389,7 @@ function checkLocked() {
     '	if (name of processes) contains "1Password" then',
     '		try',
     '			tell process "1Password"',
-    '				set AXEnabled to value of attribute "AXEnabled" of menu item 5 of menu "1Password" of menu bar item "1Password" of menu bar 1 of application process "1Password" of application "System Events"',
+    '				set AXEnabled to value of attribute "AXEnabled" of menu item 5 of menu "1Password" of menu bar item "1Password" of menu bar 1',
     '			end tell',
     '		end try',
     '	else',
@@ -401,6 +406,7 @@ function checkLocked() {
     '		tell me to "exit"',
     '	end if',
     'end tell',
+    // 'delay 5', // just for testing
     'return "success"'
   ).trim();
 }
