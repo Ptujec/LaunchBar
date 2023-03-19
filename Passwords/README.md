@@ -25,7 +25,7 @@ In action settings you can choose a secondary browser and refresh data. Access t
 This action requires 1Password's CLI. [Learn how to install and set it up on their website!](https://developer.1password.com/docs/cli/get-started#install). \
 Follow the "Install" instructions and also make sure you do step 1 of "Sign in".
 
-**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in a JSON file in the action's support folder, which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
+**Note:** The data received from the CLI does not contain any passwords or secure information. You can enter `op item list --format=json` in the Terminal to see what data is retrieved. For performance reasons the output is stored in the action's support folder (converted to a Base64 String), which can be found in `~/Library/Application Support/LaunchBar/Action Support/`.
 
 ## Limitations
 
