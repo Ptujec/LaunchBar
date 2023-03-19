@@ -22,9 +22,6 @@ Raycast Extension:
 
 TODO:
 - German localization
-- Settings
-  - update on open item?
-  - show/hide additional_information (subtitles)
 */
 
 const localDataFile = Action.supportPath + '/list';
@@ -56,8 +53,7 @@ function run() {
         );
         break;
       case 1:
-        var output = showAccounts();
-        return output;
+        return showAccounts();
       case 2:
         break;
     }
@@ -65,8 +61,7 @@ function run() {
   }
 
   if (LaunchBar.options.alternateKey) {
-    var output = settings();
-    return output;
+    return settings();
   }
 
   var list = JSON.parse(
@@ -139,6 +134,11 @@ function settings() {
   }
   return [
     {
+      title: 'Secondary browser',
+      icon: browserIcon,
+      children: chooseSecondaryBrowser(),
+    },
+    {
       title: 'Choose account and update action data',
       icon: 'accountsTemplate',
       action: 'showAccounts',
@@ -150,9 +150,10 @@ function settings() {
       actionRunsInBackground: true,
     },
     {
-      title: 'Secondary browser',
-      icon: browserIcon,
-      children: chooseSecondaryBrowser(),
+      title: 'Update 1Password CLI',
+      icon: 'cliTemplate',
+      action: 'updateCLI',
+      actionRunsInBackground: true,
     },
   ];
 }
@@ -254,8 +255,7 @@ function updateLocalData() {
 
 function signIn() {
   if (Action.preferences.accountID == undefined) {
-    var output = showAccounts();
-    return output;
+    return showAccounts();
   }
 
   var cmd =
@@ -273,6 +273,15 @@ function signIn() {
   ).trim();
 }
 
+function updateCLI() {
+  LaunchBar.executeAppleScript(
+    'tell application "Terminal"',
+    '	activate',
+    '	do script "op  update"',
+    'end tell'
+  );
+}
+
 function chooseSecondaryBrowser() {
   var result = [];
   altBrowser.forEach(function (item) {
@@ -288,9 +297,7 @@ function chooseSecondaryBrowser() {
 
 function setSecondaryBrowser(bID) {
   Action.preferences.secondaryBrowser = bID;
-
-  var output = settings();
-  return output;
+  return settings();
 }
 
 // ACTION FUNCTIONS
@@ -377,8 +384,7 @@ function getRandomID() {
 
 function checkLocked() {
   if (Action.preferences.accountID == undefined) {
-    var output = showAccounts();
-    return output;
+    return showAccounts();
   }
 
   var cmd =
