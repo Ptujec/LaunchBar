@@ -19,10 +19,9 @@ Alfed Workflow:
 - https://github.com/alfredapp/1password-workflow
 Raycast Extension:
 - https://github.com/khasbilegt/1Password/tree/main
-
-TODO:
-- German localization
 */
+
+String.prototype.localizationTable = 'default';
 
 const localDataFile = Action.supportPath + '/list';
 const op = '/usr/local/bin/op';
@@ -40,11 +39,11 @@ function run() {
     LaunchBar.options.controlKey
   ) {
     var response = LaunchBar.alert(
-      'First run info:',
-      '1) This actions requires 1Password\'s CLI.\nPress "Open guide" for how to install and enable it. (Follow the "Install" instructions and also make sure you do step 1 of "Sign in".)\n2) Then press "Get started" and choose your account. You can pick a different one later in action settings (⌥↩).\nFor performance reasons the output is stored in a JSON file in the action\'s support folder. Refresh data in action settings (⌥↩).\nYou will get a notification when the setup/refresh is completed.\nBoth the Preferences.plist and the JSON file can be found here: ~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/.',
-      'Open guide',
-      'Get started',
-      'Cancel'
+      'First run info:'.localize(),
+      '1) This action requires 1Password\'s CLI. Press "Open guide" for how to install and enable it.\n2) Then press "Get started" and choose your account.\nFor performance reasons the output is stored the action\'s support folder (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/).\nRefresh data in action settings (⌥↩).'.localize(),
+      'Open guide'.localize(),
+      'Get started'.localize(),
+      'Cancel'.localize()
     );
     switch (response) {
       case 0:
@@ -105,11 +104,13 @@ function run() {
       pushData.icon = 'genericTemplate';
     }
 
+    // if (item.vault.name == 'Screenshots') {
     if (category == 'login') {
       logins.push(pushData);
     } else {
       results.push(pushData);
     }
+    // }
   });
 
   results.sort(function (a, b) {
@@ -134,23 +135,23 @@ function settings() {
   }
   return [
     {
-      title: 'Secondary browser',
+      title: 'Secondary browser'.localize(),
       icon: browserIcon,
       children: chooseSecondaryBrowser(),
     },
     {
-      title: 'Choose account and update action data',
+      title: 'Choose account and update action data'.localize(),
       icon: 'accountsTemplate',
       action: 'showAccounts',
     },
     {
-      title: 'Update action data',
+      title: 'Update action data'.localize(),
       icon: 'updateTemplate',
       action: 'updateLocalData',
       actionRunsInBackground: true,
     },
     {
-      title: 'Update 1Password CLI',
+      title: 'Update 1Password CLI'.localize(),
       icon: 'cliTemplate',
       action: 'updateCLI',
       actionRunsInBackground: true,
@@ -163,11 +164,11 @@ function showAccounts() {
 
   if (accounts.trim() == '[]') {
     var response = LaunchBar.alert(
-      'Something went wrong!',
-      "Please check if you have 1Password-CLI enabled in 1Password Settings/Developer.\nIf you have and it still doesn't work let me know.",
-      'Open 1Password Settings',
-      'Report Issue',
-      'Cancel'
+      'Something went wrong!'.localize(),
+      "Please check if you have 1Password-CLI enabled in 1Password Settings/Developer.\nIf you have and it still doesn't work let me know.".localize(),
+      'Open 1Password Settings'.localize(),
+      'Report Issue'.localize(),
+      'Cancel'.localize()
     );
     switch (response) {
       case 0:
@@ -191,7 +192,7 @@ function showAccounts() {
       title: item.url,
       subtitle: item.email,
       icon: 'accountTemplate',
-      badge: 'account',
+      badge: 'account'.localize(),
       action: 'setAccountID',
       actionArgument: item.account_uuid,
       actionRunsInBackground: true,
@@ -241,8 +242,8 @@ function updateLocalData() {
   File.writeData(list, localDataFile);
 
   LaunchBar.displayNotification({
-    title: 'Passwords Action',
-    string: 'All set. Data is up to date.',
+    title: 'Passwords Action'.localize(),
+    string: 'All set. Data is up to date.'.localize(),
   });
 
   LaunchBar.execute(
@@ -250,7 +251,9 @@ function updateLocalData() {
     '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
   );
 
-  LaunchBar.openURL('x-launchbar:select?abbreviation=Passwords');
+  LaunchBar.openURL(
+    'x-launchbar:select?abbreviation=' + 'Passwords'.localize()
+  );
 }
 
 function signIn() {

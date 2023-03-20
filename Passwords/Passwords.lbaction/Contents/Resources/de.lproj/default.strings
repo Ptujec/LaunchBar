@@ -1,0 +1,17 @@
+"Cancel" = "Abbrechen";
+"Get started" = "Loslegen";
+"Open guide" = "Anleitung öffnen";
+"First run info:" = "Infos zum Start:";
+'1) This action requires 1Password\'s CLI. Press "Open guide" for how to install and enable it.\n2) Then press "Get started" and choose your account.\nFor performance reasons the output is stored the action\'s support folder (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/).\nRefresh data in action settings (⌥↩).' = '1) Diese Aktion erfordert 1Password CLI. Drücken Sie auf "Anleitung öffnen", um zu erfahren, wie Sie es installieren und aktivieren.\n2) Drücken Sie dann auf "Loslegen" und wählen Sie Ihr Benutzerkonto aus.\nDamit die Aktion flüssig läuft werden die Daten im Support-Ordner der Aktion gespeichert (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/).\nDie Daten können in den Aktionseinstellungen aktualisiert werden (⌥↩).';
+"Secondary browser" = "Zweitbrowser auswählen";
+"Choose account and update action data" = "Benutzerkonto auswählen und Daten aktualisieren";
+"Update action data" = "Daten aktualisieren";
+"Update 1Password CLI" = "1Password CLI aktualisieren";
+"Passwords" = "Passw%C3%B6rter";
+"Something went wrong!" = "Etwas ist schief gelaufen!";
+"Please check if you have 1Password-CLI enabled in 1Password Settings/Developer.\nIf you have and it still doesn't work let me know." = "Bitte überprüfen Sie, ob Sie 1Password-CLI in 1Password/Einstellungen/Entwickler aktiviert haben.\nWenn es trotzdem nicht funktioniert, lassen Sie es mich wissen.";
+"Open 1Password Settings" = "1Password Einstellungen öffnen";
+"Report Issue" = "Problem melden";
+"account" = "Benutzerkonto";
+"Passwords Action" = "Passwörter Aktion";
+"All set. Data is up to date." = "Alles bereit. Die Daten sind auf dem neuesten Stand.";
