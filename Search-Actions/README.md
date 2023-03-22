@@ -18,6 +18,7 @@
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
 - Google Search (with DuckDuckGos version of Feeling Lucky)
+- ARD Mediathek
 
 The added benefit of these actions over a custom search template are the suggestions. There are built in versions of Google and DuckDuckGo, but without some of the features.
 
