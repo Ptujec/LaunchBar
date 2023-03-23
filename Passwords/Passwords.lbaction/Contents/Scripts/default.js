@@ -18,16 +18,13 @@ Documentation:
 Alfed Workflow:
 - https://github.com/alfredapp/1password-workflow
 Raycast Extension:
-- https://github.com/khasbilegt/1Password/tree/main
+- https://github.com/raycast/extensions/tree/a773745cd8555874d9d528c629308836d55ed6bf/extensions/1password/
 */
 
 String.prototype.localizationTable = 'default';
 
 const localDataFile = Action.supportPath + '/list';
 const op = '/usr/local/bin/op';
-const altBrowser = File.readJSON(
-  Action.path + '/Contents/Resources/browser.json'
-);
 
 function run() {
   var accountID = Action.preferences.accountID;
@@ -286,14 +283,63 @@ function updateCLI() {
 }
 
 function chooseSecondaryBrowser() {
+  // List all installed browser (from /Applications/ & Safari) execpt the default browser and the currently chosen browser
+
+  var secondaryBrowser = Action.preferences.secondaryBrowser;
+  if (secondaryBrowser == undefined) {
+    secondaryBrowser = '';
+  }
+
+  var plist = File.readPlist(
+    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
+  );
+
+  var defaultBrowser = '';
+  plist.LSHandlers.forEach(function (item) {
+    if (item.LSHandlerURLScheme == 'http') {
+      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
+    }
+  });
+
   var result = [];
-  altBrowser.forEach(function (item) {
+  if (defaultBrowser != 'com.apple.safari') {
     result.push({
-      title: item.title,
-      icon: item.bundleID,
+      title: 'Safari',
+      icon: 'com.apple.Safari',
       action: 'setSecondaryBrowser',
-      actionArgument: item.bundleID,
+      actionArgument: 'com.apple.Safari',
     });
+  }
+
+  var installedApps = File.getDirectoryContents('/Applications/');
+  installedApps.forEach(function (item) {
+    if (item.endsWith('.app')) {
+      var infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+
+      if (File.exists(infoPlistPath)) {
+        var infoPlist = File.readPlist(infoPlistPath);
+        var bundleName = infoPlist.CFBundleName;
+        var appID = infoPlist.CFBundleIdentifier;
+        var activityTypes = infoPlist.NSUserActivityTypes;
+
+        if (
+          activityTypes != undefined &&
+          defaultBrowser.toLowerCase() != appID.toLowerCase() &&
+          secondaryBrowser.toLowerCase() != appID.toLowerCase()
+        ) {
+          activityTypes.forEach(function (item) {
+            if (item == 'NSUserActivityTypeBrowsingWeb') {
+              result.push({
+                title: bundleName,
+                icon: appID,
+                action: 'setSecondaryBrowser',
+                actionArgument: appID,
+              });
+            }
+          });
+        }
+      }
+    }
   });
   return result;
 }
