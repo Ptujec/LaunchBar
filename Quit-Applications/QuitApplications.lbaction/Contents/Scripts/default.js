@@ -33,9 +33,9 @@ function run() {
     var text = File.readText(Action.path + '/Contents/Resources/contexts.txt');
     File.writeText(text, textFilePath);
     LaunchBar.openURL(File.fileURLForPath(textFilePath));
-  } else if (LaunchBar.options.shiftKey) {
+  } else if (LaunchBar.options.alternateKey) {
     LaunchBar.hide();
-    LaunchBar.openURL(File.fileURLForPath(textFilePath));
+    LaunchBar.openURL(File.fileURLForPath(textFilePath), 'BBEdit');
   } else {
     // Show Contexts
     var names = File.readText(textFilePath).split('\n');
@@ -54,7 +54,7 @@ function run() {
           subtitle:
             'Quits applications not in "'.localize() +
             contextTitle.localize() +
-            '". (Edit: ⇧⏎)'.localize(),
+            '". (Edit: ⌥⏎)'.localize(),
           icon: icon,
           action: 'main',
           actionArgument: contextTitle,
@@ -69,8 +69,8 @@ function main(contextTitle) {
   var contextJSONFile = Action.supportPath + '/' + contextTitle + '.json';
   Action.preferences.contextJSONFile = contextJSONFile;
 
-  if (LaunchBar.options.shiftKey || !File.exists(contextJSONFile)) {
-    // Edit … when holding shift … or if context does not exist in preferences
+  if (LaunchBar.options.alternateKey || !File.exists(contextJSONFile)) {
+    // Edit … when holding alternate … or if context does not exist in preferences
 
     if (!File.exists(contextJSONFile)) {
       // Create

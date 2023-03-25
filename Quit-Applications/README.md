@@ -5,7 +5,7 @@
 <img src="01.gif" width="640"/> 
 
 The purpose of this action is to **limit distractions by quitting apps** that are not needed for what you are currently doing. 
-You can set up **custom contexts** like e.g. "Work", "Meeting", etc. in a plain text file, which will open on first launch or if you press `⇧⏎`. You can even pick an emoji to be displayed as the icon for your context. 
+You can set up **custom contexts** like e.g. "Work", "Meeting", etc. in a plain text file, which will open on first launch or if you press `⌥⏎`. You can even pick an emoji to be displayed as the icon for your context. 
 
 <img src="02.jpg" width="640"/>   
 

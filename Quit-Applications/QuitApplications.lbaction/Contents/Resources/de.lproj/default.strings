@@ -9,7 +9,7 @@
 "Frontmost Application" = "Programm im Vordergrund";
 "Don't quit the frontmost application." = "Programm im Vordergrund nicht beenden.";
 "Quits applications not in \"" = "Beendet Programme, die nicht zu \"";
-"\". (Edit: ⇧⏎)" = "\" zählen. (Bearbeiten: ⇧⏎)";
+"\". (Edit: ⌥⏎)" = "\" zählen. (Bearbeiten: ⌥⏎)";
 "Quit " = "";
 " and close " = " beenden und ";
 " Finder windows." = " Finder Fenster schließen.";

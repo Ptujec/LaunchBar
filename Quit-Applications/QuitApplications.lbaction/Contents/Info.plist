@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Quit Applications (by Context)</string>
 	<key>CFBundleVersion</key>
-	<string>1.4.4</string>
+	<string>1.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>Quits applications by context. (Edit: ⇧⏎)</string>
+		<string>Quits applications by context. (Edit: ⌥⏎)</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
