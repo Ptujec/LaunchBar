@@ -1,11 +1,18 @@
 /* 
-Mindnode Search 
-by Ptujec 
-2021-07-12
+MindNode Search Action for LaunchBar
+by Christian Bender (@ptujec)
+2023-03-31
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
+
 var folderPath = Action.preferences.folderLocation;
 
 function run(argument) {
+  if (argument == '') {
+    return;
+  }
+
   if (folderPath == undefined || folderPath == '') {
     try {
       var plist = File.readPlist(
@@ -116,20 +123,46 @@ function run(argument) {
 
             if (sub != null) {
               results.push({
+                title: title,
                 subtitle: sub,
                 path: path,
               });
             } else {
               results.push({
+                title: title,
                 path: path,
               });
             }
           }
         }
       }
-      results.sort(function (a, b) {
-        return a.path > b.path;
+      results.sort((a, b) => {
+        // Check if either titles start with argument
+        const aStartsWithArg = a.title
+          .toLowerCase()
+          .startsWith(argument.toLowerCase());
+        const bStartsWithArg = b.title
+          .toLowerCase()
+          .startsWith(argument.toLowerCase());
+
+        // If both do, sort by full title alphabetically
+        if (aStartsWithArg && bStartsWithArg) {
+          return a.title.localeCompare(b.title);
+        }
+        // If only a does, put it first
+        else if (aStartsWithArg) {
+          return -1;
+        }
+        // If only b does, put it first
+        else if (bStartsWithArg) {
+          return 1;
+        }
+        // If neither does, sort by full title alphabetically
+        else {
+          return a.title.localeCompare(b.title);
+        }
       });
+
       return results;
     }
   }
