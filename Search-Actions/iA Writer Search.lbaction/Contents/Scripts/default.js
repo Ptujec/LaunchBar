@@ -7,6 +7,10 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
+  if (argument == '') {
+    return;
+  }
+
   var folderPath = Action.preferences.folderLocation;
 
   if (LaunchBar.options.shiftKey) {
@@ -93,9 +97,11 @@ function run(argument) {
         var result = output[i];
         if (result != '' && !File.isDirectory(result)) {
           var path = result;
+          var title = File.displayName(path);
 
           if (LaunchBar.options.commandKey) {
             results.push({
+              title: title,
               path: path,
             });
           } else {
@@ -108,20 +114,50 @@ function run(argument) {
               sub = sub.toString().replace(/\n/g, ' ').trim();
 
               results.push({
+                title: title,
                 subtitle: sub,
                 path: path,
               });
             } else {
               results.push({
+                title: title,
                 path: path,
               });
             }
           }
         }
       }
-      results.sort(function (a, b) {
-        return a.path > b.path;
+      // results.sort(function (a, b) {
+      //   return a.title > b.title;
+      // });
+
+      results.sort((a, b) => {
+        // Check if either titles start with argument
+        const aStartsWithArg = a.title
+          .toLowerCase()
+          .startsWith(argument.toLowerCase());
+        const bStartsWithArg = b.title
+          .toLowerCase()
+          .startsWith(argument.toLowerCase());
+
+        // If both do, sort by full title alphabetically
+        if (aStartsWithArg && bStartsWithArg) {
+          return a.title.localeCompare(b.title);
+        }
+        // If only a does, put it first
+        else if (aStartsWithArg) {
+          return -1;
+        }
+        // If only b does, put it first
+        else if (bStartsWithArg) {
+          return 1;
+        }
+        // If neither does, sort by full title alphabetically
+        else {
+          return a.title.localeCompare(b.title);
+        }
       });
+
       return results;
     }
   }
