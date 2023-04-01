@@ -1,5 +1,7 @@
 # LaunchBar Action: Ask ChatGPT
 
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
 This action let's you send requests to ChatGPT. 
 
 Press `space`, enter your question and hit `enter`. The answer will open in your default text editor as a simple markdown file. It works very well with [iA Writer](https://ia.net/writer). 
