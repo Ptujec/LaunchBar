@@ -12,6 +12,8 @@ Press `space`, enter your question and hit `enter`. The answer will open in your
 
 <img src="01.png" width="740"/> 
 
+Also, if you use ChatGPT a lot you might be better served with a dedicated app. 
+
 ## Features: 
 
 - If you ask a question within 5 minutes after the previous question you will be asked if you want to continue the current thread. You can also bring up this prompt by holding down `⌘`, when you send the question.
