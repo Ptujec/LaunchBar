@@ -52,6 +52,10 @@ function run(argument) {
         '&symbols=USD,INR'
     );
     if (ratesData.response.status != 200) {
+      if (ratesData.response.status == 401) {
+        Action.preferences.apiKey = undefined;
+      }
+
       LaunchBar.alert(
         ratesData.response.status + ': ' + ratesData.response.localizedStatus
       );
@@ -110,11 +114,21 @@ function setApiKey() {
       LaunchBar.hide();
       break;
     case 1:
-      Action.preferences.apiKey = LaunchBar.getClipboardString().trim();
-      LaunchBar.alert(
-        'Success!',
-        'API Access Key set to: ' + Action.preferences.apiKey
-      );
+      // Check API Key
+      var clipboard = LaunchBar.getClipboardString().trim();
+
+      if (clipboard.length == 32) {
+        Action.preferences.apiKey = clipboard;
+
+        LaunchBar.alert(
+          'Success!',
+          'API Access Key set to: ' + Action.preferences.apiKey
+        );
+      } else {
+        LaunchBar.alert(
+          'Seems like an incorrect API-key. Make sure it is the most recent item of your clipboard history!'
+        );
+      }
       break;
     case 2:
       break;
