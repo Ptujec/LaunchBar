@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Dollar ⇄ Euro</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.4.2</string>
+	<string>1.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -27,7 +27,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Converter-Actions</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Converter-Actions/DollarEuro.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequirements</key>
 	<string>Internet connection</string>
