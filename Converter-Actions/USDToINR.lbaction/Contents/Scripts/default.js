@@ -21,13 +21,11 @@ function run(argument) {
     return;
   }
 
-  if (argument.includes(',')) {
-    argument = parseFloat(argument.replace(/,/g, '.'));
-  }
-
-  //   LaunchBar.alert(argument);
-
   if (argument != undefined) {
+    if (argument.includes(',')) {
+      argument = parseFloat(argument.replace(/,/g, '.'));
+    }
+
     if (argument.trim() == '' || isNaN(argument)) {
       return;
     }
