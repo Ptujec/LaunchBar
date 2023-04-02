@@ -1,8 +1,8 @@
 # LaunchBar Actions
 
-<img src="header.jpg" width="640"/> 
+<a href="https://ptujec.github.io/launchbar"><img src="header.jpg" width="640"/></a> 
 
-[→ Go to my website to view a curated list of my actions.](https://ptujec.github.io/launchbar.html)
+[→ Go to my website to view a curated list of my actions.](https://ptujec.github.io/launchbar)
 
 ## Installation
 You can download the [whole repository](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) or any of the directories separately. **There are download links in the readme of each directory.**  
