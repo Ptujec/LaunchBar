@@ -9,7 +9,8 @@
 ## List
 
 - Dollar ⇄ Euro (requires an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
-- Kuna ⇄ Euro
+- Kuna ⇄ Euro 
+- USD ⇄ INR
 - Temperatur - Celsius ⇄ Fahrenheit
 
 ## Download
