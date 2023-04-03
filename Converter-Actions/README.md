@@ -9,7 +9,8 @@
 ## Currency converter actions: 
 
 - Dollar ⇄ Euro 
-- Kuna ⇄ Euro 
+- Kuna ⇄ Euro
+- Euro ⇄ Pound 
 - USD ⇄ INR
 
 The currency converter actions require an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
