@@ -133,7 +133,7 @@ function setApiKey() {
   );
   switch (response) {
     case 0:
-      LaunchBar.openURL('https://exchangeratesapi.io/pricing/');
+      LaunchBar.openURL('https://manage.exchangeratesapi.io/dashboard');
       LaunchBar.hide();
       break;
     case 1:
