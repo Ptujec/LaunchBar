@@ -22,11 +22,13 @@ function run(argument) {
   }
 
   if (argument != undefined) {
+    var usesCommaSeparator = false;
     if (argument.includes(',')) {
-      argument = parseFloat(argument.replace(/,/g, '.'));
+      usesCommaSeparator = true;
+      argument = parseFloat(argument.trim().replace(/\,/g, '.'));
     }
 
-    if (argument.trim() == '' || isNaN(argument)) {
+    if (argument == '' || isNaN(argument)) {
       return;
     }
   }
@@ -98,25 +100,32 @@ function run(argument) {
   var oneInrInEuro = 1 / inrToEuroRate;
 
   var usdToInr = oneDollarInEuro * inrToEuroRate;
-
   var inrToUsd = oneInrInEuro * dollarToEuroRate;
 
-  var inputAsNumber = parseFloat(argument);
+  var inrResult = (argument * usdToInr).toFixed(2);
+  var usdResult = (argument * inrToUsd).toFixed(3);
 
-  var inrResult = (inputAsNumber * usdToInr).toFixed(2).toString();
+  usdToInr = usdToInr.toFixed(2);
+  inrToUsd = inrToUsd.toFixed(3);
 
-  var usdResult = (inputAsNumber * inrToUsd).toFixed(3).toString();
+  if (usesCommaSeparator == true) {
+    inrResult = inrResult.toString().replace(/\./g, ',');
+    usdResult = usdResult.toString().replace(/\./g, ',');
+    argument = argument.toFixed(2).toString().replace(/\./g, ',');
+    usdToInr = usdToInr.toString().replace(/\./g, ',');
+    inrToUsd = inrToUsd.toString().replace(/\./g, ',');
+  }
 
   return [
     {
       title: inrResult,
-      subtitle: argument + ' USD (Rate: ' + usdToInr.toFixed(2) + ')',
+      subtitle: argument + ' USD (Rate: ' + usdToInr + ')',
       icon: 'iconTemplate',
       badge: 'INR',
     },
     {
       title: usdResult.toString(),
-      subtitle: argument + ' INR (Rate: ' + inrToUsd.toFixed(3) + ')',
+      subtitle: argument + ' INR (Rate: ' + inrToUsd + ')',
       icon: 'icon2Template',
       badge: 'USD',
     },
