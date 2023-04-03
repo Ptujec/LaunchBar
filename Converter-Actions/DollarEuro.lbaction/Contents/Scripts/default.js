@@ -113,11 +113,11 @@ function run(argument) {
       title: dollarResult,
       subtitle: argument + ' EUR (Rate: ' + euroToDollar + ')',
       icon: 'iconTemplate',
-      badge: 'GBP',
+      badge: 'USD',
     },
     {
       title: euroResult,
-      subtitle: argument + ' GBP (Rate: ' + dollarToEuro + ')',
+      subtitle: argument + ' USD (Rate: ' + dollarToEuro + ')',
       icon: 'icon2Template',
       badge: 'EUR',
     },
