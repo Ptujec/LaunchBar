@@ -15,7 +15,7 @@
 
 The currency converter actions require an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
 
-You can use `.` or `,` as decimal separator. Group separators are not supported currently.
+You can use `.` or `,` as decimal separators. Group separators are not supported currently.
 
 ## Other:
 - Celsius ⇄ Fahrenheit
