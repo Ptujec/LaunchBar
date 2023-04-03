@@ -26,29 +26,58 @@ function run(argument) {
 
   if (File.exists(localDataPath)) {
     var localData = File.readJSON(localDataPath);
-    var rateInfoDate = localData.data.date;
+    if (localData.data != undefined) {
+      var rateInfoDate = localData.data.date;
 
-    if (todayDate == rateInfoDate) {
-      makeAPICall = false;
+      if (todayDate == rateInfoDate) {
+        makeAPICall = false;
+      }
     }
   }
 
   if (makeAPICall == true) {
     var ratesData = HTTP.getJSON(
-      'http://api.exchangeratesapi.io/latest?access_key=' +
+      'http://api.exchangeratesapi.io/v1/latest?access_key=' +
         apiKey +
         '&symbols=USD'
     );
-    if (ratesData.response.status != 200) {
-      LaunchBar.alert(
-        ratesData.response.status + ': ' + ratesData.response.localizedStatus
-      );
+
+    if (ratesData.error != undefined) {
+      LaunchBar.alert(ratesData.error);
       return;
     }
+
+    if (ratesData.data.error != undefined) {
+      var code = ratesData.data.error.code;
+      var info = ratesData.data.error.info;
+
+      if (isNaN(code)) {
+        code = ratesData.response.status;
+      }
+
+      if (info == undefined) {
+        info = ratesData.data.error.message;
+      }
+
+      LaunchBar.alert(code + ': ' + info);
+
+      if (
+        ratesData.data.error.code == 101 ||
+        ratesData.data.error.code == 'invalid_access_key'
+      ) {
+        Action.preferences.apiKey = undefined;
+      }
+      return;
+    }
+
     // Store data to reduce API calls
     File.writeJSON(ratesData, localDataPath);
   } else {
     var ratesData = localData;
+  }
+
+  if (ratesData.response == undefined) {
+    return;
   }
 
   argument = argument.toString().replace(/[^0-9.,]*/g, '');
@@ -102,15 +131,25 @@ function setApiKey() {
   );
   switch (response) {
     case 0:
-      LaunchBar.openURL('https://exchangeratesapi.io/pricing/');
+      LaunchBar.openURL('https://manage.exchangeratesapi.io/dashboard');
       LaunchBar.hide();
       break;
     case 1:
-      Action.preferences.apiKey = LaunchBar.getClipboardString().trim();
-      LaunchBar.alert(
-        'Success!',
-        'API Access Key set to: ' + Action.preferences.apiKey
-      );
+      // Check API Key
+      var clipboard = LaunchBar.getClipboardString().trim();
+
+      if (clipboard.length == 32) {
+        Action.preferences.apiKey = clipboard;
+
+        LaunchBar.alert(
+          'Success!',
+          'API Access Key set to: ' + Action.preferences.apiKey
+        );
+      } else {
+        LaunchBar.alert(
+          'Seems like an incorrect API-key. Make sure it is the most recent item of your clipboard history!'
+        );
+      }
       break;
     case 2:
       break;
