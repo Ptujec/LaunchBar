@@ -21,6 +21,18 @@ function run(argument) {
     return;
   }
 
+  if (argument != undefined) {
+    var usesCommaSeparator = false;
+    if (argument.includes(',')) {
+      usesCommaSeparator = true;
+      argument = parseFloat(argument.trim().replace(/\,/g, '.'));
+    }
+
+    if (argument == '' || isNaN(argument)) {
+      return;
+    }
+  }
+
   // Check stored rates are from today to see if a new API call is needed
   var makeAPICall = true;
 
@@ -80,43 +92,34 @@ function run(argument) {
     return;
   }
 
-  argument = argument.toString().replace(/[^0-9.,]*/g, '');
+  var dollarToEuro = ratesData.data.rates.USD;
+  var euroToDollar = 1 / dollarToEuro;
+  var dollarResult = (argument * euroToDollar).toFixed(2);
+  var euroResult = (argument * dollarToEuro).toFixed(2);
 
-  var result = argument.replace(/[^0-9]/g, '');
+  dollarToEuro = dollarToEuro.toFixed(2);
+  euroToDollar = euroToDollar.toFixed(2);
 
-  if (/[,\.]\d{2}$/.test(argument)) {
-    result = result.replace(/(\d{2})$/, '.$1');
+  if (usesCommaSeparator == true) {
+    dollarResult = dollarResult.toString().replace(/\./g, ',');
+    euroResult = euroResult.toString().replace(/\./g, ',');
+    argument = argument.toFixed(2).toString().replace(/\./g, ',');
+    euroToDollar = euroToDollar.toString().replace(/\./g, ',');
+    dollarToEuro = dollarToEuro.toString().replace(/\./g, ',');
   }
-
-  argument = result;
-  number = argument.replace('.', ',');
-
-  var dollarRate = ratesData.data.rates.USD;
-  var euroRate = 1 / dollarRate;
-  var euro = argument * euroRate;
-  euro = euro.toFixed(2).toString().replace('.', ',');
-  var dollar = argument * dollarRate;
-  dollar = dollar.toFixed(2).toString().replace('.', ',');
-  dollarRate = dollarRate.toFixed(2).toString().replace('.', ',');
-  euroRate = euroRate.toFixed(2).toString().replace('.', ',');
-
-  var eResult = number + ' USD = ' + euro + ' EUR (Rate: ' + euroRate + ')';
-  var dResult = number + ' EUR = ' + dollar + ' USD (Rate: ' + dollarRate + ')';
-
-  LaunchBar.setClipboardString(eResult + '\n' + dResult);
 
   return [
     {
-      title: euro,
-      subtitle: number + ' USD (Rate: ' + euroRate + ')',
-      icon: 'DollarEuroTemplate',
-      badge: 'EUR',
+      title: dollarResult,
+      subtitle: argument + ' EUR (Rate: ' + euroToDollar + ')',
+      icon: 'iconTemplate',
+      badge: 'GBP',
     },
     {
-      title: dollar,
-      subtitle: number + ' EUR (Rate: ' + dollarRate + ')',
-      icon: 'EuroDollarTemplate',
-      badge: 'USD',
+      title: euroResult,
+      subtitle: argument + ' GBP (Rate: ' + dollarToEuro + ')',
+      icon: 'icon2Template',
+      badge: 'EUR',
     },
   ];
 }

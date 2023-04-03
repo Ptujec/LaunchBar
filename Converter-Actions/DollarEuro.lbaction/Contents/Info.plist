@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>EuroDollarTemplate.pdf</string>
+	<string>iconTemplate.pdf</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.DollarEuro</string>
 	<key>CFBundleName</key>
 	<string>Dollar ⇄ Euro</string>
 	<key>CFBundleVersion</key>
-	<string>1.5.1</string>
+	<string>1.5.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,10 +20,7 @@
 		<string>Internet connection</string>
 		<key>LBSummary</key>
 		<string>Converts Dollar to Euro (and vice versa) 
-… using https://exchangeratesapi.io/ 
-- It is okay to enter more then just the amount ("How much ist $3.99 in Euros" or "Wieviel sind 5,20 Euro in Dollar?") when you select a string. Avoid commas and dots after the amount though.
-- You always get both directions. Decimals are separated by commas in the result. But it does not matter how you enter it.
-- Result is returned immediately and copied to the clipboard at the same time</string>
+… using https://exchangeratesapi.io/</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -56,6 +53,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string>Enter any number or string ("2,95", "To pay: $20.99", …)</string>
+	<string></string>
 </dict>
 </plist>
