@@ -36,10 +36,12 @@ function run(argument) {
 
   if (File.exists(localDataPath)) {
     var localData = File.readJSON(localDataPath);
-    var rateInfoDate = localData.data.date;
+    if (localData.data != undefined) {
+      var rateInfoDate = localData.data.date;
 
-    if (todayDate == rateInfoDate) {
-      makeAPICall = false;
+      if (todayDate == rateInfoDate) {
+        makeAPICall = false;
+      }
     }
   }
 
@@ -49,20 +51,43 @@ function run(argument) {
         apiKey +
         '&symbols=USD,INR'
     );
-    if (ratesData.response.status != 200) {
-      if (ratesData.response.status == 401) {
-        Action.preferences.apiKey = undefined;
-      }
 
-      LaunchBar.alert(
-        ratesData.response.status + ': ' + ratesData.response.localizedStatus
-      );
+    if (ratesData.error != undefined) {
+      LaunchBar.alert(ratesData.error);
       return;
     }
+
+    if (ratesData.data.error != undefined) {
+      var code = ratesData.data.error.code;
+      var info = ratesData.data.error.info;
+
+      if (isNaN(code)) {
+        code = ratesData.response.status;
+      }
+
+      if (info == undefined) {
+        info = ratesData.data.error.message;
+      }
+
+      LaunchBar.alert(code + ': ' + info);
+
+      if (
+        ratesData.data.error.code == 101 ||
+        ratesData.data.error.code == 'invalid_access_key'
+      ) {
+        Action.preferences.apiKey = undefined;
+      }
+      return;
+    }
+
     // Store data to reduce API calls
     File.writeJSON(ratesData, localDataPath);
   } else {
     var ratesData = localData;
+  }
+
+  if (ratesData.response == undefined) {
+    return;
   }
 
   // Using EUR as the base because of API restricitons
