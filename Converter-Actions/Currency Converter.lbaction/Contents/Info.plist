@@ -3,33 +3,32 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>iconTemplate.pdf</string>
+	<string>icon</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.DollarEuro</string>
+	<string>ptujec.LaunchBar.action.CurrencyConverter</string>
 	<key>CFBundleName</key>
-	<string>Dollar ⇄ Euro</string>
+	<string>Currency Converter</string>
 	<key>CFBundleVersion</key>
-	<string>1.5.3</string>
+	<string>1.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBRequirements</key>
-		<string>Internet connection</string>
+		<string>You need an API key from https://exchangeratesapi.io</string>
 		<key>LBSummary</key>
-		<string>Converts Dollar to Euro (and vice versa) 
-… using https://exchangeratesapi.io/</string>
+		<string>Enter = Settings, Space = Convert</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Converter-Actions</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Converter-Actions#currency-converter-action</string>
 		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Converter-Actions/DollarEuro.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Converter-Actions/Currency%20Converter.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequirements</key>
-	<string>Internet connection</string>
+	<string>You need an API key from https://exchangeratesapi.io</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
@@ -42,8 +41,6 @@
 			<true/>
 			<key>LBLiveFeedbackEnabled</key>
 			<true/>
-			<key>LBRequiresArgument</key>
-			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBReturnsResult</key>
@@ -53,6 +50,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string></string>
+	<string>Enter amount (e.g. 2.99 or 2,99)</string>
 </dict>
 </plist>

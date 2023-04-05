@@ -2,22 +2,23 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-<img src="dollar.png" width="600"/>
+## Currency converter action: 
 
-<img src="temp.png" width="600"/> 
+<img src="01.jpg" width="708"/> 
 
-## Currency converter actions: 
+The purpose of this action is to convert currencies you use frequently with as little input as necessary. 
 
-- Dollar ⇄ Euro 
-- Kuna ⇄ Euro
-- Euro ⇄ Pound 
-- USD ⇄ INR
+`Enter` = Settings
 
-The currency converter actions require an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
+`Space` = Convert currencies 
 
 You can use `.` or `,` as decimal separators. Group separators are not supported currently.
 
-## Other:
+You can do the usual things with a selected result e.g. paste with `Shift` + `Enter`.
+
+**NOTE:** The currency converter action requires an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
+
+## Other actions:
 - Celsius ⇄ Fahrenheit
 
 ## Download
