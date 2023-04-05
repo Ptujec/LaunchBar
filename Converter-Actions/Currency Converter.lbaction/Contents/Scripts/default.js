@@ -429,5 +429,6 @@ function setApiKey() {
     case 2:
       break;
   }
+  LaunchBar.hide();
   return;
 }
