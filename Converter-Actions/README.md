@@ -16,7 +16,7 @@ You can use `.` or `,` as decimal separators. Group separators are not supported
 
 You can do the usual things with a selected result e.g. paste with `Shift` + `Enter`.
 
-**NOTE:** The currency converter action requires an API key. You can get one for free at [https://exchangeratesapi.io/pricing/](https://exchangeratesapi.io/pricing/))
+**NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchangerates API is built and maintained by APILayer).
 
 ## Other actions:
 - Celsius ⇄ Fahrenheit

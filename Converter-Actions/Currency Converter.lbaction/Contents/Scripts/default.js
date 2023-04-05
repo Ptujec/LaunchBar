@@ -17,8 +17,12 @@ Potential Features:
 
 const apiKey = Action.preferences.apiKey;
 const ratesDataPath = Action.supportPath + '/localRatesData.json';
-const currencyListDataPath = Action.supportPath + '/currencyListData.json';
+const currencyList = File.readJSON(
+  Action.path + '/Contents/Resources/currencyList.json'
+).symbols;
+
 const todayDate = new Date().toISOString().split('T')[0];
+const apiURL = '';
 
 var base = Action.preferences.base;
 if (base == undefined) {
@@ -92,7 +96,7 @@ function main(argument) {
   }
 
   if (targetCurrencies == base) {
-    return [baseSetting];
+    return settings();
   }
 
   targetCurrencies.forEach(function (targetCurrency) {
@@ -203,16 +207,13 @@ function baseCurrencyList() {
     base = 'USD';
   }
 
-  var currencyListData = getCurrencyList();
-
   // PARSE RESULT
-  var list = currencyListData.data.symbols;
   var other = [];
   var currentBase = [];
 
-  for (var i in list) {
+  for (var i in currencyList) {
     var pushData = {
-      title: list[i],
+      title: currencyList[i],
       icon: 'circleTemplate',
       badge: i,
       action: 'setBase',
@@ -232,16 +233,12 @@ function baseCurrencyList() {
 }
 
 function favsCurrencyList() {
-  var currencyListData = getCurrencyList();
-
-  // PARSE RESULT
-  var list = currencyListData.data.symbols;
   var other = [];
   var favs = [];
 
-  for (var i in list) {
+  for (var i in currencyList) {
     var pushData = {
-      title: list[i],
+      title: currencyList[i],
       icon: 'circleTemplate',
       badge: i,
       action: 'setTarget',
@@ -263,10 +260,11 @@ function favsCurrencyList() {
 
 function getCurrencyList() {
   // CHECK STORED RATES ARE FROM TODAY TO SEE IF A NEW API CALL IS NEEDED
+
   var makeAPICall = true;
 
-  if (File.exists(currencyListDataPath)) {
-    var localCurrencyListData = File.readJSON(currencyListDataPath);
+  if (File.exists(currencyListPath)) {
+    var localCurrencyListData = File.readJSON(currencyListPath);
 
     if (
       todayDate == Action.preferences.currencyListDate &&
@@ -278,39 +276,34 @@ function getCurrencyList() {
 
   if (makeAPICall == true) {
     var currencyListData = HTTP.getJSON(
-      'http://api.exchangeratesapi.io/v1/symbols?access_key=' + apiKey
+      'https://api.apilayer.com/exchangerates_data/symbols',
+      {
+        headerFields: {
+          apikey: apiKey,
+        },
+      }
     );
 
-    if (currencyListData.error != undefined) {
-      LaunchBar.alert(currencyListData.error);
-      return;
-    }
+    File.writeJSON(currencyListData, currencyListPath);
 
-    if (currencyListData.data.error != undefined) {
-      var code = currencyListData.data.error.code;
-      var info = currencyListData.data.error.info;
-
-      if (isNaN(code)) {
-        code = currencyListData.response.status;
+    if (currencyListData.response.status != 200) {
+      if (currencyListData.data.message != undefined) {
+        var details = currencyListData.data.message;
+      }
+      if (currencyListData.data.error != undefined) {
+        var details = currencyListData.data.error;
       }
 
-      if (info == undefined) {
-        info = currencyListData.data.error.message;
+      if (details == undefined) {
+        details = currencyListData.response.localizedStatus;
       }
 
-      LaunchBar.alert(code + ': ' + info);
-
-      if (
-        currencyListData.data.error.code == 101 ||
-        currencyListData.data.error.code == 'invalid_access_key'
-      ) {
-        Action.preferences.apiKey = undefined;
-      }
+      LaunchBar.alert(currencyListData.response.status + ': ' + details);
       return;
     }
 
     // Store data to reduce API calls
-    File.writeJSON(currencyListData, currencyListDataPath);
+    File.writeJSON(currencyListData, currencyListPath);
 
     Action.preferences.currencyListDate = todayDate;
   } else {
@@ -364,34 +357,27 @@ function getRatesData() {
 
   if (makeAPICall == true) {
     var ratesData = HTTP.getJSON(
-      'http://api.exchangeratesapi.io/v1/latest?access_key=' + apiKey
+      'https://api.apilayer.com/exchangerates_data/latest',
+      {
+        headerFields: {
+          apikey: apiKey,
+        },
+      }
     );
 
-    if (ratesData.error != undefined) {
-      LaunchBar.alert(ratesData.error);
-      return;
-    }
-
-    if (ratesData.data.error != undefined) {
-      var code = ratesData.data.error.code;
-      var info = ratesData.data.error.info;
-
-      if (isNaN(code)) {
-        code = ratesData.response.status;
+    if (ratesData.response.status != 200) {
+      if (ratesData.data.message != undefined) {
+        var details = ratesData.data.message;
+      }
+      if (ratesData.data.error != undefined) {
+        var details = ratesData.data.error;
       }
 
-      if (info == undefined) {
-        info = ratesData.data.error.message;
+      if (details == undefined) {
+        details = ratesData.response.localizedStatus;
       }
 
-      LaunchBar.alert(code + ': ' + info);
-
-      if (
-        ratesData.data.error.code == 101 ||
-        ratesData.data.error.code == 'invalid_access_key'
-      ) {
-        Action.preferences.apiKey = undefined;
-      }
+      LaunchBar.alert(ratesData.response.status + ': ' + details);
       return;
     }
 
@@ -410,15 +396,17 @@ function getRatesData() {
 
 function setApiKey() {
   var response = LaunchBar.alert(
-    'API Access Key required',
-    'You can get a free API Access Key at https://exchangeratesapi.io/pricing/. Copy the key to your clipboard, run the action again and choose »Set API-Token«',
+    'API key required',
+    'This actions requires an API key. Press "Open Website" to get yours from APILayer.com.\nCopy the key to your clipboard, run the action again and press »Set API key«',
     'Open Website',
-    'Set API-Token',
+    'Set API key',
     'Cancel'
   );
   switch (response) {
     case 0:
-      LaunchBar.openURL('https://manage.exchangeratesapi.io/dashboard');
+      LaunchBar.openURL(
+        'https://apilayer.com/marketplace/exchangerates_data-api'
+      );
       LaunchBar.hide();
       break;
     case 1:
@@ -441,4 +429,5 @@ function setApiKey() {
     case 2:
       break;
   }
+  return;
 }
