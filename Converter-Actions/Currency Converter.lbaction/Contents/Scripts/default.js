@@ -258,65 +258,6 @@ function favsCurrencyList() {
   return favs.concat(other);
 }
 
-function getCurrencyList() {
-  // CHECK STORED RATES ARE FROM TODAY TO SEE IF A NEW API CALL IS NEEDED
-
-  var makeAPICall = true;
-
-  if (File.exists(currencyListPath)) {
-    var localCurrencyListData = File.readJSON(currencyListPath);
-
-    if (
-      todayDate == Action.preferences.currencyListDate &&
-      localCurrencyListData.data != undefined
-    ) {
-      makeAPICall = false;
-    }
-  }
-
-  if (makeAPICall == true) {
-    var currencyListData = HTTP.getJSON(
-      'https://api.apilayer.com/exchangerates_data/symbols',
-      {
-        headerFields: {
-          apikey: apiKey,
-        },
-      }
-    );
-
-    File.writeJSON(currencyListData, currencyListPath);
-
-    if (currencyListData.response.status != 200) {
-      if (currencyListData.data.message != undefined) {
-        var details = currencyListData.data.message;
-      }
-      if (currencyListData.data.error != undefined) {
-        var details = currencyListData.data.error;
-      }
-
-      if (details == undefined) {
-        details = currencyListData.response.localizedStatus;
-      }
-
-      LaunchBar.alert(currencyListData.response.status + ': ' + details);
-      return;
-    }
-
-    // Store data to reduce API calls
-    File.writeJSON(currencyListData, currencyListPath);
-
-    Action.preferences.currencyListDate = todayDate;
-  } else {
-    var currencyListData = localCurrencyListData;
-  }
-
-  if (currencyListData.response == undefined) {
-    return;
-  }
-
-  return currencyListData;
-}
-
 function setBase(symbol) {
   Action.preferences.base = symbol;
   return baseCurrencyList();
