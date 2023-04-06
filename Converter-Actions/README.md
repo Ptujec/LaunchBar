@@ -8,13 +8,11 @@
 
 The purpose of this action is to convert currencies you use frequently with as little input as necessary. 
 
-`Enter` = Settings
-
-`Space` = Convert currencies 
-
 You can use `.` or `,` as decimal separators. Group separators are not supported currently.
 
-You can do the usual things with a selected result e.g. paste with `Shift` + `Enter`.
+You can do the usual things with a selected result e.g. paste with `Shift (⇧)` + `Enter`.
+
+Press `Shift (⇧)` +  `Enter` when the action is selected to get to settings.
 
 **NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchangerates API is built and maintained by APILayer).
 
