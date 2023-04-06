@@ -30,27 +30,6 @@ if (targetCurrencies != '') {
   favsSetting.badge = targetCurrencies.join(', ');
 }
 
-var decimalSeparator = Action.preferences.decimalSeparator;
-
-var decimalSeparatorSetting = {
-  title: 'Toogle decimal separator',
-  icon: 'settings',
-  badge: '.',
-  action: 'toogleDecimalSeparator',
-  actionArgument: ',',
-};
-
-if (decimalSeparator != undefined && decimalSeparator == ',') {
-  decimalSeparatorSetting.badge = ',';
-  decimalSeparatorSetting.actionArgument = '.';
-}
-
-var setAPISetting = {
-  title: 'Set API Key',
-  icon: 'keyTemplate',
-  action: 'setApiKey',
-};
-
 // SETTING FUNCTIONS
 function settings() {
   var base = Action.preferences.base;
@@ -65,6 +44,27 @@ function settings() {
   if (base != undefined) {
     baseSetting.badge = base;
   }
+
+  var decimalSeparator = Action.preferences.decimalSeparator;
+
+  var decimalSeparatorSetting = {
+    title: 'Toogle decimal separator',
+    icon: 'settings',
+    badge: '.',
+    action: 'toogleDecimalSeparator',
+    actionArgument: ',',
+  };
+
+  if (decimalSeparator != undefined && decimalSeparator == ',') {
+    decimalSeparatorSetting.badge = ',';
+    decimalSeparatorSetting.actionArgument = '.';
+  }
+
+  var setAPISetting = {
+    title: 'Set API Key',
+    icon: 'keyTemplate',
+    action: 'setApiKey',
+  };
 
   return [favsSetting, baseSetting, decimalSeparatorSetting, setAPISetting];
 }
