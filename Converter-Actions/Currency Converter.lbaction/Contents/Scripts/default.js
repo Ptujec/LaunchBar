@@ -25,10 +25,6 @@ function run(argument) {
   }
 
   // SHOW SETTINGS
-  // if (argument == undefined) {
-  //   return settings();
-  // }
-
   if (LaunchBar.options.shiftKey) {
     // Shift is the only modifier that seems to work when live feedback is enabled
     return settings();
@@ -125,18 +121,71 @@ function main(argument) {
           subtitle: labelTargetResult,
           icon: 'result',
           badge: base + ' → ' + targetCurrency,
+          action: 'showDetails',
+          actionArgument: {
+            result: titleTargetResult,
+            currencyTitle: targetCurrency,
+            rate: baseToTarget.toFixed(2).toString(),
+            argument: argument.toString(),
+            currencyBadge: base,
+            usesCommaSeparator: usesCommaSeparator,
+          },
         },
         {
           title: titleBaseResult,
           subtitle: labelBaseResult,
           icon: 'result',
           badge: targetCurrency + ' → ' + base,
+          action: 'showDetails',
+          actionArgument: {
+            result: titleBaseResult,
+            currencyTitle: base,
+            rate: targetToBase.toFixed(2).toString(),
+            argument: argument.toString(),
+            currencyBadge: targetCurrency,
+            usesCommaSeparator: usesCommaSeparator,
+          },
         }
       );
     }
   });
 
   return result;
+}
+
+function showDetails(dict) {
+  // PASTE
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(dict.result);
+    return;
+  }
+
+  // SHOW DETAILS
+  var details = [
+    {
+      title: dict.result,
+      badge: dict.currencyTitle,
+      icon: 'result',
+    },
+    {
+      title: dict.argument,
+      badge: dict.currencyBadge,
+      icon: 'from',
+    },
+    {
+      title: dict.rate,
+      badge: 'Rate',
+      icon: 'rate',
+    },
+  ];
+
+  if (dict.usesCommaSeparator == true) {
+    details.forEach(function (item, index) {
+      item.title = item.title.replace(/\./g, ',');
+    });
+  }
+
+  return details;
 }
 
 function getRatesData() {

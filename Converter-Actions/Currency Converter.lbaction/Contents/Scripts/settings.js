@@ -2,6 +2,10 @@
 
 var base = Action.preferences.base;
 
+if (base == undefined) {
+  base = 'USD';
+}
+
 var baseSetting = {
   title: 'Choose base currency',
   icon: 'settings',
