@@ -51,8 +51,8 @@ function main(argument) {
   var decimalSeparator = Action.preferences.decimalSeparator;
   var usesCommaSeparator = false;
 
-  if (argument.toString().includes(',') || decimalSeparator == ',') {
-    var usesCommaSeparator = true;
+  if (argument.includes(',') || decimalSeparator == ',') {
+    usesCommaSeparator = true;
     argument = parseFloat(argument.trim().replace(/\,/g, '.'));
   }
 
@@ -82,9 +82,7 @@ function main(argument) {
       var targetResult = (argument * baseToTarget).toFixed(2);
       var baseResult = (argument * targetToBase).toFixed(2);
 
-      var titleTargetResult = targetResult;
-      var titleBaseResult = baseResult;
-      var labelTargetResult =
+      var subTargetResult =
         argument +
         ' ' +
         base +
@@ -96,7 +94,7 @@ function main(argument) {
         baseToTarget.toFixed(2) +
         ')';
 
-      var labelBaseResult =
+      var subBaseResult =
         argument +
         ' ' +
         targetCurrency +
@@ -108,22 +106,15 @@ function main(argument) {
         targetToBase.toFixed(2) +
         ')';
 
-      if (usesCommaSeparator == true) {
-        titleTargetResult = titleTargetResult.replace(/\./g, ',');
-        labelTargetResult = labelTargetResult.replace(/\./g, ',');
-        titleBaseResult = titleBaseResult.replace(/\./g, ',');
-        labelBaseResult = labelBaseResult.replace(/\./g, ',');
-      }
-
       result.push(
         {
-          title: titleTargetResult,
-          subtitle: labelTargetResult,
+          title: targetResult,
+          subtitle: subTargetResult,
           icon: 'result',
           badge: base + ' → ' + targetCurrency,
           action: 'showDetails',
           actionArgument: {
-            result: titleTargetResult,
+            result: targetResult,
             currencyTitle: targetCurrency,
             rate: baseToTarget.toFixed(2).toString(),
             argument: argument.toString(),
@@ -132,13 +123,13 @@ function main(argument) {
           },
         },
         {
-          title: titleBaseResult,
-          subtitle: labelBaseResult,
+          title: baseResult,
+          subtitle: subBaseResult,
           icon: 'result',
           badge: targetCurrency + ' → ' + base,
           action: 'showDetails',
           actionArgument: {
-            result: titleBaseResult,
+            result: baseResult,
             currencyTitle: base,
             rate: targetToBase.toFixed(2).toString(),
             argument: argument.toString(),
@@ -149,6 +140,13 @@ function main(argument) {
       );
     }
   });
+
+  if (usesCommaSeparator == true) {
+    result.forEach(function (item) {
+      item.title = item.title.toString().replace(/\./g, ',');
+      item.subtitle = item.subtitle.toString().replace(/\./g, ',');
+    });
+  }
 
   return result;
 }
@@ -180,7 +178,7 @@ function showDetails(dict) {
   ];
 
   if (dict.usesCommaSeparator == true) {
-    details.forEach(function (item, index) {
+    details.forEach(function (item) {
       item.title = item.title.replace(/\./g, ',');
     });
   }
