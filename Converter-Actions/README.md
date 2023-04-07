@@ -4,13 +4,17 @@
 
 ## Currency converter action: 
 
-<img src="01.jpg" width="708"/> 
+<img src="01.jpg" width="704"/> 
 
 The purpose of this action is to convert currencies you use frequently with as little input as necessary. 
 
-You can use `.` or `,` as decimal separators. Group separators are not supported currently. You can do the usual things with a selected result e.g. paste with `Shift (⇧)` + `Enter (↩)`.
+You can use `.` or `,` as decimal separators. Group separators are not supported currently. You can show a detailed view or do the usual things with a selected result (e.g. paste with `Shift (⇧)` + `Enter (↩)`).
+
+<img src="02.jpg" width="704"/> 
 
 **Settings:** Press `Shift (⇧)` +  `Enter (↩)` when the action is selected to get to settings.
+
+<img src="03.jpg" width="704"/> 
 
 **NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchangerates API is built and maintained by APILayer).
 
