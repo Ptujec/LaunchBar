@@ -166,14 +166,14 @@ function showDetails(dict) {
       icon: 'result',
     },
     {
-      title: dict.argument,
-      badge: dict.currencyBadge,
-      icon: 'from',
-    },
-    {
       title: dict.rate,
       badge: 'Rate',
       icon: 'rate',
+    },
+    {
+      title: dict.argument,
+      badge: dict.currencyBadge,
+      icon: 'from',
     },
   ];
 
