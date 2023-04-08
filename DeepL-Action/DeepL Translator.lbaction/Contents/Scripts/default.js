@@ -104,6 +104,20 @@ function translate(lang) {
       lang
   );
 
+  if (result.response == undefined) {
+    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+    LaunchBar.alert(result.error);
+    return;
+  }
+
+  if (result.response.status != 200) {
+    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+    LaunchBar.alert(
+      result.response.status + ': ' + result.response.localizedStatus
+    );
+    return;
+  }
+
   return [
     {
       title: result.data.translations[0].text,
