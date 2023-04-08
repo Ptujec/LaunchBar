@@ -1,0 +1,17 @@
+"Choose base currency" = "Basiswährung wählen";
+"Choose target currencies" = "Zielwährung wählen";
+"Toogle decimal separator" = "Dezimaltrennzeichen ändern";
+"Set API key" = "API-Schlüssel festlegen";
+" is " = " = ";
+" (Rate: " = " (Kurs: ";
+"Rate" = "Kurs";
+"API key required" = "API-Schlüssel erforderlich";
+'This actions requires an API key. Press "Open Website" to get yours from APILayer.com.\nCopy the key to your clipboard, run the action again and press "Set API key"' = 'Diese Aktion benötigt einen API-Schlüssel. Wählen Sie "Website öffnen", um einen Schlüssel von APILayer.com zu erhalten.\nKopieren Sie den Schlüssel, führen die Aktion erneut aus und wählen dann "API-Schlüssel festlegen".';
+"Open Website" = "Website öffnen";
+"Cancel" = "Abbrechen";
+"Manual data refresh" = "Manuelle Datenaktualisierung";
+"Last update: " = "Letzte Aktualisierung: ";
+" (API Usage: " = " (API Nutzung: ";
+"Confirm to refresh!" = "Aktualisierung bestätigen!";
+"Every refresh counts against your API usage. Currency rates are updated automatically if the local data has not been updated within the last 4 hours." = "Jede Aktualisierung wird auf Ihre API-Nutzung angerechnet. Die Währungskurse werden automatisch aktualisiert, wenn die lokalen Daten nicht innerhalb der letzten 4 Stunden aktualisiert wurden.";
+"Refresh" = "Aktualisieren";

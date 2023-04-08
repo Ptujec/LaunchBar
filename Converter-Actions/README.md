@@ -14,7 +14,9 @@ You can use `.` or `,` as decimal separators. Group separators are not supported
 
 **Settings:** Press `Shift (⇧)` +  `Enter (↩)` when the action is selected to get to settings.
 
-**NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchangerates API is built and maintained by APILayer).
+**NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchange rates API is built and maintained by APILayer).
+
+If the local currency data has not been updated within the last 4 hours, the action will make a new API call if you use it. This hopefully is a good balance between accuracy and being economical with API calls.
 
 ## Other actions:
 - Celsius ⇄ Fahrenheit

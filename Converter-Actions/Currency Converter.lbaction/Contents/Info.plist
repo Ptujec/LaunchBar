@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Currency Converter</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.3</string>
+	<string>1.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBRequirements</key>
-		<string>You need an API key from https://exchangeratesapi.io</string>
+		<string>API key (There is a dialog in the action)</string>
 		<key>LBSummary</key>
 		<string>⇧↩ (Shift Enter) = Settings</string>
 		<key>LBTwitter</key>
@@ -28,7 +28,7 @@
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Converter-Actions/Currency%20Converter.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequirements</key>
-	<string>You need an API key from https://exchangeratesapi.io</string>
+	<string>API key (There is a dialog in the action)</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
