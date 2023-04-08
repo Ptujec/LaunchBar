@@ -136,7 +136,6 @@ function ask(argument) {
     headerFields: {
       Authorization: 'Bearer ' + apiKey,
     },
-
     body: {
       model: model,
       // model: 'gpt-4',
@@ -147,7 +146,14 @@ function ask(argument) {
   // File.writeJSON(result, Action.supportPath + '/test.json');
   // var result = File.readJSON(Action.supportPath + '/test.json');
 
+  if (result.response == undefined) {
+    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+    LaunchBar.alert(result.error);
+    return;
+  }
+
   if (result.response.status != 200) {
+    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
     LaunchBar.alert(
       result.response.status + ': ' + result.response.localizedStatus
     );
