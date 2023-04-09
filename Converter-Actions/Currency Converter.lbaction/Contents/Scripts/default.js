@@ -91,7 +91,7 @@ function main(argument) {
         ' ' +
         targetCurrency +
         ' (Rate: '.localize() +
-        baseToTarget.toFixed(2) +
+        baseToTarget.toFixed(4) +
         ')';
 
       var subBaseResult =
@@ -103,7 +103,7 @@ function main(argument) {
         ' ' +
         base +
         ' (Rate: '.localize() +
-        targetToBase.toFixed(2) +
+        targetToBase.toFixed(4) +
         ')';
 
       result.push(
@@ -115,10 +115,10 @@ function main(argument) {
           action: 'showDetails',
           actionArgument: {
             result: targetResult,
-            currencyTitle: targetCurrency,
-            rate: baseToTarget.toFixed(2).toString(),
+            target: targetCurrency,
+            rate: baseToTarget.toFixed(4).toString(),
             argument: argument.toString(),
-            currencyBadge: base,
+            base: base,
             usesCommaSeparator: usesCommaSeparator,
           },
         },
@@ -130,10 +130,10 @@ function main(argument) {
           action: 'showDetails',
           actionArgument: {
             result: baseResult,
-            currencyTitle: base,
-            rate: targetToBase.toFixed(2).toString(),
+            target: base,
+            rate: targetToBase.toFixed(4).toString(),
             argument: argument.toString(),
-            currencyBadge: targetCurrency,
+            base: targetCurrency,
             usesCommaSeparator: usesCommaSeparator,
           },
         }
@@ -162,17 +162,23 @@ function showDetails(dict) {
   var details = [
     {
       title: dict.result,
-      badge: dict.currencyTitle,
+      badge: dict.target,
       icon: 'result',
     },
     {
       title: dict.rate,
       badge: 'Rate'.localize(),
       icon: 'rate',
+      action: 'openURL',
+      actionArgument: {
+        argument: dict.argument,
+        base: dict.base,
+        target: dict.target,
+      },
     },
     {
       title: dict.argument,
-      badge: dict.currencyBadge,
+      badge: dict.base,
       icon: 'from',
     },
   ];
@@ -204,6 +210,18 @@ function showDetails(dict) {
   details.push(info);
 
   return details;
+}
+
+function openURL(dict) {
+  var url =
+    'https://www.google.com/finance/quote/' +
+    dict.base +
+    '-' +
+    dict.target +
+    '?window=1M';
+
+  LaunchBar.hide();
+  LaunchBar.openURL(url);
 }
 
 // SETTING FUNCTIONS
