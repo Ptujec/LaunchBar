@@ -174,6 +174,7 @@ function showDetails(dict) {
         argument: dict.argument,
         base: dict.base,
         target: dict.target,
+        rate: dict.rate,
       },
     },
     {
@@ -213,6 +214,11 @@ function showDetails(dict) {
 }
 
 function openURL(dict) {
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(dict.rate);
+    return;
+  }
+
   var url =
     'https://www.google.com/finance/quote/' +
     dict.base +
