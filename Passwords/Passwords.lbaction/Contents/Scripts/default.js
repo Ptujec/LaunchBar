@@ -140,6 +140,7 @@ function settings() {
       title: 'Choose account and update action data'.localize(),
       icon: 'accountsTemplate',
       action: 'showAccounts',
+      // children: showAccounts(),
     },
     {
       title: 'Update action data'.localize(),
@@ -290,16 +291,7 @@ function chooseSecondaryBrowser() {
     secondaryBrowser = '';
   }
 
-  var plist = File.readPlist(
-    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
-  );
-
-  var defaultBrowser = '';
-  plist.LSHandlers.forEach(function (item) {
-    if (item.LSHandlerURLScheme == 'http') {
-      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
-    }
-  });
+  var defaultBrowser = getDefaultBrowser();
 
   var result = [];
   if (defaultBrowser != 'com.apple.safari') {
@@ -342,6 +334,21 @@ function chooseSecondaryBrowser() {
     }
   });
   return result;
+}
+
+function getDefaultBrowser() {
+  var plist = File.readPlist(
+    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
+  );
+
+  var defaultBrowser = '';
+  plist.LSHandlers.forEach(function (item) {
+    if (item.LSHandlerURLScheme == 'http') {
+      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
+    }
+  });
+
+  return defaultBrowser;
 }
 
 function setSecondaryBrowser(bID) {
@@ -390,8 +397,15 @@ function viewItem(item) {
 }
 
 function openURL(item) {
+  // Make shure Browser is live
+  if (LaunchBar.options.alternateKey) {
+    var browser = Action.preferences.secondaryBrowser;
+  } else {
+    var browser = getDefaultBrowser();
+  }
+
   // Checks if the menu bar item to lock 1P is enabled. So 'true' means 1P is unlocked. If it is false it will try to sign in. The current method is not ideal because it relies on GUI scripting. But it seems currently the only possible way.
-  var test = checkLocked();
+  var test = checkLocked(browser);
   if (test != 'success') {
     LaunchBar.alert(test);
     LaunchBar.hide();
@@ -410,13 +424,7 @@ function openURL(item) {
 
   url = url + '?' + getRandomID() + '=' + item.id;
 
-  // Secondary Browser
-  if (LaunchBar.options.alternateKey) {
-    // LaunchBar falls back to default browser is no secondary browser is set up in action preferences
-    LaunchBar.openURL(url, Action.preferences.secondaryBrowser);
-  } else {
-    LaunchBar.openURL(url);
-  }
+  LaunchBar.openURL(url, browser);
 
   // updateLocalData();
 }
@@ -431,7 +439,7 @@ function getRandomID() {
   return result;
 }
 
-function checkLocked() {
+function checkLocked(browser) {
   if (Action.preferences.accountID == undefined) {
     return showAccounts();
   }
@@ -458,10 +466,11 @@ function checkLocked() {
     '			return _e as string',
     '			tell application "LaunchBar" to activate',
     '		end try',
+    '		tell application id "' + browser + '" to activate',
     '		tell me to "exit"',
     '	end if',
     'end tell',
-    // 'delay 5', // just for testing
+    // 'delay 2', // just for testing
     'return "success"'
   ).trim();
 }
