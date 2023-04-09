@@ -13,7 +13,6 @@ Documentation
 Potential Features:
 - Group seperators
 - Copy Results automatically to the clipboard (including rate and such)
-- Show results in detailed view on enter
 */
 String.prototype.localizationTable = 'default';
 
@@ -375,12 +374,11 @@ function getLocalDataInfo() {
       var hFields = ratesData.response.headerFields;
 
       if (hFields['ratelimit-remaining'] != undefined) {
+        var remaining = hFields['ratelimit-remaining'];
+        var limit = hFields['ratelimit-limit'];
+        var used = limit - remaining;
         var apiUsageStats =
-          ' (API Usage: '.localize() +
-          hFields['ratelimit-remaining'] +
-          '/' +
-          hFields['ratelimit-limit'] +
-          ')';
+          ' (API Usage: '.localize() + used + '/' + limit + ')';
       }
     }
   }
