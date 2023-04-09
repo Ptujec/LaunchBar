@@ -4,13 +4,13 @@
 
 ## Currency converter action: 
 
-<img src="01.jpg" width="734"/> 
+<img src="01.jpg" width="720"/> 
 
 The purpose of this action is to convert currencies you use frequently with as little input as necessary. 
 
 You can use `.` or `,` as decimal separators. Group separators are not supported currently. You can show a detailed view or do the usual things with a selected result (e.g. paste with `Shift (⇧)` + `Enter (↩)`).
 
-<img src="02.jpg" width="734"/> 
+<img src="02.jpg" width="720"/> 
 
 If you hit return on a rate in the detailed view, you will be taken to Google Finance, showing the rate development over the past month.
 
