@@ -2,8 +2,7 @@
 "Choose target currencies" = "Zielwährung wählen";
 "Toogle decimal separator" = "Dezimaltrennzeichen ändern";
 "Set API key" = "API-Schlüssel festlegen";
-" is " = " = ";
-" (Rate: " = " (Kurs: ";
+"Rate: " = "Kurs: ";
 "Rate" = "Kurs";
 "API key required" = "API-Schlüssel erforderlich";
 'This actions requires an API key. Press "Open Website" to get yours from APILayer.com.\nCopy the key to your clipboard, run the action again and press "Set API key"' = 'Diese Aktion benötigt einen API-Schlüssel. Wählen Sie "Website öffnen", um einen Schlüssel von APILayer.com zu erhalten.\nKopieren Sie den Schlüssel, führen die Aktion erneut aus und wählen dann "API-Schlüssel festlegen".';

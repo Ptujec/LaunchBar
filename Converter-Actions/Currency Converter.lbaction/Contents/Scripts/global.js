@@ -1,5 +1,15 @@
 const apiKey = Action.preferences.apiKey;
 const ratesDataPath = Action.supportPath + '/localRatesData.json';
+const cLocale = LaunchBar.currentLocale;
+
+const minMaxFractionDefault = {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+};
+const minMaxFractionRate = {
+  maximumFractionDigits: 4,
+  minimumFractionDigits: 2,
+};
 
 const currencyListData = File.readJSON(
   Action.path + '/Contents/Resources/currencyList.json'
@@ -9,11 +19,6 @@ if (LaunchBar.currentLocale == 'de') {
   var currencyList = currencyListData.symbols_de;
 } else {
   var currencyList = currencyListData.symbols;
-}
-
-var decimalSeparator = Action.preferences.decimalSeparator;
-if (decimalSeparator == undefined) {
-  decimalSeparator = '.';
 }
 
 // SETTING VARIABLES

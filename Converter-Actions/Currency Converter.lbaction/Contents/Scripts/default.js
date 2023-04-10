@@ -10,9 +10,6 @@ Documentation
 - https://exchangeratesapi.io/documentation/ (old version)
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http/ 
 
-TODO: 
-- Integrate addGroupSeparators function to output for better legibility … need to change how/when I replace decimal separators in main func (see 1.2.1) … 
-
 */
 String.prototype.localizationTable = 'default';
 
@@ -45,10 +42,7 @@ function main(argument) {
   }
 
   // CLEAN UP ARGUMENT
-  var usesCommaSeparator = false;
-
   if (argument.startsWith(',')) {
-    usesCommaSeparator = true;
     argument = 0 + argument;
   }
 
@@ -57,12 +51,7 @@ function main(argument) {
     .replace(/(?<=\d)(,|\.)(?=\d{3})/g, ''); // Strip group separators
 
   if (argument.includes(',')) {
-    usesCommaSeparator = true;
-    argument = parseFloat(argument.replace(/\,/g, '.')).toFixed(2);
-  }
-
-  if (decimalSeparator == ',') {
-    usesCommaSeparator = true;
+    argument = parseFloat(argument.replace(/\,/g, '.'));
   }
 
   // DO THE CONVERTING
@@ -74,7 +63,6 @@ function main(argument) {
   var oneBaseUnitInEuro = 1 / baseToEuroRate;
 
   if (targetCurrencies == '') {
-    // return [targetsSetting];
     return [targetsSetting, baseSetting];
   }
 
@@ -89,75 +77,65 @@ function main(argument) {
 
       var baseToTarget = oneBaseUnitInEuro * targetToEuroRate;
       var targetToBase = oneTargetUnitInEuro * baseToEuroRate;
+      var targetResult = argument * baseToTarget;
+      var baseResult = argument * targetToBase;
 
-      var targetResult = (argument * baseToTarget).toFixed(2);
-      var baseResult = (argument * targetToBase).toFixed(2);
-
-      var subTargetResult =
-        argument +
-        ' ' +
-        base +
-        ' is '.localize() +
-        targetResult +
-        ' ' +
-        targetCurrency +
-        ' (Rate: '.localize() +
-        baseToTarget.toFixed(4) +
-        ')';
-
-      var subBaseResult =
-        argument +
-        ' ' +
-        targetCurrency +
-        ' is '.localize() +
-        baseResult +
-        ' ' +
-        base +
-        ' (Rate: '.localize() +
-        targetToBase.toFixed(4) +
-        ')';
+      var displayArgument = parseFloat(argument).toLocaleString(
+        cLocale,
+        minMaxFractionDefault
+      );
 
       result.push(
         {
-          title: targetResult,
-          subtitle: subTargetResult,
+          title: targetResult.toLocaleString(cLocale, {
+            style: 'currency',
+            currency: targetCurrency,
+          }),
+          label:
+            'Rate: '.localize() +
+            baseToTarget.toLocaleString(cLocale, minMaxFractionRate),
           icon: 'result',
           badge: base + ' → ' + targetCurrency,
           action: 'showDetails',
           actionArgument: {
-            result: targetResult,
+            result: targetResult.toLocaleString(cLocale, minMaxFractionDefault),
+            paste: targetResult.toLocaleString(cLocale, {
+              style: 'currency',
+              currency: targetCurrency,
+            }),
             target: targetCurrency,
-            rate: baseToTarget.toFixed(4).toString(),
-            argument: argument.toString(),
+            rate: baseToTarget.toLocaleString(cLocale, minMaxFractionRate),
+            argument: displayArgument,
             base: base,
-            usesCommaSeparator: usesCommaSeparator,
           },
         },
         {
-          title: baseResult,
-          subtitle: subBaseResult,
+          title: baseResult.toLocaleString(cLocale, {
+            style: 'currency',
+            currency: base,
+          }),
+          label:
+            'Rate: '.localize() +
+            targetToBase.toLocaleString(cLocale, minMaxFractionRate),
+          // subtitle: subBaseResult,
           icon: 'result',
           badge: targetCurrency + ' → ' + base,
           action: 'showDetails',
           actionArgument: {
-            result: baseResult,
+            result: baseResult.toLocaleString(cLocale, minMaxFractionDefault),
+            paste: baseResult.toLocaleString(cLocale, {
+              style: 'currency',
+              currency: base,
+            }),
             target: base,
-            rate: targetToBase.toFixed(4).toString(),
-            argument: argument.toString(),
+            rate: targetToBase.toLocaleString(cLocale, minMaxFractionRate),
+            argument: displayArgument,
             base: targetCurrency,
-            usesCommaSeparator: usesCommaSeparator,
           },
         }
       );
     }
   });
-
-  if (usesCommaSeparator == true) {
-    result.forEach(function (item) {
-      item.title = item.title.toString().replace(/\./g, ',');
-      item.subtitle = item.subtitle.toString().replace(/\./g, ',');
-    });
-  }
 
   return result;
 }
@@ -165,7 +143,7 @@ function main(argument) {
 function showDetails(dict) {
   // PASTE
   if (LaunchBar.options.shiftKey) {
-    LaunchBar.paste(dict.result);
+    LaunchBar.paste(dict.paste);
     return;
   }
 
@@ -194,12 +172,6 @@ function showDetails(dict) {
       icon: 'from',
     },
   ];
-
-  if (dict.usesCommaSeparator == true) {
-    details.forEach(function (item) {
-      item.title = item.title.replace(/\./g, ',');
-    });
-  }
 
   var localDataInfo = getLocalDataInfo(); // [dataDate, apiUsageStats]
 
@@ -257,33 +229,13 @@ function settings() {
     baseSetting.badge = base;
   }
 
-  var decimalSeparator = Action.preferences.decimalSeparator;
-
-  var decimalSeparatorSetting = {
-    title: 'Toogle decimal separator'.localize(),
-    icon: 'settings',
-    badge: '.',
-    action: 'toogleDecimalSeparator',
-    actionArgument: ',',
-  };
-
-  if (decimalSeparator != undefined && decimalSeparator == ',') {
-    decimalSeparatorSetting.badge = ',';
-    decimalSeparatorSetting.actionArgument = '.';
-  }
-
   var setAPISetting = {
     title: 'Set API key'.localize(),
     icon: 'keyTemplate',
     action: 'setApiKey',
   };
 
-  var settingItems = [
-    targetsSetting,
-    baseSetting,
-    decimalSeparatorSetting,
-    setAPISetting,
-  ];
+  var settingItems = [targetsSetting, baseSetting, setAPISetting];
 
   var localDataInfo = getLocalDataInfo();
 
@@ -382,11 +334,6 @@ function removeTarget(symbol) {
     }
   });
   return targetCurrencyList();
-}
-
-function toogleDecimalSeparator(separator) {
-  Action.preferences.decimalSeparator = separator;
-  return settings();
 }
 
 function getLocalDataInfo() {
