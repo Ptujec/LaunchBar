@@ -10,9 +10,9 @@ Documentation
 - https://exchangeratesapi.io/documentation/ (old version)
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http/ 
 
-Potential Features:
-- Group seperators
-- Copy Results automatically to the clipboard (including rate and such)
+TODO: 
+- Integrate addGroupSeparators function to output for better legibility … need to change how/when I replace decimal separators in main func (see 1.2.1) … 
+
 */
 String.prototype.localizationTable = 'default';
 
@@ -39,25 +39,36 @@ function run(argument) {
 }
 
 function main(argument) {
-  // MATCHING AMOUNT FROM THE INPUT (also allows to start with ".1")
-  argument = argument.replace(/^(,|\.)/g, '0$1').match(/\d+[,\.]?(?:\d+)?/);
-
-  if (argument == undefined) {
+  // CHECK FOR NUMBERS IN INPUT
+  if (/\d/.test(argument) == false) {
     return;
   }
 
-  argument = argument[0];
-
-  var decimalSeparator = Action.preferences.decimalSeparator;
+  // CLEAN UP ARGUMENT
   var usesCommaSeparator = false;
 
-  if (argument.includes(',') || decimalSeparator == ',') {
+  if (argument.startsWith(',')) {
     usesCommaSeparator = true;
-    argument = parseFloat(argument.trim().replace(/\,/g, '.'));
+    argument = 0 + argument;
   }
 
+  argument = argument
+    .match(/[\d,.]+/)[0] // Get amount numbers (commas, points and numbers in arbitrary order)
+    .replace(/(?<=\d)(,|\.)(?=\d{3})/g, ''); // Strip group separators
+
+  if (argument.includes(',')) {
+    usesCommaSeparator = true;
+    argument = parseFloat(argument.replace(/\,/g, '.')).toFixed(2);
+  }
+
+  if (decimalSeparator == ',') {
+    usesCommaSeparator = true;
+  }
+
+  // DO THE CONVERTING
   var result = [];
   var rates = getRatesData().data.rates;
+
   // Because of API restricitons the base has be calculated from how it relates to EUR (which is the base in the API)
   var baseToEuroRate = rates[base];
   var oneBaseUnitInEuro = 1 / baseToEuroRate;
@@ -169,7 +180,7 @@ function showDetails(dict) {
       title: dict.rate,
       badge: 'Rate'.localize(),
       icon: 'rate',
-      action: 'openURL',
+      action: 'rateAction',
       actionArgument: {
         argument: dict.argument,
         base: dict.base,
@@ -213,7 +224,7 @@ function showDetails(dict) {
   return details;
 }
 
-function openURL(dict) {
+function rateAction(dict) {
   if (LaunchBar.options.shiftKey) {
     LaunchBar.paste(dict.rate);
     return;

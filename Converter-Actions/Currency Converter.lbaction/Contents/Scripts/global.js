@@ -11,6 +11,11 @@ if (LaunchBar.currentLocale == 'de') {
   var currencyList = currencyListData.symbols;
 }
 
+var decimalSeparator = Action.preferences.decimalSeparator;
+if (decimalSeparator == undefined) {
+  decimalSeparator = '.';
+}
+
 // SETTING VARIABLES
 var base = Action.preferences.base;
 

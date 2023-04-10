@@ -6,19 +6,19 @@
 
 <img src="01.jpg" width="720"/> 
 
-The purpose of this action is to convert currencies you use frequently with as little input as necessary. 
-
-You can use `.` or `,` as decimal separators. Group separators are not supported currently. You can show a detailed view or do the usual things with a selected result (e.g. paste with `Shift (⇧)` + `Enter (↩)`).
+**The purpose of this action is to convert currencies you use frequently with as little input as necessary.** 
+ 
+You can drill into each result for a detailed view. Of course you can do the usual things with a selected result (e.g. paste with `Shift (⇧)` + `Enter (↩)`).
 
 <img src="02.jpg" width="720"/> 
 
-If you hit return on a rate in the detailed view, you will be taken to Google Finance, showing the rate development over the past month.
+If you hit return on a currency rate in the detailed view you will be taken to Google Finance.
 
 **Settings:** Press `Shift (⇧)` +  `Enter (↩)` when the action is selected to get to settings.
 
-**NOTE:** The currency converter action requires an API key. You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). (The Exchange rates API is built and maintained by APILayer).
+**NOTE: This action requires an API key.** You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). The Exchange rates API is built and maintained by APILayer.
 
-If the local currency data has not been updated within the last 4 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.
+*If the local currency data has not been updated within the last 4 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.*
 
 ## Other actions:
 - Celsius ⇄ Fahrenheit
