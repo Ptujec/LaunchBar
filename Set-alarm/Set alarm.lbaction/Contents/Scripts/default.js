@@ -7,6 +7,11 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
+  if (argument == undefined) {
+    LaunchBar.openURL('file:///System/Applications/Clock.app/');
+    return;
+  }
+
   var list = LaunchBar.execute('/usr/bin/shortcuts', 'list').trim().split('\n');
 
   if (!list.includes('Set alarm')) {
