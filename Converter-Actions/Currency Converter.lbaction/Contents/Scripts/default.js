@@ -486,11 +486,13 @@ function APICall() {
   }
 
   if (ratesData.response.status != 200) {
-    if (ratesData.data.message != undefined) {
-      var details = ratesData.data.message;
-    }
-    if (ratesData.data.error != undefined) {
-      var details = ratesData.data.error;
+    if (ratesData.data != undefined) {
+      if (ratesData.data.message != undefined) {
+        var details = ratesData.data.message;
+      }
+      if (ratesData.data.error != undefined) {
+        var details = ratesData.data.error;
+      }
     }
 
     if (details == undefined) {
