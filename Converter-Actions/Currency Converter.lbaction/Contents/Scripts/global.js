@@ -1,5 +1,5 @@
 const apiKey = Action.preferences.apiKey;
-const ratesDataPath = Action.supportPath + '/localRatesData.json';
+const ratesDataPath = Action.cachePath + '/localRatesData.json';
 const cLocale = LaunchBar.currentLocale;
 
 const minMaxFractionDefault = {
