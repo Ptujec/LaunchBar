@@ -381,7 +381,7 @@ function refreshAlert(arg) {
   var difference = compareDates();
 
   // Check if a new API call is needed
-  if (difference != undefined || difference < 3600) {
+  if (difference != undefined && difference < 3600) {
     // If less than 1 hour has passed there is no need to make a new API call unless the user is on a paid plan.
     alertTitle +=
       '\nYour local data has already been updated within the last hour.'.localize();
@@ -416,7 +416,7 @@ function getRatesData() {
 
   // Check if a new API call is needed
   var difference = compareDates();
-  if (difference != undefined || difference < 14400) {
+  if (difference != undefined && difference < 14400) {
     // If less than 4 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
     makeAPICall = false;
   }
