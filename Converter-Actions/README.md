@@ -18,7 +18,7 @@ If you hit return on a currency rate in the detailed view you will be taken to G
 
 **NOTE: This action requires an APP ID from openexchangerates.org.** You can get one for free [here](https://openexchangerates.org/signup/free). 
 
-Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. If the local currency data has not been updated within the last 4 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.
+Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. If the local currency data has not been updated within the last 2 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.
 
 ## Other actions:
 - Celsius ⇄ Fahrenheit

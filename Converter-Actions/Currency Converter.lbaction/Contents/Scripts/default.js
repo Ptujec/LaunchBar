@@ -389,7 +389,7 @@ function refreshAlert(arg) {
 
   var response = LaunchBar.alert(
     alertTitle,
-    'Every refresh counts against your API usage. Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. Local currency rates are updated automatically if they have not been updated within the last 4 hours.'.localize(),
+    'Every refresh counts against your API usage. Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. Local currency rates are updated automatically if they have not been updated within the last 2 hours.'.localize(),
     'Ok',
     'Usage stats'.localize(),
     'Cancel'.localize()
@@ -416,8 +416,8 @@ function getRatesData() {
 
   // Check if a new API call is needed
   var difference = compareDates();
-  if (difference != undefined && difference < 14400) {
-    // If less than 4 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
+  if (difference != undefined && difference < 7200) {
+    // If less than 2 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
     makeAPICall = false;
   }
 
