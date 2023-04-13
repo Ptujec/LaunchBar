@@ -5,9 +5,11 @@ by Christian Bender (@ptujec)
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
+App ID
+- https://openexchangerates.org/account/app-ids
+
 Documentation
-- https://apilayer.com/marketplace/exchangerates_data-api
-- https://exchangeratesapi.io/documentation/ (old version)
+- https://docs.openexchangerates.org/reference/api-introduction
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http/ 
 
 */
@@ -18,7 +20,7 @@ include('global.js');
 function run(argument) {
   // CHECK FOR VALID API ACCESS KEY
   if (apiKey == undefined) {
-    setApiKey();
+    setAppID();
   }
 
   // SHOW SETTINGS
@@ -56,11 +58,18 @@ function main(argument) {
 
   // DO THE CONVERTING
   var result = [];
-  var rates = getRatesData().data.rates;
+  var ratesData = getRatesData();
 
-  // Because of API restricitons the base has be calculated from how it relates to EUR (which is the base in the API)
-  var baseToEuroRate = rates[base];
-  var oneBaseUnitInEuro = 1 / baseToEuroRate;
+  if (ratesData == undefined) {
+    return;
+  }
+
+  var rates = ratesData.data.rates;
+
+  // The base is calculated from how it relates to USD (which is the base in the API)
+
+  var baseToUSDRate = rates[base] / rates['USD']; //
+  var oneBaseUnitInUSD = 1 / baseToUSDRate;
 
   if (targetCurrencies == '') {
     return [targetsSetting, baseSetting];
@@ -72,11 +81,11 @@ function main(argument) {
 
   targetCurrencies.forEach(function (targetCurrency) {
     if (targetCurrency != base) {
-      var targetToEuroRate = rates[targetCurrency];
-      var oneTargetUnitInEuro = 1 / targetToEuroRate;
+      var targetToUSDRate = rates[targetCurrency];
+      var oneTargetUnitInUSD = 1 / targetToUSDRate;
 
-      var baseToTarget = oneBaseUnitInEuro * targetToEuroRate;
-      var targetToBase = oneTargetUnitInEuro * baseToEuroRate;
+      var baseToTarget = oneBaseUnitInUSD * targetToUSDRate;
+      var targetToBase = oneTargetUnitInUSD * baseToUSDRate;
       var targetResult = argument * baseToTarget;
       var baseResult = argument * targetToBase;
 
@@ -186,9 +195,9 @@ function showDetails(dict) {
     if (localDataInfo[0] != undefined) {
       info.subtitle = 'Last update: '.localize() + localDataInfo[0];
 
-      if (localDataInfo[1] != undefined) {
-        info.subtitle = info.subtitle + localDataInfo[1];
-      }
+      // if (localDataInfo[1] != undefined) {
+      //   info.subtitle = info.subtitle + localDataInfo[1];
+      // }
     }
   }
   details.push(info);
@@ -230,9 +239,9 @@ function settings() {
   }
 
   var setAPISetting = {
-    title: 'Set API key'.localize(),
+    title: 'Set App ID'.localize(),
     icon: 'keyTemplate',
-    action: 'setApiKey',
+    action: 'setAppID',
   };
 
   var settingItems = [targetsSetting, baseSetting, setAPISetting];
@@ -353,25 +362,36 @@ function getLocalDataInfo() {
         }
       );
 
-      var hFields = ratesData.response.headerFields;
-
-      if (hFields['ratelimit-remaining'] != undefined) {
-        var remaining = hFields['ratelimit-remaining'];
-        var limit = hFields['ratelimit-limit'];
-        var used = limit - remaining;
-        var apiUsageStats =
-          ' (API Usage: '.localize() + used + '/' + limit + ')';
-      }
+      // var hFields = ratesData.response.headerFields;
+      // if (hFields['x-ratelimit-remaining-quota-month'] != undefined) {
+      //   var remaining = hFields['x-ratelimit-remaining-quota-month'];
+      //   var limit = hFields['x-ratelimit-limit-monthly-month'];
+      //   var used = limit - remaining;
+      //   var apiUsageStats =
+      //     ' (API Usage: '.localize() + used + '/' + limit + ')';
+      // }
     }
   }
-  return [dataDate, apiUsageStats];
+  // return [dataDate, apiUsageStats];
+  return [dataDate];
 }
 
 function refreshAlert(arg) {
+  var alertTitle = 'Confirm to refresh!'.localize();
+  var difference = compareDates();
+
+  // Check if a new API call is needed
+  if (difference != undefined || difference < 3600) {
+    // If less than 1 hour has passed there is no need to make a new API call unless the user is on a paid plan.
+    alertTitle +=
+      '\nYour local data has already been updated within the last hour.'.localize();
+  }
+
   var response = LaunchBar.alert(
-    'Confirm to refresh!'.localize(),
-    'Every refresh counts against your API usage. Currency rates are updated automatically if the local data has not been updated within the last 4 hours.'.localize(),
+    alertTitle,
+    'Every refresh counts against your API usage. Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. Local currency rates are updated automatically if they have not been updated within the last 4 hours.'.localize(),
     'Ok',
+    'Usage stats'.localize(),
     'Cancel'.localize()
   );
   switch (response) {
@@ -383,6 +403,10 @@ function refreshAlert(arg) {
         return main(arg); // show results again with updated data
       }
     case 1:
+      LaunchBar.hide();
+      LaunchBar.openURL('https://openexchangerates.org/account/usage');
+      break;
+    case 2:
       break;
   }
 }
@@ -391,38 +415,41 @@ function getRatesData() {
   var makeAPICall = true;
 
   // Check if a new API call is needed
+  var difference = compareDates();
+  if (difference != undefined || difference < 14400) {
+    // If less than 4 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
+    makeAPICall = false;
+  }
+
+  if (makeAPICall == true) {
+    var ratesData = APICall();
+  } else {
+    if (File.exists(ratesDataPath)) {
+      var localRatesData = File.readJSON(ratesDataPath);
+      var ratesData = localRatesData;
+    }
+  }
+  return ratesData;
+}
+
+function compareDates() {
   if (File.exists(ratesDataPath)) {
     var localRatesData = File.readJSON(ratesDataPath);
     if (localRatesData.data != undefined) {
       var localDataUnixTimestamp = localRatesData.data.timestamp;
       var nowUnixTimestamp = Math.floor(new Date().getTime() / 1000);
       var difference = nowUnixTimestamp - localDataUnixTimestamp;
-      if (difference < 14400) {
-        // If less than 4 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
-        makeAPICall = false;
-      }
     }
   }
-
-  if (makeAPICall == true) {
-    var ratesData = APICall();
-  } else {
-    var ratesData = localRatesData;
-  }
-
-  if (ratesData.response == undefined) {
-    return;
-  }
-
-  return ratesData;
+  return difference;
 }
 
 function APICall() {
   var ratesData = HTTP.getJSON(
-    'https://api.apilayer.com/exchangerates_data/latest',
+    'https://openexchangerates.org/api/latest.json',
     {
       headerFields: {
-        apikey: apiKey,
+        Authorization: 'Token ' + apiKey,
       },
     }
   );
@@ -435,18 +462,27 @@ function APICall() {
   if (ratesData.response.status != 200) {
     if (ratesData.data != undefined) {
       if (ratesData.data.message != undefined) {
-        var details = ratesData.data.message;
+        if (
+          ratesData.data.message == 'invalid_app_id' ||
+          ratesData.data.message == 'missing_app_id'
+        ) {
+          var showAPIDialog = true;
+        }
       }
-      if (ratesData.data.error != undefined) {
-        var details = ratesData.data.error;
+
+      if (ratesData.data.description != undefined) {
+        var details = ratesData.data.description;
       }
     }
-
     if (details == undefined) {
       details = ratesData.response.localizedStatus;
     }
 
-    LaunchBar.alert(ratesData.response.status + ': ' + details);
+    LaunchBar.alert(ratesData.response.status, details);
+
+    if (showAPIDialog == true) {
+      setAppID();
+    }
     return;
   }
 
@@ -455,23 +491,21 @@ function APICall() {
   return ratesData;
 }
 
-function setApiKey() {
+function setAppID() {
   var response = LaunchBar.alert(
-    'API key required'.localize(),
-    'This actions requires an API key. Press "Open Website" to get yours from APILayer.com.\nCopy the key to your clipboard, run the action again and press "Set API key"'.localize(),
+    'App ID required'.localize(),
+    'This actions requires an App ID from openexchangerates.org. Press "Open Website" to get yours.\nCopy the ID to your clipboard, run the action again and press "Set App ID"'.localize(),
     'Open Website'.localize(),
-    'Set API key'.localize(),
+    'Set App ID'.localize(),
     'Cancel'.localize()
   );
   switch (response) {
     case 0:
       LaunchBar.hide();
-      LaunchBar.openURL(
-        'https://apilayer.com/marketplace/exchangerates_data-api'
-      );
+      LaunchBar.openURL('https://openexchangerates.org/account/app-ids');
       break;
     case 1:
-      // Check API Key
+      // Check App ID
       var clipboard = LaunchBar.getClipboardString().trim();
 
       if (clipboard.length == 32) {

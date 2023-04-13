@@ -16,9 +16,9 @@ const currencyListData = File.readJSON(
 );
 
 if (LaunchBar.currentLocale == 'de') {
-  var currencyList = currencyListData.symbols_de;
+  var currencyList = currencyListData.currencies_de;
 } else {
-  var currencyList = currencyListData.symbols;
+  var currencyList = currencyListData.currencies;
 }
 
 // SETTING VARIABLES

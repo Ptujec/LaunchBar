@@ -16,9 +16,9 @@ If you hit return on a currency rate in the detailed view you will be taken to G
 
 **Settings:** Press `Shift (⇧)` +  `Enter (↩)` when the action is selected to get to settings.
 
-**NOTE: This action requires an API key.** You can get one for free [here](https://apilayer.com/marketplace/exchangerates_data-api). The Exchange rates API is built and maintained by APILayer.
+**NOTE: This action requires an APP ID from openexchangerates.org.** You can get one for free [here](https://openexchangerates.org/signup/free). 
 
-*If the local currency data has not been updated within the last 4 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.*
+Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. If the local currency data has not been updated within the last 4 hours, the action will make a new API call. This hopefully is a good balance between accuracy and being economical with API calls.
 
 ## Other actions:
 - Celsius ⇄ Fahrenheit
