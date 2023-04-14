@@ -14,8 +14,8 @@
 
 ## Add to Playlist
 
-I wish Apple would have better support for this in AppleScript. But with some GUI scripting it is possible to add the currently playing song to a playlist of your choice. 
-The implementation is not ideal and you may see some stuff going on in the background. But at least it does work.
+**This action requires this [shortcut](https://www.icloud.com/shortcuts/67c0315a9886405c9f7b830a18df7b6f).**
+AppleScript lacks support to add a song to a playlist. But using shortcuts is better than relying on GUI scripting.
 
 <img src="atp.gif" width="600"/> 
 
