@@ -24,9 +24,7 @@ function run(argument) {
     argument = '-1';
   }
 
-  var checkNum = parseInt(argument);
-
-  if (!isNaN(checkNum)) {
+  if (!isNaN(parseInt(argument))) {
     // Number offset
     var startDate = new Date();
     var endDate = new Date();
@@ -136,6 +134,11 @@ function showGames(startDateString, endDateString) {
   // return;
   // var scoreData = File.readJSON(Action.supportPath + '/test.json');
 
+  if (scoreData.response == undefined) {
+    LaunchBar.alert(scoreData.error);
+    return;
+  }
+
   if (scoreData.response.status != 200) {
     LaunchBar.alert(
       scoreData.response.status + ': ' + scoreData.response.localizedStatus
@@ -187,23 +190,12 @@ function showGames(startDateString, endDateString) {
       timeStyle: 'none',
     });
 
-    // If the game status starts with a time - meaning it did not start yet
-    if (/^\d+:\d+/.test(status)) {
+    // Time difference from now to game start
+    var difference = (new Date(status) - new Date()) / (1000 * 60 * 60);
+
+    if (difference > 0) {
       // Date
-      var minutes = status.match(/:(\d+)/)[1];
-      var hours = status.match(/^\d+/);
-      if (status.includes('PM')) {
-        hours = parseInt(hours) + 12;
-      }
-
-      var dateTime = gameDate.replace(/-/g, '') + hours + minutes; // for Sorting
-
-      var etISODate = gameDate + 'T' + hours + ':' + minutes + ':00.000Z';
-      var utc = new Date(etISODate);
-      var timeoffset = 5;
-      utc.setTime(utc.getTime() + timeoffset * 60 * 60 * 1000);
-
-      var relativeDate = LaunchBar.formatDate(new Date(utc), {
+      var relativeDate = LaunchBar.formatDate(new Date(status), {
         relativeDateFormatting: true,
       });
 
@@ -279,7 +271,7 @@ function showGames(startDateString, endDateString) {
       actionRunsInBackground: true,
     };
 
-    if (time != 'Final' && time != '') {
+    if (time != 'Final' && time != '' && time != null) {
       pushData.label = time;
     }
 
