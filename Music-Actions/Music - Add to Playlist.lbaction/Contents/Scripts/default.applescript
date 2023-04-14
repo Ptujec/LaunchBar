@@ -3,7 +3,7 @@ Add to Playlist Action Script for LaunchBar
 by Christian Bender (@ptujec)
 2023-04-14
 
-Important: Requires the following shortcut: https://www.icloud.com/shortcuts/67c0315a9886405c9f7b830a18df7b6f
+Important: Requires the following shortcut: https://www.icloud.com/shortcuts/6589a7ba4afd42ad9ffe49e8b08d3bb0
 
 Read/write plist: https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/WorkwithPropertyListFiles.html
 
@@ -47,7 +47,14 @@ end run
 
 on addToPlaylist(_name)
 	tell application "LaunchBar" to hide
-	tell application "Shortcuts Events" to run shortcut "Add to Playlist" with input _name -- requires the following shortcut: https://www.icloud.com/shortcuts/67c0315a9886405c9f7b830a18df7b6f
+	
+	try
+		tell application "Shortcuts Events" to run shortcut "Add to Playlist" with input _name -- requires the following shortcut: https://www.icloud.com/shortcuts/6589a7ba4afd42ad9ffe49e8b08d3bb0
+	on error e
+		tell application "LaunchBar" to activate
+		display alert e
+	end try
+	
 	
 	tell application "System Events"
 		-- 	set _frontmost to item 1 of (get name of processes whose frontmost is true)

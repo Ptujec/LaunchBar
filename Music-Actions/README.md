@@ -14,7 +14,7 @@
 
 ## Add to Playlist
 
-**This action requires this [shortcut](https://www.icloud.com/shortcuts/67c0315a9886405c9f7b830a18df7b6f).**
+**This action requires this [shortcut](https://www.icloud.com/shortcuts/6589a7ba4afd42ad9ffe49e8b08d3bb0).**
 AppleScript lacks support to add a song to a playlist. But using shortcuts is better than relying on GUI scripting.
 
 <img src="atp.gif" width="600"/> 
