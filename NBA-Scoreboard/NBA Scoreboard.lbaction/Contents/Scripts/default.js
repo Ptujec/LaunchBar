@@ -190,10 +190,14 @@ function showGames(startDateString, endDateString) {
       timeStyle: 'none',
     });
 
+    // Test status for date
+    var statusIsDate = new Date(status);
+
     // Time difference from now to game start
     var difference = (new Date(status) - new Date()) / (1000 * 60 * 60);
 
-    if (difference > 0) {
+    // if (difference > 0) {
+    if (statusIsDate != 'Invalid Date') {
       // Date
       var relativeDate = LaunchBar.formatDate(new Date(status), {
         relativeDateFormatting: true,
@@ -275,8 +279,8 @@ function showGames(startDateString, endDateString) {
       pushData.label = time;
     }
 
-    if (/^\d+:\d+/.test(status)) {
-      pushData.date = dateTime;
+    if (statusIsDate != 'Invalid Date') {
+      pushData.date = statusIsDate.getTime();
       scheduledGames.push(pushData);
     } else {
       otherGames.push(pushData);
