@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.apple.SFSymbols-beta</string>
+	<string>com.apple.SFSymbols</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.SFSymbolsBrowser</string>
 	<key>CFBundleName</key>
 	<string>SF-Symbols Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.4</string>
+	<string>1.4.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.SFSymbols</string>
 	<key>LBDescription</key>
