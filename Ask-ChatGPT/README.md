@@ -4,9 +4,7 @@
 
 <img src="01.jpg" width="740"/> 
 
-This action allows you to send requests to ChatGPT. With version 2.0, you can chat with ChatGPT in a more powerful and intuitive way, using custom questions or predefined prompts.
-
-There are **two main ways to use it**:
+This action allows you to send requests to ChatGPT. There are **two main ways to use it**:
 
 ### 1: Chat away 
 
