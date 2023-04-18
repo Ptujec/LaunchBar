@@ -22,6 +22,8 @@ In any case, the answer will open in your default text editor as a simple markdo
 
 <img src="04.jpg" width="740"/> 
 
+While waiting for the answer, you can continue using LaunchBar as the primary task runs in the background without affecting the interface.
+
 ### Additional Features
 
 - Results are automatically copied to the clipboard.
