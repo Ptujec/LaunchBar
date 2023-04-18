@@ -7,145 +7,338 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://platform.openai.com/docs/api-reference/chat
+- https://platform.openai.com/docs/guides/chat/introduction
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
+
+Prompts: 
+- https://prompts.chat/
+
 */
 
+String.prototype.localizationTable = 'default'; // For potential localization later
+
+include('browser.js');
+
 const apiKey = Action.preferences.apiKey;
-const chatsFolder = Action.supportPath + '/chats/';
-const recent = Action.preferences.recent;
 const recentTimeStamp = Action.preferences.recentTimeStamp;
+const chatsFolder = Action.supportPath + '/chats/';
+const presets = File.readJSON(Action.path + '/Contents/Resources/presets.json');
+const userPresets = Action.supportPath + '/userPresets.json';
 
 function run(argument) {
-  // API KEY (RE)SET
-  if (apiKey == undefined || LaunchBar.options.controlKey) {
+  // ON FIRST RUN COPY PRESETS TO ACTION SUPPORT
+  if (!File.exists(userPresets)) {
+    File.writeJSON(presets, userPresets);
+  } else {
+    // CHECK IF LB CAN READ THE CUSTOM JSON
+    try {
+      let test = File.readJSON(userPresets);
+    } catch (e) {
+      var response = LaunchBar.alert(
+        e,
+        'You can either start fresh or try to fix your custom presets JSON code.',
+        'Start fresh',
+        'Edit presets',
+        'Cancel'
+      );
+      switch (response) {
+        case 0:
+          // Start fresh
+          File.writeJSON(presets, userPresets);
+          break;
+        case 1:
+          editPresets();
+          break;
+        case 2:
+          break;
+      }
+      return;
+    }
+  }
+
+  // CHECK/SET API KEY
+  if (apiKey == undefined) {
     setApiKey();
     return;
   }
 
-  // CHOOSE MODEL
-  if (argument == undefined) {
-    var model = Action.preferences.model;
-    var v3 = 'gpt-3.5-turbo';
-    var v4 = 'gpt-4';
-
-    if (model == v3) {
-      var sub = 'Your currently selected model is: ' + v3 + '.\n';
-    } else if (model == v4) {
-      var sub = 'Your currently selected model is: ' + v4 + '.\n';
-    } else {
-      var sub = '';
-    }
-
-    var response = LaunchBar.alert(
-      'Choose your model!',
-      sub +
-        '(If you want to enter your question press "space" before "enter".)',
-      v3,
-      v4,
-      'Cancel'
-    );
-    switch (response) {
-      case 0:
-        // Ok … do something
-        Action.preferences.model = v3;
-        break;
-
-      case 1:
-        Action.preferences.model = v4;
-        break;
-
-      case 2:
-        break;
-    }
-    // LaunchBar.hide();
-    return;
+  // SETTINGS
+  if (LaunchBar.options.alternateKey) {
+    return settings();
   }
 
-  // SHOW RECENT CHAT REPLIES
-  // if (argument == undefined) {
-  //   if (!File.exists(chatsFolder)) {
-  //     return;
-  //   }
-  //   LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+  // IF NO ARGUMENT IS PASSED
+  if (argument == undefined) {
+    // SHOW PREDEFINED PROMPTS
+    if (!LaunchBar.options.commandKey) {
+      return prompts();
+    }
 
-  //   var result = [];
-  //   var contents = File.getDirectoryContents(chatsFolder);
-  //   contents.forEach(function (item) {
-  //     result.push({
-  //       path: chatsFolder + '/' + item,
-  //     });
-  //   });
-  //   return result;
-  // }
+    // DISPLAY RECENT CHATS
+    // GET CHATS
+    var chatsExist = false;
+    if (File.exists(chatsFolder)) {
+      var chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
+        .trim()
+        .split('\n');
 
-  // ASK
+      if (chatFiles != '') {
+        chatsExist = true;
+      }
+    }
+    if (chatsExist == false) {
+      return;
+    }
+    var result = [];
+    chatFiles.forEach(function (item) {
+      var path = chatsFolder + '/' + item;
+      var title = File.displayName(path).replace(/\.md$/, ''),
+        pushData = {
+          title: title,
+          subtitle: '',
+          path: chatsFolder + '/' + item,
+        };
+      result.push(pushData);
+    });
+    return result;
+  }
 
-  ask(argument);
+  // IF ARGUMENT IS PASSED
+
+  // CHOOSE PERSONA
+  if (LaunchBar.options.commandKey) {
+    return showPersonas(argument);
+  }
+
+  // OPTIONS
+  // (e.g. continue with chat, add url, …)
+  return options({
+    argument: argument,
+  });
 }
 
-function ask(argument) {
-  LaunchBar.hide();
+function options(dict) {
+  var argument = dict.argument;
 
-  // CHECK TIME BETWEEN LAST QUESTION (in minutes)
-  const timeDifference = (new Date() - new Date(recentTimeStamp)) / 60000;
+  var personaIcon = Action.preferences.personaIcon ?? 'weasel';
 
-  // INCLUDE RECENT RESULTS IF LESS THAN 5 MINUTES HAVE PASSED OR CMD MODIFIER
-  var addRecent = false;
-  if (timeDifference < 5 || LaunchBar.options.commandKey) {
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+  var result = [
+    {
+      title: 'New Chat',
+      subtitle: 'Asks: ' + argument,
+      icon: personaIcon,
+      action: 'ask',
+      actionArgument: {
+        argument: argument,
+      },
+      actionRunsInBackground: true,
+    },
+  ];
+
+  // GET MOST RECENT CHAT
+  var chatsExist = false;
+  if (File.exists(chatsFolder)) {
+    var chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
+      .trim()
+      .split('\n');
+
+    if (chatFiles != '') {
+      chatsExist = true;
+    }
+  }
+  if (chatsExist == true) {
+    var recentPath = chatsFolder + '/' + chatFiles[0];
+    var title = File.displayName(recentPath).replace(/\.md$/, '');
+
+    var pushData = {
+      title: 'Continue: ' + title,
+      subtitle: 'Asks: ' + argument,
+      icon: personaIcon,
+      action: 'ask',
+      actionArgument: {
+        argument: argument,
+        addRecent: true,
+        recentPath: recentPath,
+        recentTitle: title,
+      },
+      actionRunsInBackground: true,
+    };
+
+    // PERSONA ADJUSTMENTS FOR CONTINUE RECENT CHAT ITEM
+    var recentPersona = Action.preferences.recentPersona;
+    if (
+      recentPersona != undefined &&
+      recentPersona.title != Action.preferences.personaTitle
+    ) {
+      pushData.actionArgument.persona = recentPersona.persona;
+      pushData.icon = recentPersona.icon;
+      pushData.badge = recentPersona.title;
+    }
+
+    result.push(pushData);
+
+    // Reverse order if recent was created less than five minutes ago
+    const timeDifference = (new Date() - new Date(recentTimeStamp)) / 60000;
+    if (timeDifference < 10) {
+      result.reverse();
+    }
+  }
+
+  if (dict.persona != undefined) {
+    result.forEach(function (item) {
+      item.actionArgument.persona = dict.persona;
+      item.icon = dict.icon; // persona icon
+      item.badge = dict.title; // persona title
+    });
+  }
+
+  // SHOW CONTEXT OPTIONS
+  result.push(
+    {
+      title: 'Add Website',
+      subtitle: 'Asks: ' + argument,
+      action: 'ask',
+      icon: 'weasel_web',
+      actionArgument: {
+        argument: argument + '\n',
+        addURL: true,
+      },
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Add Clipboard',
+      subtitle: 'Asks: ' + argument,
+      action: 'ask',
+      icon: 'weasel_clipboard',
+      actionArgument: {
+        argument: argument + '\n',
+        addClipboard: true,
+      },
+      actionRunsInBackground: true,
+    }
+  );
+
+  if (dict.persona != undefined) {
+    result.forEach(function (item) {
+      item.actionArgument.persona = dict.persona;
+      item.badge = dict.title; // persona title
+    });
+  }
+
+  return result;
+}
+
+function ask(dict) {
+  Action.preferences.presetPrompt = dict.presetPrompt; // Needed for logic what persona to use and what icon to display for continue option the next time
+
+  var argument = dict.argument.trim();
+  var title = dict.title ?? argument;
+
+  // ITEMS WITH URL
+  if (dict.addURL == true) {
+    var currentURL = getCurrentURL();
+    if (currentURL != undefined) {
+      title = (title + ' - ' + currentURL)
+        .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]/g, '_')
+        .replace(/(https?|www)/g, ' ');
+      argument += ' ' + currentURL;
+    } else {
+      return;
+    }
+  }
+
+  // ITEMS WITH CLIPBOARD CONTENT
+  if (dict.addClipboard == true) {
+    var clipboard = LaunchBar.getClipboardString().trim();
+
+    var displayClipboard = clipboard;
+    if (displayClipboard.length > 500) {
+      displayClipboard = displayClipboard.substring(0, 500) + '…';
+    }
 
     var response = LaunchBar.alert(
-      'Continue?',
-      'Do you want to continue with the chat named:\n"' + recent + '"?',
-      'Continue',
-      'New',
+      argument.trim(),
+      '"' + displayClipboard + '"',
+      'Ok',
       'Cancel'
     );
     switch (response) {
       case 0:
-        // Ok … do something
-        addRecent = true;
+        title = title + ' - ' + clipboard;
+        argument += '\n\n' + clipboard;
         break;
       case 1:
-        break;
-      case 2:
         return;
     }
-    LaunchBar.hide();
   }
 
+  var question = argument; // position is important becaus of addClipboard & addURL
+
+  // INCLUDE PREVIOUS CHAT HISTORY?
+  var addRecent = dict.addRecent;
   if (addRecent == true) {
-    var recentPath = chatsFolder + '/' + recent + '.md';
+    var recentPath = dict.recentPath;
 
-    if (recent != undefined && File.exists(recentPath)) {
-      var text = File.readText(recentPath).replace(/^> /gm, '');
-      question = text + '...' + argument + '\n';
-      var title = recent;
+    if (!File.exists(recentPath)) {
+      return;
     }
+
+    // Add thread for context
+    var text = File.readText(recentPath).replace(/^> /gm, '');
+    question = text + '...' + argument + '\n';
+
+    var title = dict.recentTitle;
   } else {
-    var question = argument;
+    // TITLE CLEANUP
+    title = title
+      .replace(/[&~=§#@[\]{}()+\\\/%*$:;,.?><\|"“'´]/g, ' ')
+      .replace(/[\s_]{2,}/g, ' ');
+
+    if (title.length > 80) {
+      title = title.substring(0, 80) + '…';
+    }
   }
 
-  // ASK
-  var model = Action.preferences.model;
-  if (model == undefined) {
-    model = 'gpt-3.5-turbo';
-  }
+  // MODEL
+  var model = Action.preferences.model ?? 'gpt-3.5-turbo';
 
+  // PERSONA
+  // GET DEFAULT
+  var defaultPersona =
+    Action.preferences.persona ??
+    File.readJSON(userPresets).personas[0].persona;
+
+  // PRIORITIZE INPUT PERSONA
+  var persona = dict.persona ?? defaultPersona;
+
+  // LaunchBar.alert(title);
+  // LaunchBar.alert(argument);
+  // LaunchBar.alert(persona);
+  // return;
+
+  // API CALL
+  LaunchBar.hide();
   var result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
     headerFields: {
       Authorization: 'Bearer ' + apiKey,
     },
     body: {
       model: model,
-      // model: 'gpt-4',
-      messages: [{ role: 'user', content: question }],
+      messages: [
+        { role: 'system', content: persona },
+        { role: 'user', content: question },
+      ],
     },
   });
 
   // File.writeJSON(result, Action.supportPath + '/test.json');
   // var result = File.readJSON(Action.supportPath + '/test.json');
 
+  processResult(result, argument, title, persona);
+}
+
+function processResult(result, argument, title, persona) {
+  // ERROR HANDLING
   if (result.response == undefined) {
     LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
     LaunchBar.alert(result.error);
@@ -154,29 +347,58 @@ function ask(argument) {
 
   if (result.response.status != 200) {
     LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+
+    if (result.data != undefined) {
+      var data = JSON.parse(result.data);
+      if (data.error != undefined) {
+        var details = data.error.message;
+      }
+    }
+
     LaunchBar.alert(
-      result.response.status + ': ' + result.response.localizedStatus
+      result.response.status + ': ' + details ?? result.response.localizedStatus
     );
     return;
   }
 
-  var data = JSON.parse(result.data);
-  var content = data.choices[0].message.content.trim().split('\n');
+  // STORE USED PERSONA PROPERTIES
+  // Preset prompts have an icon. They can also have a persona. The title is the prompt title not of the persona. But it does not really matter.
 
-  var contentBlockQuote = [];
-  content.forEach(function (item) {
-    contentBlockQuote.push('> ' + item);
+  var recentPersona = {};
+
+  if (Action.preferences.presetPrompt) {
+    var presetData = File.readJSON(userPresets).prompts;
+  } else {
+    var presetData = File.readJSON(userPresets).personas;
+  }
+
+  presetData.forEach(function (item) {
+    if (item.persona == persona) {
+      recentPersona = {
+        persona: item.persona,
+        title: item.title,
+        icon: item.icon,
+      };
+    }
   });
 
-  var text = argument + '\n\n' + contentBlockQuote.join('\n');
-  +'\n\n';
+  Action.preferences.recentPersona = recentPersona;
 
-  if (title == undefined) {
-    var title = argument;
-    if (title.length > 50) {
-      title = title.substring(0, 50) + '…';
-    }
-  }
+  // PARSE RESULT JSON
+  var data = JSON.parse(result.data);
+
+  // COPY RESULT TO CLIPBOARD
+  LaunchBar.setClipboardString(data.choices[0].message.content.trim());
+
+  // CREATE TEXT FILE
+  var answer = data.choices[0].message.content;
+
+  var quotetArgument = [];
+  argument.split('\n').forEach(function (item) {
+    quotetArgument.push('> ' + item);
+  });
+
+  var text = quotetArgument.join('\n') + '\n\n' + answer;
 
   if (!File.exists(chatsFolder)) {
     File.createDirectory(chatsFolder);
@@ -190,7 +412,6 @@ function ask(argument) {
 
   File.writeText(text, fileLocation);
 
-  Action.preferences.recent = title;
   Action.preferences.recentTimeStamp = new Date().toISOString();
 
   var fileURL = File.fileURLForPath(fileLocation);
@@ -201,12 +422,151 @@ function ask(argument) {
   );
 
   LaunchBar.openURL(fileURL);
+}
 
-  // LaunchBar.displayNotification({
-  //   title: argument,
-  //   string: content,
-  //   url: fileURL,
-  // });
+function prompts() {
+  if (!File.exists(userPresets)) {
+    return;
+  }
+
+  const prompts = File.readJSON(userPresets).prompts;
+  var result = [];
+  prompts.forEach(function (item) {
+    result.push({
+      title: item.title,
+      subtitle: item.description,
+      icon: item.icon,
+      action: 'ask',
+      actionArgument: {
+        title: item.title,
+        argument: item.argument,
+        persona: item.persona,
+        icon: item.icon,
+        addURL: item.addURL,
+        addClipboard: item.addClipboard,
+        presetPrompt: true,
+      },
+      actionRunsInBackground: true,
+    });
+  });
+  return result;
+}
+
+function showPersonas(argument) {
+  if (!File.exists(userPresets)) {
+    return;
+  }
+
+  const personas = File.readJSON(userPresets).personas;
+
+  var result = [];
+  personas.forEach(function (item) {
+    var pushData = {
+      title: item.title,
+      subtitle: item.description,
+      icon: item.icon,
+      action: 'setPersona',
+      actionArgument: {
+        persona: item.persona,
+        title: item.title,
+        icon: item.icon,
+      },
+    };
+
+    if (argument != undefined) {
+      pushData.subtitle = 'Asks: ' + argument;
+      pushData.action = 'options';
+      pushData.actionArgument.argument = argument;
+    }
+
+    result.push(pushData);
+  });
+  return result;
+}
+
+// SETTING FUNCTIONS
+
+function settings() {
+  var model = Action.preferences.model ?? 'gpt-3.5-turbo';
+
+  var personaTitle =
+    Action.preferences.personaTitle ??
+    File.readJSON(Action.path + '/Contents/Resources/presets.json').personas[0]
+      .title;
+
+  var personaIcon = Action.preferences.personaIcon ?? 'weasel';
+
+  return [
+    {
+      title: 'Choose default persona',
+      icon: personaIcon,
+      badge: personaTitle,
+      children: showPersonas(),
+    },
+    {
+      title: 'Choose model',
+      icon: 'gearTemplate',
+      badge: model,
+      // action: 'models',
+      children: models(),
+    },
+    {
+      title: 'Set API key',
+      icon: 'keyTemplate',
+      action: 'setApiKey',
+    },
+    {
+      title: 'Customize personas & prompts',
+      icon: 'codeTemplate',
+      action: 'editPresets',
+    },
+  ];
+}
+
+function setPersona(dict) {
+  Action.preferences.persona = dict.persona;
+  Action.preferences.personaTitle = dict.title;
+  Action.preferences.personaIcon = dict.icon;
+  return settings();
+}
+
+function models() {
+  var model = Action.preferences.model;
+  var v3 = 'gpt-3.5-turbo';
+  var v4 = 'gpt-4';
+
+  if (model == v3 || model == undefined) {
+    var icon3 = 'checkTemplate.png';
+    var icon4 = 'circleTemplate.png';
+  } else if (model == v4) {
+    var icon3 = 'circleTemplate.png';
+    var icon4 = 'checkTemplate.png';
+  }
+
+  return [
+    {
+      title: v3,
+      icon: icon3,
+      action: 'setModel',
+      actionArgument: v3,
+    },
+    {
+      title: v4,
+      icon: icon4,
+      action: 'setModel',
+      actionArgument: v4,
+    },
+  ];
+}
+
+function setModel(arg) {
+  Action.preferences.model = arg;
+  return settings();
+}
+
+function editPresets() {
+  LaunchBar.hide();
+  LaunchBar.openURL(File.fileURLForPath(userPresets));
 }
 
 function setApiKey() {

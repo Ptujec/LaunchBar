@@ -1,32 +1,81 @@
 # LaunchBar Action: Ask ChatGPT
 
-*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+*[→ Click here to view a list of all my actions.](https://ptujec.github.io/launchbar)* 
 
-This action let's you send requests to ChatGPT. 
+<img src="01.jpg" width="740"/> 
 
-Press `space`, enter your question and hit `enter`. The answer will open in your default text editor as a simple markdown file. It works very well with [iA Writer](https://ia.net/writer). 
+This action allows you to send requests to ChatGPT. With version 2.0, you can chat with ChatGPT in a more powerful and intuitive way, using custom questions or predefined prompts.
 
-**Please take the [following quote](https://mastodon.social/@tess/110105460869464011) to heart while using this action** 😉: 
+There are **two main ways to use it**:
 
-> … any time someone proposes doing anything with an ML model, you should replace “AI” in the proposal with “trained weasels” and if it still sounds like a good idea you can go ahead with it.
+### 1: Chat away 
 
-<img src="01.png" width="740"/> 
+Press `space` to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
 
-Also, if you use ChatGPT a lot you might be better served with a dedicated app. 
+<img src="02.jpg" width="740"/> 
 
-## Features: 
+### 2: Use predefined prompts 
 
-- If you ask a question within 5 minutes after the previous question you will be asked if you want to continue the current thread. You can also bring up this prompt by holding down `⌘`, when you send the question.
-- Choose the between `gpt-3.5-turbo` and `gpt-4` models. 
-- Reset API key with  `⌃` + `enter`. 
+Press `enter` to access a menu of predefined prompts. You can customize them in the [settings](#settings) to suit your needs. This is convenient for frequently used tasks.
+
+<img src="03.jpg" width="740"/> 
+
+In any case, the answer will open in your default text editor as a simple markdown file, which works very well with [iA Writer](https://ia.net/writer) in preview mode. 
+
+<img src="04.jpg" width="740"/> 
+
+### Additional Features
+
+- Results are automatically copied to the clipboard.
+- To view recent chats, select the action in LaunchBar and press `command` + `enter` \
+(BTW: You can also delete chats in this view with `command` + `delete` and [all the other stuff](https://www.obdev.at/resources/launchbar/help/WorkingWithFiles.html#append-text) you can do with files in LaunchBar.)
+- Use alternative personas with `command` + `enter` when you are done entering text. 
+
+### Settings
+
+Access the settings with `option` + `enter`. Here you can:
+
+- Choose a default persona
+- Choose between `gpt-3.5-turbo` and `gpt-4` models
+- Set or reset your API key
+- Customize prompts and personas
+
+You can customize and add as many prompts and personas as you want, and choose an emoji as the icon to identify them easily. 
+
+```
+{
+  "prompts": [
+    {
+      "icon": "✍🏻",
+      "argument": "The instruction passed to the model",
+      "title": "Your unique title",
+      "addURL": false,
+      "addClipboard": true,
+      "description": "A description to display as the subtitle",
+      "persona": "The persona for this task (optional)"
+    }
+  ],
+  "personas": [
+    {
+      "title": "Assistant",
+      "icon": "weasel",
+      "description": "This is the default persona",
+      "persona": "You are a helpful assistant."
+    }
+  ]
+}
+```
 
 ## Requirements
 
-You need an [API key from OpenAI](https://platform.openai.com/account/api-keys) to use this action. 
+To use this action, you need an [API key from OpenAI](https://platform.openai.com/account/api-keys) and good judgement on how to use a tool like this 😉. 
 
-## Known Issue
+## Miscellaneous
 
-If you enter a question and something goes wrong you won't see a prompt until you bring up LB in the app switcher. This is because the action runs in the background to keep the action from blocking LB while it is running. 
+- [ChipiChat](https://github.com/quinncomendant/ChipiChat.lbaction#chipichat-launchbarchatgpt) is a cool alternative LaunchBar action for ChatGPT. 
+- Here is a [long list of interesting prompts](https://prompts.chat) that may serve as inspiration for both prompts and personas to use with this action.
+- I really enjoyed [this episode of Changelog](https://changelog.fm/534#t=45:20) and especially [Simon's](https://github.com/simonw) take on LLMs.
+- Why the icon? [The answer is in this toot.](https://mastodon.social/@tess/110105460869464011)
 
 ## Download
 

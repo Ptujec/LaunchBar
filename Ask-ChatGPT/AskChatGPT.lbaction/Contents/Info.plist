@@ -9,19 +9,21 @@
 	<key>CFBundleName</key>
 	<string>Ask ChatGPT</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
+		<key>LBSummary</key>
+		<string>⌥↩ = Settings; ⌘↩ = Chats; ↩ = Presets; ␣ = Enter text</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Ask-ChatGPT/AskChatGPT.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Ask-ChatGPT</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Ask-ChatGPT/AskChatGPT.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -36,8 +38,6 @@
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBReturnsResult</key>
-			<true/>
-			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>
