@@ -268,10 +268,7 @@ function settings() {
 }
 
 function baseCurrencyList() {
-  var base = Action.preferences.base;
-  if (base == undefined) {
-    base = 'USD';
-  }
+  var base = Action.preferences.base ?? 'USD';
 
   // PARSE RESULT
   var other = [];
@@ -474,11 +471,11 @@ function APICall() {
         var details = ratesData.data.description;
       }
     }
-    if (details == undefined) {
-      details = ratesData.response.localizedStatus;
-    }
 
-    LaunchBar.alert(ratesData.response.status, details);
+    LaunchBar.alert(
+      ratesData.response.status,
+      details ?? ratesData.response.localizedStatus
+    );
 
     if (showAPIDialog == true) {
       setAppID();
