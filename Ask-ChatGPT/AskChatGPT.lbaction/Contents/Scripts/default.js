@@ -166,10 +166,8 @@ function options(dict) {
 
     // PERSONA ADJUSTMENTS FOR CONTINUE RECENT CHAT ITEM
     var recentPersona = Action.preferences.recentPersona;
-    if (
-      recentPersona != undefined &&
-      recentPersona.title != Action.preferences.personaTitle
-    ) {
+    var personaTitle = Action.preferences.personaTitle ?? 'Assistant';
+    if (recentPersona != undefined && recentPersona.title != personaTitle) {
       pushData.actionArgument.persona = recentPersona.persona;
       pushData.icon = recentPersona.icon;
       pushData.badge = recentPersona.title;
