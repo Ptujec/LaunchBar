@@ -4,13 +4,13 @@
 
 ## Currency converter action: 
 
-<img src="01.jpg" width="702"/> 
+<img src="01.jpg" width="736"/> 
 
 **The purpose of this action is to convert currencies you use frequently with as little input as necessary.** 
  
 You can drill into each result for a detailed view. Of course you can do the usual things with a selected result (e.g. paste with `Shift (⇧)` + `Enter (↩)`).
 
-<img src="02.jpg" width="702"/> 
+<img src="02.jpg" width="736"/> 
 
 If you hit return on a currency rate in the detailed view you will be taken to Google Finance.
 
