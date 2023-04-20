@@ -18,7 +18,7 @@ Press `enter` to access a menu of predefined prompts. You can customize them in 
 
 <img src="03.jpg" width="740"/> 
 
-In any case, the answer will open in your default text editor as a simple markdown file, which works very well with [iA Writer](https://ia.net/writer) in preview mode. 
+In any case, the answer will open in your default text editor as a simple markdown file, which works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files. It even allows for pinning files so they stay on top at all times.
 
 <img src="04.jpg" width="740"/> 
 
