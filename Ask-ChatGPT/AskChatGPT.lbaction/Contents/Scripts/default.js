@@ -191,6 +191,7 @@ function options(dict) {
         recentPath: recent.path,
         recentFileTitle: recentFileTitle,
         persona: recent.persona ?? undefined,
+        isPrompt: recent.isPrompt,
       },
       actionRunsInBackground: true,
     };
@@ -200,7 +201,7 @@ function options(dict) {
       Action.preferences.defaultPersonaTitle ??
       File.readJSON(userPresetsPath).personas[0].title; // default
 
-    if (recentBadge != defaultPersonaTitle) {
+    if (recentBadge != defaultPersonaTitle && recent.isPrompt != true) {
       pushData.badge = recentBadge;
     }
 
@@ -208,7 +209,7 @@ function options(dict) {
 
     // Reverse order if recent was created less than five minutes ago
     const timeDifference = (new Date() - new Date(recentTimeStamp)) / 60000;
-    if (timeDifference < 10) {
+    if (timeDifference < 5) {
       result.reverse();
     }
   }
@@ -373,10 +374,20 @@ function ask(dict) {
 
   var icon = dict.icon; // might need fallback(s) to default
 
-  processResult(result, argument, title, persona, icon, presetTitle);
+  var isPrompt = dict.isPrompt;
+
+  processResult(result, argument, title, persona, icon, presetTitle, isPrompt);
 }
 
-function processResult(result, argument, title, persona, icon, presetTitle) {
+function processResult(
+  result,
+  argument,
+  title,
+  persona,
+  icon,
+  presetTitle,
+  isPrompt
+) {
   // ERROR HANDLING
   if (result.response == undefined) {
     alertWhenRunningInBackground(result.error);
@@ -436,6 +447,7 @@ function processResult(result, argument, title, persona, icon, presetTitle) {
     presetTitle: presetTitle,
     icon: icon,
     path: fileLocation,
+    isPrompt: isPrompt,
   };
 
   // PLAY SOUND AND OPEN FILE
