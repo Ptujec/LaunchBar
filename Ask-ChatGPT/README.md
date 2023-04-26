@@ -2,11 +2,12 @@
 
 *[→ Click here to view a list of all my actions.](https://ptujec.github.io/launchbar)* 
 
-<img src="01.jpg" width="740"/> 
 
 This action allows you to send requests to ChatGPT. There are **two main ways to use it**:
 
 ### 1: Chat away 
+
+<img src="01.jpg" width="740"/> 
 
 Press `space` to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
 
