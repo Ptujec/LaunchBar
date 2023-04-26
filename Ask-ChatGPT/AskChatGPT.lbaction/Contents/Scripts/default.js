@@ -23,16 +23,18 @@ const apiKey = Action.preferences.apiKey;
 const recentTimeStamp = Action.preferences.recentTimeStamp;
 const chatsFolder = Action.supportPath + '/chats/';
 const presets = File.readJSON(Action.path + '/Contents/Resources/presets.json');
-const userPresets = Action.supportPath + '/userPresets.json';
+const userPresetsPath = Action.supportPath + '/userPresets.json';
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '2.0';
 
 function run(argument) {
   // ON FIRST RUN COPY PRESETS TO ACTION SUPPORT
-  if (!File.exists(userPresets)) {
-    File.writeJSON(presets, userPresets);
+  if (!File.exists(userPresetsPath)) {
+    File.writeJSON(presets, userPresetsPath);
   } else {
     // CHECK IF LB CAN READ THE CUSTOM JSON
     try {
-      let test = File.readJSON(userPresets);
+      let test = File.readJSON(userPresetsPath);
     } catch (e) {
       var response = LaunchBar.alert(
         e,
@@ -44,7 +46,7 @@ function run(argument) {
       switch (response) {
         case 0:
           // Start fresh
-          File.writeJSON(presets, userPresets);
+          File.writeJSON(presets, userPresetsPath);
           break;
         case 1:
           editPresets();
@@ -69,6 +71,34 @@ function run(argument) {
 
   // IF NO ARGUMENT IS PASSED
   if (argument == undefined) {
+    // CHECK FOR NEW PRESETS
+    if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
+      // Compare presets with user presets
+      var newPresetsList = comparePresets();
+
+      if (newPresetsList != undefined) {
+        // Offer updating presets if they don't match
+        var response = LaunchBar.alert(
+          'Update presets?',
+          'The following presets are new or missing in your user presets:\n' +
+            newPresetsList +
+            '\nWould you like to add them to your user presets?',
+          'Ok',
+          'Cancel'
+        );
+        switch (response) {
+          case 0:
+            // Update
+            updatePresets();
+            break;
+          case 1:
+            break;
+        }
+      }
+      // Save current version number
+      Action.preferences.lastUsedActionVersion = Action.version;
+    }
+
     // SHOW PREDEFINED PROMPTS
     if (!LaunchBar.options.commandKey) {
       return prompts();
@@ -91,12 +121,12 @@ function run(argument) {
     }
     var result = [];
     chatFiles.forEach(function (item) {
-      var path = chatsFolder + '/' + item;
+      var path = chatsFolder + item;
       var title = File.displayName(path).replace(/\.md$/, ''),
         pushData = {
           title: title,
           subtitle: '',
-          path: chatsFolder + '/' + item,
+          path: chatsFolder + item,
         };
       result.push(pushData);
     });
@@ -118,59 +148,60 @@ function run(argument) {
 }
 
 function options(dict) {
-  var argument = dict.argument;
+  // LaunchBar.alert('Options:\n' + JSON.stringify(dict));
+  // return;
 
-  var personaIcon = Action.preferences.personaIcon ?? 'weasel';
+  var argument = dict.argument;
+  var defaultPersonaIcon = Action.preferences.defaultPersonaIcon ?? 'weasel';
 
   var result = [
     {
       title: 'New Chat',
       subtitle: 'Asks: ' + argument,
-      icon: personaIcon,
+      icon: dict.icon ?? defaultPersonaIcon,
       action: 'ask',
       actionArgument: {
         argument: argument,
+        icon: dict.icon ?? defaultPersonaIcon,
       },
       actionRunsInBackground: true,
     },
   ];
 
   // GET MOST RECENT CHAT
-  var chatsExist = false;
-  if (File.exists(chatsFolder)) {
-    var chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
-      .trim()
-      .split('\n');
+  var recent = Action.preferences.recent;
 
-    if (chatFiles != '') {
-      chatsExist = true;
-    }
-  }
-  if (chatsExist == true) {
-    var recentPath = chatsFolder + '/' + chatFiles[0];
-    var title = File.displayName(recentPath).replace(/\.md$/, '');
+  if (
+    recent != undefined &&
+    recent.path != undefined &&
+    File.exists(recent.path)
+  ) {
+    var recentFileTitle = File.displayName(recent.path).replace(/\.md$/, '');
 
     var pushData = {
-      title: 'Continue: ' + title,
+      title: 'Continue: ' + recentFileTitle,
       subtitle: 'Asks: ' + argument,
-      icon: personaIcon,
+      icon: dict.icon ?? recent.icon ?? defaultPersonaIcon,
       action: 'ask',
       actionArgument: {
         argument: argument,
+        presetTitle: recent.presetTitle,
         addRecent: true,
-        recentPath: recentPath,
-        recentTitle: title,
+        icon: dict.icon ?? recent.icon ?? defaultPersonaIcon,
+        recentPath: recent.path,
+        recentFileTitle: recentFileTitle,
+        persona: recent.persona ?? undefined,
       },
       actionRunsInBackground: true,
     };
 
-    // PERSONA ADJUSTMENTS FOR CONTINUE RECENT CHAT ITEM
-    var recentPersona = Action.preferences.recentPersona;
-    var personaTitle = Action.preferences.personaTitle ?? 'Assistant';
-    if (recentPersona != undefined && recentPersona.title != personaTitle) {
-      pushData.actionArgument.persona = recentPersona.persona;
-      pushData.icon = recentPersona.icon;
-      pushData.badge = recentPersona.title;
+    var recentBadge = recent.presetTitle;
+    var defaultPersonaTitle =
+      Action.preferences.defaultPersonaTitle ??
+      File.readJSON(userPresetsPath).personas[0].title; // default
+
+    if (recentBadge != defaultPersonaTitle) {
+      pushData.badge = recentBadge;
     }
 
     result.push(pushData);
@@ -180,14 +211,6 @@ function options(dict) {
     if (timeDifference < 10) {
       result.reverse();
     }
-  }
-
-  if (dict.persona != undefined) {
-    result.forEach(function (item) {
-      item.actionArgument.persona = dict.persona;
-      item.icon = dict.icon; // persona icon
-      item.badge = dict.title; // persona title
-    });
   }
 
   // SHOW CONTEXT OPTIONS
@@ -200,6 +223,7 @@ function options(dict) {
       actionArgument: {
         argument: argument + '\n',
         addURL: true,
+        icon: dict.icon ?? 'weasel_web',
       },
       actionRunsInBackground: true,
     },
@@ -211,6 +235,7 @@ function options(dict) {
       actionArgument: {
         argument: argument + '\n',
         addClipboard: true,
+        icon: dict.icon ?? 'weasel_clipboard',
       },
       actionRunsInBackground: true,
     }
@@ -218,8 +243,9 @@ function options(dict) {
 
   if (dict.persona != undefined) {
     result.forEach(function (item) {
+      item.badge = dict.presetTitle; // persona title
       item.actionArgument.persona = dict.persona;
-      item.badge = dict.title; // persona title
+      item.actionArgument.presetTitle = dict.presetTitle; // persona  title
     });
   }
 
@@ -227,22 +253,14 @@ function options(dict) {
 }
 
 function ask(dict) {
-  Action.preferences.presetPrompt = dict.presetPrompt; // Needed for logic what persona to use and what icon to display for continue option the next time
+  // LaunchBar.alert('Ask:\n' + JSON.stringify(dict));
 
   var argument = dict.argument.trim();
-  var title = dict.title ?? argument;
 
-  // ITEMS WITH URL
-  if (dict.addURL == true) {
-    var currentURL = getCurrentURL();
-    if (currentURL != undefined) {
-      title = (title + ' - ' + currentURL)
-        .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]/g, '_')
-        .replace(/(https?|www)/g, ' ');
-      argument += ' ' + currentURL;
-    } else {
-      return;
-    }
+  if (dict.isPrompt) {
+    var title = dict.presetTitle ?? argument; // for (new) file name
+  } else {
+    var title = argument;
   }
 
   // ITEMS WITH CLIPBOARD CONTENT
@@ -270,6 +288,22 @@ function ask(dict) {
     }
   }
 
+  LaunchBar.hide();
+
+  // ITEMS WITH URL
+  if (dict.addURL == true) {
+    var currentURL = getCurrentURL();
+    if (currentURL != undefined) {
+      title = (title + ' - ' + currentURL)
+        .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]/g, '_')
+        .replace(/(https?|www)/g, ' ');
+
+      argument += ' ' + currentURL;
+    } else {
+      return;
+    }
+  }
+
   var question = argument; // position is important becaus of addClipboard & addURL
 
   // INCLUDE PREVIOUS CHAT HISTORY?
@@ -285,7 +319,7 @@ function ask(dict) {
     var text = File.readText(recentPath).replace(/^> /gm, '');
     question = text + '...' + argument + '\n';
 
-    var title = dict.recentTitle;
+    var title = dict.recentFileTitle;
   } else {
     // TITLE CLEANUP
     title = title
@@ -304,18 +338,17 @@ function ask(dict) {
   // GET DEFAULT
   var defaultPersona =
     Action.preferences.persona ??
-    File.readJSON(userPresets).personas[0].persona;
+    File.readJSON(userPresetsPath).personas[0].persona;
 
   // PRIORITIZE INPUT PERSONA
   var persona = dict.persona ?? defaultPersona;
 
-  // LaunchBar.alert(title);
-  // LaunchBar.alert(argument);
-  // LaunchBar.alert(persona);
+  // alertWhenRunningInBackground('Title: ' + title);
+  // alertWhenRunningInBackground('Argument: ' + argument);
+  // alertWhenRunningInBackground('Persona: ' + persona);
   // return;
 
   // API CALL
-  LaunchBar.hide();
   var result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
     headerFields: {
       Authorization: 'Bearer ' + apiKey,
@@ -332,20 +365,25 @@ function ask(dict) {
   // File.writeJSON(result, Action.supportPath + '/test.json');
   // var result = File.readJSON(Action.supportPath + '/test.json');
 
-  processResult(result, argument, title, persona);
+  // ADDITIONAL INFO FOR STORING RECENT INFO IN THE NEXT STEP
+  var presetTitle =
+    dict.presetTitle ??
+    Action.preferences.defaultPersonaTitle ??
+    File.readJSON(userPresetsPath).personas[0].title; // default
+
+  var icon = dict.icon; // might need fallback(s) to default
+
+  processResult(result, argument, title, persona, icon, presetTitle);
 }
 
-function processResult(result, argument, title, persona) {
+function processResult(result, argument, title, persona, icon, presetTitle) {
   // ERROR HANDLING
   if (result.response == undefined) {
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
-    LaunchBar.alert(result.error);
+    alertWhenRunningInBackground(result.error);
     return;
   }
 
   if (result.response.status != 200) {
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
-
     if (result.data != undefined) {
       var data = JSON.parse(result.data);
       if (data.error != undefined) {
@@ -353,34 +391,11 @@ function processResult(result, argument, title, persona) {
       }
     }
 
-    LaunchBar.alert(
+    alertWhenRunningInBackground(
       result.response.status + ': ' + details ?? result.response.localizedStatus
     );
     return;
   }
-
-  // STORE USED PERSONA PROPERTIES
-  // Preset prompts have an icon. They can also have a persona. The title is the prompt title not of the persona. But it does not really matter.
-
-  var recentPersona = {};
-
-  if (Action.preferences.presetPrompt) {
-    var presetData = File.readJSON(userPresets).prompts;
-  } else {
-    var presetData = File.readJSON(userPresets).personas;
-  }
-
-  presetData.forEach(function (item) {
-    if (item.persona == persona) {
-      recentPersona = {
-        persona: item.persona,
-        title: item.title,
-        icon: item.icon,
-      };
-    }
-  });
-
-  Action.preferences.recentPersona = recentPersona;
 
   // PARSE RESULT JSON
   var data = JSON.parse(result.data);
@@ -402,7 +417,7 @@ function processResult(result, argument, title, persona) {
     File.createDirectory(chatsFolder);
   }
 
-  const fileLocation = chatsFolder + '/' + title + '.md';
+  const fileLocation = chatsFolder + title + '.md';
 
   if (File.exists(fileLocation)) {
     text = File.readText(fileLocation) + '\n\n' + text;
@@ -410,24 +425,35 @@ function processResult(result, argument, title, persona) {
 
   File.writeText(text, fileLocation);
 
+  // STORE TIMESTAMP
   Action.preferences.recentTimeStamp = new Date().toISOString();
 
-  var fileURL = File.fileURLForPath(fileLocation);
+  // STORE USED PERSONA PROPERTIES
+  // Preset prompts have an icon. They can also have a persona. The title is the prompt title not of the persona. But it does not really matter.
 
+  Action.preferences.recent = {
+    persona: persona,
+    presetTitle: presetTitle,
+    icon: icon,
+    path: fileLocation,
+  };
+
+  // PLAY SOUND AND OPEN FILE
   var result = LaunchBar.execute(
     '/usr/bin/afplay',
     '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
   );
 
+  var fileURL = File.fileURLForPath(fileLocation);
   LaunchBar.openURL(fileURL);
 }
 
 function prompts() {
-  if (!File.exists(userPresets)) {
+  if (!File.exists(userPresetsPath)) {
     return;
   }
 
-  const prompts = File.readJSON(userPresets).prompts;
+  const prompts = File.readJSON(userPresetsPath).prompts;
   var result = [];
   prompts.forEach(function (item) {
     result.push({
@@ -436,13 +462,13 @@ function prompts() {
       icon: item.icon,
       action: 'ask',
       actionArgument: {
-        title: item.title,
+        presetTitle: item.title,
         argument: item.argument,
         persona: item.persona,
         icon: item.icon,
-        addURL: item.addURL,
         addClipboard: item.addClipboard,
-        presetPrompt: true,
+        addURL: item.addURL,
+        isPrompt: true,
       },
       actionRunsInBackground: true,
     });
@@ -451,11 +477,11 @@ function prompts() {
 }
 
 function showPersonas(argument) {
-  if (!File.exists(userPresets)) {
+  if (!File.exists(userPresetsPath)) {
     return;
   }
 
-  const personas = File.readJSON(userPresets).personas;
+  const personas = File.readJSON(userPresetsPath).personas;
 
   var result = [];
   personas.forEach(function (item) {
@@ -465,9 +491,9 @@ function showPersonas(argument) {
       icon: item.icon,
       action: 'setPersona',
       actionArgument: {
-        persona: item.persona,
-        title: item.title,
-        icon: item.icon,
+        persona: item.persona, // default persona
+        title: item.title, // default persona title (for Settings)
+        icon: item.icon, // default persona icon
       },
     };
 
@@ -475,6 +501,8 @@ function showPersonas(argument) {
       pushData.subtitle = 'Asks: ' + argument;
       pushData.action = 'options';
       pushData.actionArgument.argument = argument;
+      pushData.actionArgument.title = undefined;
+      pushData.actionArgument.presetTitle = item.title;
     }
 
     result.push(pushData);
@@ -482,23 +510,26 @@ function showPersonas(argument) {
   return result;
 }
 
+function alertWhenRunningInBackground(alertMessage) {
+  LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+  LaunchBar.alert(alertMessage);
+  LaunchBar.hide();
+}
+
 // SETTING FUNCTIONS
 
 function settings() {
   var model = Action.preferences.model ?? 'gpt-3.5-turbo';
 
-  var personaTitle =
-    Action.preferences.personaTitle ??
-    File.readJSON(Action.path + '/Contents/Resources/presets.json').personas[0]
-      .title;
-
-  var personaIcon = Action.preferences.personaIcon ?? 'weasel';
+  var defaultPersonaTitle =
+    Action.preferences.defaultPersonaTitle ??
+    File.readJSON(userPresetsPath).personas[0].title; // default
 
   return [
     {
       title: 'Choose default persona',
-      icon: personaIcon,
-      badge: personaTitle,
+      icon: Action.preferences.defaultPersonaIcon ?? 'weasel',
+      badge: defaultPersonaTitle,
       children: showPersonas(),
     },
     {
@@ -518,13 +549,23 @@ function settings() {
       icon: 'codeTemplate',
       action: 'editPresets',
     },
+    {
+      title: 'Update personas & prompts',
+      icon: 'updateTemplate',
+      action: 'updatePresets',
+    },
+    {
+      title: 'Reset personas & prompts',
+      icon: 'sparkleTemplate',
+      action: 'resetPresets',
+    },
   ];
 }
 
 function setPersona(dict) {
-  Action.preferences.persona = dict.persona;
-  Action.preferences.personaTitle = dict.title;
-  Action.preferences.personaIcon = dict.icon;
+  Action.preferences.defaultPersona = dict.persona;
+  Action.preferences.defaultPersonaTitle = dict.title;
+  Action.preferences.defaultPersonaIcon = dict.icon;
   return settings();
 }
 
@@ -564,7 +605,101 @@ function setModel(arg) {
 
 function editPresets() {
   LaunchBar.hide();
-  LaunchBar.openURL(File.fileURLForPath(userPresets));
+  LaunchBar.openURL(File.fileURLForPath(userPresetsPath));
+}
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+  for (var i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i]; // parse int
+    const b = ~~lastUsedParts[i]; // parse int
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
+}
+
+function comparePresets() {
+  if (!File.exists(userPresetsPath)) {
+    return;
+  }
+
+  var userPresets = File.readJSON(userPresetsPath);
+
+  var allUserPresets = userPresets.prompts.concat(userPresets.personas);
+
+  var allUserPresetTitles = [];
+
+  allUserPresets.forEach(function (item) {
+    allUserPresetTitles.push(item.title);
+  });
+
+  var allPresets = presets.prompts.concat(presets.personas);
+
+  var newPresetTitles = [];
+
+  allPresets.forEach(function (item) {
+    if (!allUserPresetTitles.includes(item.title)) {
+      newPresetTitles.push(item.title);
+    }
+  });
+
+  if (newPresetTitles.length > 0) {
+    return newPresetTitles.join('\n');
+  }
+}
+
+function updatePresets() {
+  if (!File.exists(userPresetsPath)) {
+    return;
+  }
+
+  var personaCount = 0;
+  var promptCount = 0;
+
+  var userPresets = File.readJSON(userPresetsPath);
+  var userPrompts = userPresets.prompts;
+
+  var userPromptTitles = [];
+  userPrompts.forEach(function (item) {
+    userPromptTitles.push(item.title);
+  });
+
+  presets.prompts.forEach(function (item) {
+    if (!userPromptTitles.includes(item.title)) {
+      userPresets.prompts.push(item);
+      promptCount++;
+    }
+  });
+
+  var userPersonas = userPresets.personas;
+
+  var userPersonaTitles = [];
+  userPersonas.forEach(function (item) {
+    userPersonaTitles.push(item.title);
+  });
+
+  presets.personas.forEach(function (item) {
+    if (!userPersonaTitles.includes(item.title)) {
+      userPresets.personas.push(item);
+      personaCount++;
+    }
+  });
+
+  File.writeJSON(userPresets, userPresetsPath);
+
+  LaunchBar.displayNotification({
+    title: 'Done!',
+    string: personaCount + ' new personas. ' + promptCount + ' new prompts.',
+  });
+
+  return settings();
+}
+
+function resetPresets() {
+  File.writeJSON(presets, userPresetsPath);
+  return settings();
 }
 
 function setApiKey() {

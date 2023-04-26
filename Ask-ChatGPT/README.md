@@ -28,7 +28,7 @@ While waiting for the answer, you can continue using LaunchBar as the primary ta
 
 - Results are automatically copied to the clipboard.
 - To view recent chats, select the action in LaunchBar and press `command` + `enter` \
-(BTW: You can also delete chats in this view with `command` + `delete` and [all the other stuff](https://www.obdev.at/resources/launchbar/help/WorkingWithFiles.html#append-text) you can do with files in LaunchBar.)
+(BTW: You quick look or delete chats in this view or any of [the usual stuff](https://www.obdev.at/resources/launchbar/help/WorkingWithFiles.html#append-text) you can do with files in LaunchBar.)
 - Use alternative personas with `command` + `enter` when you are done entering text. 
 
 ### Settings
@@ -38,7 +38,7 @@ Access the settings with `option` + `enter`. Here you can:
 - Choose a default persona
 - Choose between `gpt-3.5-turbo` and `gpt-4` models
 - Set or reset your API key
-- Customize prompts and personas
+- Update, reset or customize prompts and personas
 
 You can customize and add as many prompts and personas as you want, and choose an emoji as the icon to identify them easily. 
 
@@ -74,6 +74,7 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 
 - [ChipiChat](https://github.com/quinncomendant/ChipiChat.lbaction#chipichat-launchbarchatgpt) is a cool alternative LaunchBar action for ChatGPT. 
 - Here is a [long list of interesting prompts](https://prompts.chat) that may serve as inspiration for both prompts and personas to use with this action.
+- [QLMarkdown](https://github.com/sbarex/QLMarkdown) is a great Quick Look plugin for Markdown files.
 - I really enjoyed [this episode of Changelog](https://changelog.fm/534#t=45:20) and especially [Simon's](https://github.com/simonw) take on LLMs.
 - Why the icon? [The answer is in this toot.](https://mastodon.social/@tess/110105460869464011)
 

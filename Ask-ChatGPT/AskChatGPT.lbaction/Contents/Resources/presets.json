@@ -5,7 +5,6 @@
       "description": "Asks to improve the text of your latest clipboard entry",
       "argument": "Improve the following text:",
       "persona": "You are a proofreader. Review the provided input for any spelling, grammar, or punctuation errors. Provide me with any necessary corrections and make suggestions for how to improve the writing. The goal is a simple and coherent writing style. Answer in the language of the provided text.",
-      "addURL": false,
       "addClipboard": true,
       "icon": "weasel_typo"
     },
@@ -14,7 +13,6 @@
       "description": "Asks for a summary of your latest clipboard entry",
       "argument": "Summarize the following text in the source language:",
       "persona": "You are research assistant. Your summary should be informative and factual, covering the most important aspects of the provided text. Write your summary in the language of the provided text",
-      "addURL": false,
       "addClipboard": true,
       "icon": "weasel_clipboard"
     },
@@ -22,10 +20,16 @@
       "title": "Summarize website",
       "description": "Asks for a summary of the current website in your browser",
       "argument": "Summarize the following website in the source language:",
-      "persona" : "You are a research assistant. Your summary should be factual, covering the most important aspects of the topic. Strickly use information from the provided source.",
+      "persona": "You are a research assistant. Your summary should be factual, covering the most important aspects of the topic. Strickly use information from the provided source.",
       "addURL": true,
-      "addClipboard": false,
       "icon": "weasel_web"
+    },
+    {
+      "title": "Create color palette",
+      "description": "Asks to create a color palette from the color value in your clipboard",
+      "argument" : "Create a random color palette based on a given color value and display them in a HTML table. Follow this pattern for the table:\n<table><tr><td style=\"background-color:colorValue\"></td><td>colorValue</td></tr></table>\nInclude the color value in the HTML table. Do not put the HTML table in quotes when you answer. Create the color palette based on this color value:",
+      "addClipboard": true,
+      "icon": "weasel_color"
     }
   ],
   "personas": [

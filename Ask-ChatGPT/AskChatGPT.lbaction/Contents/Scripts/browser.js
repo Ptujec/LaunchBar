@@ -19,7 +19,7 @@ function getCurrentURL() {
 
   // Check if browser is supported
   if (!supportedBrowers.includes(frontmost)) {
-    LaunchBar.alert(frontmost + ' is not a supported browser!'.localize());
+    alertWhenRunningInBackground(frontmost + ' is not a supported browser!');
     return;
   }
 
