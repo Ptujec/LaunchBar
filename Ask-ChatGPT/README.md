@@ -19,15 +19,20 @@ Press `enter` to access a menu of predefined prompts. You can customize them in 
 
 <img src="03.jpg" width="740"/> 
 
-In any case, the answer will open in your default text editor as a simple markdown file, which works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files. It even allows for pinning files so they stay on top at all times.
+### What’s next?
+
+No need to wait while the answer is generated. All this is happening in the background without affecting the LaunchBar interface.
+
+The chat will open in your default text editor as a simple markdown file when done. 
 
 <img src="04.jpg" width="740"/> 
 
-While waiting for the answer, you can continue using LaunchBar as the primary task runs in the background without affecting the interface.
+Additionally the answer is automatically copied to the clipboard.
+
+This action works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files. It even allows for pinning files so they stay on top at all times.
 
 ### Additional Features
 
-- Results are automatically copied to the clipboard.
 - To view recent chats, select the action in LaunchBar and press `command` + `enter` \
 (BTW: You quick look or delete chats in this view or any of [the usual stuff](https://www.obdev.at/resources/launchbar/help/WorkingWithFiles.html#append-text) you can do with files in LaunchBar.)
 - Use alternative personas with `command` + `enter` when you are done entering text. 
