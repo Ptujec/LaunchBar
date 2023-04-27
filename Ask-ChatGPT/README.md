@@ -29,7 +29,7 @@ The chat will open in your default text editor as a simple markdown file when do
 
 Additionally the answer is automatically copied to the clipboard.
 
-This action works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files. It even allows for pinning files so they stay on top at all times.
+This action works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files.
 
 ### Additional Features
 
