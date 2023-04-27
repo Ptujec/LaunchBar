@@ -23,7 +23,7 @@ Press `enter` to access a menu of predefined prompts. You can customize them in 
 
 No need to wait while the answer is generated. All this is happening in the background without affecting the LaunchBar interface.
 
-The chat will open in your default text editor as a simple **markdown file** when done. 
+The chat will open as a simple **markdown file** when done. 
 
 <img src="04.jpg" width="740"/> 
 
@@ -43,6 +43,7 @@ Access the settings with `option` + `enter`. Here you can:
 
 - Choose a default persona
 - Choose between `gpt-3.5-turbo` and `gpt-4` models
+- Choose an editor to display the resulting chats 
 - Set or reset your API key
 - Update, reset or customize prompts and personas
 

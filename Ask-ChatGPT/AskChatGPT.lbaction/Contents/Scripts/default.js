@@ -18,6 +18,7 @@ Prompts:
 String.prototype.localizationTable = 'default'; // For potential localization later
 
 include('browser.js');
+include('editors.js');
 
 const apiKey = Action.preferences.apiKey;
 const recentTimeStamp = Action.preferences.recentTimeStamp;
@@ -457,7 +458,7 @@ function processResult(
   );
 
   var fileURL = File.fileURLForPath(fileLocation);
-  LaunchBar.openURL(fileURL);
+  LaunchBar.openURL(fileURL, Action.preferences.EditorID);
 }
 
 function prompts() {
@@ -531,25 +532,27 @@ function alertWhenRunningInBackground(alertMessage) {
 // SETTING FUNCTIONS
 
 function settings() {
-  var model = Action.preferences.model ?? 'gpt-3.5-turbo';
-
-  var defaultPersonaTitle =
-    Action.preferences.defaultPersonaTitle ??
-    File.readJSON(userPresetsPath).personas[0].title; // default
-
   return [
     {
       title: 'Choose default persona',
       icon: Action.preferences.defaultPersonaIcon ?? 'weasel',
-      badge: defaultPersonaTitle,
+      badge:
+        Action.preferences.defaultPersonaTitle ??
+        File.readJSON(userPresetsPath).personas[0].title,
       children: showPersonas(),
     },
     {
       title: 'Choose model',
       icon: 'gearTemplate',
-      badge: model,
-      // action: 'models',
+      badge: Action.preferences.model ?? 'gpt-3.5-turbo',
       children: models(),
+    },
+    {
+      title: 'Choose editor to display chats',
+      icon: 'eyeTemplate',
+      badge: Action.preferences.EditorName ?? 'default',
+      // action: 'chooseEditor',
+      children: chooseEditor(),
     },
     {
       title: 'Set API key',
