@@ -23,11 +23,11 @@ Press `enter` to access a menu of predefined prompts. You can customize them in 
 
 No need to wait while the answer is generated. All this is happening in the background without affecting the LaunchBar interface.
 
-The chat will open in your default text editor as a simple markdown file when done. 
+The chat will open in your default text editor as a simple **markdown file** when done. 
 
 <img src="04.jpg" width="740"/> 
 
-Additionally the answer is automatically copied to the clipboard.
+Additionally the answer is automatically copied to the **clipboard**.
 
 This action works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files.
 
