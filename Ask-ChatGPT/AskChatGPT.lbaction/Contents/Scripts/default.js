@@ -296,9 +296,14 @@ function ask(dict) {
   if (dict.addURL == true) {
     var currentURL = getCurrentURL();
     if (currentURL != undefined) {
-      title = (title + ' - ' + currentURL)
-        .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]/g, '_')
-        .replace(/(https?|www)/g, ' ');
+      title =
+        title +
+        ' - ' +
+        currentURL
+          .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]+/g, '_')
+          .replace(/https?|www/g, '')
+          .replace(/^_+|_+$/g, '')
+          .trim();
 
       argument += ' ' + currentURL;
     } else {
@@ -452,7 +457,7 @@ function processResult(
   };
 
   // PLAY SOUND AND OPEN FILE
-  var result = LaunchBar.execute(
+  LaunchBar.execute(
     '/usr/bin/afplay',
     '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
   );
