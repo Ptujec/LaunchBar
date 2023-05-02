@@ -9,7 +9,7 @@
 This action extracts color codes (hex and rgba) from a website and puts them in a local HTML file. You can:
 
 - Copy a color value by clicking on it. 
-- Export the whole palette as a list to the system color picker. (Note: You might need to restart an app for new lists to appear in the color picker.)
+- Import the whole palette as a list to the system color picker. (Note: You might need to restart an app for new lists to appear in the color picker.)
 - Browse files (with `space`).
 - Choose a browser in which the files should be opened (with `option` + `enter`).
 
