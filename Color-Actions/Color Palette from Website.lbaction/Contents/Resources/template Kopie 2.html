@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Color Palette - <!-- url --></title>
+    <style>
+      :root {
+        --primary-color: #0080ec;
+        --text-color: #181818;
+        --background-color: #fff;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text-color: #eee;
+          --background-color: #2b2b2b;
+        }
+      }
+
+      body {
+        font-family: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial',
+          sans-serif;
+        color: var(--text-color);
+        background-color: var(--background-color);
+      }
+      h1 {
+        text-align: center;
+        padding: 28px 0 0;
+        margin: 0;
+        font-size: 28px;
+      }
+      h2 {
+        text-align: center;
+        padding: 8px 0 0;
+        margin: 0;
+        font-size: 16px;
+        font-weight: normal;
+      }
+      p {
+        text-align: center;
+        padding: 12px 0 0;
+        margin: 0;
+        font-size: 14px;
+      }
+      a {
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+      table {
+        margin: 0 auto;
+        padding: 40px 0 25px;
+      }
+      td {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        cursor: pointer;
+        border: solid var(--background-color);
+        /*  border-radius: 25%; */
+        /*  transition: 0.4s; */
+        box-shadow: inset 0 0 0 0px;
+      }
+      td:hover {
+        transform: scale(1.04, 1.04);
+        transform-origin: center;
+      }
+      .ht:hover .tooltip {
+        display: block;
+      }
+      .tooltip {
+        display: none;
+        color: var(--background-color);
+        background-color: var(--text-color);
+        border: solid var(--text-color);
+        border-radius: 2px;
+        font-size: 10px;
+        margin-top: -30px; /* moves it down */
+        margin-left: 20px; /* moves the tooltip to the right */
+        padding: 1px 0 2px;
+        position: absolute;
+        text-align: center;
+        z-index: 1000;
+      }
+    </style>
+
+    <script>
+      function copyToClipboard(color) {
+        const el = document.createElement('textarea');
+        el.value = color;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert(color + ' copied!');
+      }
+    </script>
+  </head>
+
+  <body>
+    <header>
+      <!-- header -->
+    </header>
+    <table>
+      <!-- table -->
+    </table>
+    <!-- <footer>
+      <p>Created with <a href="https://ptujec.github.io/launchbar">Color Palette Action</a> for <a href="https://www.obdev.at/products/launchbar/index.html">LaunchBar</a>.</p>
+    </footer> -->
+  </body>
+</html>
