@@ -14,6 +14,7 @@
 
 - DuckDuckGo (with "Feeling ducky")
 - Kagi Search
+- Neeva Search
 - Wikipedia EN/DE (Shows summary or website on ⌘↩)
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
