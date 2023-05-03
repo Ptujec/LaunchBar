@@ -21,7 +21,7 @@ This action is meant to be used with LaunchBar's "send to" feature. Select a lis
 
 ## Note
 
-Unfortunately new lists/palettes will not appear in the color picker of an active application automatically. Either restart the app or click the little `…` icon, choose `open` and select the .clr file from `~/Library/Colors`.
+Unfortunately new lists/palettes will not appear in the color picker of an active application automatically. Either restart the app or click the little `…` icon, choose `open` and select the `.clr` file from `~/Library/Colors`.
 
 If you have an idea how to solve that programmatically let me know. 
 
