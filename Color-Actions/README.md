@@ -22,7 +22,7 @@ This action is meant to be used with LaunchBar's "send to" feature. Select a lis
 ## Miscellaneous
 
 - [System Color Picker by Sindre Sorhus](https://sindresorhus.com/system-color-picker) puts the system color picker in a nice little app, with some helpful additions.
-- Want to learn more about the Color Picker? [Macmost has you covered.](https://www.youtube.com/watch?v=u8Q0vLzjAjU)
+- Want to learn more about the Color Picker? [Macmost](https://www.youtube.com/watch?v=MQqntlvhGLg) and [robinwood](https://www.robinwood.com/Catalog/Technical/OtherTuts/MacColorPicker/MacColorPicker.html) have you covered.
 
 ## Download
 
