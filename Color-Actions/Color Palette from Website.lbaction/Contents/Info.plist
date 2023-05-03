@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Color Palette from Website</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBSummary</key>
-		<string>⌥ ↩ = Choose browser to show results</string>
+		<string>⌥ ↩ = Choose browser to show results</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBUpdateURL</key>
