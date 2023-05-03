@@ -27,6 +27,8 @@ If you have an idea how to solve that programmatically let me know.
 
 ## Miscellaneous
 
+- You can find good color palettes on [Color Hunt](https://colorhunt.co/). The website action works great here.
+- ChatGPT also produces some cool results sometimes. I have a prompt for that in my [Ask ChatGPT action](https://github.com/Ptujec/LaunchBar/tree/master/Ask-ChatGPT#2-use-predefined-prompts). You can select the results in the table and send them to the import action. 
 - [System Color Picker by Sindre Sorhus](https://sindresorhus.com/system-color-picker) puts the system color picker in a nice little app, with some helpful additions.
 - Want to learn more about the Color Picker? [Macmost](https://www.youtube.com/watch?v=MQqntlvhGLg) and [robinwood](https://www.robinwood.com/Catalog/Technical/OtherTuts/MacColorPicker/MacColorPicker.html) have you covered.
 
