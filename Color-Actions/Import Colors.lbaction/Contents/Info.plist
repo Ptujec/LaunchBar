@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Import Colors</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -18,10 +18,10 @@
 		<string></string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Color-Actions</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Color-Actions/Import%20Colors.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Color-Actions</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
