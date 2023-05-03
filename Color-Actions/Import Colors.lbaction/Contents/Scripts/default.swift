@@ -68,6 +68,9 @@ if let path = fileManager.urls(for: .libraryDirectory, in: .userDomainMask).firs
         try colorList.write(to: path)
         print("Successfully created color list file at \(path)")
 
+        // Reveal the file in Finder
+        NSWorkspace.shared.activateFileViewerSelecting([path])
+
         // Play the sound using afplay
         let soundUrl = URL(fileURLWithPath: "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf")
         let soundPath = soundUrl.path
