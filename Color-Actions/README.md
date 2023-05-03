@@ -9,7 +9,7 @@
 This action extracts color codes (hex and rgba) from a website and puts them in a local HTML file. You can:
 
 - Copy a color value by clicking on it. 
-- Import the whole palette as a list to the system color picker. (**Note:** Unfortunately new lists will not appear in the color picker automatically. Either restart the app you are using or click the little `…` icon, choose `open` and select the .clr file from `~/Library/Colors`.)
+- Import the whole palette as a list to the system color picker. 
 - Browse files (with `space`).
 - Choose a browser in which the files should be opened (with `option` + `enter`).
 
@@ -18,6 +18,12 @@ This action extracts color codes (hex and rgba) from a website and puts them in 
 <img src="02.jpg" width="649"/> 
 
 This action is meant to be used with LaunchBar's "send to" feature. Select a list of color values, e.g., from the clipboard history, hit `tab`, select the action and press `enter`. 
+
+## Note
+
+Unfortunately new lists/palettes will not appear in the color picker of an active application automatically. Either restart the app or click the little `…` icon, choose `open` and select the .clr file from `~/Library/Colors`.
+
+If you have an idea how to solve that programmatically let me know. 
 
 ## Miscellaneous
 
