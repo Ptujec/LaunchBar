@@ -1,12 +1,9 @@
 /* 
-Maps Route Action for LaunchBar
+Search in Maps Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-05-04
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: 
-- autocomplete for places
 */
 
 function run(argument) {
