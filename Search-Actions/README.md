@@ -9,6 +9,7 @@
 - Notion Search
 - iA Writer Search (with an excerpt of the content found in subtitle)
 - Mindnode Search (with excerpt)
+- Search in Maps (including Route)
 
 ## Websites
 
