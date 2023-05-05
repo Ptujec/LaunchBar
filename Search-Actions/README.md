@@ -4,22 +4,23 @@
 
 ## Apps
 
-- Twitter Search
+- Twitter
 - ~~Zotero Search~~ ([Moved to it's own folder](https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions#readme))
-- Notion Search
-- iA Writer Search (with an excerpt of the content found in subtitle)
-- Mindnode Search (with excerpt)
-- Search in Maps (including Route)
+- Notion
+- iA Writer (with an excerpt of the content found in subtitle)
+- Mindnode (with excerpt)
+- Maps (including Route)
 
 ## Websites
 
 - DuckDuckGo (with "Feeling ducky")
-- Kagi Search
-- Neeva Search
+- Kagi 
+- Neeva
+- Phind
 - Wikipedia EN/DE (Shows summary or website on ⌘↩)
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
-- Google Search (with DuckDuckGos version of Feeling Lucky)
+- Google (with DuckDuckGos version of Feeling Lucky)
 - ARD Mediathek
 
 The added benefit of these actions over a custom search template are the suggestions. There are built in versions of Google and DuckDuckGo, but without some of the features.
