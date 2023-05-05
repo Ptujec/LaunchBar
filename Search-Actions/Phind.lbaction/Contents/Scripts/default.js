@@ -7,6 +7,12 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
+  if (argument == undefined) {
+    LaunchBar.hide();
+    LaunchBar.openURL('https://www.phind.com');
+    return;
+  }
+
   if (LaunchBar.options.commandKey) {
     var clipboard = LaunchBar.getClipboardString().trim();
 
@@ -33,7 +39,7 @@ function run(argument) {
   LaunchBar.hide();
   LaunchBar.openURL(
     'https://www.phind.com/search?q=' +
-      encodeURI(argument) +
+      encodeURIComponent(argument) +
       '&c=&l=&source=searchbox'
   );
 }
