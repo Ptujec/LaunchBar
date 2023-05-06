@@ -7,7 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
-  LaunchBar.hide();
+  // LaunchBar.hide();
   LaunchBar.openURL(
     'https://neeva.com/search?q=' + encodeURI(argument) + '&src=mkthome'
   );
