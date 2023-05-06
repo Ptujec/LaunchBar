@@ -15,7 +15,7 @@ function run(argument) {
     return;
   }
 
-  LaunchBar.hide();
+  // LaunchBar.hide();
   LaunchBar.openURL(
     'https://kagi.com/search?token=' +
       apiToken +

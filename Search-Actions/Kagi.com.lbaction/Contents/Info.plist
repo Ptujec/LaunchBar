@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Kagi.com</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBSummary</key>
-		<string>⇧↩ = Set API-Token</string>
+		<string>⇧ ↩ = Set API-Token</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
