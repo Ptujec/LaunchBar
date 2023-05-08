@@ -17,83 +17,141 @@ function run(actionPath) {
   }
 
   var response = LaunchBar.alert(
-    'Compile Swift Code',
-    'Swift code runs faster when compiled.\nThis action will compile the main swift file into an executable and remove the malware warning!\nThe malware warning appears for downloaded unsigned actions with executables even if the executable was compiled by you.\nUse at your own risk with actions from developers you trust.',
+    'Compile Swift Code ',
+    'Swift code runs faster when compiled.\nThis action will compile swift files inside the action bundle. It will also remove the quarantine attribute from each file in the bundle!\nUse at your own risk with actions from developers you trust.\nGo to the action website to learn more.',
     'Ok',
+    'Learn more',
     'Cancel'
   );
+
   switch (response) {
     case 0:
-      main(actionPath);
+      const scriptsDir = actionPath + '/Contents/Scripts';
+      const swiftScripts = getScripts(scriptsDir);
+
+      var successCount = 0;
+
+      if (swiftScripts.length > 0) {
+        swiftScripts.forEach(function (item) {
+          var success = main(item, actionPath);
+
+          if (success) {
+            successCount++;
+          }
+        });
+
+        LaunchBar.execute('./unquarantine.sh', actionPath);
+        LaunchBar.alert(
+          'Done!',
+          successCount + ' swift script(s) were compiled'
+        );
+      } else {
+        LaunchBar.alert('No uncompiled swift scripts found in this action!');
+      }
+
+      break;
+
     case 1:
+      LaunchBar.openURL(
+        'https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action'
+      );
+      break;
+
+    case 2:
       break;
   }
+}
 
-  function main(actionPath) {
-    // Check if default action script is an uncompiled swift file
-    var infoPlistPath = actionPath + '/Contents/Info.plist';
-    var infoPlist = File.readPlist(infoPlistPath);
-    var LBScriptName = infoPlist.LBScripts.LBDefaultScript.LBScriptName;
+function getScripts(scriptsDir) {
+  var dirContent = LaunchBar.execute('/usr/bin/find', scriptsDir).split('\n');
 
-    if (!LBScriptName.endsWith('.swift')) {
-      LBScriptName = LBScriptName + '.swift';
+  var swiftScripts = [];
+  dirContent.forEach(function (item) {
+    if (item.endsWith('.swift')) {
+      swiftScripts.push(item);
     }
+  });
 
-    var scriptsDir = actionPath + '/Contents/Scripts/';
-    var uncompiledFile = scriptsDir + LBScriptName;
+  return swiftScripts;
+}
 
-    // Check for default.swift
-    if (!File.exists(uncompiledFile)) {
-      uncompiledFile = actionPath + '/Contents/Scripts/default.swift';
-    }
-
-    // Check for main.swift
-    if (!File.exists(uncompiledFile)) {
-      var dirContent = LaunchBar.execute('/usr/bin/find', scriptsDir).split(
-        '\n'
-      );
-
-      dirContent.forEach(function (item) {
-        if (item.endsWith('main.swift')) {
-          uncompiledFile = item;
-        }
-      });
-    }
-
-    if (!File.exists(uncompiledFile)) {
-      LaunchBar.alert('No valid swift file found!');
-      return;
-    }
-
-    // Check if Command Line Tools are available
-    if (!File.exists('/Library/Developer/CommandLineTools')) {
-      LaunchBar.alert(
-        'Command Line Tools missing!',
-        'Open the Terminal.app and type "swift" to promt an install dialog.'
-      );
-      return;
-    }
-
-    // Compile swift file with command line tools and
-    LaunchBar.execute('/usr/bin/swiftc', '-O', uncompiledFile, '-o', 'default');
-
-    // Move compiled file to the actions directory
-    var outputFile = Action.path + '/Contents/Scripts/default';
-
-    if (!File.exists(outputFile)) {
-      LaunchBar.alert('File not ready!');
-      return;
-    }
-
-    var outputDir = actionPath + '/Contents/Scripts/default';
-    LaunchBar.execute('/bin/mv', outputFile, outputDir);
-
-    // Make the compiled file the default script in infoPlist
-    infoPlist.LBScripts.LBDefaultScript.LBScriptName = 'default';
-    File.writePlist(infoPlist, infoPlistPath);
-
-    LaunchBar.execute('./unquarantine.sh', actionPath);
-
-    LaunchBar.alert('Done!');
+function main(swiftScriptPath, actionPath) {
+  // Check if Command Line Tools are available
+  if (!File.exists('/Library/Developer/CommandLineTools')) {
+    LaunchBar.alert(
+      'Command Line Tools missing!',
+      'Open the Terminal.app and type "swift" to promt an install dialog.'
+    );
+    return;
   }
+  var swiftCompiledScriptPath = swiftScriptPath.replace('.swift', '');
+
+  // Compile swift file with command line tools
+  LaunchBar.execute(
+    '/usr/bin/swiftc',
+    '-O',
+    swiftScriptPath,
+    '-o',
+    swiftCompiledScriptPath
+  );
+
+  // Check if File was compiled
+
+  if (!File.exists(swiftCompiledScriptPath)) {
+    LaunchBar.alert(
+      'Something went wrong.',
+      'Could not compile ' + swiftScriptPath
+    );
+    return;
+  }
+
+  // Check if LBSuggestionsScript or LBDefaultScript end on .swift
+  const swiftScriptName = File.displayName(swiftScriptPath);
+  const swiftCompiledScriptName = File.displayName(swiftCompiledScriptPath);
+
+  const infoPlistPath = actionPath + '/Contents/Info.plist';
+  const infoPlist = File.readPlist(infoPlistPath);
+
+  var defaultScriptName = infoPlist.LBScripts.LBDefaultScript.LBScriptName;
+
+  if (defaultScriptName.endsWith('swift')) {
+    if (defaultScriptName == swiftScriptName) {
+      // Make the compiled file the default script in infoPlist
+      infoPlist.LBScripts.LBDefaultScript.LBScriptName =
+        swiftCompiledScriptName;
+      File.writePlist(infoPlist, infoPlistPath);
+    }
+  }
+
+  var LBSuggestionsScript = infoPlist.LBScripts.LBSuggestionsScript;
+
+  if (LBSuggestionsScript != undefined) {
+    var suggestionScriptName = LBSuggestionsScript.LBScriptName;
+
+    if (suggestionScriptName.endsWith('swift')) {
+      if (suggestionScriptName == swiftScriptName) {
+        // Make the compiled file the suggestion script in infoPlist
+        infoPlist.LBScripts.LBSuggestionsScript.LBScriptName =
+          swiftCompiledScriptName;
+        File.writePlist(infoPlist, infoPlistPath);
+      }
+    }
+  }
+
+  var LBActionURLScript = infoPlist.LBScripts.LBActionURLScript;
+
+  if (LBActionURLScript != undefined) {
+    var actionURLScriptName = LBActionURLScript.LBScriptName;
+
+    if (actionURLScriptName.endsWith('swift')) {
+      if (actionURLScriptName == swiftScriptName) {
+        // Make the compiled file the suggestion script in infoPlist
+        infoPlist.LBScripts.LBActionURLScript.LBScriptName =
+          swiftCompiledScriptName;
+        File.writePlist(infoPlist, infoPlistPath);
+      }
+    }
+  }
+
+  return 'success';
 }

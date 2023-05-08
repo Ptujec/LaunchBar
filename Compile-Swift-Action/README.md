@@ -1,18 +1,20 @@
 # LaunchBar Action: Compile Swift Action
 
-This action helps to compile a Swift script into an executable within an LaunchBar action. 
+This action compiles Swift scripts within a LaunchBar action and removes the quarantine attribute from each file in the bundle.
+
+**Be aware that this action should only be used for actions from trusted sources.**
 
 ## Background 
 
-Swift scripts run faster when compiled. Unfortunately I can't share actions with a compiled script. For security reasons Apple adds a `com.apple.quarantine` attribute to every downloaded file. (You can check that in Terminal with `‌xattr` plus the path to the file.) 
+Swift scripts run more efficiently when compiled. However, actions with a compiled script can't be shared easily. For security purposes, Apple adds a `com.apple.quarantine` attribute to every file of the download, which you can confirm in Terminal with `xattr` and the file's path. 
 
-This is not a problem yet. The problem starts when the main script file is an executable. If you want to run that you will get a malware alert.
+This is not an issue until the action contains compiled code. When you attempt to run it, you will receive a malware alert. 
 
-You can compile `default.swift` file yourself with `swiftc -O default.swift`. You will need Command Line Tools for that. [But it's a fairly easy and small install](https://www.maketecheasier.com/install-command-line-tools-without-xcode/). Obviously you also need to change the `LBScriptName` key in `info.plist`, pointing it to the executable. 
+If you have installed [Apple's Command Line Tools](https://www.maketecheasier.com/install-command-line-tools-without-xcode/), you can compile the Swift files yourself (with e.g. `swiftc -O default.swift`) and point the action to the compiled file in the Action Editor. However, the action still won't run due to the `com.apple.quarantine` attribute that Apple adds to every file of the downloaded action bundle. 
 
-Now you have the compiled executable and you know it matches the source file, because you compiled it yourself. But the action still won't run. This is because of the attribute on every other file of the action bundle. You can remove the attribute with LaunchBars built in `Open Anyways` action. Just be aware that this will remove the attribute from all files in that bundle. Potentially there could be other executables that the main script refers to. So check the whole bundle before you do this. And only do it if you trust the source. 
+Again, you could remove those with LaunchBar's built-in `Open Anyways` action. If you do, you should check the entire bundle before doing this though.
 
-**I know, that sounds like a lot. That is why I built this action to make that process easier.** 
+**To make this easier, I built this action so you don't have to do all that manually.**  The action compiles the raw swift files and points `LBSuggestionsScript.LBScriptName`, `LBActionURLScript.LBScriptName` or `LBDefaultScript.LBScriptName` to the complied versions.
 
 ## Download
 
