@@ -9,7 +9,6 @@
 - Notion
 - iA Writer (with an excerpt of the content found in subtitle)
 - Mindnode (with excerpt)
-- Maps (including Route)
 
 ## Websites
 
