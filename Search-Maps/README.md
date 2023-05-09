@@ -22,4 +22,4 @@ The suggestion script of this action is written in Swift. Swift scripts offer be
 
 ## Download
 
-[Download Search Maps Action](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Download Search Maps Action](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Search-Maps) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
