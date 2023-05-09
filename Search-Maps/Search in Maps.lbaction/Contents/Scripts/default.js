@@ -15,8 +15,8 @@ String.prototype.localizationTable = 'default'; // For potential localization la
 function run(argument) {
   argument = argument + ' ';
 
-  var parts = argument.split(/(?: |^)(?:to|nach|von|from|-) /);
-  var devider = argument.match(/(?: |^)(?:to|nach|von|from|-) /);
+  var parts = argument.split(/(?: |^)(?:to|nach|von|from) /);
+  var devider = argument.match(/(?: |^)(?:to|nach|von|from) /);
 
   if (devider != undefined) {
     devider = devider.join('').trim();
