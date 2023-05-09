@@ -16,8 +16,6 @@ If you indicate you are searching for directions (by using "to" or "from"), the 
 
 Starting with the destination is another option, especially if you want to take advantage of the suggestion feature. 
 
-<img src="03.jpg" width="784"/> 
-
 ## Setup
 
 The suggestion script of this action is written in Swift. Swift scripts offer better performance when compiled. [To compile the script, use the Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).
