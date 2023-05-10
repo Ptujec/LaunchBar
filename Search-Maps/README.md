@@ -2,25 +2,27 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This action improves searching Apple Maps with LaunchBar. The two main features are sugggestions as you type and support for directions. 
+This action improves searching on Apple Maps with LaunchBar. The two main features of this action are suggestions as you type and support for directions.
 
 ## Suggestions
 
-The action shows suggestions as you type. Because, you know, sometimes it is just hard to recall the correct spelling of certain names. 
+The action displays suggestions as you type. Because, you know, sometimes it's just hard to recall the correct spelling of certain names. 
 
-<img src="01.jpg" width="784"/> 
+<img src="01.jpg" width="828"/> 
 
 ## Directions
 
 If you indicate you are searching for directions (by using "to" or "from"), the action will display how it is interpreting your search query.
 
-<img src="02.jpg" width="784"/> 
+<img src="02.jpg" width="828"/> 
 
-If you want to take advantage of the suggestion feature for your destination you can start your query with the destination followed by the word "from". If you do that you will notice that the action will default to the current location if you don't specify a source location. 
+If you want to utilize the suggestion feature for your destination, you may start your query with the destination followed by the word "from". Doing so will result in the action defaulting to the current location if you do not specify a source location. 
+
+<img src="03.jpg" width="828"/> 
 
 ## Setup
 
-The suggestion script of this action is written in Swift. Swift scripts offer better performance when compiled. [To compile the script, use the Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).
+The suggestion script of this action is written in Swift. Swift scripts perform better when compiled. [Therefore, if you want to show suggestions more quickly, you can compile the script using the Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).
 
 ## Download
 
