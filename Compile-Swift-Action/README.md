@@ -4,6 +4,24 @@ This action compiles Swift scripts within a LaunchBar action and removes the qua
 
 **Be aware that this action should only be used for actions from trusted sources.**
 
+## How To
+
+Follow these steps:
+
+1. Run this action.
+2. Select the `.lbaction` bundle of the action you want to compile.
+3. Confirm by pressing `return` (`↩`).
+
+If you want to do this for an already installed action, you will find the `.lbaction` bundle at `~/Library/Application Support/LaunchBar/Actions`.
+
+Alternatively, you can:
+
+1. Select the action you want to compile in LaunchBar.
+2. Press and hold the `option` (`⌥`) key, then press `→` to select the `.lbaction` bundle.
+3. Press `tab` (`⇥`).
+4. Select this action.
+5. Confirm by pressing `return` (`↩`).
+
 ## Background 
 
 Swift scripts run more efficiently when compiled. However, actions with a compiled script can't be shared easily. For security purposes, Apple adds a `com.apple.quarantine` attribute to every file of the download, which you can confirm in Terminal with `xattr` and the file's path. 
