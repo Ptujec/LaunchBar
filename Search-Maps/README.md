@@ -20,7 +20,7 @@ If you want to utilize the suggestion feature for your destination, you may star
 
 <img src="03.jpg" width="828"/> 
 
-## Setup
+## Performance
 
 The suggestion script of this action is written in Swift. Swift scripts perform better when compiled. [Therefore, if you want to show suggestions more quickly, you can compile the script using the Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).
 
