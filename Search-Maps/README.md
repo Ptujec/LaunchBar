@@ -2,9 +2,11 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
+This action improves searching Apple Maps with LaunchBar. The two main features are sugggestions as you type and support for directions. 
+
 ## Suggestions
 
-This action adds suggestions, when you search in Apple Maps with LaunchBar. Because, you know, sometimes it is just hard to recall the correct spelling of certain names. 
+The action shows suggestions as you type. Because, you know, sometimes it is just hard to recall the correct spelling of certain names. 
 
 <img src="01.jpg" width="784"/> 
 
@@ -14,7 +16,7 @@ If you indicate you are searching for directions (by using "to" or "from"), the 
 
 <img src="02.jpg" width="784"/> 
 
-Starting with the destination is another option, especially if you want to take advantage of the suggestion feature. 
+If you want to take advantage of the suggestion feature for your destination you can start your query with the destination followed by the word "from". If you do that you will notice that the action will default to the current location if you don't specify a source location. 
 
 ## Setup
 
