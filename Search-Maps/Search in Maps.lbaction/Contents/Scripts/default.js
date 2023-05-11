@@ -7,12 +7,24 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
+- https://developer.what3words.com/
 
 */
 
 String.prototype.localizationTable = 'default'; // For potential localization later
 
+const apiKey = Action.preferences.apiKey;
+
 function run(argument) {
+  var what3wordsRegex = /(?:[a-züäöß]+\.){2}[a-züäöß]+/;
+
+  var what3words = argument.match(what3wordsRegex);
+
+  if (what3words) {
+    showWhat3words(what3words);
+    return;
+  }
+
   argument = argument + ' ';
 
   var parts = argument.split(/(?: |^)(?:to|nach|von|from) /);
@@ -41,4 +53,81 @@ function run(argument) {
   }
 
   LaunchBar.openURL(url);
+}
+
+function showWhat3words(what3words) {
+  if (apiKey == undefined || LaunchBar.options.commandKey) {
+    setApiKey();
+    return;
+  }
+
+  var requestURL =
+    'https://api.what3words.com/v3/convert-to-coordinates?words=' +
+    encodeURIComponent(what3words) +
+    '&key=' +
+    apiKey;
+
+  var result = HTTP.getJSON(requestURL);
+
+  // ERROR HANDLING
+  if (result.response == undefined) {
+    LaunchBar.alert(result.error);
+    return;
+  }
+
+  if (result.response.status != 200) {
+    LaunchBar.alert(
+      result.response.status + ': ' + result.response.localizedStatus
+    );
+    return;
+  }
+
+  var coo = result.data.coordinates;
+
+  var url =
+    'http://maps.apple.com/?q=///' +
+    // encodeURIComponent(what3words) +
+    '&ll=' +
+    coo.lat +
+    ',' +
+    coo.lng +
+    '&z=10&t=s';
+
+  LaunchBar.openURL(url);
+}
+
+function setApiKey() {
+  var response = LaunchBar.alert(
+    'API key required',
+    '1) Press "Open Website" to create an API key.\n2) Press "Set API key"',
+    'Open Website',
+    'Set API key',
+    'Cancel'
+  );
+  switch (response) {
+    case 0:
+      LaunchBar.openURL('https://developer.what3words.com/public-api');
+      LaunchBar.hide();
+      break;
+    case 1:
+      var clipboardContent = LaunchBar.getClipboardString().trim();
+
+      if (clipboardContent.length == 8) {
+        // Write new API key in Action preferences
+        Action.preferences.apiKey = clipboardContent;
+
+        LaunchBar.alert(
+          'Success!',
+          'API key set to: ' + Action.preferences.apiKey
+        );
+      } else {
+        LaunchBar.alert(
+          'The length of the clipboard content does not match the length of a correct API key',
+          'Make sure the API key is the most recent item in the clipboard!'
+        );
+      }
+      break;
+    case 2:
+      break;
+  }
 }
