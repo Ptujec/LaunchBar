@@ -86,7 +86,7 @@ function showWhat3words(what3words) {
 
   var url =
     'http://maps.apple.com/?q=///' +
-    // encodeURIComponent(what3words) +
+    encodeURIComponent(what3words) +
     '&ll=' +
     coo.lat +
     ',' +
