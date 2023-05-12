@@ -22,7 +22,9 @@ If you want to utilize the suggestion feature for your destination, you may star
 
 ## what3words
 
-There are currently no suggestions for it, however, the action does support [what3words](https://what3words.com/about) locations. An API key is required.
+The action also supports [what3words](https://what3words.com/about) locations. An API key is required. Recognition is pretty flexible. You can skip the 3 slashes or send the entire url. It doesn't matter.  
+
+<img src="04.jpg" width="828"/> 
 
 ## Performance
 

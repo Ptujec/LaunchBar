@@ -1,6 +1,6 @@
 #!/usr/bin/env swift
 
-/* 
+/*
 Search in Maps Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-05-08
@@ -10,6 +10,18 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 import Foundation
 import MapKit
+
+struct Suggestion: Codable {
+    let country: String
+    let nearestPlace: String
+    let words: String
+    let rank: Int
+    let language: String
+}
+
+struct ApiResponse: Codable {
+    let suggestions: [Suggestion]
+}
 
 let input = CommandLine.arguments[1]
 parseInputAndGenerateJson(input)
@@ -58,6 +70,7 @@ func parseInputAndGenerateJson(_ input: String) {
 }
 
 func generateJsonWithDivider(saddr: String, daddr: String, divider: String) {
+    // ... code for generating JSON with divider ...
     let output = [
         ["title": saddr, "icon": "circleTemplate"],
         ["title": divider, "icon": "dotsTemplate"],
@@ -65,19 +78,26 @@ func generateJsonWithDivider(saddr: String, daddr: String, divider: String) {
     ]
 
     let jsonData = try! JSONSerialization.data(withJSONObject: output)
-    let jsonString = String(data: jsonData, encoding: .utf8)!
-    print(jsonString)
+    if let jsonString = String(data: jsonData, encoding: .utf8) {
+        print(jsonString)
+    }
 }
 
 func generateJsonWithoutDivider(input: String) {
-    // Location Suggestions
-    let searchCompleter = MKLocalSearchCompleter()
-    let searchCompleterDelegate = SearchCompleterDelegate()
-    searchCompleter.delegate = searchCompleterDelegate
-    searchCompleter.queryFragment = input
-    searchCompleter.resultTypes = .address
+    let what3wordsRegex = try! NSRegularExpression(pattern: "(?:[a-züäöß]+\\.){2}[a-züäöß]+")
     
-    RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
+    if let what3words = input.range(of: what3wordsRegex.pattern, options: .regularExpression) {
+        showWhat3wordsSuggestions(what3words: String(input[what3words]))
+    } else {
+        // Location Suggestions
+        let searchCompleter = MKLocalSearchCompleter()
+        let searchCompleterDelegate = SearchCompleterDelegate()
+        searchCompleter.delegate = searchCompleterDelegate
+        searchCompleter.queryFragment = input
+        searchCompleter.resultTypes = .address
+        
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
+    }
 }
 
 class SearchCompleterDelegate: NSObject, MKLocalSearchCompleterDelegate {
@@ -93,12 +113,57 @@ class SearchCompleterDelegate: NSObject, MKLocalSearchCompleterDelegate {
         }
 
         let jsonData = try! JSONSerialization.data(withJSONObject: suggestionResults)
-        let jsonString = String(data: jsonData, encoding: .utf8)!
-
-        print(jsonString)
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
+        }
     }
 
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         print("Error: \(error.localizedDescription)")
     }
+}
+
+func showWhat3wordsSuggestions(what3words: String) {
+    let requestURL = "https://mapapi.what3words.com/api/autosuggest?input=" + what3words.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+    let url = URL(string: requestURL)!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+
+    let semaphore = DispatchSemaphore(value: 0)
+
+    URLSession.shared.dataTask(with: request) { data, _, error in
+        if let error = error {
+            print("Error fetching data: \(error)")
+            return
+        }
+        guard let data = data else {
+            print("No data received.")
+            return
+        }
+
+        do {
+            let decodedData = try JSONDecoder().decode(ApiResponse.self, from: data)
+            let w3wSuggs = decodedData.suggestions
+
+            var suggestions: [[String: Any]] = []
+
+            for item in w3wSuggs {
+                suggestions.append([
+                    "title": item.words,
+                    "subtitle": item.nearestPlace,
+                    "icon": "w3wTemplate",
+                ])
+            }
+
+            let jsonData = try JSONSerialization.data(withJSONObject: suggestions, options: [])
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error decoding JSON: \(error)")
+        }
+        semaphore.signal()
+    }.resume()
+    _ = semaphore.wait(timeout: .distantFuture)
+    //  RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
 }
