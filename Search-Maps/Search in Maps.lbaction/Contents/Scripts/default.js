@@ -14,17 +14,9 @@ Documentation:
 String.prototype.localizationTable = 'default'; // For potential localization later
 
 const apiKey = Action.preferences.apiKey;
+const w3wRegex = /(?:[a-züäöß]+\.){2}[a-züäöß]+/;
 
 function run(argument) {
-  var what3wordsRegex = /(?:[a-züäöß]+\.){2}[a-züäöß]+/;
-
-  var what3words = argument.match(what3wordsRegex);
-
-  if (what3words) {
-    showWhat3words(what3words);
-    return;
-  }
-
   argument = argument + ' ';
 
   var parts = argument.split(/(?: |^)(?:to|nach|von|from) /);
@@ -41,6 +33,14 @@ function run(argument) {
       var daddr = parts[1]; // destination address
     }
 
+    if (w3wRegex.test(daddr)) {
+      daddr = getCooComp(daddr.match(w3wRegex)[0]);
+    }
+
+    if (w3wRegex.test(saddr)) {
+      saddr = getCooComp(saddr.match(w3wRegex)[0]);
+    }
+
     if (saddr == '') {
       var url = encodeURI('http://maps.apple.com/?daddr=' + daddr);
     } else {
@@ -49,13 +49,25 @@ function run(argument) {
       );
     }
   } else {
-    var url = 'https://maps.apple.com/?q=' + encodeURI(argument);
+    const what3words = argument.match(w3wRegex);
+
+    if (what3words) {
+      var cooComp = getCooComp(what3words);
+      var url =
+        'http://maps.apple.com/?q=///' +
+        encodeURIComponent(what3words) +
+        '&ll=' +
+        cooComp +
+        '&z=10&t=s';
+    } else {
+      var url = 'https://maps.apple.com/?q=' + encodeURI(argument);
+    }
   }
 
   LaunchBar.openURL(url);
 }
 
-function showWhat3words(what3words) {
+function getCooComp(what3words) {
   if (apiKey == undefined || LaunchBar.options.commandKey) {
     setApiKey();
     return;
@@ -83,17 +95,9 @@ function showWhat3words(what3words) {
   }
 
   var coo = result.data.coordinates;
+  var cooComp = coo.lat + ',' + coo.lng;
 
-  var url =
-    'http://maps.apple.com/?q=///' +
-    encodeURIComponent(what3words) +
-    '&ll=' +
-    coo.lat +
-    ',' +
-    coo.lng +
-    '&z=10&t=s';
-
-  LaunchBar.openURL(url);
+  return cooComp;
 }
 
 function setApiKey() {

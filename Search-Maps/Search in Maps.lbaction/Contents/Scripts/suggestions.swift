@@ -124,8 +124,10 @@ class SearchCompleterDelegate: NSObject, MKLocalSearchCompleterDelegate {
 }
 
 func showWhat3wordsSuggestions(what3words: String) {
-    let requestURL = "https://mapapi.what3words.com/api/autosuggest?input=" + what3words.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
-    let url = URL(string: requestURL)!
+    var urlComponents = URLComponents(string: "https://mapapi.what3words.com/api/autosuggest")!
+    urlComponents.queryItems = [URLQueryItem(name: "input", value: what3words)]
+    let url = urlComponents.url!
+
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
 
