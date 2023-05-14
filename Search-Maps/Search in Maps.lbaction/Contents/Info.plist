@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search in Maps</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.3</string>
+	<string>1.2.4</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.Maps</string>
 	<key>LBDescription</key>

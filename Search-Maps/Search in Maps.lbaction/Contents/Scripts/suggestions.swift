@@ -71,10 +71,23 @@ func parseInputAndGenerateJson(_ input: String) {
 
 func generateJsonWithDivider(saddr: String, daddr: String, divider: String) {
     // ... code for generating JSON with divider ...
+    let what3wordsRegex = try! NSRegularExpression(pattern: "(?:[a-züäöß]+\\.){2}[a-züäöß]+")
+    
+    var saddrIcon = "circleTemplate"
+    var daddrIcon = "pinTemplate"
+    
+    if (saddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil) {
+        saddrIcon = "w3wCircleTemplate"
+    }
+    
+    if (daddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil) {
+        daddrIcon = "w3wPinTemplate"
+    }
+    
     let output = [
-        ["title": saddr, "icon": "circleTemplate"],
+        ["title": saddr, "icon": saddrIcon],
         ["title": divider, "icon": "dotsTemplate"],
-        ["title": daddr, "icon": "pinTemplate"],
+        ["title": daddr, "icon": daddrIcon],
     ]
 
     let jsonData = try! JSONSerialization.data(withJSONObject: output)
@@ -153,7 +166,7 @@ func showWhat3wordsSuggestions(what3words: String) {
                 suggestions.append([
                     "title": item.words,
                     "subtitle": item.nearestPlace,
-                    "icon": "w3wTemplate",
+                    "icon": "w3wPinTemplate",
                 ])
             }
 
