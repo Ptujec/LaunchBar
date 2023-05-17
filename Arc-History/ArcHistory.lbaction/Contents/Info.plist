@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Arc History</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>company.thebrowser.Browser</string>
 	<key>LBDescription</key>
@@ -38,7 +38,7 @@
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.sh</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>
