@@ -17,15 +17,27 @@ SELECT itemData.itemID, itemData.fieldID, itemData.valueID FROM itemData")
 
 itemNotes=$(sqlite3 -json "${database_path}" "
 SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes")
+if [ -z "${itemNotes}" ]; then
+  itemNotes="[]"
+fi
 
 itemAttachments=$(sqlite3 -json "${database_path}" "
 SELECT itemAttachments.itemID, itemAttachments.parentItemID, itemAttachments.contentType, itemAttachments.path FROM itemAttachments")
+if [ -z "${itemAttachments}" ]; then
+  itemAttachments="[]"
+fi
 
 tags=$(sqlite3 -json "${database_path}" "
 SELECT tags.name AS title, tags.tagID  FROM tags")
+if [ -z "${tags}" ]; then
+  tags="[]"
+fi
 
 itemTags=$(sqlite3 -json "${database_path}" "
 SELECT itemTags.itemID, itemTags.tagID FROM itemTags")
+if [ -z "${itemTags}" ]; then
+  itemTags="[]"
+fi
 
 creators=$(sqlite3 -json "${database_path}" "
 SELECT creators.creatorID, creators.lastName, creators.firstName FROM creators")
@@ -35,12 +47,21 @@ SELECT itemCreators.itemID, itemCreators.creatorID FROM itemCreators")
 
 collections=$(sqlite3 -json "${database_path}" "
 SELECT collections.collectionID, collections.collectionName FROM collections")
+if [ -z "${collections}" ]; then
+  collections="[]"
+fi
 
 collectionItems=$(sqlite3 -json "${database_path}" "
 SELECT collectionItems.collectionID, collectionItems.itemID FROM collectionItems")
+if [ -z "${collectionItems}" ]; then
+  collectionItems="[]"
+fi
 
 deletedItems=$(sqlite3 -json "${database_path}" "
 SELECT deletedItems.itemID FROM deletedItems")
+if [ -z "${deletedItems}" ]; then
+  deletedItems="[]"
+fi
 
 # Print formated as JSON
 printf '{"itemTypes": %s, "items": %s, "itemDataValues": %s, "itemData": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s}' "${itemTypes}" "${items}" "${itemDataValues}" "${itemData}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}"
