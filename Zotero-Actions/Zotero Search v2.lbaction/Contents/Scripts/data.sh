@@ -39,5 +39,8 @@ SELECT collections.collectionID, collections.collectionName FROM collections")
 collectionItems=$(sqlite3 -json "${database_path}" "
 SELECT collectionItems.collectionID, collectionItems.itemID FROM collectionItems")
 
+deletedItems=$(sqlite3 -json "${database_path}" "
+SELECT deletedItems.itemID FROM deletedItems")
+
 # Print formated as JSON
-printf '{"itemTypes": %s, "items": %s, "itemDataValues": %s, "itemData": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s}' "${itemTypes}" "${items}" "${itemDataValues}" "${itemData}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}"
+printf '{"itemTypes": %s, "items": %s, "itemDataValues": %s, "itemData": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s}' "${itemTypes}" "${items}" "${itemDataValues}" "${itemData}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}"

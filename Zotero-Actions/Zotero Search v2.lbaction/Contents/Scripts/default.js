@@ -6,15 +6,11 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
-Shell
-- librarys (items by library bzw sammlung) ?
-
-Javascript
-- only copy db when mod dates don't match
+- date
 - option to open pdf or url OR show in Zotero 
-- search priorities 1: title, name 2: tag 3: note
 
-Icons
+- only copy db when mod dates don't match
+- option to always update?
 */
 
 const dataPath = Action.supportPath + '/data.json';
@@ -108,28 +104,22 @@ function show(data) {
     {
       title: 'Creators',
       icon: 'creatorTemplate',
-      // action: 'showCreators',
-      // actionArgument: data,
       children: showCreators(data),
     },
     {
       title: 'Tags',
       icon: 'tagTemplate',
-      // action: 'showTags',
-      // actionArgument: data,
       children: showTags(data),
     },
     {
       title: 'Collections',
       icon: 'collectionTemplate',
-      // action: 'showCreators',
-      // actionArgument: data,
       children: showCollections(data),
     },
     {
-      title: 'Titles',
-      icon: 'titleTemplate',
-      action: 'showTitles',
+      title: 'All Entries',
+      icon: 'libraryTemplate',
+      action: 'showAllEntries',
       actionArgument: data,
     },
   ];
@@ -233,7 +223,7 @@ function showItemsWithCollection(collectionIDString) {
   return showEntries(itemIDs, data);
 }
 
-function showTitles(data) {
+function showAllEntries(data) {
   var itemIDs = [];
 
   data.itemData.forEach(function (item) {
@@ -247,64 +237,23 @@ function showTitles(data) {
   return showEntries(itemIDs, data);
 }
 
-// function showEntries(itemIDs, data) {
-//   // LaunchBar.alert(itemIDs.length);
-//   var result = [];
-
-//   // Get title, creator and date for each itemID
-//   itemIDs.forEach(function (itemID) {
-//     var creators = [];
-//     data.itemCreators.forEach(function (i) {
-//       if (itemID == i.itemID) {
-//         data.creators.forEach(function (j) {
-//           if (j.creatorID == i.creatorID) {
-//             creators.push(j.lastName + ', ' + j.firstName);
-//           }
-//         });
-//       }
-//     });
-//     var title = '';
-//     data.itemData.forEach(function (i) {
-//       if (itemID == i.itemID && i.fieldID == 110) {
-//         data.itemDataValues.forEach(function (j) {
-//           if (j.valueID == i.valueID) {
-//             title = j.value;
-//           }
-//         });
-//       }
-//     });
-
-//     var url = '';
-//     data.items.forEach(function (i) {
-//       if (itemID == i.itemID) {
-//         url = 'zotero://select/library/items/' + i.key;
-//       }
-//     });
-
-//     result.push({
-//       title: title,
-//       subtitle: creators.join(' & '),
-//       icon: 'zTemplate',
-//       url: url,
-//     });
-//   });
-
-//   return result;
-// }
-
 function showEntries(itemIDs, data) {
   var result = [];
 
+  const deletedItemIDs = new Set(data.deletedItems.map((item) => item.itemID));
+
   var attachmentItemIDs = {};
   var itemsMap = data.items.reduce((map, item) => {
-    if (item.itemTypeID == 14) {
+    if (item.itemTypeID == 14 || item.itemTypeID == 1) {
       attachmentItemIDs[item.itemID] = true;
     }
-    map[item.itemID] = 'zotero://select/library/items/' + item.key;
+    map[item.itemID] = {
+      url: 'zotero://select/library/items/' + item.key,
+      itemTypeID: item.itemTypeID,
+    };
     return map;
   }, {});
 
-  // Create hash maps for faster lookups
   var creatorsMap = data.creators.reduce((map, creator) => {
     map[creator.creatorID] = creator.lastName + ', ' + creator.firstName;
     return map;
@@ -316,7 +265,7 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemDataMap = data.itemData.reduce((map, itemData) => {
+  var itemTitleMap = data.itemData.reduce((map, itemData) => {
     if (itemData.fieldID == 110) {
       data.itemDataValues.forEach((itemDataValue) => {
         if (itemDataValue.valueID == itemData.valueID) {
@@ -327,21 +276,49 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemsMap = data.items.reduce((map, item) => {
-    map[item.itemID] = 'zotero://select/library/items/' + item.key;
-    return map;
-  }, {});
+  // var itemDateMap = data.itemData.reduce((map, itemData) => {
+  //   if (itemData.fieldID == 14) {
+  //     data.itemDataValues.forEach((itemDataValue) => {
+  //       if (itemDataValue.valueID == itemData.valueID) {
+  //         var year = itemDataValue.value.split('-')[0];
+  //         map[itemData.itemID] = year;
+  //       }
+  //     });
+  //   }
+  //   return map;
+  // }, {});
 
-  // Process itemIDs and build the result array
+  const templateIcons = new Set([
+    '10',
+    '11',
+    '16',
+    '17',
+    '18',
+    '21',
+    '25',
+    '26',
+    '28',
+    '30',
+    '31',
+    '37',
+  ]);
+
   itemIDs.forEach((itemID) => {
-    if (!attachmentItemIDs[itemID]) {
+    if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
+      const iconBase = itemsMap[itemID]
+        ? itemsMap[itemID].itemTypeID.toString()
+        : 'zTemplate';
+      const icon = templateIcons.has(iconBase)
+        ? iconBase + 'Template'
+        : iconBase;
+
       result.push({
-        title: itemDataMap[itemID] || '',
+        title: itemTitleMap[itemID],
         subtitle: itemCreatorsMap[itemID]
           ? itemCreatorsMap[itemID].join(' & ')
-          : '',
-        icon: 'zTemplate',
-        url: itemsMap[itemID],
+          : '', //+ (itemDateMap[itemID] ? itemDateMap[itemID] : ''),
+        icon: icon,
+        url: itemsMap[itemID] ? itemsMap[itemID].url : '',
       });
     }
   });

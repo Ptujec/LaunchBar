@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>0.1</string>
+	<string>0.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -18,10 +18,10 @@
 		<string></string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Zotero-Actions/Zotero%20Search%20v2.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>org.zotero.zotero</string>

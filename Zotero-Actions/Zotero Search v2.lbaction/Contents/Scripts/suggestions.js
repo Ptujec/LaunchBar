@@ -33,6 +33,7 @@ function runWithString(string) {
 
   tags.forEach(function (item) {
     if (item.title.toLowerCase().includes(string)) {
+      item.icon = 'arrowTemplate';
       suggestions.push(item);
     }
   });
@@ -42,14 +43,16 @@ function runWithString(string) {
       suggestions.push({
         title: item.lastName,
         subtitle: item.firstName,
-        icon: 'creatorTemplate',
+        // icon: 'creatorTemplate',
+        icon: 'arrowTemplate',
       });
     }
     if (item.firstName.toLowerCase().includes(string)) {
       suggestions.push({
         title: item.lastName,
         subtitle: item.firstName,
-        icon: 'creatorTemplate',
+        // icon: 'creatorTemplate',
+        icon: 'arrowTemplate',
       });
     }
   });
