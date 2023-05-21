@@ -7,8 +7,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
 - date
-- option to open pdf or url OR show in Zotero 
+- option to open pdf or url OR show in Zotero?
 
+- show details for items?
 - only copy db when mod dates don't match
 - option to always update?
 */
@@ -67,16 +68,22 @@ function search(argument, data) {
   });
 
   // Search in DataValues
-  var itemDataValuesIDs = [];
+  // var itemDataValuesIDs = [];
 
-  data.itemDataValues.forEach(function (item) {
+  // data.itemDataValues.forEach(function (item) {
+  //   if (item.value.toLowerCase().includes(argument)) {
+  //     itemDataValuesIDs.push(item.valueID);
+  //   }
+  // });
+
+  // data.itemData.forEach(function (item) {
+  //   if (itemDataValuesIDs.includes(item.valueID)) {
+  //     itemIDs.push(item.itemID);
+  //   }
+  // });
+
+  data.metaAll.forEach(function (item) {
     if (item.value.toLowerCase().includes(argument)) {
-      itemDataValuesIDs.push(item.valueID);
-    }
-  });
-
-  data.itemData.forEach(function (item) {
-    if (itemDataValuesIDs.includes(item.valueID)) {
       itemIDs.push(item.itemID);
     }
   });
@@ -226,7 +233,7 @@ function showItemsWithCollection(collectionIDString) {
 function showAllEntries(data) {
   var itemIDs = [];
 
-  data.itemData.forEach(function (item) {
+  data.meta.forEach(function (item) {
     if (item.fieldID == 110) {
       itemIDs.push(item.itemID);
     }
@@ -244,7 +251,11 @@ function showEntries(itemIDs, data) {
 
   var attachmentItemIDs = {};
   var itemsMap = data.items.reduce((map, item) => {
-    if (item.itemTypeID == 14 || item.itemTypeID == 1) {
+    if (
+      item.itemTypeID == 14 ||
+      item.itemTypeID == 1 ||
+      item.itemTypeID == 37
+    ) {
       attachmentItemIDs[item.itemID] = true;
     }
     map[item.itemID] = {
@@ -265,13 +276,27 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemTitleMap = data.itemData.reduce((map, itemData) => {
-    if (itemData.fieldID == 110) {
-      data.itemDataValues.forEach((itemDataValue) => {
-        if (itemDataValue.valueID == itemData.valueID) {
-          map[itemData.itemID] = itemDataValue.value;
-        }
-      });
+  // var itemTitleMap = data.itemData.reduce((map, itemData) => {
+  //   if (itemData.fieldID == 110) {
+  //     data.itemDataValues.forEach((itemDataValue) => {
+  //       if (itemDataValue.valueID == itemData.valueID) {
+  //         map[itemData.itemID] = itemDataValue.value;
+  //       }
+  //     });
+  //   }
+  //   return map;
+  // }, {});
+
+  var itemTitleMap = data.meta.reduce((map, meta) => {
+    if (meta.fieldID == 110) {
+      map[meta.itemID] = meta.value;
+    }
+    return map;
+  }, {});
+
+  var itemDateMap = data.meta.reduce((map, meta) => {
+    if (meta.fieldID == 14) {
+      map[meta.itemID] = meta.value;
     }
     return map;
   }, {});
@@ -314,9 +339,11 @@ function showEntries(itemIDs, data) {
 
       result.push({
         title: itemTitleMap[itemID],
-        subtitle: itemCreatorsMap[itemID]
-          ? itemCreatorsMap[itemID].join(' & ')
-          : '', //+ (itemDateMap[itemID] ? itemDateMap[itemID] : ''),
+        subtitle:
+          (itemCreatorsMap[itemID]
+            ? itemCreatorsMap[itemID].join(' & ') + ' '
+            : '') +
+          (itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : ''),
         icon: icon,
         url: itemsMap[itemID] ? itemsMap[itemID].url : '',
       });
