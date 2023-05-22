@@ -34,7 +34,7 @@ function runWithString(string) {
     }
   });
 
-  // TODO: Nur wirklich Title keine Anhänge
+  // TODO: titles in suggestions (but without notes and attachments/annotations)
   // data.meta.forEach(function (item) {
   //   if (item.fieldID == 110 && item.value.toLowerCase().includes(string)) {
   //     suggestions.push({

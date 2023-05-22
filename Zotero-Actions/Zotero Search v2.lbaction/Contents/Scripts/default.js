@@ -6,10 +6,16 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
-- title in suggestions
+- titles in suggestions (but without notes and attachments/annotations)
 - option to open pdf or url OR show in Zotero?
-- show details for items?
 - make sure Zotero is running before use the url command !! 
+- details
+  - booktitle for chapters
+  - publisher
+  - place
+  - publication for magazines
+  - abstract?
+  - attachments?
 - attachment count?
 
 - only copy db when mod dates don't match
@@ -18,9 +24,21 @@ TODO:
 
 const dataPath = Action.supportPath + '/data.json';
 
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
+
 function run(argument) {
+  // Check version
+  if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
+    // Update data
+    var updateJSON = true;
+
+    // Save current version number
+    Action.preferences.lastUsedActionVersion = Action.version;
+  }
+
   // Create JSON Data from SQL database
-  if (LaunchBar.options.commandKey || !File.exists(dataPath)) {
+  if (LaunchBar.options.commandKey || !File.exists(dataPath) || updateJSON) {
     var data = LaunchBar.execute('/bin/sh', './data.sh');
     File.writeText(data, dataPath);
   }
@@ -408,4 +426,16 @@ function itemActions(dict) {
       },
     ];
   }
+}
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+  for (var i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i]; // parse int
+    const b = ~~lastUsedParts[i]; // parse int
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }
