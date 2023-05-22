@@ -7,9 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
 - titles in suggestions (but without notes and attachments/annotations)
-- initialize second and third firstNames 
 - don't show translators 
-- option to open pdf or url OR show in Zotero?
 - make sure Zotero is running before use the url command !! 
 - details
   - booktitle for chapters
@@ -17,19 +15,19 @@ TODO:
   - place
   - publication for magazines
   - abstract?
-  - attachments?
+  - tags?
 - attachment count?
-
-- show all titles for creator on return in details?
-
 
 - only copy db when mod dates don't match
 - option to always update?
 */
 
+const storagePath = LaunchBar.homeDirectory + '/Zotero/storage';
+
 const dataPath = Action.supportPath + '/data.json';
 
 const currentActionVersion = Action.version;
+
 const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
 
 function run(argument) {
@@ -50,6 +48,12 @@ function run(argument) {
 
   var data = File.readJSON(dataPath);
 
+  // Search in Storage
+  if (LaunchBar.options.controlKey) {
+    return searchInStorageDir(argument, data);
+  }
+
+  // Search or browse sql database
   if (argument != undefined) {
     return search(argument, data);
   } else {
@@ -127,6 +131,31 @@ function search(argument, data) {
 
   // Filter duplicates
   itemIDs = [...new Set(itemIDs)];
+
+  return showEntries(itemIDs, data);
+}
+
+function searchInStorageDir(argument, data) {
+  var output = LaunchBar.execute(
+    '/usr/bin/mdfind',
+    '-onlyin',
+    storagePath,
+    argument
+  )
+    .trim()
+    .split('\n');
+
+  const itemIDs = output.reduce((acc, path) => {
+    const attachmentKey = path.split('/')[5];
+
+    data.itemAttachments.forEach((item) => {
+      if (item.key === attachmentKey) {
+        acc.push(item.parentItemID);
+      }
+    });
+
+    return acc;
+  }, []);
 
   return showEntries(itemIDs, data);
 }
@@ -411,11 +440,11 @@ function itemActions(dict) {
       }
     });
 
-    return [
+    details = [
       {
         title: dict.title,
         icon: dict.icon,
-        url: dict.url,
+        url: url || dict.url,
       },
       {
         title: dict.creator,
@@ -431,6 +460,47 @@ function itemActions(dict) {
         icon: 'arrowTemplate',
       },
     ];
+
+    // Attachments
+
+    var paths = [];
+    data.itemAttachments.forEach((item) => {
+      if (itemID == item.parentItemID) {
+        if (item.path != undefined) {
+          paths.push({
+            path:
+              storagePath +
+              '/' +
+              item.key +
+              '/' +
+              item.path.split('storage:')[1],
+            type: item.contentType,
+          });
+        }
+      }
+    });
+
+    if (paths.length > 0) {
+      for (var i = 0; i < paths.length; i++) {
+        if (paths[i].type == 'application/pdf') {
+          details[0].path = paths[i].path;
+          details[0].subtitle = '';
+          details[0].url = undefined;
+          break;
+        }
+      }
+
+      paths.forEach(function (item) {
+        details.push({
+          title: item.type.split('/')[1].toUpperCase() || '',
+          path: item.path,
+          subtitle: '',
+          icon: '14Template',
+        });
+      });
+    }
+
+    return details;
   }
 }
 

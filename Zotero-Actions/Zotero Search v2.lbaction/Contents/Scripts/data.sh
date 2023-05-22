@@ -22,7 +22,10 @@ if [ -z "${itemNotes}" ]; then
 fi
 
 itemAttachments=$(sqlite3 -json "${database_path}" "
-SELECT itemAttachments.itemID, itemAttachments.parentItemID, itemAttachments.contentType, itemAttachments.path FROM itemAttachments")
+SELECT items.key, itemAttachments.itemID, itemAttachments.parentItemID, itemAttachments.contentType, itemAttachments.path 
+FROM itemAttachments
+LEFT JOIN items ON itemAttachments.itemID = items.itemID
+")
 if [ -z "${itemAttachments}" ]; then
   itemAttachments="[]"
 fi
