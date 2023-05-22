@@ -23,33 +23,50 @@ function runWithString(string) {
 
   var suggestions = [];
 
-  const tags = showTags(data);
+  const icon = 'icon';
 
-  tags.forEach(function (item) {
+  data.tags.forEach(function (item) {
     if (item.title.toLowerCase().includes(string)) {
-      item.icon = 'arrowTemplate';
-      suggestions.push(item);
+      suggestions.push({
+        title: item.title,
+        icon: icon,
+      });
     }
   });
+
+  // TODO: Nur wirklich Title keine Anhänge
+  // data.meta.forEach(function (item) {
+  //   if (item.fieldID == 110 && item.value.toLowerCase().includes(string)) {
+  //     suggestions.push({
+  //       title: item.value,
+  //       icon: icon,
+  //     });
+  //   }
+  // });
 
   data.creators.forEach(function (item) {
     if (item.lastName.toLowerCase().includes(string)) {
       suggestions.push({
         title: item.lastName,
-        subtitle: item.firstName,
-        // icon: 'creatorTemplate',
-        icon: 'arrowTemplate',
+        // subtitle: item.firstName,
+        icon: icon,
       });
     }
     if (item.firstName.toLowerCase().includes(string)) {
       suggestions.push({
-        title: item.lastName,
-        subtitle: item.firstName,
-        // icon: 'creatorTemplate',
-        icon: 'arrowTemplate',
+        title: item.firstName,
+        // title: item.lastName,
+        // subtitle: item.firstName,
+        icon: icon,
       });
     }
   });
+
+  // Use filter() method to remove duplicates from suggestions array
+  suggestions = suggestions.filter(
+    (suggestion, index, self) =>
+      index === self.findIndex((s) => s.title === suggestion.title)
+  );
 
   return suggestions;
 }

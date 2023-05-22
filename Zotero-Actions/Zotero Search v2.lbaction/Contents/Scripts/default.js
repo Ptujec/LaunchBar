@@ -6,10 +6,12 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
-- date
+- title in suggestions
 - option to open pdf or url OR show in Zotero?
-
 - show details for items?
+- make sure Zotero is running before use the url command !! 
+- attachment count?
+
 - only copy db when mod dates don't match
 - option to always update?
 */
@@ -266,7 +268,10 @@ function showEntries(itemIDs, data) {
   }, {});
 
   var creatorsMap = data.creators.reduce((map, creator) => {
-    map[creator.creatorID] = creator.lastName + ', ' + creator.firstName;
+    var creatorName = [creator.lastName, creator.firstName]
+      .filter(Boolean)
+      .join(', ');
+    map[creator.creatorID] = creatorName;
     return map;
   }, {});
 
@@ -337,18 +342,70 @@ function showEntries(itemIDs, data) {
         ? iconBase + 'Template'
         : iconBase;
 
+      const creator = itemCreatorsMap[itemID]
+        ? itemCreatorsMap[itemID].join(' & ') + ' '
+        : '';
+
+      const date = itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : '';
+
+      const title = itemTitleMap[itemID];
+
       result.push({
-        title: itemTitleMap[itemID],
-        subtitle:
-          (itemCreatorsMap[itemID]
-            ? itemCreatorsMap[itemID].join(' & ') + ' '
-            : '') +
-          (itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : ''),
+        title: title,
+        subtitle: creator + date,
         icon: icon,
-        url: itemsMap[itemID] ? itemsMap[itemID].url : '',
+        // url: itemsMap[itemID] ? itemsMap[itemID].url : '',
+        action: 'itemActions',
+        actionArgument: {
+          url: itemsMap[itemID] ? itemsMap[itemID].url : '',
+          itemID: itemID,
+          creator: creator,
+          date: date,
+          title: title,
+          icon: icon,
+        },
       });
     }
   });
 
   return result;
+}
+
+function itemActions(dict) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.openURL(dict.url);
+  } else {
+    // Show details
+    const itemID = dict.itemID;
+    const data = File.readJSON(dataPath);
+    var url = '';
+
+    data.metaAll.forEach(function (item) {
+      if (item.itemID == itemID) {
+        if (item.fieldID == 1) {
+          url = item.value;
+        }
+      }
+    });
+
+    return [
+      {
+        title: dict.title,
+        icon: dict.icon,
+      },
+      {
+        title: dict.creator,
+        icon: 'creatorTemplate',
+      },
+      {
+        title: dict.date,
+        icon: 'calTemplate',
+      },
+      {
+        title: url ?? '',
+        url: url ?? '',
+        icon: 'arrowTemplate',
+      },
+    ];
+  }
 }
