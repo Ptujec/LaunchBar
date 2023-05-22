@@ -19,6 +19,7 @@ const zoteroPath = LaunchBar.homeDirectory + '/Zotero/storage'; // TODO: Read th
 
 function run(argument) {
   if (argument == undefined) {
+    LaunchBar.hide();
     LaunchBar.openURL(File.fileURLForPath('/Applications/Zotero.app'));
   } else {
     if (LaunchBar.options.commandKey) {

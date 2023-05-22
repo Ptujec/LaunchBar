@@ -5,13 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>z.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.ZoteroSearch</string>
+	<string>ptujec.LaunchBar.action.ZoteroPDFSearch</string>
 	<key>CFBundleName</key>
-	<string>Zotero Search</string>
+	<string>Zotero PDF Search </string>
 	<key>CFBundleVersion</key>
-	<string>2.1.1</string>
-	<key>LBAssociatedApplication</key>
-	<string>org.zotero.zotero</string>
+	<string>2.1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -22,10 +20,10 @@
 		<string>This action searches the Zotero storage folder for attachments (PDFs and other).</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions#readme</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Zotero-Actions/Zotero%20Search.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions#readme</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>org.zotero.zotero</string>
