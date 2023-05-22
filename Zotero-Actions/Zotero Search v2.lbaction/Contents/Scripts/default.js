@@ -7,6 +7,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
 - titles in suggestions (but without notes and attachments/annotations)
+- initialize second and third firstNames 
+- don't show translators 
 - option to open pdf or url OR show in Zotero?
 - make sure Zotero is running before use the url command !! 
 - details
@@ -17,6 +19,9 @@ TODO:
   - abstract?
   - attachments?
 - attachment count?
+
+- show all titles for creator on return in details?
+
 
 - only copy db when mod dates don't match
 - option to always update?
@@ -286,7 +291,7 @@ function showEntries(itemIDs, data) {
   }, {});
 
   var creatorsMap = data.creators.reduce((map, creator) => {
-    var creatorName = [creator.lastName, creator.firstName]
+    var creatorName = [creator.lastName, initializeName(creator.firstName)]
       .filter(Boolean)
       .join(', ');
     map[creator.creatorID] = creatorName;
@@ -410,6 +415,7 @@ function itemActions(dict) {
       {
         title: dict.title,
         icon: dict.icon,
+        url: dict.url,
       },
       {
         title: dict.creator,
@@ -438,4 +444,11 @@ function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
     if (a < b) return false;
   }
   return false;
+}
+
+function initializeName(name) {
+  return name
+    .split(' ')
+    .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
+    .join(' ');
 }
