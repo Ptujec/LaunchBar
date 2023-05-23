@@ -146,7 +146,7 @@ function searchInStorageDir(argument, data) {
     .trim()
     .split('\n');
 
-  const itemIDs = output.reduce((acc, path) => {
+  var itemIDs = output.reduce((acc, path) => {
     const attachmentKey = path.split('/')[5];
 
     data.itemAttachments.forEach((item) => {
@@ -157,6 +157,9 @@ function searchInStorageDir(argument, data) {
 
     return acc;
   }, []);
+
+  // Filter duplicates
+  itemIDs = [...new Set(itemIDs)];
 
   return showEntries(itemIDs, data);
 }
