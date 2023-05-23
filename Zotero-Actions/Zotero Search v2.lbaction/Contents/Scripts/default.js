@@ -14,6 +14,7 @@ TODO:
   - publisher
   - place
   - publication for magazines
+  - serie für kommentare
   - abstract?
   - tags?
 - attachment count?
@@ -426,6 +427,9 @@ function showEntries(itemIDs, data) {
 function itemActions(dict) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(dict.url);
+  } else if (LaunchBar.options.shiftKey) {
+    // TODO: Paste (synCache? oder lieber weg lassen … brauch key)
+    // LaunchBar.paste(dict.itemID);
   } else {
     // Show details
     const itemID = dict.itemID;
@@ -483,6 +487,7 @@ function itemActions(dict) {
     if (paths.length > 0) {
       for (var i = 0; i < paths.length; i++) {
         if (paths[i].type == 'application/pdf') {
+          // TODO: epub?
           details[0].path = paths[i].path;
           details[0].subtitle = '';
           details[0].url = undefined;

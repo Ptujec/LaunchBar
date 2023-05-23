@@ -25,6 +25,8 @@ itemAttachments=$(sqlite3 -json "${database_path}" "
 SELECT items.key, itemAttachments.itemID, itemAttachments.parentItemID, itemAttachments.contentType, itemAttachments.path 
 FROM itemAttachments
 LEFT JOIN items ON itemAttachments.itemID = items.itemID
+LEFT JOIN deletedItems ON itemAttachments.itemID = deletedItems.itemID 
+WHERE deletedItems.itemID IS NULL 
 ")
 if [ -z "${itemAttachments}" ]; then
   itemAttachments="[]"
@@ -84,7 +86,12 @@ LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
 WHERE itemData.fieldID = 14 OR itemData.fieldID = 110 
 ")
 
+# synCache=$(sqlite3 -json "${database_path}" "
+# SELECT syncCache.key, syncCache.data
+# FROM syncCache 
+# ")
+
 # Print formated as JSON
 # printf '{"itemTypes": %s, "items": %s, "itemDataValues": %s, "itemData": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemDataValues}" "${itemData}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}"
 
-printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}"
+printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}" # "${synCache}"
