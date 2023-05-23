@@ -320,30 +320,25 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var creatorsMap = data.creators.reduce((map, creator) => {
-    var creatorName = [creator.lastName, initializeName(creator.firstName)]
-      .filter(Boolean)
-      .join(', ');
-    map[creator.creatorID] = creatorName;
-    return map;
-  }, {});
-
   var itemCreatorsMap = data.itemCreators.reduce((map, itemCreator) => {
-    map[itemCreator.itemID] = map[itemCreator.itemID] || [];
-    map[itemCreator.itemID].push(creatorsMap[itemCreator.creatorID]);
+    // TODO: Finetune what to show and what not
+    if (
+      itemCreator.creatorTypeID != 4 &&
+      itemCreator.creatorTypeID != 2 &&
+      itemCreator.creatorTypeID != 3
+    ) {
+      var creatorName = [
+        itemCreator.lastName,
+        initializeName(itemCreator.firstName),
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      map[itemCreator.itemID] = map[itemCreator.itemID] || [];
+      map[itemCreator.itemID].push(creatorName);
+    }
     return map;
   }, {});
-
-  // var itemTitleMap = data.itemData.reduce((map, itemData) => {
-  //   if (itemData.fieldID == 110) {
-  //     data.itemDataValues.forEach((itemDataValue) => {
-  //       if (itemDataValue.valueID == itemData.valueID) {
-  //         map[itemData.itemID] = itemDataValue.value;
-  //       }
-  //     });
-  //   }
-  //   return map;
-  // }, {});
 
   var itemTitleMap = data.meta.reduce((map, meta) => {
     if (meta.fieldID == 110) {
@@ -358,18 +353,6 @@ function showEntries(itemIDs, data) {
     }
     return map;
   }, {});
-
-  // var itemDateMap = data.itemData.reduce((map, itemData) => {
-  //   if (itemData.fieldID == 14) {
-  //     data.itemDataValues.forEach((itemDataValue) => {
-  //       if (itemDataValue.valueID == itemData.valueID) {
-  //         var year = itemDataValue.value.split('-')[0];
-  //         map[itemData.itemID] = year;
-  //       }
-  //     });
-  //   }
-  //   return map;
-  // }, {});
 
   const templateIcons = new Set([
     '10',
@@ -486,7 +469,10 @@ function itemActions(dict) {
 
     if (paths.length > 0) {
       for (var i = 0; i < paths.length; i++) {
-        if (paths[i].type == 'application/pdf') {
+        if (
+          paths[i].type == 'application/pdf' ||
+          paths[i].type == 'application/epub+zip'
+        ) {
           // TODO: epub?
           details[0].path = paths[i].path;
           details[0].subtitle = '';

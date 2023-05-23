@@ -48,7 +48,9 @@ creators=$(sqlite3 -json "${database_path}" "
 SELECT creators.creatorID, creators.lastName, creators.firstName FROM creators")
 
 itemCreators=$(sqlite3 -json "${database_path}" "
-SELECT itemCreators.itemID, itemCreators.creatorID FROM itemCreators")
+SELECT itemCreators.itemID, itemCreators.creatorID, itemCreators.creatorTypeID, creators.lastName, creators.firstName FROM itemCreators
+LEFT JOIN creators ON itemCreators.creatorID = creators.creatorID
+")
 
 collections=$(sqlite3 -json "${database_path}" "
 SELECT collections.collectionID, collections.collectionName FROM collections")
