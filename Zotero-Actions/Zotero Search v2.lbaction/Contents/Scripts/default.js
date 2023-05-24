@@ -7,7 +7,6 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
 - titles in suggestions (but without notes and attachments/annotations)
-- don't show translators 
 - make sure Zotero is running before use the url command !! 
 - details
   - booktitle for chapters
@@ -97,21 +96,6 @@ function search(argument, data) {
     }
   });
 
-  // Search in DataValues
-  // var itemDataValuesIDs = [];
-
-  // data.itemDataValues.forEach(function (item) {
-  //   if (item.value.toLowerCase().includes(argument)) {
-  //     itemDataValuesIDs.push(item.valueID);
-  //   }
-  // });
-
-  // data.itemData.forEach(function (item) {
-  //   if (itemDataValuesIDs.includes(item.valueID)) {
-  //     itemIDs.push(item.itemID);
-  //   }
-  // });
-
   data.metaAll.forEach(function (item) {
     if (item.value.toLowerCase().includes(argument)) {
       itemIDs.push(item.itemID);
@@ -132,6 +116,11 @@ function search(argument, data) {
 
   // Filter duplicates
   itemIDs = [...new Set(itemIDs)];
+
+  // Fallback to storage search if no itemIDs found
+  if (itemIDs.length == 0) {
+    return searchInStorageDir(argument, data);
+  }
 
   return showEntries(itemIDs, data);
 }
@@ -324,22 +313,13 @@ function showEntries(itemIDs, data) {
   }, {});
 
   var itemCreatorsMap = data.itemCreators.reduce((map, itemCreator) => {
-    // TODO: Finetune what to show and what not
-    if (
-      itemCreator.creatorTypeID != 4 &&
-      itemCreator.creatorTypeID != 2 &&
-      itemCreator.creatorTypeID != 3
-    ) {
-      var creatorName = [
-        itemCreator.lastName,
-        initializeName(itemCreator.firstName),
-      ]
+    map[itemCreator.itemID] = map[itemCreator.itemID] || [];
+    map[itemCreator.itemID].push({
+      name: [itemCreator.lastName, initializeName(itemCreator.firstName)]
         .filter(Boolean)
-        .join(', ');
-
-      map[itemCreator.itemID] = map[itemCreator.itemID] || [];
-      map[itemCreator.itemID].push(creatorName);
-    }
+        .join(', '),
+      typeID: itemCreator.creatorTypeID,
+    });
     return map;
   }, {});
 
@@ -376,13 +356,30 @@ function showEntries(itemIDs, data) {
     if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
       const iconBase = itemsMap[itemID]
         ? itemsMap[itemID].itemTypeID.toString()
-        : 'zTemplate';
+        : '34';
       const icon = templateIcons.has(iconBase)
         ? iconBase + 'Template'
         : iconBase;
 
       const creator = itemCreatorsMap[itemID]
-        ? itemCreatorsMap[itemID].join(' & ') + ' '
+        ? itemCreatorsMap[itemID]
+            .filter((creator) => {
+              const type1Exists = itemCreatorsMap[itemID].some(
+                (c) => c.typeID === 1
+              );
+              if (type1Exists) {
+                return creator.typeID === 1;
+              }
+              const type3Exists = itemCreatorsMap[itemID].some(
+                (c) => c.typeID === 3
+              );
+              if (type3Exists) {
+                return creator.typeID === 3;
+              }
+              return true;
+            })
+            .map((creator) => creator.name)
+            .join(' & ') + ' '
         : '';
 
       const date = itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : '';
@@ -393,7 +390,6 @@ function showEntries(itemIDs, data) {
         title: title,
         subtitle: creator + date,
         icon: icon,
-        // url: itemsMap[itemID] ? itemsMap[itemID].url : '',
         action: 'itemActions',
         actionArgument: {
           url: itemsMap[itemID] ? itemsMap[itemID].url : '',
@@ -411,15 +407,53 @@ function showEntries(itemIDs, data) {
 }
 
 function itemActions(dict) {
+  const data = File.readJSON(dataPath);
   if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(dict.url);
   } else if (LaunchBar.options.shiftKey) {
-    // TODO: Paste (synCache? oder lieber weg lassen … brauch key)
-    // LaunchBar.paste(dict.itemID);
+    // Paste citation & copy link to item
+    // TODO: Build citation according to a csl style sheet?
+
+    const authorNames = data.itemCreators
+      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+      .map((item) => item.lastName);
+    const editorNames = data.itemCreators
+      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+      .map((item) => item.lastName);
+    const otherNames = data.itemCreators
+      .filter(
+        (item) =>
+          item.itemID === dict.itemID &&
+          item.creatorTypeID !== 1 &&
+          item.creatorTypeID !== 3
+      )
+      .map((item) => item.lastName);
+
+    const creators =
+      authorNames.length > 0
+        ? authorNames
+        : editorNames.length > 0
+        ? editorNames
+        : otherNames;
+    const creatorString =
+      creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
+
+    var citation = '(' + creatorString + ', ' + dict.date + ')';
+    // var citationMDLink = '[' + citation + '](' + dict.url + ')';
+    // LaunchBar.paste(citation);
+    // LaunchBar.setClipboardString(dict.url);
+
+    LaunchBar.executeAppleScript(
+      // 'set the clipboard to "' + citationMDLink + '"',
+      // 'delay 0.1',
+      'set the clipboard to "' + dict.url + '"',
+      'tell application "LaunchBar" to paste in frontmost application "' +
+        citation +
+        '"'
+    );
   } else {
     // Show details
     const itemID = dict.itemID;
-    const data = File.readJSON(dataPath);
     var url = '';
 
     data.metaAll.forEach(function (item) {
@@ -447,7 +481,7 @@ function itemActions(dict) {
       {
         title: url ?? '',
         url: url ?? '',
-        icon: 'arrowTemplate',
+        icon: 'openTemplate',
       },
     ];
 
@@ -476,7 +510,6 @@ function itemActions(dict) {
           paths[i].type == 'application/pdf' ||
           paths[i].type == 'application/epub+zip'
         ) {
-          // TODO: epub?
           details[0].path = paths[i].path;
           details[0].subtitle = '';
           details[0].url = undefined;
