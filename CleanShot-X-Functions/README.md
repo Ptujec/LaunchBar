@@ -1,5 +1,7 @@
 # LaunchBar Action: CleanShot X Functions
 
+*[→ Click here to view a list of all my actions.](https://ptujec.github.io/launchbar)* 
+
 This is a simple action associated with the [app](https://cleanshot.com/) to access functions with LaunchBar. 
 
 <img src="cleanshot.gif" width="800"/> 
