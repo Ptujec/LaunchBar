@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>0.12</string>
+	<string>0.13</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

@@ -1,4 +1,15 @@
 #!/bin/sh
+
+# Get the modification timestamps of both files
+file1_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite")
+file2_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite-copy")
+
+# Compare the timestamps and exit if zotero.sqlite is not newer
+if [ "$file1_modified" -le "$file2_modified" ]; then
+        # echo "zotero.sqlite is not newer than zotero.sqlite-copy"
+        exit 1
+fi
+
 cp "${HOME}/Zotero/zotero.sqlite" "${HOME}/Zotero/zotero.sqlite-copy"
 database_path="${HOME}/Zotero/zotero.sqlite-copy"
 
@@ -39,7 +50,10 @@ if [ -z "${tags}" ]; then
 fi
 
 itemTags=$(sqlite3 -json "${database_path}" "
-SELECT itemTags.itemID, itemTags.tagID FROM itemTags")
+SELECT itemTags.itemID, itemTags.tagID, tags.name 
+FROM itemTags
+LEFT JOIN tags ON itemTags.tagID = tags.tagID
+")
 if [ -z "${itemTags}" ]; then
   itemTags="[]"
 fi
@@ -59,7 +73,9 @@ if [ -z "${collections}" ]; then
 fi
 
 collectionItems=$(sqlite3 -json "${database_path}" "
-SELECT collectionItems.collectionID, collectionItems.itemID FROM collectionItems")
+SELECT  collectionItems.collectionID,  collections.collectionName, collectionItems.itemID FROM collectionItems
+LEFT JOIN collections ON collectionItems.collectionID = collections.collectionID
+")
 if [ -z "${collectionItems}" ]; then
   collectionItems="[]"
 fi

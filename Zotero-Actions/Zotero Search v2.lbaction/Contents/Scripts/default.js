@@ -9,47 +9,32 @@ TODO:
 - titles in suggestions (but without notes and attachments/annotations)
 - make sure Zotero is running before use the url command !! 
 - details
-  - booktitle for chapters
-  - publisher
-  - place
-  - publication for magazines
   - serie für kommentare
-  - abstract?
-  - tags?
+  - publication for magazines?
 - attachment count?
-
-- only copy db when mod dates don't match
-- option to always update?
 */
 
 const storagePath = LaunchBar.homeDirectory + '/Zotero/storage';
-
 const dataPath = Action.supportPath + '/data.json';
 
-const currentActionVersion = Action.version;
-
-const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
-
 function run(argument) {
-  // Check version
-  if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
-    // Update data
-    var updateJSON = true;
+  // Create JSON Data from SQL database (it will only do that if the database has been updated)
+  var data = LaunchBar.execute('/bin/sh', './data.sh');
 
-    // Save current version number
-    Action.preferences.lastUsedActionVersion = Action.version;
-  }
-
-  // Create JSON Data from SQL database
-  if (LaunchBar.options.commandKey || !File.exists(dataPath) || updateJSON) {
-    var data = LaunchBar.execute('/bin/sh', './data.sh');
+  if (data) {
     File.writeText(data, dataPath);
   }
 
+  // Settings
+  if (LaunchBar.options.alternateKey) {
+    return 'Settings are going to be here';
+  }
+
+  // Get data from JSON
   var data = File.readJSON(dataPath);
 
   // Search in Storage
-  if (LaunchBar.options.controlKey) {
+  if (LaunchBar.options.commandKey) {
     return searchInStorageDir(argument, data);
   }
 
@@ -66,15 +51,8 @@ function search(argument, data) {
   var itemIDs = [];
 
   // Search in Tags
-  var tagIDs = [];
-  data.tags.forEach(function (item) {
-    if (item.title.toLowerCase().includes(argument)) {
-      tagIDs.push(item.tagID);
-    }
-  });
-
   data.itemTags.forEach(function (item) {
-    if (tagIDs.includes(item.tagID)) {
+    if (item.name.toLowerCase().includes(argument)) {
       itemIDs.push(item.itemID);
     }
   });
@@ -96,8 +74,28 @@ function search(argument, data) {
     }
   });
 
+  // Search all Files (including title, place, publisher, isbn )
+
+  // data.metaAll.forEach(function (item) {
+  //   if (item.value.toLowerCase().includes(argument)) {
+  //     itemIDs.push(item.itemID);
+  //   }
+  // });
+
+  var words = argument.toLowerCase().split(' ');
+
   data.metaAll.forEach(function (item) {
-    if (item.value.toLowerCase().includes(argument)) {
+    let value = item.value.toLowerCase();
+    let match = true;
+
+    words.forEach(function (word) {
+      if (value.indexOf(word) === -1) {
+        match = false;
+        return;
+      }
+    });
+
+    if (match) {
       itemIDs.push(item.itemID);
     }
   });
@@ -197,7 +195,6 @@ function showItemsWithTag(tagIDString) {
   var tagID = parseInt(tagIDString);
   var data = File.readJSON(dataPath);
 
-  // Get itemIDs that include the tagID
   var itemIDs = [];
   data.itemTags.forEach(function (item) {
     if (item.tagID == tagID) {
@@ -231,7 +228,6 @@ function showItemsWithCreator(creatorIDString) {
   var creatorID = parseInt(creatorIDString);
   var data = File.readJSON(dataPath);
 
-  // Get itemIDs that include the tagID
   var itemIDs = [];
   data.itemCreators.forEach(function (item) {
     if (item.creatorID == creatorID) {
@@ -266,7 +262,6 @@ function showItemsWithCollection(collectionIDString) {
   var collectionID = parseInt(collectionIDString);
   var data = File.readJSON(dataPath);
 
-  // Get itemIDs that include the tagID
   var itemIDs = [];
   data.collectionItems.forEach(function (item) {
     if (item.collectionID == collectionID) {
@@ -455,12 +450,70 @@ function itemActions(dict) {
     // Show details
     const itemID = dict.itemID;
     var url = '';
+    var journalTitle = '';
+    var bookTitle = '';
 
     data.metaAll.forEach(function (item) {
       if (item.itemID == itemID) {
         if (item.fieldID == 1) {
           url = item.value;
         }
+        if (item.fieldID == 12) {
+          journalTitle = item.value;
+        }
+        if (item.fieldID == 115) {
+          bookTitle = item.value;
+        }
+      }
+    });
+
+    // Creator IDs
+    const authorIDs = data.itemCreators
+      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+      .map((item) => item.creatorID);
+    const editorIDs = data.itemCreators
+      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+      .map((item) => item.creatorID);
+    const otherIDs = data.itemCreators
+      .filter(
+        (item) =>
+          item.itemID === dict.itemID &&
+          item.creatorTypeID !== 1 &&
+          item.creatorTypeID !== 3
+      )
+      .map((item) => item.creatorID);
+
+    const creatorsArr =
+      authorIDs.length > 0
+        ? authorIDs
+        : editorIDs.length > 0
+        ? editorIDs
+        : otherIDs;
+
+    // Collections
+    var collections = [];
+    var collectionsArr = [];
+
+    data.collectionItems.forEach(function (item) {
+      if (item.itemID == itemID) {
+        collectionsArr.push({
+          collectionName: item.collectionName,
+          collectionID: item.collectionID,
+        });
+        collections.push(item.collectionName);
+      }
+    });
+
+    // Tags
+    var tags = [];
+    var tagsArr = [];
+    data.itemTags.forEach(function (item) {
+      if (item.itemID == itemID) {
+        tagsArr.push({
+          name: item.name,
+          tagID: item.tagID,
+        });
+        tags.push(item.name);
       }
     });
 
@@ -473,17 +526,55 @@ function itemActions(dict) {
       {
         title: dict.creator,
         icon: 'creatorTemplate',
+        children: showItemCreatorIDs(creatorsArr, data),
       },
       {
         title: dict.date,
         icon: 'calTemplate',
+      },
+    ];
+
+    if (journalTitle) {
+      details.push({
+        title: journalTitle,
+        icon: 'journalTemplate',
+        action: 'showJournalArticles',
+        actionArgument: journalTitle,
+        // children: showItemJournalArticles(journalTitle)
+      });
+    }
+
+    if (bookTitle) {
+      details.push({
+        title: bookTitle,
+        icon: 'bookTemplate',
+        action: 'showBookSections',
+        actionArgument: bookTitle,
+      });
+    }
+
+    details.push(
+      {
+        title: collections.join(', '),
+        icon: 'collectionTemplate',
+        children: showItemCollections(collectionsArr),
+      },
+      {
+        title: tags.join(', '),
+        icon: 'tagTemplate',
+        children: showItemTags(tagsArr),
       },
       {
         title: url ?? '',
         url: url ?? '',
         icon: 'openTemplate',
       },
-    ];
+      {
+        title: 'Open in Zotero',
+        url: dict.url,
+        icon: 'openTemplate',
+      }
+    );
 
     // Attachments
 
@@ -519,7 +610,7 @@ function itemActions(dict) {
 
       paths.forEach(function (item) {
         details.push({
-          title: item.type.split('/')[1].toUpperCase() || '',
+          title: item.path.split('.').slice(-1)[0].toUpperCase() || '',
           path: item.path,
           subtitle: '',
           icon: '14Template',
@@ -531,16 +622,88 @@ function itemActions(dict) {
   }
 }
 
-function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
-  const lastUsedParts = lastUsedActionVersion.split('.');
-  const currentParts = currentActionVersion.split('.');
-  for (var i = 0; i < currentParts.length; i++) {
-    const a = ~~currentParts[i]; // parse int
-    const b = ~~lastUsedParts[i]; // parse int
-    if (a > b) return true;
-    if (a < b) return false;
+function showBookSections(bookTitle) {
+  const data = File.readJSON(dataPath);
+  var itemIDs = [];
+
+  data.metaAll.forEach(function (item) {
+    if (
+      item.fieldID == '115' &&
+      item.value.toLowerCase() == bookTitle.toLowerCase()
+    ) {
+      itemIDs.push(item.itemID);
+    }
+  });
+  return showEntries(itemIDs, data);
+}
+
+function showJournalArticles(journalTitle) {
+  const data = File.readJSON(dataPath);
+  var itemIDs = [];
+
+  data.metaAll.forEach(function (item) {
+    if (item.value.toLowerCase() == journalTitle.toLowerCase()) {
+      itemIDs.push(item.itemID);
+    }
+  });
+
+  // Filter duplicates
+  itemIDs = [...new Set(itemIDs)];
+
+  return showEntries(itemIDs, data);
+}
+
+function showItemCreatorIDs(creatorsArr, data) {
+  if (creatorsArr.length == 1) {
+    return showItemsWithCreator(creatorsArr[0]);
   }
-  return false;
+
+  var results = [];
+  data.creators.forEach(function (item) {
+    if (creatorsArr.includes(item.creatorID)) {
+      results.push({
+        title: item.lastName + ', ' + item.firstName,
+        icon: 'creatorTemplate',
+        action: 'showItemsWithCreator',
+        actionArgument: item.creatorID.toString(),
+      });
+    }
+  });
+  return results;
+}
+
+function showItemCollections(collectionsArr) {
+  if (collectionsArr.length == 1) {
+    return showItemsWithCollection(collectionsArr[0].collectionID);
+  }
+
+  var results = [];
+  collectionsArr.forEach(function (item) {
+    results.push({
+      title: item.collectionName,
+      icon: 'collectionTemplate',
+      action: 'showItemsWithCollection',
+      actionArgument: item.collectionID.toString(),
+    });
+  });
+  return results;
+}
+
+function showItemTags(tagsArr) {
+  if (tagsArr.length == 1) {
+    return showItemsWithTag(tagsArr[0].tagID);
+  }
+
+  var results = [];
+  tagsArr.forEach(function (item) {
+    results.push({
+      title: item.name,
+      icon: 'tagTemplate',
+      action: 'showItemsWithTag',
+      actionArgument: item.tagID.toString(),
+    });
+  });
+  return results;
 }
 
 function initializeName(name) {
