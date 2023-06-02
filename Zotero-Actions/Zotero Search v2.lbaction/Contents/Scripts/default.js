@@ -4,14 +4,6 @@ by Christian Bender (@ptujec)
 2023-05-17
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: 
-- titles in suggestions (but without notes and attachments/annotations)
-- make sure Zotero is running before use the url command !! 
-- details
-  - serie für kommentare
-  - publication for magazines?
-- attachment count?
 */
 
 const storagePath = LaunchBar.homeDirectory + '/Zotero/storage';
@@ -25,27 +17,23 @@ function run(argument) {
     File.writeText(data, dataPath);
   }
 
-  // Settings
+  // Show Settings
   if (LaunchBar.options.alternateKey) {
-    return 'Settings are going to be here';
+    return settings();
   }
 
   // Get data from JSON
   var data = File.readJSON(dataPath);
 
-  // Search in Storage
-  if (LaunchBar.options.commandKey) {
-    return searchInStorageDir(argument, data);
-  }
-
   // Search or browse sql database
   if (argument != undefined) {
     return search(argument, data);
   } else {
-    return show(data);
+    return browse(data);
   }
 }
 
+// SEARCH
 function search(argument, data) {
   argument = argument.toLowerCase();
   var itemIDs = [];
@@ -74,13 +62,7 @@ function search(argument, data) {
     }
   });
 
-  // Search all Files (including title, place, publisher, isbn )
-
-  // data.metaAll.forEach(function (item) {
-  //   if (item.value.toLowerCase().includes(argument)) {
-  //     itemIDs.push(item.itemID);
-  //   }
-  // });
+  // Search all Files (including title, place, publisher, isbn)
 
   var words = argument.toLowerCase().split(' ');
 
@@ -112,13 +94,13 @@ function search(argument, data) {
     }
   });
 
+  // Search in Storage (fallback if no itemIDs found or by holding cmd)
+  if (itemIDs.length == 0 || LaunchBar.options.commandKey) {
+    itemIDs = itemIDs.concat(searchInStorageDir(argument, data));
+  }
+
   // Filter duplicates
   itemIDs = [...new Set(itemIDs)];
-
-  // Fallback to storage search if no itemIDs found
-  if (itemIDs.length == 0) {
-    return searchInStorageDir(argument, data);
-  }
 
   return showEntries(itemIDs, data);
 }
@@ -145,14 +127,15 @@ function searchInStorageDir(argument, data) {
     return acc;
   }, []);
 
-  // Filter duplicates
-  itemIDs = [...new Set(itemIDs)];
-
-  return showEntries(itemIDs, data);
+  return itemIDs;
 }
 
-function show(data) {
-  return [
+// BROWSE
+function browse(data) {
+  var result =
+    showEntries(Action.preferences.recents || [], data).reverse() || [];
+
+  result.push(
     {
       title: 'Creators',
       icon: 'creatorTemplate',
@@ -169,12 +152,14 @@ function show(data) {
       children: showCollections(data),
     },
     {
-      title: 'All Entries',
+      title: 'All Items',
       icon: 'libraryTemplate',
-      action: 'showAllEntries',
+      action: 'showAllItems',
       actionArgument: data,
-    },
-  ];
+    }
+  );
+
+  return result;
 }
 
 function showTags(data) {
@@ -235,6 +220,9 @@ function showItemsWithCreator(creatorIDString) {
     }
   });
 
+  // Filter duplicates
+  itemIDs = [...new Set(itemIDs)];
+
   return showEntries(itemIDs, data);
 }
 
@@ -272,7 +260,7 @@ function showItemsWithCollection(collectionIDString) {
   return showEntries(itemIDs, data);
 }
 
-function showAllEntries(data) {
+function showAllItems(data) {
   var itemIDs = [];
 
   data.meta.forEach(function (item) {
@@ -387,7 +375,7 @@ function showEntries(itemIDs, data) {
         icon: icon,
         action: 'itemActions',
         actionArgument: {
-          url: itemsMap[itemID] ? itemsMap[itemID].url : '',
+          zoteroURL: itemsMap[itemID] ? itemsMap[itemID].url : '',
           itemID: itemID,
           creator: creator,
           date: date,
@@ -398,227 +386,260 @@ function showEntries(itemIDs, data) {
     }
   });
 
+  // if (result.length === 1) {
+  //   return showItemDetails(result[0].actionArgument);
+  // }
   return result;
 }
 
+function initializeName(name) {
+  return name
+    .split(' ')
+    .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
+    .join(' ');
+}
+
+// ITEM ACTIONS
+
 function itemActions(dict) {
-  const data = File.readJSON(dataPath);
   if (LaunchBar.options.commandKey) {
-    LaunchBar.openURL(dict.url);
+    saveRecent(dict.itemID);
+
+    if (checkVersion()) {
+      LaunchBar.executeAppleScript(
+        'tell application id "org.zotero.zotero" to launch'
+      );
+    }
+
+    LaunchBar.openURL(dict.zoteroURL);
   } else if (LaunchBar.options.shiftKey) {
-    // Paste citation & copy link to item
-    // TODO: Build citation according to a csl style sheet?
-
-    const authorNames = data.itemCreators
-      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
-      .map((item) => item.lastName);
-    const editorNames = data.itemCreators
-      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
-      .map((item) => item.lastName);
-    const otherNames = data.itemCreators
-      .filter(
-        (item) =>
-          item.itemID === dict.itemID &&
-          item.creatorTypeID !== 1 &&
-          item.creatorTypeID !== 3
-      )
-      .map((item) => item.lastName);
-
-    const creators =
-      authorNames.length > 0
-        ? authorNames
-        : editorNames.length > 0
-        ? editorNames
-        : otherNames;
-    const creatorString =
-      creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
-
-    var citation = '(' + creatorString + ', ' + dict.date + ')';
-    // var citationMDLink = '[' + citation + '](' + dict.url + ')';
-    // LaunchBar.paste(citation);
-    // LaunchBar.setClipboardString(dict.url);
-
-    LaunchBar.executeAppleScript(
-      // 'set the clipboard to "' + citationMDLink + '"',
-      // 'delay 0.1',
-      'set the clipboard to "' + dict.url + '"',
-      'tell application "LaunchBar" to paste in frontmost application "' +
-        citation +
-        '"'
-    );
+    saveRecent(dict.itemID);
+    pasteCitation(dict);
   } else {
-    // Show details
-    const itemID = dict.itemID;
-    var url = '';
-    var journalTitle = '';
-    var bookTitle = '';
+    return showItemDetails(dict);
+  }
+}
 
-    data.metaAll.forEach(function (item) {
-      if (item.itemID == itemID) {
-        if (item.fieldID == 1) {
-          url = item.value;
-        }
-        if (item.fieldID == 12) {
-          journalTitle = item.value;
-        }
-        if (item.fieldID == 115) {
-          bookTitle = item.value;
-        }
+function showItemDetails(dict) {
+  const data = File.readJSON(dataPath);
+
+  const itemID = dict.itemID;
+  var url = '';
+  var journalTitle = '';
+  var bookTitle = '';
+  var seriesTitle = '';
+
+  data.metaAll.forEach(function (item) {
+    if (item.itemID == itemID) {
+      if (item.fieldID == 1) {
+        url = item.value;
       }
+      if (item.fieldID == 3) {
+        seriesTitle = item.value;
+      }
+      if (item.fieldID == 12) {
+        journalTitle = item.value;
+      }
+      if (item.fieldID == 115) {
+        bookTitle = item.value;
+      }
+    }
+  });
+
+  // Creator IDs
+  const authorIDs = data.itemCreators
+    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+    .map((item) => item.creatorID);
+  const editorIDs = data.itemCreators
+    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+    .map((item) => item.creatorID);
+  const otherIDs = data.itemCreators
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID !== 1 &&
+        item.creatorTypeID !== 3
+    )
+    .map((item) => item.creatorID);
+
+  const creatorsArr =
+    authorIDs.length > 0
+      ? authorIDs
+      : editorIDs.length > 0
+      ? editorIDs
+      : otherIDs;
+
+  // Collections
+  var collections = [];
+  var collectionsArr = [];
+
+  data.collectionItems.forEach(function (item) {
+    if (item.itemID == itemID) {
+      collectionsArr.push({
+        collectionName: item.collectionName,
+        collectionID: item.collectionID,
+      });
+      collections.push(item.collectionName);
+    }
+  });
+
+  // Tags
+  var tags = [];
+  var tagsArr = [];
+  data.itemTags.forEach(function (item) {
+    if (item.itemID == itemID) {
+      tagsArr.push({
+        name: item.name,
+        tagID: item.tagID,
+      });
+      tags.push(item.name);
+    }
+  });
+
+  dict.url = url;
+
+  details = [
+    {
+      title: dict.title,
+      icon: dict.icon,
+      // url: url || dict.url,
+      action: 'itemDetailActions',
+      actionArgument: dict,
+    },
+    {
+      title: dict.creator,
+      icon: 'creatorTemplate',
+      children: showItemCreatorIDs(creatorsArr, data),
+    },
+    {
+      title: dict.date,
+      icon: 'calTemplate',
+    },
+  ];
+
+  if (journalTitle) {
+    details.push({
+      title: journalTitle,
+      // icon: 'journalTemplate',
+      icon: dict.icon + 'Template',
+      action: 'showJournalArticles',
+      actionArgument: journalTitle,
+      // children: showItemJournalArticles(journalTitle)
     });
+  }
 
-    // Creator IDs
-    const authorIDs = data.itemCreators
-      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
-      .map((item) => item.creatorID);
-    const editorIDs = data.itemCreators
-      .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
-      .map((item) => item.creatorID);
-    const otherIDs = data.itemCreators
-      .filter(
-        (item) =>
-          item.itemID === dict.itemID &&
-          item.creatorTypeID !== 1 &&
-          item.creatorTypeID !== 3
-      )
-      .map((item) => item.creatorID);
+  if (bookTitle) {
+    details.push({
+      title: bookTitle,
+      icon: 'bookTemplate',
+      action: 'showBookSections',
+      actionArgument: bookTitle,
+    });
+  }
 
-    const creatorsArr =
-      authorIDs.length > 0
-        ? authorIDs
-        : editorIDs.length > 0
-        ? editorIDs
-        : otherIDs;
+  if (seriesTitle) {
+    details.push({
+      title: seriesTitle,
+      icon: 'seriesTemplate',
+      action: 'showSeriesItems',
+      actionArgument: seriesTitle,
+    });
+  }
 
-    // Collections
-    var collections = [];
-    var collectionsArr = [];
+  details.push(
+    {
+      title: collections.join(', '),
+      icon: 'collectionTemplate',
+      children: showItemCollections(collectionsArr),
+    },
+    {
+      title: tags.join(', '),
+      icon: 'tagTemplate',
+      children: showItemTags(tagsArr),
+    },
+    {
+      title: 'Cite and Link',
+      icon: 'citeTemplate',
+      action: 'pasteCitation',
+      actionArgument: dict,
+    },
+    {
+      title: url ?? '',
+      url: url ?? '',
+      icon: 'openTemplate',
+    },
+    {
+      title: 'Open in Zotero',
+      icon: 'openTemplate',
+      url: dict.zoteroURL,
+    }
+  );
 
-    data.collectionItems.forEach(function (item) {
-      if (item.itemID == itemID) {
-        collectionsArr.push({
-          collectionName: item.collectionName,
-          collectionID: item.collectionID,
+  // Attachments
+
+  var paths = [];
+  data.itemAttachments.forEach((item) => {
+    if (itemID == item.parentItemID) {
+      if (item.path != undefined) {
+        paths.push({
+          path:
+            storagePath + '/' + item.key + '/' + item.path.split('storage:')[1],
+          type: item.contentType,
         });
-        collections.push(item.collectionName);
       }
-    });
+    }
+  });
 
-    // Tags
-    var tags = [];
-    var tagsArr = [];
-    data.itemTags.forEach(function (item) {
-      if (item.itemID == itemID) {
-        tagsArr.push({
-          name: item.name,
-          tagID: item.tagID,
-        });
-        tags.push(item.name);
+  if (paths.length > 0) {
+    for (var i = 0; i < paths.length; i++) {
+      if (
+        paths[i].type == 'application/pdf' ||
+        paths[i].type == 'application/epub+zip'
+      ) {
+        details[0].subtitle = '';
+        details[0].path = paths[i].path;
+        details[0].actionArgument.path = paths[i].path;
+        break;
       }
-    });
+    }
 
-    details = [
-      {
-        title: dict.title,
-        icon: dict.icon,
-        url: url || dict.url,
-      },
-      {
-        title: dict.creator,
-        icon: 'creatorTemplate',
-        children: showItemCreatorIDs(creatorsArr, data),
-      },
-      {
-        title: dict.date,
-        icon: 'calTemplate',
-      },
-    ];
-
-    if (journalTitle) {
+    paths.forEach(function (item) {
       details.push({
-        title: journalTitle,
-        icon: 'journalTemplate',
-        action: 'showJournalArticles',
-        actionArgument: journalTitle,
-        // children: showItemJournalArticles(journalTitle)
+        title: item.path.split('.').slice(-1)[0].toUpperCase() || '',
+        path: item.path,
+        subtitle: '',
+        icon: '14Template',
       });
-    }
-
-    if (bookTitle) {
-      details.push({
-        title: bookTitle,
-        icon: 'bookTemplate',
-        action: 'showBookSections',
-        actionArgument: bookTitle,
-      });
-    }
-
-    details.push(
-      {
-        title: collections.join(', '),
-        icon: 'collectionTemplate',
-        children: showItemCollections(collectionsArr),
-      },
-      {
-        title: tags.join(', '),
-        icon: 'tagTemplate',
-        children: showItemTags(tagsArr),
-      },
-      {
-        title: url ?? '',
-        url: url ?? '',
-        icon: 'openTemplate',
-      },
-      {
-        title: 'Open in Zotero',
-        url: dict.url,
-        icon: 'openTemplate',
-      }
-    );
-
-    // Attachments
-
-    var paths = [];
-    data.itemAttachments.forEach((item) => {
-      if (itemID == item.parentItemID) {
-        if (item.path != undefined) {
-          paths.push({
-            path:
-              storagePath +
-              '/' +
-              item.key +
-              '/' +
-              item.path.split('storage:')[1],
-            type: item.contentType,
-          });
-        }
-      }
     });
+  }
 
-    if (paths.length > 0) {
-      for (var i = 0; i < paths.length; i++) {
-        if (
-          paths[i].type == 'application/pdf' ||
-          paths[i].type == 'application/epub+zip'
-        ) {
-          details[0].path = paths[i].path;
-          details[0].subtitle = '';
-          details[0].url = undefined;
-          break;
-        }
-      }
+  return details;
+}
 
-      paths.forEach(function (item) {
-        details.push({
-          title: item.path.split('.').slice(-1)[0].toUpperCase() || '',
-          path: item.path,
-          subtitle: '',
-          icon: '14Template',
-        });
-      });
+function itemDetailActions(dict) {
+  // Save as Recent
+  saveRecent(dict.itemID);
+
+  // Options
+  if (LaunchBar.options.commandKey) {
+    if (checkVersion()) {
+      LaunchBar.executeAppleScript(
+        'tell application id "org.zotero.zotero" to launch'
+      );
     }
 
-    return details;
+    LaunchBar.openURL(dict.zoteroURL);
+    return;
+  }
+
+  if (LaunchBar.options.shiftKey) {
+    return pasteCitation(dict);
+  }
+
+  if (dict.path != undefined) {
+    LaunchBar.openURL(File.fileURLForPath(dict.path));
+  } else {
+    LaunchBar.openURL(dict.url || dict.zoteroURL);
   }
 }
 
@@ -630,6 +651,21 @@ function showBookSections(bookTitle) {
     if (
       item.fieldID == '115' &&
       item.value.toLowerCase() == bookTitle.toLowerCase()
+    ) {
+      itemIDs.push(item.itemID);
+    }
+  });
+  return showEntries(itemIDs, data);
+}
+
+function showSeriesItems(seriesTitle) {
+  const data = File.readJSON(dataPath);
+  var itemIDs = [];
+
+  data.metaAll.forEach(function (item) {
+    if (
+      item.fieldID == '3' &&
+      item.value.toLowerCase() == seriesTitle.toLowerCase()
     ) {
       itemIDs.push(item.itemID);
     }
@@ -706,9 +742,146 @@ function showItemTags(tagsArr) {
   return results;
 }
 
-function initializeName(name) {
-  return name
-    .split(' ')
-    .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
-    .join(' ');
+function pasteCitation(dict) {
+  // TODO: Build citation according to a csl style sheet?
+
+  const data = File.readJSON(dataPath);
+
+  const authorNames = data.itemCreators
+    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+    .map((item) => item.lastName);
+  const editorNames = data.itemCreators
+    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+    .map((item) => item.lastName);
+  const otherNames = data.itemCreators
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID !== 1 &&
+        item.creatorTypeID !== 3
+    )
+    .map((item) => item.lastName);
+
+  const creators =
+    authorNames.length > 0
+      ? authorNames
+      : editorNames.length > 0
+      ? editorNames
+      : otherNames;
+  const creatorString =
+    creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
+
+  var citation = '(' + creatorString + ', ' + dict.date + ')';
+
+  const citationFormat = Action.preferences.citationFormat;
+
+  if (citationFormat == 'richText') {
+    LaunchBar.executeAppleScriptFile(
+      './rt.applescript',
+      citation,
+      dict.zoteroURL
+    );
+  } else if (citationFormat == 'markdown') {
+    LaunchBar.paste('[' + citation + '](' + dict.zoteroURL + ')');
+  } else {
+    // LaunchBar.paste(citation);
+    // LaunchBar.setClipboardString(dict.url);
+    LaunchBar.executeAppleScript(
+      // 'set the clipboard to "' + citationMDLink + '"',
+      // 'delay 0.1',
+      'set the clipboard to "' + dict.zoteroURL + '"',
+      'tell application "LaunchBar" to paste in frontmost application "' +
+        citation +
+        '"'
+    );
+  }
+}
+
+function saveRecent(itemID) {
+  var recents = Action.preferences.recents || [];
+
+  // Check if itemID exists in the recents array
+  if (recents.indexOf(itemID) > -1) {
+    // Move the item to the end of the array
+    recents.splice(recents.indexOf(itemID), 1);
+    recents.push(itemID);
+  } else {
+    // Add the item to the array
+    recents.push(itemID);
+  }
+
+  if (recents.length > 3) {
+    recents.splice(0, 1);
+  }
+
+  Action.preferences.recents = recents;
+}
+
+function checkVersion() {
+  var contents = File.getDirectoryContents('/Applications/');
+  var name = '';
+  contents.forEach(function (item) {
+    if (item.startsWith('Zotero')) {
+      name = item;
+    }
+  });
+
+  var plist = File.readPlist('/Applications/' + name + '/Contents/Info.plist');
+
+  var version = parseInt(plist.CFBundleVersion.split('.')[0]);
+
+  if (version < 7) {
+    return true;
+  }
+}
+
+// SETTINGS
+
+function settings() {
+  if (Action.preferences.citationFormat == 'richText') {
+    var formatIcon = 'rTemplate';
+  } else if (Action.preferences.citationFormat == 'markdown') {
+    var formatIcon = 'mTemplate';
+  } else {
+    var formatIcon = 'plainTemplate';
+    var formatIcon = 'pasteTemplate';
+  }
+
+  return [
+    {
+      title: 'Citation Format',
+      icon: formatIcon,
+      children: listFormats(),
+    },
+  ];
+}
+
+function listFormats() {
+  return [
+    {
+      title: 'Paste citation only',
+      subtitle: 'The link will be copied to the clipboard',
+      // icon: 'plainTemplate',
+      icon: 'pasteTemplate',
+      action: 'setFormat',
+      actionArgument: 'plain',
+    },
+    {
+      title: 'Paste citation with link as rich text',
+      icon: 'rTemplate',
+      action: 'setFormat',
+      actionArgument: 'richText',
+    },
+    {
+      title: 'Paste citation with link as markdown',
+      icon: 'mTemplate',
+      action: 'setFormat',
+      actionArgument: 'markdown',
+    },
+  ];
+}
+
+function setFormat(citationFormat) {
+  Action.preferences.citationFormat = citationFormat;
+  return settings();
 }

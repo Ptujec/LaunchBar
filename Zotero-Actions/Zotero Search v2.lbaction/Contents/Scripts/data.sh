@@ -20,12 +20,6 @@ SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes")
 items=$(sqlite3 -json "${database_path}" "
 SELECT items.itemID, items.itemTypeID, items.key FROM items")
 
-# itemDataValues=$(sqlite3 -json "${database_path}" "
-# SELECT itemDataValues.valueID, itemDataValues.value FROM itemDataValues")
-
-# itemData=$(sqlite3 -json "${database_path}" "
-# SELECT itemData.itemID, itemData.fieldID, itemData.valueID FROM itemData")
-
 itemNotes=$(sqlite3 -json "${database_path}" "
 SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes")
 if [ -z "${itemNotes}" ]; then
@@ -101,15 +95,7 @@ SELECT  itemData.itemID, itemData.fieldID,
 FROM itemData
 LEFT JOIN fields ON itemData.fieldID = fields.fieldID
 LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
-WHERE itemData.fieldID = 14 OR itemData.fieldID = 110 
+WHERE itemData.fieldID = 14 OR itemData.fieldID = 110
 ")
-
-# synCache=$(sqlite3 -json "${database_path}" "
-# SELECT syncCache.key, syncCache.data
-# FROM syncCache 
-# ")
-
-# Print formated as JSON
-# printf '{"itemTypes": %s, "items": %s, "itemDataValues": %s, "itemData": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemDataValues}" "${itemData}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}"
 
 printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}" # "${synCache}"
