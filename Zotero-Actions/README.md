@@ -1,14 +1,14 @@
 # LaunchBar Action for Zotero
 
-Enjoy the brand new action for Zotero. This new action let's you do everything the old did and much more in one simple yet powerful action. 
+Introducing the new LaunchBar action for Zotero. This updated action offers all the features of the old one and more, all within a simplified and powerful action.
 
 ## Search 
 
 <img src="01.jpg" width="806"/> 
 
-As you search you get helpful suggestions that include creator names, tags and titles. 
+As you begin your search, helpful suggestions will appear, including creator names, tags, and titles.
 
-If there is no match in the database the action will fall back to searching your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
+If your search returns no results in the database, the action will automatically search your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
 
 **Note**: You can also directly search both the database and your local attachments with `command` + `enter`. 
   
@@ -17,50 +17,45 @@ If there is no match in the database the action will fall back to searching your
 
 <img src="02.jpg" width="806"/> 
 
-If you hit `enter` instead of `space` you can browse your database by creators, tags, collections or simply all items. 
+If you press `Enter` instead of `space`, you can browse your database by creators, tags, collections, or all items. 
 
-In addition you have quick access to your 3 most recently used items.  
+Additionally, you have quick access to your three most recently used items.
 
 ## Details & Actions
 
 <img src="03.jpg" width="806"/> 
 
-If you hit `enter` on a given item you can reveal more details such as tags, publications, links or attachments. 
+If you hit `Enter` on a particular item, you can see more details such as tags, publications, links, or attachments. 
 
-A lot of the details also offer further functionality. You can e.g. take a quick look inside an attached PDF.
+Many of the details also offer further functionality. For instance, you can quickly look inside an attached PDF.
 
 <img src="04.jpg" width="806"/>  
 
 Here is a list of possible actions: 
 
-#### 1) More browsing 
+#### 1) More Browsing
 
-You can browse other items that are part of the same collection, publication, book, have the same tag or are written by the same author
+You can browse other items that are part of the same collection, publication, book, have the same tag, or are written by the same author.
 
-#### 2) Interact with attachments
+#### 2) Interact with Attachments
 
-LaunchBar is a great file browser and this action makes use of it. Use quicklook, open the attachment or mail it to someone. There are lots of possibilities. ([Take a look at the "Joining Forces" video if you are new to LaunchBar.](https://www.obdev.at/products/launchbar/videos.html))
+You can use quicklook, open the attachment, or even mail it to someone. There are plenty of possibilities. [(If you are new to LaunchBar, take a look at the "Joining Forces" video.)](https://www.obdev.at/products/launchbar/videos.html)
 
-#### 3) Open links 
+#### 3) Open Links 
 
-#### 4) Open item in Zotero
+#### 4) Open Item in Zotero
 
-**Note**: Open in Zotero does not fully work when the Zotero is not running. It will open Zotero but it won't select the item on the first attempt. This is a limitation of Zotero. 
-In this case just use the action again once Zotero is running. 
+**Note**: This will always open Zotero, but it may fail to select the item on the first attempt if Zotero is not running previously. This is a limitation of Zotero. In this case, use the action again once Zotero is running.
 
-#### 5) Cite and link
+#### 5) Cite and Link
 
-Cite and link offers both a short citation (e.g. "(Buckingham & Goodall, 2019)") and a link back to the item in Zotero. 
+Cite and Link offers a short citation (e.g., "(Buckingham & Goodall, 2019)") and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste them together as rich text or in markdown format by going to settings and selecting your preferred format (`option` + `return`).
 
-By default the citation is pasted in the front document and the link is put on the clipboard. 
+**Note:** This action's citation function is not enough to write a paper, primarily as it does not yet support custom citation styles. Nevertheless, it should be a great help during research.
 
-But you can also choose to paste both together either as rich text or in markdown format. Go to settings to choose your preferred format (`option` + `return`)
+#### 6) 🪄 The Magic Title Item
 
-**Note:** The citation offered by this action might not be enough yet for the actual writing of a paper. Especially since this does not yet support custom citation styles. But it can be a help during research.
-
-#### 6) 🪄 The magic title item
-
-As this action is mainly tailored to give you quick access to the content of your Zotero database the title item has kind of super powers. If there is a PDF attached you can use quicklook or open the PDF right from that item. If not but there is a link you can open that. Or if none of that is true `enter` will reveal the item in Zotero.
+As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has superpowers. If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
 
 ## Shortcuts
 
@@ -69,7 +64,7 @@ There are also some shortcuts (modifier keys) that work with any selected Zotero
 - Open a given item in Zotero with `command` + `return`
 - Paste a citation with `shift` + `return`   
 
-Those even work on the top level. So you don't need to go into the details to use them.
+Those even work on the top level. So you don't need to go into details to use them.
 
 
 ## Download
