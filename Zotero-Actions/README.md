@@ -55,7 +55,7 @@ Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and 
 
 #### 6) 🪄 The Magic Title Item
 
-As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has superpowers. If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
+As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has kind of "superpowers". If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
 
 ## Shortcuts
 
