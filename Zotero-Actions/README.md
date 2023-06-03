@@ -1,6 +1,6 @@
 # LaunchBar Action for Zotero
 
-Introducing the new LaunchBar action for Zotero. This updated action offers all the features of the old one and more, all within a simplified and powerful action.
+Introducing the new LaunchBar action for Zotero. This new action offers all the features of the previous actions and more, all within one simplified and powerful action.
 
 ## Search 
 
