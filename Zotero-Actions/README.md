@@ -8,7 +8,7 @@ Introducing the new LaunchBar action for Zotero. This new action offers all the 
 
 As you begin your search, helpful suggestions will appear, including creator names, tags, and titles.
 
-If your search returns no results in the database, the action will automatically search your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
+If your search returns no results in the database, the action will automatically search the content of your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
 
 **Note**: You can also directly search both the database and your local attachments with `command` + `enter`. 
   
