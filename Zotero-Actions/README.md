@@ -1,6 +1,6 @@
 # LaunchBar Action for Zotero
 
-Introducing the new LaunchBar action for Zotero. This updated action offers all the features of the old one and more, all within a simplified and powerful action.
+Search, browse, and act on items from your local Zotero database. This action requires no dependencies except the Zotero app.
 
 ## Search 
 
@@ -8,7 +8,7 @@ Introducing the new LaunchBar action for Zotero. This updated action offers all 
 
 As you begin your search, helpful suggestions will appear, including creator names, tags, and titles.
 
-If your search returns no results in the database, the action will automatically search your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
+If your search returns no results in the database, the action will automatically search the content of your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
 
 **Note**: You can also directly search both the database and your local attachments with `command` + `enter`. 
   
@@ -49,13 +49,13 @@ You can use quicklook, open the attachment, or even mail it to someone. There ar
 
 #### 5) Cite and Link
 
-Cite and Link offers a short citation (e.g., "(Buckingham & Goodall, 2019)") and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste them together as rich text or in markdown format by going to settings and selecting your preferred format (`option` + `return`).
+Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste them together as rich text or in markdown format by going to settings and selecting your preferred format (`option` + `return`).
 
 **Note:** This action's citation function is not enough to write a paper, primarily as it does not yet support custom citation styles. Nevertheless, it should be a great help during research.
 
 #### 6) 🪄 The Magic Title Item
 
-As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has superpowers. If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
+As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has kind of "superpowers". If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
 
 ## Shortcuts
 
