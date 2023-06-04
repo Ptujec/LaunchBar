@@ -30,7 +30,7 @@ function runWithString(string) {
     }
   });
 
-  // Title suggestions
+  // Title & Series suggestions
   var itemIDs = [];
 
   data.items.forEach(function (item) {
@@ -45,11 +45,14 @@ function runWithString(string) {
 
   var words = string.toLowerCase().split(' ');
 
-  data.meta.forEach(function (item) {
+  data.metaAll.forEach(function (item) {
     let value = item.value.toLowerCase();
     let match = true;
 
-    if (item.fieldID == 110 && itemIDs.includes(item.itemID)) {
+    if (
+      (item.fieldID == 110 || item.fieldID == 3) &&
+      itemIDs.includes(item.itemID)
+    ) {
       words.forEach(function (word) {
         if (value.indexOf(word) === -1) {
           match = false;
