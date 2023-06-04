@@ -1,6 +1,7 @@
 # LaunchBar Action for Zotero
 
-Introducing the new LaunchBar action for Zotero. This new action offers all the features of the previous actions and more, all within one simplified and powerful action.
+Introducing the new LaunchBar action for Zotero: Search, browse, and act on items from your local Zotero database. 
+This action requires no dependencies except the Zotero app (tested with version 6 and 7 beta).
 
 ## Search 
 
