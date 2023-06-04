@@ -4,10 +4,10 @@
 file1_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite")
 file2_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite-copy")
 
-# Compare the timestamps and exit if zotero.sqlite is not newer
-if [ "$file1_modified" -le "$file2_modified" ]; then
-        # echo "zotero.sqlite is not newer than zotero.sqlite-copy"
-        exit 1
+# Compare the timestamps and exit if zotero.sqlite is not newer and if the passed argement is not true (It might be true if there is a new version of the action or if the JSON file has been removed)
+
+if [ $1 != "true" ] && [ "$file1_modified" -le "$file2_modified" ]; then
+  exit 1
 fi
 
 cp "${HOME}/Zotero/zotero.sqlite" "${HOME}/Zotero/zotero.sqlite-copy"
@@ -98,4 +98,4 @@ LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
 WHERE itemData.fieldID = 14 OR itemData.fieldID = 110
 ")
 
-printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}" # "${synCache}"
+printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}"

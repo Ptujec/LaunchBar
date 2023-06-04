@@ -9,9 +9,23 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 const storagePath = LaunchBar.homeDirectory + '/Zotero/storage';
 const dataPath = Action.supportPath + '/data.json';
 
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
+
 function run(argument) {
-  // Create JSON Data from SQL database (it will only do that if the database has been updated)
-  var data = LaunchBar.execute('/bin/sh', './data.sh');
+  // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
+
+  if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
+    var updateJSON = true;
+
+    Action.preferences.lastUsedActionVersion = Action.version;
+  }
+
+  if (!File.exists(dataPath)) {
+    var updateJSON = true;
+  }
+
+  var data = LaunchBar.execute('/bin/sh', './data.sh', updateJSON);
 
   if (data) {
     File.writeText(data, dataPath);
@@ -133,7 +147,7 @@ function searchInStorageDir(argument, data) {
 // BROWSE
 function browse(data) {
   var result =
-    showEntries(Action.preferences.recents || [], data).reverse() || [];
+    showEntries(Action.preferences.recentItems || [], data).reverse() || [];
 
   result.push(
     {
@@ -405,7 +419,7 @@ function itemActions(dict) {
   if (LaunchBar.options.commandKey) {
     saveRecent(dict.itemID);
 
-    if (checkVersion()) {
+    if (checkZoteroVersion()) {
       LaunchBar.executeAppleScript(
         'tell application id "org.zotero.zotero" to launch'
       );
@@ -622,7 +636,7 @@ function itemDetailActions(dict) {
 
   // Options
   if (LaunchBar.options.commandKey) {
-    if (checkVersion()) {
+    if (checkZoteroVersion()) {
       LaunchBar.executeAppleScript(
         'tell application id "org.zotero.zotero" to launch'
       );
@@ -798,26 +812,26 @@ function pasteCitation(dict) {
 }
 
 function saveRecent(itemID) {
-  var recents = Action.preferences.recents || [];
+  var recentItems = Action.preferences.recentItems || [];
 
-  // Check if itemID exists in the recents array
-  if (recents.indexOf(itemID) > -1) {
+  // Check if itemID exists in the recentItems array
+  if (recentItems.indexOf(itemID) > -1) {
     // Move the item to the end of the array
-    recents.splice(recents.indexOf(itemID), 1);
-    recents.push(itemID);
+    recentItems.splice(recentItems.indexOf(itemID), 1);
+    recentItems.push(itemID);
   } else {
     // Add the item to the array
-    recents.push(itemID);
+    recentItems.push(itemID);
   }
 
-  if (recents.length > 3) {
-    recents.splice(0, 1);
+  if (recentItems.length > 3) {
+    recentItems.splice(0, 1);
   }
 
-  Action.preferences.recents = recents;
+  Action.preferences.recentItems = recentItems;
 }
 
-function checkVersion() {
+function checkZoteroVersion() {
   var contents = File.getDirectoryContents('/Applications/');
   var name = '';
   contents.forEach(function (item) {
@@ -833,6 +847,18 @@ function checkVersion() {
   if (version < 7) {
     return true;
   }
+}
+
+function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+  for (var i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i]; // parse int
+    const b = ~~lastUsedParts[i]; // parse int
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }
 
 // SETTINGS
