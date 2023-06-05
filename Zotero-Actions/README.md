@@ -1,6 +1,6 @@
 # LaunchBar Action for Zotero
 
-Search, browse, and act on items from your local Zotero database. This action requires no dependencies except the Zotero app.
+Search, browse, and act on items from your local Zotero database. 
 
 ## Search 
 
