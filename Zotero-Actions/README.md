@@ -49,9 +49,9 @@ You can use quicklook, open the attachment, or even mail it to someone. There ar
 
 #### 5) Cite and Link
 
-Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste them together as rich text or in markdown format by going to settings and selecting your preferred format (`option` + `return`).
+Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste a citation including the link as rich text or in markdown format by going to settings and selecting your preferred format. Select the action and then press `option` + `return`.
 
-**Note:** This action's citation function is not enough to write a paper, primarily as it does not yet support custom citation styles. Nevertheless, it should be a great help during research.
+**Note:** This action's citation function might not yet be all you need to compose a paper, primarily because it does not yet support custom citation styles. Nevertheless, it should be a great help during research, especially when adding links back to the item in Zotero, which can help you locate the correct sources easily, regardless of where you store your research notes. 
 
 #### 6) 🪄 The Magic Title Item
 
