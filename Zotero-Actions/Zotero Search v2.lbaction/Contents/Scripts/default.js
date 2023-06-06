@@ -53,13 +53,6 @@ function search(argument, data) {
   argument = argument.toLowerCase();
   var itemIDs = new Set();
 
-  // Search in Tags
-  data.itemTags.forEach((item) => {
-    if (item.name.toLowerCase().includes(argument)) {
-      itemIDs.add(item.itemID);
-    }
-  });
-
   // Search in Creators
   const creatorIDs = data.creators.reduce((acc, item) => {
     const lowerCaseCreatorName =
@@ -72,6 +65,13 @@ function search(argument, data) {
 
   data.itemCreators.forEach((item) => {
     if (creatorIDs.has(item.creatorID)) {
+      itemIDs.add(item.itemID);
+    }
+  });
+
+  // Search in Tags
+  data.itemTags.forEach((item) => {
+    if (item.name.toLowerCase().includes(argument)) {
       itemIDs.add(item.itemID);
     }
   });
@@ -420,18 +420,43 @@ function itemActions(dict) {
 }
 
 function showItemDetails(dict) {
+  const itemID = dict.itemID;
   const data = File.readJSON(dataPath);
 
-  const itemID = dict.itemID;
-  var url = '';
-  var journalTitle = '';
-  var bookTitle = '';
-  var seriesTitle = '';
+  let journalTitle, bookTitle, seriesTitle;
 
-  data.metaAll.forEach(function (item) {
+  const attachedUrlsItemIDs = [];
+
+  const paths = data.itemAttachments
+    .filter((item) => itemID == item.parentItemID)
+    .map((item) => {
+      if (item.path) {
+        return {
+          path:
+            storagePath + '/' + item.key + '/' + item.path.split('storage:')[1],
+          type: item.contentType,
+        };
+      }
+      if (
+        !item.path &&
+        (item.contentType == 'text/html' || item.contentType == null)
+      ) {
+        attachedUrlsItemIDs.push(item.itemID);
+      }
+      return null;
+    })
+    .filter((path) => path !== null);
+
+  const attachedUrlsItems = [];
+  let urls = [];
+
+  data.metaAll.forEach((item) => {
     if (item.itemID == itemID) {
       if (item.fieldID == 1) {
-        url = item.value;
+        urls.push({
+          urlTitle: item.value,
+          url: item.value,
+        });
       }
       if (item.fieldID == 3) {
         seriesTitle = item.value;
@@ -443,7 +468,39 @@ function showItemDetails(dict) {
         bookTitle = item.value;
       }
     }
+
+    if (
+      attachedUrlsItemIDs.includes(item.itemID) &&
+      (item.fieldID == 1 || item.fieldID == 110)
+    ) {
+      attachedUrlsItems.push(item);
+    }
   });
+
+  const attachedUrls = attachedUrlsItems.reduce((acc, entry) => {
+    let existingItem = acc.find((item) => item.itemID === entry.itemID);
+
+    if (!existingItem) {
+      existingItem = { itemID: entry.itemID };
+      acc.push(existingItem);
+    }
+
+    if (entry.fieldID === 1) {
+      existingItem.url = entry.value;
+    } else if (entry.fieldID === 110) {
+      existingItem.title = entry.value;
+    }
+
+    return acc;
+  }, []);
+
+  urls = [
+    ...urls,
+    ...attachedUrls.map((item) => ({
+      url: item.url,
+      urlTitle: item.title,
+    })),
+  ];
 
   // Creator IDs
   const authorIDs = data.itemCreators
@@ -469,39 +526,31 @@ function showItemDetails(dict) {
       : otherIDs;
 
   // Collections
-  var collections = [];
-  var collectionsArr = [];
+  var collectionsArr = data.collectionItems
+    .filter((item) => item.itemID == itemID)
+    .map((item) => ({
+      collectionName: item.collectionName,
+      collectionID: item.collectionID,
+    }));
 
-  data.collectionItems.forEach(function (item) {
-    if (item.itemID == itemID) {
-      collectionsArr.push({
-        collectionName: item.collectionName,
-        collectionID: item.collectionID,
-      });
-      collections.push(item.collectionName);
-    }
-  });
+  var collections = collectionsArr.map((item) => item.collectionName);
 
   // Tags
-  var tags = [];
-  var tagsArr = [];
-  data.itemTags.forEach(function (item) {
-    if (item.itemID == itemID) {
-      tagsArr.push({
-        name: item.name,
-        tagID: item.tagID,
-      });
-      tags.push(item.name);
-    }
-  });
+  var tagsArr = data.itemTags
+    .filter((item) => item.itemID == itemID)
+    .map((item) => ({
+      name: item.name,
+      tagID: item.tagID,
+    }));
 
-  dict.url = url;
+  var tags = tagsArr.map((item) => item.name);
+
+  dict.url = urls[0] ? urls[0].url : '';
 
   details = [
     {
       title: dict.title,
       icon: dict.icon,
-      // url: url || dict.url,
       action: 'itemDetailActions',
       actionArgument: dict,
     },
@@ -519,11 +568,9 @@ function showItemDetails(dict) {
   if (journalTitle) {
     details.push({
       title: journalTitle,
-      // icon: 'journalTemplate',
       icon: dict.icon + 'Template',
       action: 'showJournalArticles',
       actionArgument: journalTitle,
-      // children: showItemJournalArticles(journalTitle)
     });
   }
 
@@ -555,40 +602,18 @@ function showItemDetails(dict) {
       title: tags.join(', '),
       icon: 'tagTemplate',
       children: showItemTags(tagsArr),
-    },
-    {
-      title: 'Cite and Link',
-      icon: 'citeTemplate',
-      action: 'pasteCitation',
-      actionArgument: dict,
-    },
-    {
-      title: url ?? '',
-      url: url ?? '',
-      icon: 'openTemplate',
-    },
-    {
-      title: 'Open in Zotero',
-      icon: 'openTemplate',
-      url: dict.zoteroURL,
     }
   );
 
-  // Attachments
-
-  var paths = [];
-  data.itemAttachments.forEach((item) => {
-    if (itemID == item.parentItemID) {
-      if (item.path != undefined) {
-        paths.push({
-          path:
-            storagePath + '/' + item.key + '/' + item.path.split('storage:')[1],
-          type: item.contentType,
-        });
-      }
-    }
+  urls.forEach(function (item) {
+    details.push({
+      title: item.urlTitle,
+      url: item.url,
+      icon: 'linkTemplate',
+    });
   });
 
+  // Add Storage paths
   if (paths.length > 0) {
     for (var i = 0; i < paths.length; i++) {
       if (
@@ -603,14 +628,29 @@ function showItemDetails(dict) {
     }
 
     paths.forEach(function (item) {
+      var title = item.path.split('.').slice(-1)[0].toUpperCase() || '';
       details.push({
-        title: item.path.split('.').slice(-1)[0].toUpperCase() || '',
+        title: title,
         path: item.path,
         subtitle: '',
         icon: '14Template',
       });
     });
   }
+
+  details.push(
+    {
+      title: 'Cite and Link',
+      icon: 'citeTemplate',
+      action: 'pasteCitation',
+      actionArgument: dict,
+    },
+    {
+      title: 'Open in Zotero',
+      icon: 'openTemplate',
+      url: dict.zoteroURL,
+    }
+  );
 
   return details;
 }

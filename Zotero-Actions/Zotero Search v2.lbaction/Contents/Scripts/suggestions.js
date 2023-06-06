@@ -74,9 +74,9 @@ function runWithString(string) {
 
   // Combine suggestions and remove duplicates
   const combinedSuggestions = [
+    ...creatorSuggestions,
     ...tagSuggestions,
     ...titleSuggestions,
-    ...creatorSuggestions,
   ];
 
   // return combinedSuggestions;
