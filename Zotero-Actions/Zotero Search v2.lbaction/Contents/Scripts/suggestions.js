@@ -11,85 +11,79 @@ include('default.js');
 function runWithString(string) {
   if (!File.exists(dataPath)) return;
   if (string != undefined && string.trim().length == 0) return;
-
-  var data = File.readJSON(dataPath);
-
   string = string.toLowerCase();
 
-  var suggestions = [];
+  var data = File.readJSON(dataPath);
 
   const icon = 'icon';
 
   // Tag suggestions
-  data.tags.forEach(function (item) {
-    if (item.title.toLowerCase().includes(string)) {
-      suggestions.push({
-        title: item.title,
-        icon: icon,
-      });
-    }
-  });
+  const tagSuggestions = data.tags
+    .filter((item) => item.title.toLowerCase().includes(string))
+    .map((item) => ({ title: item.title, icon: icon }));
 
   // Title & Series suggestions
-  var itemIDs = [];
+  const words = string.split(' ');
+  const wordMap = new Map();
+  words.forEach((word) => wordMap.set(word, true));
 
-  data.items.forEach(function (item) {
-    if (
-      item.itemTypeID != 1 &&
-      item.itemTypeID != 14 &&
-      item.itemTypeID != 37
-    ) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  const itemIDs = data.items
+    .filter(
+      (item) =>
+        item.itemTypeID !== 1 &&
+        item.itemTypeID !== 14 &&
+        item.itemTypeID !== 37
+    )
+    .map((item) => item.itemID);
 
-  var words = string.toLowerCase().split(' ');
+  const titleSuggestions = data.metaAll
+    .filter((item) => {
+      if (
+        (item.fieldID == 110 || item.fieldID == 3) &&
+        itemIDs.includes(item.itemID)
+      ) {
+        let value = item.value.toLowerCase();
+        let match = true;
 
-  data.metaAll.forEach(function (item) {
-    let value = item.value.toLowerCase();
-    let match = true;
-
-    if (
-      (item.fieldID == 110 || item.fieldID == 3) &&
-      itemIDs.includes(item.itemID)
-    ) {
-      words.forEach(function (word) {
-        if (value.indexOf(word) === -1) {
-          match = false;
-          return;
+        for (const word of wordMap.keys()) {
+          if (!value.includes(word)) {
+            match = false;
+            break;
+          }
         }
-      });
-
-      if (match) {
-        suggestions.push({
-          title: item.value,
-          icon: icon,
-        });
+        return match;
       }
-    }
-  });
+      return false;
+    })
+    .map((item) => ({ title: item.value, icon: icon }));
 
   // Creator suggestions
-  data.creators.forEach(function (item) {
-    if (item.lastName.toLowerCase().includes(string)) {
-      suggestions.push({
-        title: item.lastName,
-        icon: icon,
-      });
-    }
-    if (item.firstName.toLowerCase().includes(string)) {
-      suggestions.push({
-        title: item.firstName,
-        icon: icon,
-      });
-    }
-  });
+  const creatorSuggestions = data.creators
+    .flatMap((item) => [
+      {
+        name: item.lastName,
+        match: item.lastName.toLowerCase().includes(string),
+      },
+      {
+        name: item.firstName,
+        match: item.firstName.toLowerCase().includes(string),
+      },
+    ])
+    .filter((item) => item.match)
+    .map((item) => ({ title: item.name, icon: icon }));
 
-  // Use filter() method to remove duplicates from suggestions array
-  suggestions = suggestions.filter(
-    (suggestion, index, self) =>
-      index === self.findIndex((s) => s.title === suggestion.title)
-  );
+  // Combine suggestions and remove duplicates
+  const combinedSuggestions = [
+    ...tagSuggestions,
+    ...titleSuggestions,
+    ...creatorSuggestions,
+  ];
 
-  return suggestions;
+  // return combinedSuggestions;
+
+  const uniqueSuggestions = Array.from(
+    new Set(combinedSuggestions.map((suggestion) => suggestion.title))
+  ).map((title) => ({ title: title, icon: icon }));
+
+  return uniqueSuggestions;
 }

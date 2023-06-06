@@ -48,75 +48,70 @@ function run(argument) {
 }
 
 // SEARCH
+
 function search(argument, data) {
   argument = argument.toLowerCase();
-  var itemIDs = [];
+  var itemIDs = new Set();
 
   // Search in Tags
-  data.itemTags.forEach(function (item) {
+  data.itemTags.forEach((item) => {
     if (item.name.toLowerCase().includes(argument)) {
-      itemIDs.push(item.itemID);
+      itemIDs.add(item.itemID);
     }
   });
 
   // Search in Creators
-  var creatorIDs = [];
-  data.creators.forEach(function (item) {
-    if (
-      item.lastName.toLowerCase().includes(argument) ||
-      item.firstName.toLowerCase().includes(argument)
-    ) {
-      creatorIDs.push(item.creatorID);
+  const creatorIDs = data.creators.reduce((acc, item) => {
+    const lowerCaseCreatorName =
+      item.firstName.toLowerCase() + ' ' + item.lastName.toLowerCase();
+    if (lowerCaseCreatorName.includes(argument)) {
+      acc.set(item.creatorID, true);
+    }
+    return acc;
+  }, new Map());
+
+  data.itemCreators.forEach((item) => {
+    if (creatorIDs.has(item.creatorID)) {
+      itemIDs.add(item.itemID);
     }
   });
 
-  data.itemCreators.forEach(function (item) {
-    if (creatorIDs.includes(item.creatorID)) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  // Search all Fields (including title, place, publisher, isbn)
+  const words = argument.split(' ');
 
-  // Search all Files (including title, place, publisher, isbn)
+  const wordMap = new Map();
+  words.forEach((word) => wordMap.set(word, true));
 
-  var words = argument.toLowerCase().split(' ');
-
-  data.metaAll.forEach(function (item) {
+  data.metaAll.forEach((item) => {
     let value = item.value.toLowerCase();
     let match = true;
 
-    words.forEach(function (word) {
-      if (value.indexOf(word) === -1) {
+    for (const word of wordMap.keys()) {
+      if (!value.includes(word)) {
         match = false;
-        return;
+        break;
       }
-    });
+    }
 
     if (match) {
-      itemIDs.push(item.itemID);
+      itemIDs.add(item.itemID);
     }
   });
 
   // Search in Notes
-  data.itemNotes.forEach(function (item) {
-    if (
-      item.note
-        .replace(/(<([^>]+)>)/g, '') // remove HTML tags
-        .toLowerCase()
-        .includes(argument)
-    ) {
-      itemIDs.push(item.parentItemID);
+  data.itemNotes.forEach((item) => {
+    const noteText = item.note.replace(/(<([^>]+)>)/g, '').toLowerCase();
+    if (noteText.includes(argument)) {
+      itemIDs.add(item.parentItemID);
     }
   });
 
   // Search in Storage (fallback if no itemIDs found or by holding cmd)
-  if (itemIDs.length == 0 || LaunchBar.options.commandKey) {
-    itemIDs = itemIDs.concat(searchInStorageDir(argument, data));
+  if (itemIDs.size === 0 || LaunchBar.options.commandKey) {
+    itemIDs = new Set([...itemIDs, ...searchInStorageDir(argument, data)]);
   }
 
-  // Filter duplicates
-  itemIDs = [...new Set(itemIDs)];
-
-  return showEntries(itemIDs, data);
+  return showEntries([...itemIDs], data);
 }
 
 function searchInStorageDir(argument, data) {
@@ -134,12 +129,12 @@ function searchInStorageDir(argument, data) {
 
     data.itemAttachments.forEach((item) => {
       if (item.key === attachmentKey) {
-        acc.push(item.parentItemID);
+        acc.add(item.parentItemID);
       }
     });
 
     return acc;
-  }, []);
+  }, new Set());
 
   return itemIDs;
 }
@@ -177,17 +172,15 @@ function browse(data) {
 }
 
 function showTags(data) {
-  data.tags.forEach(function (item) {
-    item.icon = 'tagTemplate';
-    item.action = 'showItemsWithTag';
-    item.actionArgument = item.tagID.toString();
+  const tags = data.tags.map((item) => {
+    return {
+      ...item,
+      icon: 'tagTemplate',
+      action: 'showItemsWithTag',
+      actionArgument: item.tagID.toString(),
+    };
   });
-
-  data.tags.sort(function (a, b) {
-    return a.title > b.title;
-  });
-
-  return data.tags;
+  return tags.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function showItemsWithTag(tagIDString) {
@@ -205,19 +198,17 @@ function showItemsWithTag(tagIDString) {
 }
 
 function showCreators(data) {
-  var results = [];
+  data.creators.sort((a, b) =>
+    a.lastName + ', ' + a.firstName > b.lastName + ', ' + b.firstName ? 1 : -1
+  );
 
-  data.creators.forEach(function (item) {
-    results.push({
-      title: item.lastName + ', ' + item.firstName,
+  const results = data.creators.map((item) => {
+    return {
+      title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
       icon: 'creatorTemplate',
       action: 'showItemsWithCreator',
       actionArgument: item.creatorID.toString(),
-    });
-  });
-
-  results.sort(function (a, b) {
-    return a.title > b.title;
+    };
   });
 
   return results;
@@ -241,23 +232,17 @@ function showItemsWithCreator(creatorIDString) {
 }
 
 function showCollections(data) {
-  var results = [];
-
-  data.collections.forEach(function (item) {
-    results.push({
+  const collections = data.collections.map((item) => {
+    return {
       title: item.collectionName,
       icon: 'collectionTemplate',
       action: 'showItemsWithCollection',
       actionArgument: item.collectionID.toString(),
       // children: showItemsWithCollection(item.collectionID.toString()),
-    });
+    };
   });
 
-  results.sort(function (a, b) {
-    return a.title > b.title;
-  });
-
-  return results;
+  return collections.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function showItemsWithCollection(collectionIDString) {
@@ -712,7 +697,7 @@ function showItemCreatorIDs(creatorsArr, data) {
   data.creators.forEach(function (item) {
     if (creatorsArr.includes(item.creatorID)) {
       results.push({
-        title: item.lastName + ', ' + item.firstName,
+        title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
         icon: 'creatorTemplate',
         action: 'showItemsWithCreator',
         actionArgument: item.creatorID.toString(),
@@ -866,16 +851,20 @@ function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
 function settings() {
   if (Action.preferences.citationFormat == 'richText') {
     var formatIcon = 'rTemplate';
+    var badge = 'Rich Text';
   } else if (Action.preferences.citationFormat == 'markdown') {
     var formatIcon = 'mTemplate';
+    var badge = 'Markdown';
   } else {
-    var formatIcon = 'plainTemplate';
+    // var formatIcon = 'plainTemplate';
     var formatIcon = 'pasteTemplate';
+    var badge = 'Plain';
   }
 
   return [
     {
       title: 'Citation Format',
+      subtitle: badge,
       icon: formatIcon,
       children: listFormats(),
     },
