@@ -2,6 +2,8 @@
 
 Search, browse, and act on items from your local Zotero database. 
 
+**Note: Performance is not great yet with large libraries!**
+
 ## Search 
 
 <img src="01.jpg" width="806"/> 
