@@ -58,7 +58,7 @@ function runWithString(string) {
     .map((item) => ({ title: item.value, icon: icon }));
 
   // Creator suggestions
-  const creatorSuggestions = data.creators
+  const creatorSuggestions = data.itemCreators
     .flatMap((item) => [
       {
         name: item.lastName,

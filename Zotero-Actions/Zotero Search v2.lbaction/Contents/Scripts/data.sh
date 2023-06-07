@@ -15,13 +15,21 @@ database_path="${HOME}/Zotero/zotero.sqlite-copy"
 
 # Query the database
 itemTypes=$(sqlite3 -json "${database_path}" "
-SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes")
+SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes
+")
 
 items=$(sqlite3 -json "${database_path}" "
-SELECT items.itemID, items.itemTypeID, items.key FROM items")
+SELECT items.itemID, items.itemTypeID, items.key FROM items
+LEFT JOIN feedItems ON items.itemID = feedItems.itemID 
+LEFT JOIN deletedItems ON items.itemID = deletedItems.itemID 
+WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
+")
 
 itemNotes=$(sqlite3 -json "${database_path}" "
-SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes")
+SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes
+LEFT JOIN deletedItems ON itemNotes.itemID = deletedItems.itemID 
+WHERE deletedItems.itemID IS NULL
+")
 if [ -z "${itemNotes}" ]; then
   itemNotes="[]"
 fi
@@ -47,6 +55,8 @@ itemTags=$(sqlite3 -json "${database_path}" "
 SELECT itemTags.itemID, itemTags.tagID, tags.name 
 FROM itemTags
 LEFT JOIN tags ON itemTags.tagID = tags.tagID
+LEFT JOIN deletedItems ON itemTags.itemID = deletedItems.itemID 
+WHERE deletedItems.itemID IS NULL 
 ")
 if [ -z "${itemTags}" ]; then
   itemTags="[]"
@@ -58,6 +68,9 @@ SELECT creators.creatorID, creators.lastName, creators.firstName FROM creators")
 itemCreators=$(sqlite3 -json "${database_path}" "
 SELECT itemCreators.itemID, itemCreators.creatorID, itemCreators.creatorTypeID, creators.lastName, creators.firstName FROM itemCreators
 LEFT JOIN creators ON itemCreators.creatorID = creators.creatorID
+LEFT JOIN feedItems ON itemCreators.itemID = feedItems.itemID 
+LEFT JOIN deletedItems ON itemCreators.itemID = deletedItems.itemID 
+WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
 
 collections=$(sqlite3 -json "${database_path}" "
@@ -69,15 +82,11 @@ fi
 collectionItems=$(sqlite3 -json "${database_path}" "
 SELECT  collectionItems.collectionID,  collections.collectionName, collectionItems.itemID FROM collectionItems
 LEFT JOIN collections ON collectionItems.collectionID = collections.collectionID
+LEFT JOIN deletedItems ON collectionItems.itemID = deletedItems.itemID 
+WHERE deletedItems.itemID IS NULL 
 ")
 if [ -z "${collectionItems}" ]; then
   collectionItems="[]"
-fi
-
-deletedItems=$(sqlite3 -json "${database_path}" "
-SELECT deletedItems.itemID FROM deletedItems")
-if [ -z "${deletedItems}" ]; then
-  deletedItems="[]"
 fi
 
 metaAll=$(sqlite3 -json "${database_path}" "
@@ -86,6 +95,9 @@ SELECT  itemData.itemID, itemData.fieldID,
 FROM itemData
 LEFT JOIN fields ON itemData.fieldID = fields.fieldID
 LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
+LEFT JOIN feedItems ON itemData.itemID = feedItems.itemID 
+LEFT JOIN deletedItems ON itemData.itemID = deletedItems.itemID 
+WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
 
 # only titles and dates
@@ -95,7 +107,9 @@ SELECT  itemData.itemID, itemData.fieldID,
 FROM itemData
 LEFT JOIN fields ON itemData.fieldID = fields.fieldID
 LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
-WHERE itemData.fieldID = 14 OR itemData.fieldID = 110
+LEFT JOIN feedItems ON itemData.itemID = feedItems.itemID
+LEFT JOIN deletedItems ON itemData.itemID = deletedItems.itemID  
+WHERE (itemData.fieldID = 14 OR itemData.fieldID = 110) AND feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
 
-printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "deletedItems": %s, "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${deletedItems}" "${metaAll}" "${meta}"
+printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s,  "metaAll": %s, "meta": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${metaAll}" "${meta}"

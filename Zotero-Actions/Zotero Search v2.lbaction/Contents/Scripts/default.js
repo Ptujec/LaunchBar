@@ -149,16 +149,22 @@ function browse(data) {
       title: 'Creators',
       icon: 'creatorTemplate',
       children: showCreators(data),
+      // action: 'showCreators',
+      // actionArgument: data,
     },
     {
       title: 'Tags',
       icon: 'tagTemplate',
       children: showTags(data),
+      // action: 'showTags',
+      // actionArgument: data,
     },
     {
       title: 'Collections',
       icon: 'collectionTemplate',
       children: showCollections(data),
+      // action: 'showCollections',
+      // actionArgument: data,
     },
     {
       title: 'All Items',
@@ -198,11 +204,11 @@ function showItemsWithTag(tagIDString) {
 }
 
 function showCreators(data) {
-  data.creators.sort((a, b) =>
+  data.itemCreators.sort((a, b) =>
     a.lastName + ', ' + a.firstName > b.lastName + ', ' + b.firstName ? 1 : -1
   );
 
-  const results = data.creators.map((item) => {
+  const results = data.itemCreators.map((item) => {
     return {
       title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
       icon: 'creatorTemplate',
@@ -276,7 +282,7 @@ function showAllItems(data) {
 function showEntries(itemIDs, data) {
   var result = [];
 
-  const deletedItemIDs = new Set(data.deletedItems.map((item) => item.itemID));
+  // const deletedItemIDs = new Set(data.deletedItems.map((item) => item.itemID));
 
   var attachmentItemIDs = {};
   var itemsMap = data.items.reduce((map, item) => {
@@ -335,7 +341,8 @@ function showEntries(itemIDs, data) {
   ]);
 
   itemIDs.forEach((itemID) => {
-    if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
+    // if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
+    if (!attachmentItemIDs[itemID]) {
       const iconBase = itemsMap[itemID]
         ? itemsMap[itemID].itemTypeID.toString()
         : '34';
