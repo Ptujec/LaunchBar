@@ -19,7 +19,7 @@ SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes
 ")
 
 items=$(sqlite3 -json "${database_path}" "
-SELECT items.itemID, items.itemTypeID, items.key FROM items
+SELECT items.itemID, items.itemTypeID, items.key, items.libraryID FROM items
 LEFT JOIN feedItems ON items.itemID = feedItems.itemID 
 LEFT JOIN deletedItems ON items.itemID = deletedItems.itemID 
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL

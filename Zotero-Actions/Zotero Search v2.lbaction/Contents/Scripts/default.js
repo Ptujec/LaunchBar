@@ -290,7 +290,7 @@ function showEntries(itemIDs, data) {
       attachmentItemIDs[item.itemID] = true;
     }
     map[item.itemID] = {
-      url: 'zotero://select/library/items/' + item.key,
+      url: 'zotero://select/items/' + item.libraryID + '_' + item.key,
       itemTypeID: item.itemTypeID,
     };
     return map;
