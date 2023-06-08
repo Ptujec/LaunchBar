@@ -42,76 +42,62 @@ function run(argument) {
   // Search or browse sql database
   if (argument != undefined) {
     return search(argument, data);
-  } else {
-    return browse(data);
   }
+  return browse(data);
 }
 
 // SEARCH
-
 function search(argument, data) {
   argument = argument.toLowerCase();
-  var itemIDs = new Set();
 
-  // Search in Creators
+  const getLowerCaseCreatorName = (item) =>
+    `${item.firstName.toLowerCase()} ${item.lastName.toLowerCase()}`;
+
   const creatorIDs = data.creators.reduce((acc, item) => {
-    const lowerCaseCreatorName =
-      item.firstName.toLowerCase() + ' ' + item.lastName.toLowerCase();
-    if (lowerCaseCreatorName.includes(argument)) {
+    if (getLowerCaseCreatorName(item).includes(argument))
       acc.set(item.creatorID, true);
-    }
     return acc;
   }, new Map());
 
-  data.itemCreators.forEach((item) => {
-    if (creatorIDs.has(item.creatorID)) {
-      itemIDs.add(item.itemID);
-    }
-  });
+  const itemCreatorsIDs = data.itemCreators
+    .filter((item) => creatorIDs.has(item.creatorID))
+    .map((item) => item.itemID);
 
-  // Search in Tags
-  data.itemTags.forEach((item) => {
-    if (item.name.toLowerCase().includes(argument)) {
-      itemIDs.add(item.itemID);
-    }
-  });
+  const itemTagsIDs = data.itemTags
+    .filter((item) => item.name.toLowerCase().includes(argument))
+    .map((item) => item.itemID);
 
   // Search all Fields (including title, place, publisher, isbn)
   const words = argument.split(' ');
+  const wordMap = new Map(words.map((word) => [word, true]));
+  const metaAllIDs = data.metaAll
+    .filter((item) => {
+      const value = item.value.toLowerCase();
+      return [...wordMap.keys()].every((word) => value.includes(word));
+    })
+    .map((item) => item.itemID);
 
-  const wordMap = new Map();
-  words.forEach((word) => wordMap.set(word, true));
+  const itemNotesIDs = data.itemNotes
+    .filter((item) =>
+      item.note
+        .replace(/(<([^>]+)>)/g, '')
+        .toLowerCase()
+        .includes(argument)
+    )
+    .map((item) => item.parentItemID);
 
-  data.metaAll.forEach((item) => {
-    let value = item.value.toLowerCase();
-    let match = true;
+  const allReversedItemIDs = [
+    ...itemCreatorsIDs.reverse(),
+    ...itemTagsIDs.reverse(),
+    ...metaAllIDs.reverse(),
+    ...itemNotesIDs.reverse(),
+  ];
 
-    for (const word of wordMap.keys()) {
-      if (!value.includes(word)) {
-        match = false;
-        break;
-      }
-    }
-
-    if (match) {
-      itemIDs.add(item.itemID);
-    }
-  });
-
-  // Search in Notes
-  data.itemNotes.forEach((item) => {
-    const noteText = item.note.replace(/(<([^>]+)>)/g, '').toLowerCase();
-    if (noteText.includes(argument)) {
-      itemIDs.add(item.parentItemID);
-    }
-  });
-
-  // Search in Storage (fallback if no itemIDs found or by holding cmd)
-  if (itemIDs.size === 0 || LaunchBar.options.commandKey) {
-    itemIDs = new Set([...itemIDs, ...searchInStorageDir(argument, data)]);
+  if (allReversedItemIDs.length === 0 || LaunchBar.options.commandKey) {
+    allReversedItemIDs.push(...searchInStorageDir(argument, data).reverse());
   }
 
-  return showEntries([...itemIDs], data);
+  return showEntries([...new Set(allReversedItemIDs)], data);
 }
 
 function searchInStorageDir(argument, data) {
@@ -148,36 +134,39 @@ function browse(data) {
     {
       title: 'Creators',
       icon: 'creatorTemplate',
-      children: showCreators(data),
-      // action: 'showCreators',
+      // children: showCreators(),
+      action: 'showCreators',
       // actionArgument: data,
     },
     {
       title: 'Tags',
       icon: 'tagTemplate',
-      children: showTags(data),
-      // action: 'showTags',
+      // children: showTags(data),
+      action: 'showTags',
       // actionArgument: data,
     },
     {
       title: 'Collections',
       icon: 'collectionTemplate',
-      children: showCollections(data),
-      // action: 'showCollections',
+      // children: showCollections(data),
+      action: 'showCollections',
       // actionArgument: data,
     },
     {
       title: 'All Items',
       icon: 'libraryTemplate',
       action: 'showAllItems',
-      actionArgument: data,
+      // actionArgument: data,
     }
   );
 
   return result;
 }
 
-function showTags(data) {
+function showTags() {
+  // Get data from JSON
+  var data = File.readJSON(dataPath);
+
   const tags = data.tags.map((item) => {
     return {
       ...item,
@@ -200,10 +189,13 @@ function showItemsWithTag(tagIDString) {
     }
   });
 
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs.reverse(), data);
 }
 
-function showCreators(data) {
+function showCreators() {
+  // Get data from JSON
+  var data = File.readJSON(dataPath);
+
   data.itemCreators.sort((a, b) =>
     a.lastName + ', ' + a.firstName > b.lastName + ', ' + b.firstName ? 1 : -1
   );
@@ -234,10 +226,13 @@ function showItemsWithCreator(creatorIDString) {
   // Filter duplicates
   itemIDs = [...new Set(itemIDs)];
 
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs.reverse(), data);
 }
 
-function showCollections(data) {
+function showCollections() {
+  // Get data from JSON
+  var data = File.readJSON(dataPath);
+
   const collections = data.collections.map((item) => {
     return {
       title: item.collectionName,
@@ -262,10 +257,13 @@ function showItemsWithCollection(collectionIDString) {
     }
   });
 
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs.reverse(), data);
 }
 
-function showAllItems(data) {
+function showAllItems() {
+  // Get data from JSON
+  var data = File.readJSON(dataPath);
+
   var itemIDs = [];
 
   data.meta.forEach(function (item) {
@@ -274,9 +272,7 @@ function showAllItems(data) {
     }
   });
 
-  itemIDs.reverse();
-
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs.reverse(), data);
 }
 
 function showEntries(itemIDs, data) {
@@ -374,10 +370,11 @@ function showEntries(itemIDs, data) {
       const date = itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : '';
 
       const title = itemTitleMap[itemID];
+      const subtitle = creator + date;
 
       result.push({
-        title: title,
-        subtitle: creator + date,
+        title: title || subtitle || '[Untitled]',
+        subtitle: title ? subtitle : '',
         icon: icon,
         action: 'itemActions',
         actionArgument: {
@@ -564,7 +561,11 @@ function showItemDetails(dict) {
     {
       title: dict.creator,
       icon: 'creatorTemplate',
-      children: showItemCreatorIDs(creatorsArr, data),
+      // children: showItemCreatorIDs(creatorsArr),
+      action: 'showItemCreatorIDs',
+      actionArgument: {
+        creatorsArr: creatorsArr,
+      },
     },
     {
       title: dict.date,
@@ -599,18 +600,29 @@ function showItemDetails(dict) {
     });
   }
 
-  details.push(
-    {
+  if (collections.length > 0) {
+    details.push({
       title: collections.join(', '),
       icon: 'collectionTemplate',
-      children: showItemCollections(collectionsArr),
-    },
-    {
+      // children: showItemCollections(collectionsArr),
+      action: 'showItemCollections',
+      actionArgument: {
+        collectionsArr: collectionsArr,
+      },
+    });
+  }
+
+  if (tags.length > 0) {
+    details.push({
       title: tags.join(', '),
       icon: 'tagTemplate',
-      children: showItemTags(tagsArr),
-    }
-  );
+      // children: showItemTags(tagsArr),
+      action: 'showItemTags',
+      actionArgument: {
+        tagsArr: tagsArr,
+      },
+    });
+  }
 
   urls.forEach(function (item) {
     details.push({
@@ -735,7 +747,12 @@ function showJournalArticles(journalTitle) {
   return showEntries(itemIDs, data);
 }
 
-function showItemCreatorIDs(creatorsArr, data) {
+function showItemCreatorIDs(dict) {
+  let creatorsArr = dict.creatorsArr;
+
+  // Get data from JSON
+  let data = File.readJSON(dataPath);
+
   if (creatorsArr.length == 1) {
     return showItemsWithCreator(creatorsArr[0]);
   }
@@ -754,7 +771,9 @@ function showItemCreatorIDs(creatorsArr, data) {
   return results;
 }
 
-function showItemCollections(collectionsArr) {
+function showItemCollections(dict) {
+  let collectionsArr = dict.collectionsArr;
+
   if (collectionsArr.length == 1) {
     return showItemsWithCollection(collectionsArr[0].collectionID);
   }
@@ -771,7 +790,8 @@ function showItemCollections(collectionsArr) {
   return results;
 }
 
-function showItemTags(tagsArr) {
+function showItemTags(dict) {
+  let tagsArr = dict.tagsArr;
   if (tagsArr.length == 1) {
     return showItemsWithTag(tagsArr[0].tagID);
   }

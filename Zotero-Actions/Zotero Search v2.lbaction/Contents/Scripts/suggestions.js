@@ -64,23 +64,22 @@ function runWithString(string) {
         name: item.lastName,
         match: item.lastName.toLowerCase().includes(string),
       },
-      {
-        name: item.firstName,
-        match: item.firstName.toLowerCase().includes(string),
-      },
+      // {
+      //   name: item.firstName,
+      //   match: item.firstName.toLowerCase().includes(string),
+      // },
     ])
     .filter((item) => item.match)
     .map((item) => ({ title: item.name, icon: icon }));
 
   // Combine suggestions and remove duplicates
   const combinedSuggestions = [
-    ...creatorSuggestions,
-    ...tagSuggestions,
-    ...titleSuggestions,
+    ...creatorSuggestions.reverse(),
+    ...tagSuggestions.reverse(),
+    ...titleSuggestions.reverse(),
   ];
 
   // return combinedSuggestions;
-
   const uniqueSuggestions = Array.from(
     new Set(combinedSuggestions.map((suggestion) => suggestion.title))
   ).map((title) => ({ title: title, icon: icon }));
