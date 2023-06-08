@@ -2,7 +2,7 @@
 
 Search, browse, and act on items from your local Zotero database. 
 
-**Note: Performance is not great yet with large libraries!**
+Note: I tested this action with a library of 2k items (almost 4k if you count attachments). It should be pretty snappy with that size. However, I am always open to ideas or contributions to improve performance.
 
 ## Search 
 
@@ -12,7 +12,7 @@ As you begin your search, helpful suggestions will appear, including creator nam
 
 If your search returns no results in the database, the action will automatically search the content of your local attachments (PDFs) using [`mdfind`](https://metaredux.com/posts/2019/12/22/mdfind.html).
 
-**Note**: You can also directly search both the database and your local attachments with `command` + `enter`. 
+Note: You can also directly search both the database and your local attachments with `command` + `enter`. 
   
 
 ## Browse
@@ -51,13 +51,13 @@ If there is a URL specified for the item, you can open it.
 
 This action also allows you to quickly look up items in the Zotero app. This way, you can quickly edit an item or perform other tasks that you cannot currently do within the action itself.
 
-**Note**: This will always open Zotero, but it may fail to select the item on the first attempt if Zotero is not running previously. This is a limitation of Zotero. In this case, use the action again once Zotero is running.
+Note: This will always open Zotero, but it may fail to select the item on the first attempt if Zotero is not running previously. This is a limitation of Zotero. In this case, use the action again once Zotero is running.
 
 #### 5) Cite and Link
 
 Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste a citation including the link as rich text or in markdown format by going to settings and selecting your preferred format. Select the action and then press `option` + `return`.
 
-**Note:** This action's citation function might not yet be all you need to compose a paper, primarily because it does not yet support custom citation styles. Nevertheless, it should be a great help during research, especially when adding links back to the item in Zotero, which can help you locate the correct sources easily, regardless of where you store your research notes. 
+Note: This action's citation function might not yet be all you need to compose a paper, primarily because it does not yet support custom citation styles. Nevertheless, it should be a great help during research, especially when adding links back to the item in Zotero, which can help you locate the correct sources easily, regardless of where you store your research notes. 
 
 #### 6) 🪄 The Magic Title Item
 
@@ -71,7 +71,6 @@ There are also some shortcuts (modifier keys) that work with any selected Zotero
 - Paste a citation with `shift` + `return`   
 
 Those even work on the top level. So you don't need to go into details to use them.
-
 
 ## Download
 
