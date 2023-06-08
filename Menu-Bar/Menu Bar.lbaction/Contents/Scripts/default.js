@@ -20,56 +20,56 @@ function run() {
     });
   }
 
-  var resultRecent = [];
-  var resultAll = [];
+  const processedList = list
+    .map((item) => {
+      const uID = item.bundleID + '.' + item.indices.join('.');
+      const sub = item.path.join(' > ');
+      let title = item.title;
 
-  list.forEach(function (item) {
-    var uID = item.bundleID + '.' + item.indices.join('.');
-    var sub = item.path.join(' > ');
-    var title = item.title;
-
-    if (item.mark != undefined) {
-      title = title + ' ' + item.mark;
-    }
-
-    if (
-      // This if statement is just for as long as there is not flag in the CLI to apply Finbar rules
-      item.indices[0] != 0 &&
-      !item.path.includes('Open Recent') &&
-      !item.path.includes('Benutzte Dokumente') &&
-      !item.path.includes('Verlauf') &&
-      !item.path.includes('History') &&
-      !item.path.includes('Services') &&
-      !item.path.includes('Dienste')
-    ) {
-      var pushData = {
-        title: title,
-        subtitle: sub,
-        icon: item.bundleID,
-        action: 'click',
-        actionArgument: {
-          bundleID: item.bundleID,
-          indices: item.indices,
-          title: item.title,
-        },
-        actionRunsInBackground: true,
-      };
-
-      if (item.shortcut != undefined) {
-        // A thin space character (U+2009) is added between every character in the keyboard shortcut to mimic the menubar appearance and make the shortcut easier to read.
-        pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
+      if (item.mark != undefined) {
+        title = title + ' ' + item.mark;
       }
 
-      // Priorize recent items
-      if (recentUIDs.includes(uID)) {
-        resultRecent.push(pushData);
-      } else {
-        resultAll.push(pushData);
-      }
-    }
-  });
+      if (
+        item.indices[1] != 0 &&
+        !item.path.includes('Open Recent') &&
+        !item.path.includes('Benutzte Dokumente') &&
+        !item.path.includes('Verlauf') &&
+        !item.path.includes('History') &&
+        !item.path.includes('Services') &&
+        !item.path.includes('Dienste')
+      ) {
+        const pushData = {
+          uID: uID,
+          title: title,
+          subtitle: sub,
+          icon: item.bundleID,
+          action: 'click',
+          actionArgument: {
+            bundleID: item.bundleID,
+            indices: item.indices,
+            title: item.title,
+          },
+          actionRunsInBackground: true,
+        };
 
-  var result = resultRecent.concat(resultAll);
+        if (item.shortcut != undefined) {
+          pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
+        }
+
+        return pushData;
+      }
+    })
+    .filter((item) => item !== undefined);
+
+  const resultRecent = processedList.filter((item) =>
+    recentUIDs.includes(item.uID)
+  );
+  const resultAll = processedList.filter(
+    (item) => !recentUIDs.includes(item.uID)
+  );
+
+  const result = resultRecent.concat(resultAll);
   return result;
 }
 
