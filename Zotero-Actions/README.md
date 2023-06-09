@@ -35,7 +35,7 @@ Many of the details also offer further functionality. For instance, you can quic
 
 Here is a list of possible actions: 
 
-#### 1) More Browsing
+#### 1) Browse some more
 
 You can browse other items that are part of the same collection, publication, book, have the same tag, or are written by the same author.
 
