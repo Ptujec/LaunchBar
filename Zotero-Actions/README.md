@@ -1,6 +1,6 @@
 # LaunchBar Action for Zotero
 
-Search, browse, and act on items from your local Zotero database. 
+Search, browse, and act on items from your local [Zotero](https://www.zotero.org) database. 
 
 Note: I tested this action with a library of 2k items (almost 4k if you count attachments). It should be pretty snappy with that size. However, I am always open to ideas or contributions to improve performance.
 
