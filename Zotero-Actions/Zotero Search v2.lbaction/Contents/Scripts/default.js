@@ -406,17 +406,8 @@ function initializeName(name) {
 
 function itemActions(dict) {
   if (LaunchBar.options.commandKey) {
-    saveRecent(dict.itemID);
-
-    if (checkZoteroVersion()) {
-      LaunchBar.executeAppleScript(
-        'tell application id "org.zotero.zotero" to launch'
-      );
-    }
-
-    LaunchBar.openURL(dict.zoteroURL);
+    openZoteroURL(dict);
   } else if (LaunchBar.options.shiftKey) {
-    saveRecent(dict.itemID);
     pasteCitation(dict);
   } else {
     return showItemDetails(dict);
@@ -633,6 +624,11 @@ function showItemDetails(dict) {
       title: item.urlTitle,
       url: item.url,
       icon: 'linkTemplate',
+      action: 'openURL',
+      actionArgument: {
+        itemID: itemID,
+        url: item.url,
+      },
     });
   });
 
@@ -672,6 +668,8 @@ function showItemDetails(dict) {
       title: 'Open in Zotero',
       icon: 'openTemplate',
       url: dict.zoteroURL,
+      action: 'openZoteroURL',
+      actionArgument: dict,
     }
   );
 
@@ -679,24 +677,17 @@ function showItemDetails(dict) {
 }
 
 function itemDetailActions(dict) {
-  // Save as Recent
-  saveRecent(dict.itemID);
-
   // Options
   if (LaunchBar.options.commandKey) {
-    if (checkZoteroVersion()) {
-      LaunchBar.executeAppleScript(
-        'tell application id "org.zotero.zotero" to launch'
-      );
-    }
-
-    LaunchBar.openURL(dict.zoteroURL);
-    return;
+    return openZoteroURL(dict);
   }
 
   if (LaunchBar.options.shiftKey) {
     return pasteCitation(dict);
   }
+
+  // Save as Recent
+  saveRecent(dict.itemID);
 
   if (dict.path != undefined) {
     LaunchBar.openURL(File.fileURLForPath(dict.path));
@@ -815,6 +806,8 @@ function showItemTags(dict) {
 function pasteCitation(dict) {
   // TODO: Build citation according to a csl style sheet?
 
+  saveRecent(dict.itemID);
+
   const data = File.readJSON(dataPath);
 
   const authorNames = data.itemCreators
@@ -865,6 +858,25 @@ function pasteCitation(dict) {
         '"'
     );
   }
+}
+
+function openURL(dict) {
+  LaunchBar.hide();
+  saveRecent(dict.itemID);
+  LaunchBar.openURL(dict.url);
+}
+
+function openZoteroURL(dict) {
+  LaunchBar.hide();
+  saveRecent(dict.itemID);
+
+  if (checkZoteroVersion()) {
+    LaunchBar.executeAppleScript(
+      'tell application id "org.zotero.zotero" to launch'
+    );
+  }
+
+  LaunchBar.openURL(dict.zoteroURL);
 }
 
 function saveRecent(itemID) {
