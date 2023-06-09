@@ -94,7 +94,7 @@ function search(argument, data) {
   ];
 
   if (allReversedItemIDs.length === 0 || LaunchBar.options.commandKey) {
-    allReversedItemIDs.push(...searchInStorageDir(argument, data).reverse());
+    allReversedItemIDs.push(...searchInStorageDir(argument, data));
   }
 
   return showEntries([...new Set(allReversedItemIDs)], data);
@@ -558,7 +558,10 @@ function showItemDetails(dict) {
       action: 'itemDetailActions',
       actionArgument: dict,
     },
-    {
+  ];
+
+  if (creatorsArr.length > 0) {
+    details.push({
       title: dict.creator,
       icon: 'creatorTemplate',
       // children: showItemCreatorIDs(creatorsArr),
@@ -566,12 +569,13 @@ function showItemDetails(dict) {
       actionArgument: {
         creatorsArr: creatorsArr,
       },
-    },
-    {
-      title: dict.date,
-      icon: 'calTemplate',
-    },
-  ];
+    });
+  }
+
+  details.push({
+    title: dict.date,
+    icon: 'calTemplate',
+  });
 
   if (journalTitle) {
     details.push({
