@@ -1,6 +1,6 @@
 function runWithString(string) {
   var data = HTTP.getJSON(
-    'https://plus.si.cobiss.net/opac7/bib/search/autocomplete?q=' +
+    'https://plus.cobiss.net/cobiss/si/sl/bib/search/autocomplete?q=' +
       encodeURI(string) +
       '&db=cobib&mat=allmaterials'
   ).data;
