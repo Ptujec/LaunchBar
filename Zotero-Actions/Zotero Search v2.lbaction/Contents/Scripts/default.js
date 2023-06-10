@@ -647,7 +647,8 @@ function showItemDetails(dict) {
     }
 
     paths.forEach(function (item) {
-      var title = item.path.split('.').slice(-1)[0].toUpperCase() || '';
+      // var title = item.path.split('.').slice(-1)[0].toUpperCase() || ''; // only extension in upper case
+      var title = item.path.split('/').slice(-1)[0] || ''; // whole name with extension
       details.push({
         title: title,
         path: item.path,
