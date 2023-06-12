@@ -39,7 +39,11 @@ function runWithString(string) {
   const titleSuggestions = data.metaAll
     .filter((item) => {
       if (
-        (item.fieldID == 110 || item.fieldID == 3) &&
+        (item.fieldID == 110 ||
+          item.fieldID == 111 ||
+          item.fieldID == 112 ||
+          item.fieldID == 113 ||
+          item.fieldID == 3) &&
         itemIDs.includes(item.itemID)
       ) {
         let value = item.value.toLowerCase();

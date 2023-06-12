@@ -264,13 +264,14 @@ function showAllItems() {
   // Get data from JSON
   var data = File.readJSON(dataPath);
 
-  var itemIDs = [];
-
-  data.meta.forEach(function (item) {
-    if (item.fieldID == 110) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  var itemIDs = data.metaAll.reduce((accumulator, item) => {
+    return item.fieldID == 110 ||
+      item.fieldID == 111 ||
+      item.fieldID == 112 ||
+      item.fieldID == 113
+      ? [...accumulator, item.itemID]
+      : accumulator;
+  }, []);
 
   return showEntries(itemIDs.reverse(), data);
 }
@@ -307,14 +308,19 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemTitleMap = data.meta.reduce((map, meta) => {
-    if (meta.fieldID == 110) {
+  var itemTitleMap = data.metaAll.reduce((map, meta) => {
+    if (
+      meta.fieldID == 110 ||
+      meta.fieldID == 111 ||
+      meta.fieldID == 112 ||
+      meta.fieldID == 113
+    ) {
       map[meta.itemID] = meta.value;
     }
     return map;
   }, {});
 
-  var itemDateMap = data.meta.reduce((map, meta) => {
+  var itemDateMap = data.metaAll.reduce((map, meta) => {
     if (meta.fieldID == 14) {
       map[meta.itemID] = meta.value;
     }
@@ -327,7 +333,7 @@ function showEntries(itemIDs, data) {
     '16',
     '17',
     '18',
-    '21',
+    // '21',
     '25',
     '26',
     '28',
@@ -338,7 +344,7 @@ function showEntries(itemIDs, data) {
 
   itemIDs.forEach((itemID) => {
     // if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
-    if (!attachmentItemIDs[itemID]) {
+    if (itemID in itemsMap && !attachmentItemIDs[itemID]) {
       const iconBase = itemsMap[itemID]
         ? itemsMap[itemID].itemTypeID.toString()
         : '34';
