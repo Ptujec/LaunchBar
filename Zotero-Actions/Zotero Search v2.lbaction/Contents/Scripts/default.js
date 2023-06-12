@@ -67,6 +67,10 @@ function search(argument, data) {
     .filter((item) => item.name.toLowerCase().includes(argument))
     .map((item) => item.itemID);
 
+  const collectionIDs = data.collectionItems
+    .filter((item) => item.collectionName.toLowerCase().includes(argument))
+    .map((item) => item.itemID);
+
   // Search all Fields (including title, place, publisher, isbn)
   const words = argument.split(' ');
   const wordMap = new Map(words.map((word) => [word, true]));
@@ -89,6 +93,7 @@ function search(argument, data) {
   const allReversedItemIDs = [
     ...itemCreatorsIDs.reverse(),
     ...itemTagsIDs.reverse(),
+    ...collectionIDs.reverse(),
     ...metaAllIDs.reverse(),
     ...itemNotesIDs.reverse(),
   ];
@@ -277,10 +282,6 @@ function showAllItems() {
 }
 
 function showEntries(itemIDs, data) {
-  var result = [];
-
-  // const deletedItemIDs = new Set(data.deletedItems.map((item) => item.itemID));
-
   var attachmentItemIDs = {};
   var itemsMap = data.items.reduce((map, item) => {
     if (
@@ -342,8 +343,8 @@ function showEntries(itemIDs, data) {
     '37',
   ]);
 
+  var result = [];
   itemIDs.forEach((itemID) => {
-    // if (!attachmentItemIDs[itemID] && !deletedItemIDs.has(itemID)) {
     if (itemID in itemsMap && !attachmentItemIDs[itemID]) {
       const iconBase = itemsMap[itemID]
         ? itemsMap[itemID].itemTypeID.toString()
@@ -395,9 +396,6 @@ function showEntries(itemIDs, data) {
     }
   });
 
-  // if (result.length === 1) {
-  //   return showItemDetails(result[0].actionArgument);
-  // }
   return result;
 }
 

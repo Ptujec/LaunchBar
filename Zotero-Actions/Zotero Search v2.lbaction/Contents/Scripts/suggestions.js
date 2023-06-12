@@ -76,10 +76,22 @@ function runWithString(string) {
     .filter((item) => item.match)
     .map((item) => ({ title: item.name, icon: icon }));
 
+  // Collection suggestions
+  const collectionSuggestions = data.collectionItems
+    .flatMap((item) => [
+      {
+        name: item.collectionName,
+        match: item.collectionName.toLowerCase().includes(string),
+      },
+    ])
+    .filter((item) => item.match)
+    .map((item) => ({ title: item.name, icon: icon }));
+
   // Combine suggestions and remove duplicates
   const combinedSuggestions = [
     ...creatorSuggestions.reverse(),
     ...tagSuggestions.reverse(),
+    ...collectionSuggestions.reverse(),
     ...titleSuggestions.reverse(),
   ];
 
