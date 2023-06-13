@@ -18,8 +18,17 @@ itemTypes=$(sqlite3 -json "${database_path}" "
 SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes
 ")
 
+fields=$(sqlite3 -json "${database_path}" "
+SELECT fields.fieldID, fields.fieldName FROM fields
+")
+
+creatorTypes=$(sqlite3 -json "${database_path}" "
+SELECT creatorTypes.creatorTypeID, creatorTypes.creatorType FROM creatorTypes
+")
+
 items=$(sqlite3 -json "${database_path}" "
-SELECT items.itemID, items.itemTypeID, items.key, items.libraryID FROM items
+SELECT items.itemID, items.itemTypeID, itemTypes.typeName, items.key, items.libraryID FROM items
+LEFT JOIN itemTypes ON items.itemTypeID = itemTypes.itemTypeID 
 LEFT JOIN feedItems ON items.itemID = feedItems.itemID 
 LEFT JOIN deletedItems ON items.itemID = deletedItems.itemID 
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
@@ -89,7 +98,7 @@ if [ -z "${collectionItems}" ]; then
   collectionItems="[]"
 fi
 
-metaAll=$(sqlite3 -json "${database_path}" "
+meta=$(sqlite3 -json "${database_path}" "
 SELECT  itemData.itemID, itemData.fieldID,  
         itemDataValues.value
 FROM itemData
@@ -100,16 +109,4 @@ LEFT JOIN deletedItems ON itemData.itemID = deletedItems.itemID
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
 
-# only titles and dates
-# meta=$(sqlite3 -json "${database_path}" "
-# SELECT  itemData.itemID, itemData.fieldID,  
-#         itemDataValues.value
-# FROM itemData
-# LEFT JOIN fields ON itemData.fieldID = fields.fieldID
-# LEFT JOIN itemDataValues ON itemData.valueID = itemDataValues.valueID
-# LEFT JOIN feedItems ON itemData.itemID = feedItems.itemID
-# LEFT JOIN deletedItems ON itemData.itemID = deletedItems.itemID  
-# WHERE (itemData.fieldID = 14 OR itemData.fieldID = 110 OR itemData.fieldID = 113) AND feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
-# ")
-
-printf '{"itemTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s,  "metaAll": %s}' "${itemTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${metaAll}"
+printf '{"itemTypes": %s, "fields": %s, "creatorTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s,  "meta": %s}' "${itemTypes}" "${fields}" "${creatorTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${meta}"

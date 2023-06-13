@@ -13,6 +13,10 @@ const currentActionVersion = Action.version;
 const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
 
 function run(argument) {
+  // Show Settings
+  if (LaunchBar.options.alternateKey) {
+    return settings();
+  }
   // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
 
   if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
@@ -31,13 +35,32 @@ function run(argument) {
     File.writeText(data, dataPath);
   }
 
-  // Show Settings
-  if (LaunchBar.options.alternateKey) {
-    return settings();
-  }
-
   // Get data from JSON
   var data = File.readJSON(dataPath);
+
+  // Create itemType, field and creatorType variables
+  if (updateJSON) {
+    const itemTypes = data.itemTypes.reduce((acc, curr) => {
+      acc[curr.typeName] = curr.itemTypeID;
+      return acc;
+    }, {});
+
+    Action.preferences.itemTypes = itemTypes;
+
+    const fields = data.fields.reduce((acc, curr) => {
+      acc[curr.fieldName] = curr.fieldID;
+      return acc;
+    }, {});
+
+    Action.preferences.fields = fields;
+
+    const creatorTypes = data.creatorTypes.reduce((acc, curr) => {
+      acc[curr.creatorType] = curr.creatorTypeID;
+      return acc;
+    }, {});
+
+    Action.preferences.creatorTypes = creatorTypes;
+  }
 
   // Search or browse sql database
   if (argument != undefined) {
@@ -74,7 +97,7 @@ function search(argument, data) {
   // Search all Fields (including title, place, publisher, isbn)
   const words = argument.split(' ');
   const wordMap = new Map(words.map((word) => [word, true]));
-  const metaAllIDs = data.metaAll
+  const metaIDs = data.meta
     .filter((item) => {
       const value = item.value.toLowerCase();
       return [...wordMap.keys()].every((word) => value.includes(word));
@@ -94,7 +117,7 @@ function search(argument, data) {
     ...itemCreatorsIDs.reverse(),
     ...itemTagsIDs.reverse(),
     ...collectionIDs.reverse(),
-    ...metaAllIDs.reverse(),
+    ...metaIDs.reverse(),
     ...itemNotesIDs.reverse(),
   ];
 
@@ -267,13 +290,14 @@ function showItemsWithCollection(collectionIDString) {
 
 function showAllItems() {
   // Get data from JSON
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
+  const fields = Action.preferences.fields;
 
-  var itemIDs = data.metaAll.reduce((accumulator, item) => {
-    return item.fieldID == 110 ||
-      item.fieldID == 111 ||
-      item.fieldID == 112 ||
-      item.fieldID == 113
+  var itemIDs = data.meta.reduce((accumulator, item) => {
+    return item.fieldID == fields.title ||
+      item.fieldID == fields.caseName ||
+      item.fieldID == fields.nameOfAct ||
+      item.fieldID == fields.subject
       ? [...accumulator, item.itemID]
       : accumulator;
   }, []);
@@ -282,18 +306,24 @@ function showAllItems() {
 }
 
 function showEntries(itemIDs, data) {
+  const prefs = Action.preferences;
+  const itemTypes = prefs.itemTypes;
+  const fields = prefs.fields;
+  const creatorTypes = prefs.creatorTypes;
+
   var attachmentItemIDs = {};
   var itemsMap = data.items.reduce((map, item) => {
     if (
-      item.itemTypeID == 14 ||
-      item.itemTypeID == 1 ||
-      item.itemTypeID == 37
+      item.itemTypeID == itemTypes.attachment ||
+      item.itemTypeID == itemTypes.note ||
+      item.itemTypeID == itemTypes.annotation
     ) {
       attachmentItemIDs[item.itemID] = true;
     }
     map[item.itemID] = {
       url: 'zotero://select/items/' + item.libraryID + '_' + item.key,
-      itemTypeID: item.itemTypeID,
+      // itemTypeID: item.itemTypeID,
+      typeName: item.typeName,
     };
     return map;
   }, {});
@@ -309,46 +339,46 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemTitleMap = data.metaAll.reduce((map, meta) => {
+  var itemTitleMap = data.meta.reduce((map, meta) => {
     if (
-      meta.fieldID == 110 ||
-      meta.fieldID == 111 ||
-      meta.fieldID == 112 ||
-      meta.fieldID == 113
+      meta.fieldID == fields.title ||
+      meta.fieldID == fields.caseName ||
+      meta.fieldID == fields.nameOfAct ||
+      meta.fieldID == fields.subject
     ) {
       map[meta.itemID] = meta.value;
     }
     return map;
   }, {});
 
-  var itemDateMap = data.metaAll.reduce((map, meta) => {
-    if (meta.fieldID == 14) {
+  var itemDateMap = data.meta.reduce((map, meta) => {
+    if (meta.fieldID == fields.date) {
       map[meta.itemID] = meta.value;
     }
     return map;
   }, {});
 
   const templateIcons = new Set([
-    '10',
-    '11',
-    '16',
-    '17',
-    '18',
-    // '21',
-    '25',
-    '26',
-    '28',
-    '30',
-    '31',
-    '37',
+    'interview',
+    'film',
+    'bill',
+    'case',
+    'hearing',
+    'forumPost',
+    'audioRecording',
+    'videoRecording',
+    'radioBroadcast',
+    'podcast',
+    'annotation',
+    'attachment',
   ]);
 
   var result = [];
   itemIDs.forEach((itemID) => {
     if (itemID in itemsMap && !attachmentItemIDs[itemID]) {
       const iconBase = itemsMap[itemID]
-        ? itemsMap[itemID].itemTypeID.toString()
-        : '34';
+        ? itemsMap[itemID].typeName
+        : 'document';
       const icon = templateIcons.has(iconBase)
         ? iconBase + 'Template'
         : iconBase;
@@ -357,16 +387,16 @@ function showEntries(itemIDs, data) {
         ? itemCreatorsMap[itemID]
             .filter((creator) => {
               const type1Exists = itemCreatorsMap[itemID].some(
-                (c) => c.typeID === 1
+                (c) => c.typeID === creatorTypes.author
               );
               if (type1Exists) {
-                return creator.typeID === 1;
+                return creator.typeID === creatorTypes.author;
               }
               const type3Exists = itemCreatorsMap[itemID].some(
-                (c) => c.typeID === 3
+                (c) => c.typeID === creatorTypes.editor
               );
               if (type3Exists) {
-                return creator.typeID === 3;
+                return creator.typeID === creatorTypes.editor;
               }
               return true;
             })
@@ -419,6 +449,11 @@ function itemActions(dict) {
 }
 
 function showItemDetails(dict) {
+  const prefs = Action.preferences;
+  const itemTypes = prefs.itemTypes;
+  const fields = prefs.fields;
+  const creatorTypes = prefs.creatorTypes;
+
   const itemID = dict.itemID;
   const data = File.readJSON(dataPath);
 
@@ -449,28 +484,28 @@ function showItemDetails(dict) {
   const attachedUrlsItems = [];
   let urls = [];
 
-  data.metaAll.forEach((item) => {
+  data.meta.forEach((item) => {
     if (item.itemID == itemID) {
-      if (item.fieldID == 1) {
+      if (item.fieldID == fields.url) {
         urls.push({
           urlTitle: item.value,
           url: item.value,
         });
       }
-      if (item.fieldID == 3) {
+      if (item.fieldID == fields.series) {
         seriesTitle = item.value;
       }
-      if (item.fieldID == 12) {
+      if (item.fieldID == fields.publicationTitle) {
         journalTitle = item.value;
       }
-      if (item.fieldID == 115) {
+      if (item.fieldID == fields.bookTitle) {
         bookTitle = item.value;
       }
     }
 
     if (
       attachedUrlsItemIDs.includes(item.itemID) &&
-      (item.fieldID == 1 || item.fieldID == 110)
+      (item.fieldID == fields.url || item.fieldID == fields.title)
     ) {
       attachedUrlsItems.push(item);
     }
@@ -484,9 +519,9 @@ function showItemDetails(dict) {
       acc.push(existingItem);
     }
 
-    if (entry.fieldID === 1) {
+    if (entry.fieldID === fields.url) {
       existingItem.url = entry.value;
-    } else if (entry.fieldID === 110) {
+    } else if (entry.fieldID === fields.title) {
       existingItem.title = entry.value;
     }
 
@@ -503,17 +538,25 @@ function showItemDetails(dict) {
 
   // Creator IDs
   const authorIDs = data.itemCreators
-    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID === creatorTypes.author
+    ) // 1
     .map((item) => item.creatorID);
   const editorIDs = data.itemCreators
-    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID === creatorTypes.editor
+    )
     .map((item) => item.creatorID);
   const otherIDs = data.itemCreators
     .filter(
       (item) =>
         item.itemID === dict.itemID &&
-        item.creatorTypeID !== 1 &&
-        item.creatorTypeID !== 3
+        item.creatorTypeID !== creatorTypes.author &&
+        item.creatorTypeID !== creatorTypes.editor
     )
     .map((item) => item.creatorID);
 
@@ -559,7 +602,6 @@ function showItemDetails(dict) {
     details.push({
       title: dict.creator,
       icon: 'creatorTemplate',
-      // children: showItemCreatorIDs(creatorsArr),
       action: 'showItemCreatorIDs',
       actionArgument: {
         creatorsArr: creatorsArr,
@@ -603,7 +645,6 @@ function showItemDetails(dict) {
     details.push({
       title: collections.join(', '),
       icon: 'collectionTemplate',
-      // children: showItemCollections(collectionsArr),
       action: 'showItemCollections',
       actionArgument: {
         collectionsArr: collectionsArr,
@@ -615,7 +656,6 @@ function showItemDetails(dict) {
     details.push({
       title: tags.join(', '),
       icon: 'tagTemplate',
-      // children: showItemTags(tagsArr),
       action: 'showItemTags',
       actionArgument: {
         tagsArr: tagsArr,
@@ -651,13 +691,12 @@ function showItemDetails(dict) {
     }
 
     paths.forEach(function (item) {
-      // var title = item.path.split('.').slice(-1)[0].toUpperCase() || ''; // only extension in upper case
-      var title = item.path.split('/').slice(-1)[0] || ''; // whole name with extension
+      var title = item.path.split('/').slice(-1)[0] || '';
       details.push({
         title: title,
         path: item.path,
         subtitle: '',
-        icon: '14Template',
+        icon: 'attachmentTemplate',
       });
     });
   }
@@ -705,9 +744,9 @@ function showBookSections(bookTitle) {
   const data = File.readJSON(dataPath);
   var itemIDs = [];
 
-  data.metaAll.forEach(function (item) {
+  data.meta.forEach(function (item) {
     if (
-      item.fieldID == '115' &&
+      item.fieldID == Action.preferences.fields.bookTitle &&
       item.value.toLowerCase() == bookTitle.toLowerCase()
     ) {
       itemIDs.push(item.itemID);
@@ -720,9 +759,9 @@ function showSeriesItems(seriesTitle) {
   const data = File.readJSON(dataPath);
   var itemIDs = [];
 
-  data.metaAll.forEach(function (item) {
+  data.meta.forEach(function (item) {
     if (
-      item.fieldID == '3' &&
+      item.fieldID == Action.preferences.fields.series &&
       item.value.toLowerCase() == seriesTitle.toLowerCase()
     ) {
       itemIDs.push(item.itemID);
@@ -735,7 +774,7 @@ function showJournalArticles(journalTitle) {
   const data = File.readJSON(dataPath);
   var itemIDs = [];
 
-  data.metaAll.forEach(function (item) {
+  data.meta.forEach(function (item) {
     if (item.value.toLowerCase() == journalTitle.toLowerCase()) {
       itemIDs.push(item.itemID);
     }
@@ -813,20 +852,29 @@ function pasteCitation(dict) {
 
   saveRecent(dict.itemID);
 
+  const creatorTypes = Action.preferences.creatorTypes;
   const data = File.readJSON(dataPath);
 
   const authorNames = data.itemCreators
-    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 1)
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID === creatorTypes.author
+    )
     .map((item) => item.lastName);
   const editorNames = data.itemCreators
-    .filter((item) => item.itemID === dict.itemID && item.creatorTypeID === 3)
+    .filter(
+      (item) =>
+        item.itemID === dict.itemID &&
+        item.creatorTypeID === creatorTypes.editor
+    )
     .map((item) => item.lastName);
   const otherNames = data.itemCreators
     .filter(
       (item) =>
         item.itemID === dict.itemID &&
-        item.creatorTypeID !== 1 &&
-        item.creatorTypeID !== 3
+        item.creatorTypeID !== creatorTypes.author &&
+        item.creatorTypeID !== creatorTypes.editor
     )
     .map((item) => item.lastName);
 
@@ -855,8 +903,6 @@ function pasteCitation(dict) {
     // LaunchBar.paste(citation);
     // LaunchBar.setClipboardString(dict.url);
     LaunchBar.executeAppleScript(
-      // 'set the clipboard to "' + citationMDLink + '"',
-      // 'delay 0.1',
       'set the clipboard to "' + dict.zoteroURL + '"',
       'tell application "LaunchBar" to paste in frontmost application "' +
         citation +

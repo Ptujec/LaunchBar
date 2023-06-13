@@ -36,7 +36,7 @@ function runWithString(string) {
     )
     .map((item) => item.itemID);
 
-  const titleSuggestions = data.metaAll
+  const titleSuggestions = data.meta
     .filter((item) => {
       if (
         (item.fieldID == 110 ||
