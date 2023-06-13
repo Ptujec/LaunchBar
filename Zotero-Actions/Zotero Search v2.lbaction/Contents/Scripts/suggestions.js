@@ -7,6 +7,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 include('default.js');
+const prefs = Action.preferences;
+const itemTypes = prefs.itemTypes;
+const fields = prefs.fields;
 
 function runWithString(string) {
   if (!File.exists(dataPath)) return;
@@ -30,20 +33,20 @@ function runWithString(string) {
   const itemIDs = data.items
     .filter(
       (item) =>
-        item.itemTypeID !== 1 &&
-        item.itemTypeID !== 14 &&
-        item.itemTypeID !== 37
+        item.itemTypeID !== itemTypes.note &&
+        item.itemTypeID !== itemTypes.attachment &&
+        item.itemTypeID !== itemTypes.annotation
     )
     .map((item) => item.itemID);
 
   const titleSuggestions = data.meta
     .filter((item) => {
       if (
-        (item.fieldID == 110 ||
-          item.fieldID == 111 ||
-          item.fieldID == 112 ||
-          item.fieldID == 113 ||
-          item.fieldID == 3) &&
+        (item.fieldID == fields.title ||
+          item.fieldID == fields.caseName ||
+          item.fieldID == fields.nameOfAct ||
+          item.fieldID == fields.subject ||
+          item.fieldID == fields.series) &&
         itemIDs.includes(item.itemID)
       ) {
         let value = item.value.toLowerCase();
