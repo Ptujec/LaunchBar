@@ -228,14 +228,23 @@ function showCreators() {
     a.lastName + ', ' + a.firstName > b.lastName + ', ' + b.firstName ? 1 : -1
   );
 
-  const results = data.itemCreators.map((item) => {
-    return {
-      title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
-      icon: 'creatorTemplate',
-      action: 'showItemsWithCreator',
-      actionArgument: item.creatorID.toString(),
-    };
-  });
+  const results = data.itemCreators.reduce(
+    (acc, item) => {
+      const title =
+        item.lastName + (item.firstName ? ', ' + item.firstName : '');
+      if (!acc.map.has(title)) {
+        acc.map.set(title, true);
+        acc.result.push({
+          title: title,
+          icon: 'creatorTemplate',
+          action: 'showItemsWithCreator',
+          actionArgument: item.creatorID.toString(),
+        });
+      }
+      return acc;
+    },
+    { map: new Map(), result: [] }
+  ).result;
 
   return results;
 }
@@ -293,13 +302,13 @@ function showAllItems() {
   const data = File.readJSON(dataPath);
   const fields = Action.preferences.fields;
 
-  var itemIDs = data.meta.reduce((accumulator, item) => {
+  var itemIDs = data.meta.reduce((acc, item) => {
     return item.fieldID == fields.title ||
       item.fieldID == fields.caseName ||
       item.fieldID == fields.nameOfAct ||
       item.fieldID == fields.subject
-      ? [...accumulator, item.itemID]
-      : accumulator;
+      ? [...acc, item.itemID]
+      : acc;
   }, []);
 
   return showEntries(itemIDs.reverse(), data);
@@ -450,7 +459,6 @@ function itemActions(dict) {
 
 function showItemDetails(dict) {
   const prefs = Action.preferences;
-  const itemTypes = prefs.itemTypes;
   const fields = prefs.fields;
   const creatorTypes = prefs.creatorTypes;
 

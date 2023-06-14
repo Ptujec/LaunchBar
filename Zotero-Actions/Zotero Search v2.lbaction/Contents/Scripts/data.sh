@@ -17,14 +17,23 @@ database_path="${HOME}/Zotero/zotero.sqlite.launchbar"
 itemTypes=$(sqlite3 -json "${database_path}" "
 SELECT itemTypes.itemTypeID, itemTypes.typeName FROM itemTypes
 ")
+if [ -z "${itemTypes}" ]; then
+  itemTypes="[]"
+fi
 
 fields=$(sqlite3 -json "${database_path}" "
 SELECT fields.fieldID, fields.fieldName FROM fields
 ")
+if [ -z "${fields}" ]; then
+  fields="[]"
+fi
 
 creatorTypes=$(sqlite3 -json "${database_path}" "
 SELECT creatorTypes.creatorTypeID, creatorTypes.creatorType FROM creatorTypes
 ")
+if [ -z "${creatorTypes}" ]; then
+  creatorTypes="[]"
+fi
 
 items=$(sqlite3 -json "${database_path}" "
 SELECT items.itemID, items.itemTypeID, itemTypes.typeName, items.key, items.libraryID FROM items
@@ -33,6 +42,9 @@ LEFT JOIN feedItems ON items.itemID = feedItems.itemID
 LEFT JOIN deletedItems ON items.itemID = deletedItems.itemID 
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
+if [ -z "${items}" ]; then
+  items="[]"
+fi
 
 itemNotes=$(sqlite3 -json "${database_path}" "
 SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes
@@ -73,6 +85,9 @@ fi
 
 creators=$(sqlite3 -json "${database_path}" "
 SELECT creators.creatorID, creators.lastName, creators.firstName FROM creators")
+if [ -z "${creators}" ]; then
+  creators="[]"
+fi
 
 itemCreators=$(sqlite3 -json "${database_path}" "
 SELECT itemCreators.itemID, itemCreators.creatorID, itemCreators.creatorTypeID, creators.lastName, creators.firstName FROM itemCreators
@@ -81,6 +96,9 @@ LEFT JOIN feedItems ON itemCreators.itemID = feedItems.itemID
 LEFT JOIN deletedItems ON itemCreators.itemID = deletedItems.itemID 
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
+if [ -z "${itemCreators}" ]; then
+  itemCreators="[]"
+fi
 
 collections=$(sqlite3 -json "${database_path}" "
 SELECT collections.collectionID, collections.collectionName FROM collections")
@@ -108,5 +126,8 @@ LEFT JOIN feedItems ON itemData.itemID = feedItems.itemID
 LEFT JOIN deletedItems ON itemData.itemID = deletedItems.itemID 
 WHERE feedItems.itemID IS NULL AND deletedItems.itemID IS NULL
 ")
+if [ -z "${meta}" ]; then
+  meta="[]"
+fi
 
 printf '{"itemTypes": %s, "fields": %s, "creatorTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s,  "meta": %s}' "${itemTypes}" "${fields}" "${creatorTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${meta}"
