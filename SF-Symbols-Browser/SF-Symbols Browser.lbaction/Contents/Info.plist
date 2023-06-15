@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.apple.SFSymbols</string>
+	<string>com.apple.SFSymbols-beta</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.SFSymbolsBrowser</string>
 	<key>CFBundleName</key>
 	<string>SF-Symbols Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.4.1</string>
+	<string>1.5</string>
 	<key>LBAssociatedApplication</key>
-	<string>com.apple.SFSymbols</string>
+	<string>com.apple.SFSymbols-beta</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,13 +20,13 @@
 		<string>ptujec@me.com</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/SF-Symbols-Browser/SF-Symbols%20Browser.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/SF-Symbols-Browser</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/SF-Symbols-Browser/SF-Symbols%20Browser.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
-	<string>com.apple.SFSymbols</string>
+	<string>com.apple.SFSymbols-beta</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
