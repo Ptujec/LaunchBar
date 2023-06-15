@@ -431,6 +431,7 @@ function showEntries(itemIDs, data) {
           title: title,
           icon: icon,
         },
+        alwaysShowsSubtitle: true,
       });
     }
   });
@@ -468,7 +469,6 @@ function showItemDetails(dict) {
   let journalTitle, bookTitle, seriesTitle;
 
   const attachedUrlsItemIDs = [];
-
   const paths = data.itemAttachments
     .filter((item) => itemID == item.parentItemID)
     .map((item) => {
@@ -595,6 +595,17 @@ function showItemDetails(dict) {
 
   var tags = tagsArr.map((item) => item.name);
 
+  // Notes
+  const notes = data.itemNotes
+    .filter((item) => itemID == item.parentItemID)
+    .map((item) => {
+      return {
+        title: item.title,
+        itemID: item.itemID,
+        parentItemID: item.parentItemID,
+      };
+    });
+
   dict.url = urls[0] ? urls[0].url : '';
 
   details = [
@@ -670,6 +681,19 @@ function showItemDetails(dict) {
       },
     });
   }
+
+  // Notes
+  notes.forEach(function (item) {
+    details.push({
+      title: item.title,
+      icon: 'noteTemplate',
+      action: 'openNote',
+      actionArgument: {
+        itemID: item.itemID,
+        parentItemID: item.parentItemID,
+      },
+    });
+  });
 
   urls.forEach(function (item) {
     details.push({
@@ -936,6 +960,28 @@ function openZoteroURL(dict) {
   }
 
   LaunchBar.openURL(dict.zoteroURL);
+}
+
+function openNote(dict) {
+  // dict.itemID
+  LaunchBar.hide();
+  saveRecent(dict.parentItemID);
+
+  const data = File.readJSON(dataPath);
+
+  const foundItem = data.items.filter((item) => dict.itemID === item.itemID)[0];
+  if (foundItem) {
+    zoteroURL =
+      'zotero://select/items/' + foundItem.libraryID + '_' + foundItem.key;
+  }
+
+  if (checkZoteroVersion()) {
+    LaunchBar.executeAppleScript(
+      'tell application id "org.zotero.zotero" to launch'
+    );
+  }
+
+  LaunchBar.openURL(zoteroURL);
 }
 
 function saveRecent(itemID) {

@@ -47,7 +47,7 @@ if [ -z "${items}" ]; then
 fi
 
 itemNotes=$(sqlite3 -json "${database_path}" "
-SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note FROM itemNotes
+SELECT itemNotes.itemID, itemNotes.parentItemID, itemNotes.note, itemNotes.title FROM itemNotes
 LEFT JOIN deletedItems ON itemNotes.itemID = deletedItems.itemID 
 WHERE deletedItems.itemID IS NULL
 ")
