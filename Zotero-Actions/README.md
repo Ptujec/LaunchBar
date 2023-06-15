@@ -4,6 +4,8 @@ Search, browse, and act on items from your local [Zotero](https://www.zotero.org
 
 Note: I tested this action with a library of 2k items (almost 4k if you count attachments). It should be pretty snappy with that size. However, I am always open to ideas or contributions to improve performance.
 
+Also, if you have not done so already, you should go to LaunchBar settings and turn on `Show all subtitles` in the `Appearance` pane.
+
 ## Search 
 
 <img src="01.jpg" width="806"/> 
