@@ -604,7 +604,8 @@ function showItemDetails(dict) {
         itemID: item.itemID,
         parentItemID: item.parentItemID,
       };
-    });
+    })
+    .sort((a, b) => a.title.localeCompare(b.title));
 
   dict.url = urls[0] ? urls[0].url : '';
 
@@ -671,6 +672,7 @@ function showItemDetails(dict) {
     });
   }
 
+  // Tags
   if (tags.length > 0) {
     details.push({
       title: tags.join(', '),
