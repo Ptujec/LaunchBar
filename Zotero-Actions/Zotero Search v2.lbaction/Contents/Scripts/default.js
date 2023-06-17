@@ -776,6 +776,7 @@ function itemDetailActions(dict) {
   }
 
   // Save as Recent
+  LaunchBar.hide();
   saveRecent(dict.itemID);
 
   if (dict.path != undefined) {
