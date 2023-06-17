@@ -6,7 +6,10 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-const storagePath = LaunchBar.homeDirectory + '/Zotero/storage';
+const zoteroDirectory = getZoteroDirectory();
+
+const storageDirectory = zoteroDirectory + 'storage/';
+
 const dataPath = Action.supportPath + '/data.json';
 
 const currentActionVersion = Action.version;
@@ -17,6 +20,7 @@ function run(argument) {
   if (LaunchBar.options.alternateKey) {
     return settings();
   }
+
   // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
 
   if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
@@ -29,7 +33,12 @@ function run(argument) {
     var updateJSON = true;
   }
 
-  var data = LaunchBar.execute('/bin/sh', './data.sh', updateJSON);
+  var data = LaunchBar.execute(
+    '/bin/sh',
+    './data.sh',
+    zoteroDirectory + 'zotero.sqlite',
+    updateJSON
+  );
 
   if (data) {
     File.writeText(data, dataPath);
@@ -132,7 +141,7 @@ function searchInStorageDir(argument, data) {
   var output = LaunchBar.execute(
     '/usr/bin/mdfind',
     '-onlyin',
-    storagePath,
+    storageDirectory,
     argument
   )
     .trim()
@@ -474,8 +483,10 @@ function showItemDetails(dict) {
     .map((item) => {
       if (item.path) {
         return {
-          path:
-            storagePath + '/' + item.key + '/' + item.path.split('storage:')[1],
+          path: item.path.replace(
+            'storage:',
+            storageDirectory + item.key + '/'
+          ),
           type: item.contentType,
         };
       }
@@ -1089,4 +1100,27 @@ function listFormats() {
 function setFormat(citationFormat) {
   Action.preferences.citationFormat = citationFormat;
   return settings();
+}
+
+function getZoteroDirectory() {
+  //
+  const profilesDir = '~/Library/Application Support/Zotero/Profiles';
+
+  const profile = File.getDirectoryContents(profilesDir)[0];
+
+  const prefsPath = profilesDir + '/' + profile + '/prefs.js';
+
+  const prefsPathContent = File.readText(prefsPath);
+
+  const match = prefsPathContent.match(
+    /user_pref\("extensions.zotero.dataDir",\s*"([^"]*)"\);/
+  );
+
+  if (match) {
+    var zoteroDirectory = match[1] + '/';
+  } else {
+    var zoteroDirectory = LaunchBar.homeDirectory + '/Zotero/';
+  }
+
+  return zoteroDirectory;
 }

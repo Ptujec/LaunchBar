@@ -1,17 +1,17 @@
 #!/bin/sh
 
 # Get the modification timestamps of both files
-file1_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite")
-file2_modified=$(stat -f "%m" "${HOME}/Zotero/zotero.sqlite.launchbar")
+file1_modified=$(stat -f "%m" "$1")
+file2_modified=$(stat -f "%m" "$1.launchbar")
 
-# Compare the timestamps and exit if zotero.sqlite is not newer and if the passed argement is not true (It might be true if there is a new version of the action or if the JSON file has been removed)
+# Compare the timestamps and exit if zotero.sqlite is not newer and if the passed argument is not true (It might be true if there is a new version of the action or if the JSON file has been removed)
 
-if [ $1 != "true" ] && [ "$file1_modified" -le "$file2_modified" ]; then
+if [ $2 != "true" ] && [ "$file1_modified" -le "$file2_modified" ]; then
   exit 1
 fi
 
-cp "${HOME}/Zotero/zotero.sqlite" "${HOME}/Zotero/zotero.sqlite.launchbar"
-database_path="${HOME}/Zotero/zotero.sqlite.launchbar"
+cp "$1" "$1.launchbar"
+database_path="$1.launchbar"
 
 # Query the database
 itemTypes=$(sqlite3 -json "${database_path}" "
