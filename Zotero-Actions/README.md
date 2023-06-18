@@ -14,7 +14,7 @@ If your search returns no results in the database, the action will automatically
 
 You can also directly search both the database and your local attachments with `command` + `enter`.  
 
-**Note**: Searching for local attachments does not work with [linked files](https://www.zotero.org/support/attaching_files#stored_files_and_linked_files). It also does not work if you use a custom Zotero directory that is not indexed by Spotlight.
+**Note**: Searching in local attachments does not work with [linked files](https://www.zotero.org/support/attaching_files#stored_files_and_linked_files). It also does not work if you use a custom Zotero directory that is not indexed by Spotlight.
   
 
 ## Browse
