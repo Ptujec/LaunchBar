@@ -898,7 +898,9 @@ function pasteCitation(dict) {
 
   saveRecent(dict.itemID);
 
-  const creatorTypes = Action.preferences.creatorTypes;
+  const prefs = Action.preferences;
+  const creatorTypes = prefs.creatorTypes;
+
   const data = File.readJSON(dataPath);
 
   const authorNames = data.itemCreators
@@ -933,7 +935,23 @@ function pasteCitation(dict) {
   const creatorString =
     creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
 
-  var citation = '(' + creatorString + ', ' + dict.date + ')';
+  var title = '';
+  if (!creatorString) {
+    const fields = prefs.fields;
+    title = data.meta
+      .filter(
+        (item) =>
+          (item.fieldID === fields.title ||
+            item.fieldID === fields.caseName ||
+            item.fieldID === fields.nameOfAct ||
+            item.fieldID === fields.subject) &&
+          item.itemID === dict.itemID
+      )
+      .map((item) => item.value);
+  }
+
+  var citation =
+    '(' + (creatorString || title) + ', ' + (dict.date || 'n.d.') + ')';
 
   const citationFormat = Action.preferences.citationFormat;
 
