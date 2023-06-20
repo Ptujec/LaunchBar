@@ -419,6 +419,7 @@ function showEntries(itemIDs, data) {
               return true;
             })
             .map((creator) => creator.name)
+            .sort()
             .join(' & ') + ' '
         : '';
 
@@ -932,6 +933,9 @@ function pasteCitation(dict) {
       : editorNames.length > 0
       ? editorNames
       : otherNames;
+
+  creators.sort();
+
   const creatorString =
     creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
 
