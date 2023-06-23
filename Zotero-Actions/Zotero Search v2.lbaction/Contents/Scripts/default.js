@@ -352,6 +352,7 @@ function showEntries(itemIDs, data) {
       name: [itemCreator.lastName, initializeName(itemCreator.firstName)]
         .filter(Boolean)
         .join(', '),
+      lastName: itemCreator.lastName,
       typeID: itemCreator.creatorTypeID,
     });
     return map;
@@ -401,32 +402,41 @@ function showEntries(itemIDs, data) {
         ? iconBase + 'Template'
         : iconBase;
 
-      const creator = itemCreatorsMap[itemID]
+      const creators = itemCreatorsMap[itemID]
         ? itemCreatorsMap[itemID]
-            .filter((creator) => {
+            .filter((creators) => {
               const type1Exists = itemCreatorsMap[itemID].some(
                 (c) => c.typeID === creatorTypes.author
               );
               if (type1Exists) {
-                return creator.typeID === creatorTypes.author;
+                return creators.typeID === creatorTypes.author;
               }
               const type3Exists = itemCreatorsMap[itemID].some(
                 (c) => c.typeID === creatorTypes.editor
               );
               if (type3Exists) {
-                return creator.typeID === creatorTypes.editor;
+                return creators.typeID === creatorTypes.editor;
               }
               return true;
             })
-            .map((creator) => creator.name)
-            .sort()
-            .join(' & ') + ' '
+            .map((creators) => creators)
         : '';
+
+      const creatorString =
+        creators.length > 3
+          ? `${creators[0].lastName} et al.`
+          : creators.length === 3
+          ? `${creators[0].lastName}, ${creators[1].lastName} & ${creators[2].lastName}`
+          : creators.length === 2
+          ? creators.map((creator) => creator.lastName).join(' & ')
+          : creators.length === 1
+          ? creators[0].name
+          : '';
 
       const date = itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : '';
 
       const title = itemTitleMap[itemID];
-      const subtitle = creator + date;
+      const subtitle = (creatorString ? creatorString + ' ' : '') + date;
 
       result.push({
         title: title || subtitle || '[Untitled]',
@@ -436,7 +446,7 @@ function showEntries(itemIDs, data) {
         actionArgument: {
           zoteroURL: itemsMap[itemID] ? itemsMap[itemID].url : '',
           itemID: itemID,
-          creator: creator,
+          creators: creators,
           date: date,
           title: title,
           icon: icon,
@@ -631,8 +641,21 @@ function showItemDetails(dict) {
   ];
 
   if (creatorsArr.length > 0) {
+    const creators = dict.creators;
+    const creatorString =
+      creators.length === 1
+        ? creators[0].name
+        : creators.length === 2
+        ? creators.map((creator) => creator.name).join(' & ')
+        : creators.length > 2
+        ? `${creators
+            .slice(0, -1)
+            .map((creator) => creator.lastName)
+            .join(', ')} & ${creators[creators.length - 1].lastName}`
+        : '';
+
     details.push({
-      title: dict.creator,
+      title: creatorString,
       icon: 'creatorTemplate',
       action: 'showItemCreatorIDs',
       actionArgument: {
@@ -843,17 +866,16 @@ function showItemCreatorIDs(dict) {
     return showItemsWithCreator(creatorsArr[0]);
   }
 
-  var results = [];
-  data.creators.forEach(function (item) {
-    if (creatorsArr.includes(item.creatorID)) {
-      results.push({
-        title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
-        icon: 'creatorTemplate',
-        action: 'showItemsWithCreator',
-        actionArgument: item.creatorID.toString(),
-      });
-    }
+  var results = creatorsArr.map((creatorID) => {
+    let item = data.creators.find((creator) => creator.creatorID === creatorID);
+    return {
+      title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
+      icon: 'creatorTemplate',
+      action: 'showItemsWithCreator',
+      actionArgument: item.creatorID.toString(),
+    };
   });
+
   return results;
 }
 
@@ -901,6 +923,7 @@ function pasteCitation(dict) {
 
   const prefs = Action.preferences;
   const creatorTypes = prefs.creatorTypes;
+  const fields = prefs.fields;
 
   const data = File.readJSON(dataPath);
 
@@ -934,28 +957,45 @@ function pasteCitation(dict) {
       ? editorNames
       : otherNames;
 
-  creators.sort();
+  // creators.sort();
 
   const creatorString =
-    creators.length > 2 ? `${creators[0]} et al.` : creators.join(' & ');
+    creators.length > 3
+      ? `${creators[0]} et al.`
+      : creators.length === 3
+      ? `${creators[0]}, ${creators[1]} & ${creators[2]}`
+      : creators.length > 0
+      ? creators.join(' & ')
+      : '';
 
+  var institution = '';
   var title = '';
+
   if (!creatorString) {
-    const fields = prefs.fields;
-    title = data.meta
-      .filter(
-        (item) =>
-          (item.fieldID === fields.title ||
-            item.fieldID === fields.caseName ||
-            item.fieldID === fields.nameOfAct ||
-            item.fieldID === fields.subject) &&
-          item.itemID === dict.itemID
-      )
-      .map((item) => item.value);
+    for (let item of data.meta) {
+      if (item.itemID === dict.itemID) {
+        if (item.fieldID === fields.institution) {
+          institution = item.value;
+          break;
+        } else if (
+          item.fieldID === fields.title ||
+          item.fieldID === fields.caseName ||
+          item.fieldID === fields.nameOfAct ||
+          item.fieldID === fields.subject
+        ) {
+          title = item.value;
+          break;
+        }
+      }
+    }
   }
 
   var citation =
-    '(' + (creatorString || title) + ', ' + (dict.date || 'n.d.') + ')';
+    '(' +
+    (creatorString || institution || title) +
+    ' ' +
+    (dict.date || 'n.d.') +
+    ')';
 
   const citationFormat = Action.preferences.citationFormat;
 
