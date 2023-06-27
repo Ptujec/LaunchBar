@@ -16,7 +16,7 @@ function runWithString(string) {
   if (string != undefined && string.trim().length == 0) return;
   string = string.toLowerCase();
 
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
 
   const icon = 'icon';
 
@@ -43,6 +43,8 @@ function runWithString(string) {
     .filter((item) => {
       if (
         (item.fieldID == fields.title ||
+          item.fieldID == fields.encyclopediaTitle ||
+          item.fieldID == fields.dictionaryTitle ||
           item.fieldID == fields.caseName ||
           item.fieldID == fields.nameOfAct ||
           item.fieldID == fields.subject ||

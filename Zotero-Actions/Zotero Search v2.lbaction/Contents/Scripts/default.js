@@ -23,29 +23,30 @@ function run(argument) {
 
   // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
 
-  if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
-    var updateJSON = true;
+  let updateJSON;
 
+  if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
+    updateJSON = true;
     Action.preferences.lastUsedActionVersion = Action.version;
   }
 
   if (!File.exists(dataPath)) {
-    var updateJSON = true;
+    updateJSON = true;
   }
 
-  var data = LaunchBar.execute(
+  const output = LaunchBar.execute(
     '/bin/sh',
     './data.sh',
     zoteroDirectory + 'zotero.sqlite',
     updateJSON
   );
 
-  if (data) {
-    File.writeText(data, dataPath);
+  if (output) {
+    File.writeText(output, dataPath);
   }
 
   // Get data from JSON
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
 
   // Create itemType, field and creatorType variables
   if (updateJSON) {
@@ -138,7 +139,7 @@ function search(argument, data) {
 }
 
 function searchInStorageDir(argument, data) {
-  var output = LaunchBar.execute(
+  const output = LaunchBar.execute(
     '/usr/bin/mdfind',
     '-onlyin',
     storageDirectory,
@@ -147,24 +148,24 @@ function searchInStorageDir(argument, data) {
     .trim()
     .split('\n');
 
-  var itemIDs = output.reduce((acc, path) => {
-    const attachmentKey = path.split('/')[5];
+  const attachmentMap = new Map();
+  for (const item of data.itemAttachments) {
+    attachmentMap.set(item.key, [
+      ...(attachmentMap.get(item.key) || []),
+      item.parentItemID,
+    ]);
+  }
 
-    data.itemAttachments.forEach((item) => {
-      if (item.key === attachmentKey) {
-        acc.add(item.parentItemID);
-      }
-    });
-
-    return acc;
-  }, new Set());
+  const itemIDs = new Set(
+    output.flatMap((path) => attachmentMap.get(path.split('/')[5]) || [])
+  );
 
   return itemIDs;
 }
 
 // BROWSE
 function browse(data) {
-  var result =
+  const result =
     showEntries(Action.preferences.recentItems || [], data).reverse() || [];
 
   result.push(
@@ -202,7 +203,7 @@ function browse(data) {
 
 function showTags() {
   // Get data from JSON
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
 
   const tags = data.tags.map((item) => {
     return {
@@ -216,94 +217,84 @@ function showTags() {
 }
 
 function showItemsWithTag(tagIDString) {
-  var tagID = parseInt(tagIDString);
-  var data = File.readJSON(dataPath);
+  const tagID = parseInt(tagIDString);
+  const data = File.readJSON(dataPath);
 
-  var itemIDs = [];
-  data.itemTags.forEach(function (item) {
-    if (item.tagID == tagID) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  const itemIDs = data.itemTags.reduce(
+    (acc, item) => (item.tagID == tagID ? [...acc, item.itemID] : acc),
+    []
+  );
 
   return showEntries(itemIDs.reverse(), data);
 }
 
 function showCreators() {
-  // Get data from JSON
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
 
-  data.itemCreators.sort((a, b) =>
-    a.lastName + ', ' + a.firstName > b.lastName + ', ' + b.firstName ? 1 : -1
-  );
-
-  const results = data.itemCreators.reduce(
-    (acc, item) => {
-      const title =
-        item.lastName + (item.firstName ? ', ' + item.firstName : '');
-      if (!acc.map.has(title)) {
-        acc.map.set(title, true);
-        acc.result.push({
-          title: title,
+  const creatorsMap = data.itemCreators.reduce(
+    (acc, { firstName, lastName, creatorID }) => {
+      const title = lastName + (firstName ? `, ${firstName}` : '');
+      if (!acc.has(title)) {
+        acc.set(title, {
+          title,
           icon: 'creatorTemplate',
           action: 'showItemsWithCreator',
-          actionArgument: item.creatorID.toString(),
+          actionArgument: creatorID.toString(),
         });
       }
       return acc;
     },
-    { map: new Map(), result: [] }
-  ).result;
+    new Map()
+  );
 
-  return results;
+  return (results = Array.from(creatorsMap.values()).sort((a, b) =>
+    a.title.localeCompare(b.title)
+  ));
 }
 
 function showItemsWithCreator(creatorIDString) {
-  var creatorID = parseInt(creatorIDString);
-  var data = File.readJSON(dataPath);
+  const creatorID = parseInt(creatorIDString);
+  const data = File.readJSON(dataPath);
 
-  var itemIDs = [];
-  data.itemCreators.forEach(function (item) {
-    if (item.creatorID == creatorID) {
-      itemIDs.push(item.itemID);
+  const itemIDs = data.itemCreators.reduce((acc, item) => {
+    if (item.creatorID === creatorID) {
+      if (!acc.includes(item.itemID)) {
+        acc.push(item.itemID);
+      }
     }
-  });
-
-  // Filter duplicates
-  itemIDs = [...new Set(itemIDs)];
+    return acc;
+  }, []);
 
   return showEntries(itemIDs.reverse(), data);
 }
 
 function showCollections() {
-  // Get data from JSON
-  var data = File.readJSON(dataPath);
+  const data = File.readJSON(dataPath);
 
-  const collections = data.collections.map((item) => {
-    return {
-      title: item.collectionName,
+  return data.collections
+    .map(({ collectionName, collectionID }) => ({
+      title: collectionName,
       icon: 'collectionTemplate',
       action: 'showItemsWithCollection',
-      actionArgument: item.collectionID.toString(),
-      // children: showItemsWithCollection(item.collectionID.toString()),
-    };
-  });
-
-  return collections.sort((a, b) => a.title.localeCompare(b.title));
+      actionArgument: {
+        collectionID: collectionID,
+      },
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
 }
 
-function showItemsWithCollection(collectionIDString) {
-  var collectionID = parseInt(collectionIDString);
-  var data = File.readJSON(dataPath);
+function showItemsWithCollection({ collectionID }) {
+  const data = File.readJSON(dataPath);
 
-  var itemIDs = [];
-  data.collectionItems.forEach(function (item) {
-    if (item.collectionID == collectionID) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  const itemIDs = data.collectionItems
+    .reduce(
+      (acc, item) =>
+        item.collectionID == collectionID ? [...acc, item.itemID] : acc,
+      []
+    )
+    .reverse();
 
-  return showEntries(itemIDs.reverse(), data);
+  return showEntries(itemIDs, data);
 }
 
 function showAllItems() {
@@ -311,16 +302,20 @@ function showAllItems() {
   const data = File.readJSON(dataPath);
   const fields = Action.preferences.fields;
 
-  var itemIDs = data.meta.reduce((acc, item) => {
-    return item.fieldID == fields.title ||
-      item.fieldID == fields.caseName ||
-      item.fieldID == fields.nameOfAct ||
-      item.fieldID == fields.subject
-      ? [...acc, item.itemID]
-      : acc;
-  }, []);
+  const itemIDs = data.meta
+    .reduce(
+      (acc, item) =>
+        item.fieldID == fields.title ||
+        item.fieldID == fields.caseName ||
+        item.fieldID == fields.nameOfAct ||
+        item.fieldID == fields.subject
+          ? [...acc, item.itemID]
+          : acc,
+      []
+    )
+    .reverse();
 
-  return showEntries(itemIDs.reverse(), data);
+  return showEntries(itemIDs, data);
 }
 
 function showEntries(itemIDs, data) {
@@ -329,8 +324,8 @@ function showEntries(itemIDs, data) {
   const fields = prefs.fields;
   const creatorTypes = prefs.creatorTypes;
 
-  var attachmentItemIDs = {};
-  var itemsMap = data.items.reduce((map, item) => {
+  let attachmentItemIDs = {};
+  const itemsMap = data.items.reduce((map, item) => {
     if (
       item.itemTypeID == itemTypes.attachment ||
       item.itemTypeID == itemTypes.note ||
@@ -346,7 +341,7 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemCreatorsMap = data.itemCreators.reduce((map, itemCreator) => {
+  const itemCreatorsMap = data.itemCreators.reduce((map, itemCreator) => {
     map[itemCreator.itemID] = map[itemCreator.itemID] || [];
     map[itemCreator.itemID].push({
       name: [itemCreator.lastName, initializeName(itemCreator.firstName)]
@@ -358,24 +353,25 @@ function showEntries(itemIDs, data) {
     return map;
   }, {});
 
-  var itemTitleMap = data.meta.reduce((map, meta) => {
-    if (
-      meta.fieldID == fields.title ||
-      meta.fieldID == fields.caseName ||
-      meta.fieldID == fields.nameOfAct ||
-      meta.fieldID == fields.subject
-    ) {
-      map[meta.itemID] = meta.value;
-    }
-    return map;
-  }, {});
+  const metaMap = data.meta.reduce(
+    (map, meta) => {
+      if (
+        meta.fieldID == fields.title ||
+        meta.fieldID == fields.caseName ||
+        meta.fieldID == fields.nameOfAct ||
+        meta.fieldID == fields.subject
+      ) {
+        map.title[meta.itemID] = meta.value;
+      }
 
-  var itemDateMap = data.meta.reduce((map, meta) => {
-    if (meta.fieldID == fields.date) {
-      map[meta.itemID] = meta.value;
-    }
-    return map;
-  }, {});
+      if (meta.fieldID == fields.date) {
+        map.date[meta.itemID] = meta.value;
+      }
+
+      return map;
+    },
+    { title: {}, date: {} }
+  );
 
   const templateIcons = new Set([
     'interview',
@@ -392,34 +388,34 @@ function showEntries(itemIDs, data) {
     'attachment',
   ]);
 
-  var result = [];
-  itemIDs.forEach((itemID) => {
+  let result = [];
+
+  for (const itemID of itemIDs) {
     if (itemID in itemsMap && !attachmentItemIDs[itemID]) {
-      const iconBase = itemsMap[itemID]
-        ? itemsMap[itemID].typeName
-        : 'document';
+      const iconBase = itemsMap[itemID]?.typeName || 'document';
       const icon = templateIcons.has(iconBase)
         ? iconBase + 'Template'
         : iconBase;
 
       const creators = itemCreatorsMap[itemID]
-        ? itemCreatorsMap[itemID]
-            .filter((creators) => {
-              const type1Exists = itemCreatorsMap[itemID].some(
-                (c) => c.typeID === creatorTypes.author
-              );
-              if (type1Exists) {
-                return creators.typeID === creatorTypes.author;
-              }
-              const type3Exists = itemCreatorsMap[itemID].some(
-                (c) => c.typeID === creatorTypes.editor
-              );
-              if (type3Exists) {
-                return creators.typeID === creatorTypes.editor;
-              }
-              return true;
-            })
-            .map((creators) => creators)
+        ? (() => {
+            const type1Exists = itemCreatorsMap[itemID].some(
+              (c) => c.typeID === creatorTypes.author
+            );
+            const type3Exists = itemCreatorsMap[itemID].some(
+              (c) => c.typeID === creatorTypes.editor
+            );
+
+            return itemCreatorsMap[itemID].reduce((acc, creator) => {
+              type1Exists
+                ? creator.typeID === creatorTypes.author && acc.push(creator)
+                : type3Exists
+                ? creator.typeID === creatorTypes.editor && acc.push(creator)
+                : acc.push(creator);
+
+              return acc;
+            }, []);
+          })()
         : '';
 
       const creatorString =
@@ -433,9 +429,11 @@ function showEntries(itemIDs, data) {
           ? creators[0].name
           : '';
 
-      const date = itemDateMap[itemID] ? itemDateMap[itemID].split('-')[0] : '';
+      const date = metaMap.date[itemID]
+        ? metaMap.date[itemID].split('-')[0]
+        : '';
 
-      const title = itemTitleMap[itemID];
+      const title = metaMap.title[itemID];
       const subtitle = (creatorString ? creatorString + ' ' : '') + date;
 
       result.push({
@@ -454,7 +452,7 @@ function showEntries(itemIDs, data) {
         alwaysShowsSubtitle: true,
       });
     }
-  });
+  }
 
   return result;
 }
@@ -486,7 +484,7 @@ function showItemDetails(dict) {
   const itemID = dict.itemID;
   const data = File.readJSON(dataPath);
 
-  let journalTitle, bookTitle, seriesTitle;
+  let journalTitle, bookTitle, seriesTitle, dictionaryTitle, encyclopediaTitle;
 
   const attachedUrlsItemIDs = [];
   const paths = data.itemAttachments
@@ -514,7 +512,7 @@ function showItemDetails(dict) {
   const attachedUrlsItems = [];
   let urls = [];
 
-  data.meta.forEach((item) => {
+  for (const item of data.meta) {
     if (item.itemID == itemID) {
       if (item.fieldID == fields.url) {
         urls.push({
@@ -531,6 +529,12 @@ function showItemDetails(dict) {
       if (item.fieldID == fields.bookTitle) {
         bookTitle = item.value;
       }
+      if (item.fieldID == fields.dictionaryTitle) {
+        dictionaryTitle = item.value;
+      }
+      if (item.fieldID == fields.encyclopediaTitle) {
+        encyclopediaTitle = item.value;
+      }
     }
 
     if (
@@ -539,7 +543,7 @@ function showItemDetails(dict) {
     ) {
       attachedUrlsItems.push(item);
     }
-  });
+  }
 
   const attachedUrls = attachedUrlsItems.reduce((acc, entry) => {
     let existingItem = acc.find((item) => item.itemID === entry.itemID);
@@ -567,55 +571,52 @@ function showItemDetails(dict) {
   ];
 
   // Creator IDs
-  const authorIDs = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID === creatorTypes.author
-    ) // 1
-    .map((item) => item.creatorID);
-  const editorIDs = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID === creatorTypes.editor
-    )
-    .map((item) => item.creatorID);
-  const otherIDs = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID !== creatorTypes.author &&
-        item.creatorTypeID !== creatorTypes.editor
-    )
-    .map((item) => item.creatorID);
+  const creatorIDs = data.itemCreators.reduce(
+    (acc, item) => {
+      if (item.itemID === dict.itemID) {
+        if (item.creatorTypeID === creatorTypes.author) {
+          acc.authorIDs.push(item.creatorID);
+        } else if (item.creatorTypeID === creatorTypes.editor) {
+          acc.editorIDs.push(item.creatorID);
+        } else {
+          acc.otherIDs.push(item.creatorID);
+        }
+      }
+      return acc;
+    },
+    {
+      authorIDs: [],
+      editorIDs: [],
+      otherIDs: [],
+    }
+  );
 
   const creatorsArr =
-    authorIDs.length > 0
-      ? authorIDs
-      : editorIDs.length > 0
-      ? editorIDs
-      : otherIDs;
+    creatorIDs.authorIDs.length > 0
+      ? creatorIDs.authorIDs
+      : creatorIDs.editorIDs.length > 0
+      ? creatorIDs.editorIDs
+      : creatorIDs.otherIDs;
 
   // Collections
-  var collectionsArr = data.collectionItems
+  const collectionsArr = data.collectionItems
     .filter((item) => item.itemID == itemID)
     .map((item) => ({
       collectionName: item.collectionName,
       collectionID: item.collectionID,
     }));
 
-  var collections = collectionsArr.map((item) => item.collectionName);
+  const collections = collectionsArr.map((item) => item.collectionName);
 
   // Tags
-  var tagsArr = data.itemTags
+  const tagsArr = data.itemTags
     .filter((item) => item.itemID == itemID)
     .map((item) => ({
       name: item.name,
       tagID: item.tagID,
     }));
 
-  var tags = tagsArr.map((item) => item.name);
+  const tags = tagsArr.map((item) => item.name);
 
   // Notes
   const notes = data.itemNotes
@@ -687,6 +688,24 @@ function showItemDetails(dict) {
     });
   }
 
+  if (dictionaryTitle) {
+    details.push({
+      title: dictionaryTitle,
+      icon: 'dictionaryTemplate',
+      action: 'showDictionaryEntry',
+      actionArgument: dictionaryTitle,
+    });
+  }
+
+  if (encyclopediaTitle) {
+    details.push({
+      title: encyclopediaTitle,
+      icon: 'encyclopediaTemplate',
+      action: 'showEncyclopediaArticles',
+      actionArgument: encyclopediaTitle,
+    });
+  }
+
   if (seriesTitle) {
     details.push({
       title: seriesTitle,
@@ -720,7 +739,8 @@ function showItemDetails(dict) {
   }
 
   // Notes
-  notes.forEach(function (item) {
+
+  for (const item of notes) {
     details.push({
       title: item.title,
       icon: 'noteTemplate',
@@ -730,9 +750,9 @@ function showItemDetails(dict) {
         parentItemID: item.parentItemID,
       },
     });
-  });
+  }
 
-  urls.forEach(function (item) {
+  for (const item of urls) {
     details.push({
       title: item.urlTitle,
       url: item.url,
@@ -743,11 +763,11 @@ function showItemDetails(dict) {
         url: item.url,
       },
     });
-  });
+  }
 
   // Add Storage paths
   if (paths.length > 0) {
-    for (var i = 0; i < paths.length; i++) {
+    for (let i = 0; i < paths.length; i++) {
       if (
         paths[i].type == 'application/pdf' ||
         paths[i].type == 'application/epub+zip'
@@ -759,15 +779,15 @@ function showItemDetails(dict) {
       }
     }
 
-    paths.forEach(function (item) {
-      var title = item.path.split('/').slice(-1)[0] || '';
+    for (const item of paths) {
+      const title = item.path.split('/').slice(-1)[0] || '';
       details.push({
         title: title,
         path: item.path,
         subtitle: '',
         icon: 'attachmentTemplate',
       });
-    });
+    }
   }
 
   details.push(
@@ -810,50 +830,53 @@ function itemDetailActions(dict) {
   }
 }
 
-function showBookSections(bookTitle) {
+function showItemsByField(fieldID, value) {
   const data = File.readJSON(dataPath);
-  var itemIDs = [];
 
-  data.meta.forEach(function (item) {
-    if (
-      item.fieldID == Action.preferences.fields.bookTitle &&
-      item.value.toLowerCase() == bookTitle.toLowerCase()
-    ) {
-      itemIDs.push(item.itemID);
-    }
-  });
+  const itemIDs = data.meta
+    .filter(
+      (item) =>
+        item.fieldID === fieldID &&
+        item.value.toLowerCase() === value.toLowerCase()
+    )
+    .map((item) => item.itemID);
+
   return showEntries(itemIDs, data);
 }
 
-function showSeriesItems(seriesTitle) {
-  const data = File.readJSON(dataPath);
-  var itemIDs = [];
+function showBookSections(bookTitle) {
+  return showItemsByField(Action.preferences.fields.bookTitle, bookTitle);
+}
 
-  data.meta.forEach(function (item) {
-    if (
-      item.fieldID == Action.preferences.fields.series &&
-      item.value.toLowerCase() == seriesTitle.toLowerCase()
-    ) {
-      itemIDs.push(item.itemID);
-    }
-  });
-  return showEntries(itemIDs, data);
+function showDictionaryEntry(dictionaryTitle) {
+  return showItemsByField(
+    Action.preferences.fields.dictionaryTitle,
+    dictionaryTitle
+  );
+}
+
+function showEncyclopediaArticles(encyclopediaTitle) {
+  return showItemsByField(
+    Action.preferences.fields.encyclopediaTitle,
+    encyclopediaTitle
+  );
+}
+
+function showSeriesItems(seriesTitle) {
+  return showItemsByField(Action.preferences.fields.series, seriesTitle);
 }
 
 function showJournalArticles(journalTitle) {
   const data = File.readJSON(dataPath);
-  var itemIDs = [];
 
-  data.meta.forEach(function (item) {
-    if (item.value.toLowerCase() == journalTitle.toLowerCase()) {
-      itemIDs.push(item.itemID);
+  const itemIDs = data.meta.reduce((acc, item) => {
+    if (item.value.toLowerCase() === journalTitle.toLowerCase()) {
+      acc.add(item.itemID);
     }
-  });
+    return acc;
+  }, new Set());
 
-  // Filter duplicates
-  itemIDs = [...new Set(itemIDs)];
-
-  return showEntries(itemIDs, data);
+  return showEntries(Array.from(itemIDs), data);
 }
 
 function showItemCreatorIDs(dict) {
@@ -866,7 +889,7 @@ function showItemCreatorIDs(dict) {
     return showItemsWithCreator(creatorsArr[0]);
   }
 
-  var results = creatorsArr.map((creatorID) => {
+  const results = creatorsArr.map((creatorID) => {
     let item = data.creators.find((creator) => creator.creatorID === creatorID);
     return {
       title: item.lastName + (item.firstName ? ', ' + item.firstName : ''),
@@ -879,41 +902,34 @@ function showItemCreatorIDs(dict) {
   return results;
 }
 
-function showItemCollections(dict) {
-  let collectionsArr = dict.collectionsArr;
-
+function showItemCollections({ collectionsArr }) {
   if (collectionsArr.length == 1) {
-    return showItemsWithCollection(collectionsArr[0].collectionID);
+    return showItemsWithCollection({
+      collectionID: collectionsArr[0].collectionID,
+    });
   }
 
-  var results = [];
-  collectionsArr.forEach(function (item) {
-    results.push({
-      title: item.collectionName,
-      icon: 'collectionTemplate',
-      action: 'showItemsWithCollection',
-      actionArgument: item.collectionID.toString(),
-    });
-  });
-  return results;
+  return collectionsArr.map((item) => ({
+    title: item.collectionName,
+    icon: 'collectionTemplate',
+    action: 'showItemsWithCollection',
+    actionArgument: {
+      collectionID: item.collectionID,
+    },
+  }));
 }
 
-function showItemTags(dict) {
-  let tagsArr = dict.tagsArr;
-  if (tagsArr.length == 1) {
+function showItemTags({ tagsArr }) {
+  if (tagsArr.length === 1) {
     return showItemsWithTag(tagsArr[0].tagID);
   }
 
-  var results = [];
-  tagsArr.forEach(function (item) {
-    results.push({
-      title: item.name,
-      icon: 'tagTemplate',
-      action: 'showItemsWithTag',
-      actionArgument: item.tagID.toString(),
-    });
-  });
-  return results;
+  return tagsArr.map((item) => ({
+    title: item.name,
+    icon: 'tagTemplate',
+    action: 'showItemsWithTag',
+    actionArgument: item.tagID.toString(),
+  }));
 }
 
 function pasteCitation(dict) {
@@ -927,35 +943,32 @@ function pasteCitation(dict) {
 
   const data = File.readJSON(dataPath);
 
-  const authorNames = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID === creatorTypes.author
-    )
-    .map((item) => item.lastName);
-  const editorNames = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID === creatorTypes.editor
-    )
-    .map((item) => item.lastName);
-  const otherNames = data.itemCreators
-    .filter(
-      (item) =>
-        item.itemID === dict.itemID &&
-        item.creatorTypeID !== creatorTypes.author &&
-        item.creatorTypeID !== creatorTypes.editor
-    )
-    .map((item) => item.lastName);
+  const creatorNames = data.itemCreators.reduce(
+    (acc, item) => {
+      if (item.itemID === dict.itemID) {
+        if (item.creatorTypeID === creatorTypes.author) {
+          acc.authorNames.push(item.lastName);
+        } else if (item.creatorTypeID === creatorTypes.editor) {
+          acc.editorNames.push(item.lastName);
+        } else {
+          acc.otherNames.push(item.lastName);
+        }
+      }
+      return acc;
+    },
+    {
+      authorNames: [],
+      editorNames: [],
+      otherNames: [],
+    }
+  );
 
   const creators =
-    authorNames.length > 0
-      ? authorNames
-      : editorNames.length > 0
-      ? editorNames
-      : otherNames;
+    creatorNames.authorNames.length > 0
+      ? creatorNames.authorNames
+      : creatorNames.editorNames.length > 0
+      ? creatorNames.editorNames
+      : creatorNames.otherNames;
 
   // creators.sort();
 
@@ -968,8 +981,7 @@ function pasteCitation(dict) {
       ? creators.join(' & ')
       : '';
 
-  var institution = '';
-  var title = '';
+  let institution, title;
 
   if (!creatorString) {
     for (let item of data.meta) {
@@ -990,7 +1002,7 @@ function pasteCitation(dict) {
     }
   }
 
-  var citation =
+  const citation =
     '(' +
     (creatorString || institution || title) +
     ' ' +
@@ -1061,7 +1073,7 @@ function openNote(dict) {
 }
 
 function saveRecent(itemID) {
-  var recentItems = Action.preferences.recentItems || [];
+  const recentItems = Action.preferences.recentItems || [];
 
   // Check if itemID exists in the recentItems array
   if (recentItems.indexOf(itemID) > -1) {
@@ -1081,27 +1093,21 @@ function saveRecent(itemID) {
 }
 
 function checkZoteroVersion() {
-  var contents = File.getDirectoryContents('/Applications/');
-  var name = '';
-  contents.forEach(function (item) {
-    if (item.startsWith('Zotero')) {
-      name = item;
-    }
-  });
+  const contents = File.getDirectoryContents('/Applications/');
 
-  var plist = File.readPlist('/Applications/' + name + '/Contents/Info.plist');
+  const zotero = contents.find((item) => item.startsWith('Zotero')) || '';
 
-  var version = parseInt(plist.CFBundleVersion.split('.')[0]);
+  const plist = File.readPlist(`/Applications/${zotero}/Contents/Info.plist`);
 
-  if (version < 7) {
-    return true;
-  }
+  const version = parseInt(plist.CFBundleVersion.split('.')[0]);
+
+  return version < 7;
 }
 
 function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
   const lastUsedParts = lastUsedActionVersion.split('.');
   const currentParts = currentActionVersion.split('.');
-  for (var i = 0; i < currentParts.length; i++) {
+  for (let i = 0; i < currentParts.length; i++) {
     const a = ~~currentParts[i]; // parse int
     const b = ~~lastUsedParts[i]; // parse int
     if (a > b) return true;
@@ -1113,16 +1119,17 @@ function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
 // SETTINGS
 
 function settings() {
+  let formatIcon, badge;
+
   if (Action.preferences.citationFormat == 'richText') {
-    var formatIcon = 'rTemplate';
-    var badge = 'Rich Text';
+    formatIcon = 'rTemplate';
+    badge = 'Rich Text';
   } else if (Action.preferences.citationFormat == 'markdown') {
-    var formatIcon = 'mTemplate';
-    var badge = 'Markdown';
+    formatIcon = 'mTemplate';
+    badge = 'Markdown';
   } else {
-    // var formatIcon = 'plainTemplate';
-    var formatIcon = 'pasteTemplate';
-    var badge = 'Plain';
+    formatIcon = 'pasteTemplate';
+    badge = 'Plain';
   }
 
   return [
@@ -1166,24 +1173,13 @@ function setFormat(citationFormat) {
 }
 
 function getZoteroDirectory() {
-  //
   const profilesDir = '~/Library/Application Support/Zotero/Profiles';
-
   const profile = File.getDirectoryContents(profilesDir)[0];
-
-  const prefsPath = profilesDir + '/' + profile + '/prefs.js';
-
-  const prefsPathContent = File.readText(prefsPath);
+  const prefsPathContent = File.readText(`${profilesDir}/${profile}/prefs.js`);
 
   const match = prefsPathContent.match(
     /user_pref\("extensions.zotero.dataDir",\s*"([^"]*)"\);/
   );
 
-  if (match) {
-    var zoteroDirectory = match[1] + '/';
-  } else {
-    var zoteroDirectory = LaunchBar.homeDirectory + '/Zotero/';
-  }
-
-  return zoteroDirectory;
+  return match ? `${match[1]}/` : `${LaunchBar.homeDirectory}/Zotero/`;
 }
