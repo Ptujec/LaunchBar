@@ -80,6 +80,7 @@ function run(argument) {
 }
 
 // SEARCH
+
 function search(argument, data) {
   argument = argument.toLowerCase();
 
@@ -88,54 +89,64 @@ function search(argument, data) {
 
   const creatorIDs = data.creators.reduce((acc, item) => {
     if (getLowerCaseCreatorName(item).includes(argument))
-      acc.set(item.creatorID, true);
+      acc.add(item.creatorID);
     return acc;
-  }, new Map());
+  }, new Set());
 
-  const itemCreatorsIDs = data.itemCreators
-    .filter((item) => creatorIDs.has(item.creatorID))
-    .map((item) => item.itemID);
+  const itemCreatorsIDs = data.itemCreators.reduce(
+    (acc, item) =>
+      creatorIDs.has(item.creatorID) ? acc.add(item.itemID) : acc,
+    new Set()
+  );
 
-  const itemTagsIDs = data.itemTags
-    .filter((item) => item.name.toLowerCase().includes(argument))
-    .map((item) => item.itemID);
+  const itemTagsIDs = data.itemTags.reduce((acc, item) => {
+    if (item.name.toLowerCase().includes(argument)) {
+      acc.add(item.itemID);
+    }
+    return acc;
+  }, new Set());
 
-  const collectionIDs = data.collectionItems
-    .filter((item) => item.collectionName.toLowerCase().includes(argument))
-    .map((item) => item.itemID);
+  const collectionIDs = data.collectionItems.reduce((acc, item) => {
+    if (item.collectionName.toLowerCase().includes(argument)) {
+      acc.add(item.itemID);
+    }
+    return acc;
+  }, new Set());
 
   // Search all Fields (including title, place, publisher, isbn)
   const words = argument.split(' ');
   const wordMap = new Map(words.map((word) => [word, true]));
-  const metaIDs = data.meta
-    .filter((item) => {
-      const value = item.value.toLowerCase();
-      return [...wordMap.keys()].every((word) => value.includes(word));
-    })
-    .map((item) => item.itemID);
 
-  const itemNotesIDs = data.itemNotes
-    .filter((item) =>
-      item.note
-        .replace(/(<([^>]+)>)/g, '')
-        .toLowerCase()
-        .includes(argument)
-    )
-    .map((item) => item.parentItemID);
+  const metaIDs = data.meta.reduce((acc, item) => {
+    const value = item.value.toLowerCase();
+    if ([...wordMap.keys()].every((word) => value.includes(word))) {
+      acc.add(item.itemID);
+    }
+    return acc;
+  }, new Set());
 
-  const allReversedItemIDs = [
-    ...itemCreatorsIDs.reverse(),
-    ...itemTagsIDs.reverse(),
-    ...collectionIDs.reverse(),
-    ...metaIDs.reverse(),
-    ...itemNotesIDs.reverse(),
-  ];
+  const itemNotesIDs = data.itemNotes.reduce((ids, item) => {
+    const note = item.note.replace(/(<([^>]+)>)/g, '').toLowerCase();
+    if (note.includes(argument)) {
+      ids.add(item.parentItemID);
+    }
+    return ids;
+  }, new Set());
 
-  if (allReversedItemIDs.length === 0 || LaunchBar.options.commandKey) {
-    allReversedItemIDs.push(...searchInStorageDir(argument, data));
+  const allReversedItemIDs = new Set([
+    ...[...itemCreatorsIDs].reverse(),
+    ...[...itemTagsIDs].reverse(),
+    ...[...collectionIDs].reverse(),
+    ...[...metaIDs].reverse(),
+    ...[...itemNotesIDs].reverse(),
+  ]);
+
+  if (allReversedItemIDs.size === 0 || LaunchBar.options.commandKey) {
+    allReversedItemIDs.add(...searchInStorageDir(argument, data));
   }
 
-  return showEntries([...new Set(allReversedItemIDs)], data);
+  // return showEntries(Array.from(allReversedItemIDs), data);
+  return showEntries(allReversedItemIDs, data);
 }
 
 function searchInStorageDir(argument, data) {
@@ -172,29 +183,22 @@ function browse(data) {
     {
       title: 'Creators',
       icon: 'creatorTemplate',
-      // children: showCreators(),
       action: 'showCreators',
-      // actionArgument: data,
     },
     {
       title: 'Tags',
       icon: 'tagTemplate',
-      // children: showTags(data),
       action: 'showTags',
-      // actionArgument: data,
     },
     {
       title: 'Collections',
       icon: 'collectionTemplate',
-      // children: showCollections(data),
       action: 'showCollections',
-      // actionArgument: data,
     },
     {
       title: 'All Items',
       icon: 'libraryTemplate',
       action: 'showAllItems',
-      // actionArgument: data,
     }
   );
 
@@ -297,25 +301,46 @@ function showItemsWithCollection({ collectionID }) {
   return showEntries(itemIDs, data);
 }
 
+// function showAllItems() {
+//   // Get data from JSON
+//   const data = File.readJSON(dataPath);
+//   const fields = Action.preferences.fields;
+
+//   const itemIDs = data.meta
+//     .reduce(
+//       (acc, item) =>
+//         item.fieldID == fields.title ||
+//         item.fieldID == fields.caseName ||
+//         item.fieldID == fields.nameOfAct ||
+//         item.fieldID == fields.subject
+//           ? [...acc, item.itemID]
+//           : acc,
+//       []
+//     )
+//     .reverse();
+
+//   return showEntries(itemIDs, data);
+// }
+
 function showAllItems() {
-  // Get data from JSON
   const data = File.readJSON(dataPath);
   const fields = Action.preferences.fields;
 
-  const itemIDs = data.meta
-    .reduce(
-      (acc, item) =>
-        item.fieldID == fields.title ||
-        item.fieldID == fields.caseName ||
-        item.fieldID == fields.nameOfAct ||
-        item.fieldID == fields.subject
-          ? [...acc, item.itemID]
-          : acc,
-      []
-    )
-    .reverse();
+  const itemIDs = data.meta.reduce((acc, item) => {
+    if (
+      item.fieldID == fields.title ||
+      item.fieldID == fields.caseName ||
+      item.fieldID == fields.nameOfAct ||
+      item.fieldID == fields.subject
+    ) {
+      acc.add(item.itemID);
+    }
+    return acc;
+  }, new Set());
 
-  return showEntries(itemIDs, data);
+  const reversedItemIDs = [...itemIDs].reverse();
+
+  return showEntries(reversedItemIDs, data);
 }
 
 function showEntries(itemIDs, data) {
