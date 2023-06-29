@@ -37,11 +37,11 @@ function run(argument) {
   const num =
     AccordancePrefs['com.oaktree.settings.general.useeuropeanversenotation'];
 
-  let result;
+  let newArgument;
 
   if (num === 0) {
     // Default Vers Notation
-    result = argument;
+    newArgument = argument;
   } else {
     // European Vers Notation
     argument = argument
@@ -50,34 +50,19 @@ function run(argument) {
       .replace(/\(|\)/g, '')
       .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2');
 
-    let matchAll = argument.match(
-      /(?:[1-5]\.?\s?)?(?:[a-zžščöäüß ]+\.?\s?)(?:[0-9,.:\-–f]+)?/gi
-    );
-
-    result = [];
-    for (scrip of matchAll) {
-      scrip = scrip.trim();
-
-      // makes sure non-european styles get converted
-      if (scrip.includes(':')) {
-        scrip = scrip.replace(/,/g, '.').replace(/:/g, ',');
-      }
-
-      let matchOne = scrip.match(
-        /([1-5]\.?\s?)?([a-zžščöäü ]+\.?\s?)([0-9,.:\-–f]+)?/i
-      );
-
-      let prefix = matchOne[1] ? matchOne[1].replace(/\./, '') : '';
-      let bookName = matchOne[2] ? replaceBookName(matchOne[2]) : '';
-      var suffix = matchOne[3] ? matchOne[3] : '1';
-
-      var newScrip = `${prefix} ${bookName} ${suffix}`;
-
-      result.push(newScrip);
+    // makes sure non-european styles get converted
+    if (argument.includes(':')) {
+      argument = argument.replace(/,/g, '.').replace(/:/g, ',');
     }
 
-    result = result
-      .join('; ')
+    // convert book names
+    newArgument = argument.replace(
+      /(?<![0-9,])\b([a-zžščöäüß ]+)\b\.?\s?/gi,
+      (match, p1) => ' ' + replaceBookName(p1) + ' '
+    );
+
+    // special treatment for the pentateuch
+    newArgument = newArgument
       .replace(/1 ?Moses/, 'Genesis')
       .replace(/2 ?Moses/, 'Exodus')
       .replace(/3 ?Moses/, 'Leviticus')
@@ -86,24 +71,24 @@ function run(argument) {
   }
 
   if (LaunchBar.options.commandKey) {
-    return listTranslations(result, argument);
+    return listTranslations(newArgument, argument);
   } else {
-    pasteText(result, argument, translation);
+    pasteText(newArgument, argument, translation);
   }
 }
 
-function pasteText(result, argument, translation) {
+function pasteText(newArgument, argument, translation) {
   var text = LaunchBar.executeAppleScript(
     'tell application "Accordance" to set theResult to «event AccdTxRf» {"' +
       translation +
       '", "' +
-      result +
+      newArgument +
       '", true}'
   ).trim();
 
   if (text.startsWith('ERR')) {
     LaunchBar.alert('Error!', text);
-    // var output = listTranslations(result, argument);
+    // var output = listTranslations(newArgument, argument);
     // return output;
     return;
     // TODO: Pick a different translation
@@ -202,7 +187,7 @@ function setFormat(format) {
   return settings();
 }
 
-function listTranslations(result, argument) {
+function listTranslations(newArgument, argument) {
   const isCommandKeyPressed = LaunchBar.options.commandKey;
   const translations = File.getDirectoryContents(textModulesPath);
 
@@ -234,7 +219,7 @@ function listTranslations(result, argument) {
       title: translationName,
       action: isCommandKeyPressed ? 'setTranslation' : 'setDefaultTranslation',
       actionArgument: {
-        result: result,
+        newArgument: newArgument,
         argument: argument,
         translation: translation,
       },
@@ -261,7 +246,7 @@ function listTranslations(result, argument) {
 
   rest.sort((a, b) => a.title.localeCompare(b.title));
 
-  result = isCommandKeyPressed
+  let result = isCommandKeyPressed
     ? lastUsedTranslation.concat(rest)
     : lastUsedTranslation.concat(defaultTranslation.concat(rest));
   return result;
@@ -272,7 +257,7 @@ function setDefaultTranslation({ translation }) {
   return listTranslations();
 }
 
-function setTranslation({ result, argument, translation }) {
+function setTranslation({ newArgument, argument, translation }) {
   Action.preferences.lastUsed = translation;
-  pasteText(result, argument, translation);
+  pasteText(newArgument, argument, translation);
 }
