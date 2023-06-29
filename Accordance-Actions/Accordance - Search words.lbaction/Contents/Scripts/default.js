@@ -23,7 +23,8 @@ function run(argument) {
     if (LaunchBar.options.commandKey) {
       return chooseTranslation(argument);
     } else {
-      LaunchBar.openURL('accord://search;Words?' + encodeURI(argument));
+      let query = searchOptions(argument);
+      LaunchBar.openURL('accord://search;Words?' + encodeURI(query));
     }
     return;
   }
