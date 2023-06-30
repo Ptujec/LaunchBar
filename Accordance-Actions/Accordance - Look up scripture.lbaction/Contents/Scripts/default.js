@@ -7,6 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+- https://accordancefiles2.com/helpfiles/14-macOS/index.htm#t=mac_14%2Fcontent%2Ftopics%2F05_dd%2Fusing_links_common_tasks.htm&rhsearch=url&rhhlterm=url%20urls (See: Examples of Accordance-specific URLs)
 
 The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
@@ -38,10 +39,10 @@ function run(argument) {
   } else {
     // European Vers Notation
     argument = argument
-      // clean up capture (e.g. brackets) and formart errors (e.g. spaces before or after verse numbers) in entry
+      // argument clean up
       .trim()
-      .replace(/\(|\)/g, '')
-      .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2');
+      .replace(/\(|\)/g, '') // remove brackets
+      .replace(/\s+/g, ' '); // remove multiple spaces
 
     // makes sure non-european styles get converted
     if (argument.includes(':')) {
@@ -50,12 +51,14 @@ function run(argument) {
 
     // convert book names
     newArgument = argument.replace(
-      /(?<![0-9,])\b([a-zžščöäüß ]+)\b\.?\s?/gi,
-      (match, p1) => ' ' + replaceBookName(p1) + ' '
+      /([a-zžščöäüß]+(?: [a-zžščöäüß]+)?)/gi,
+      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1)
     );
 
-    // special treatment for the pentateuch
+    // more clean up for accordance and special treatment for the pentateuch
     newArgument = newArgument
+      .replace(/\.( ?[a-zžščöäüß])/gi, '$1')
+      .replace(/([a-zžščöäüß])\./gi, '$1')
       .replace(/1 ?Moses/, 'Genesis')
       .replace(/2 ?Moses/, 'Exodus')
       .replace(/3 ?Moses/, 'Leviticus')
@@ -68,7 +71,7 @@ function run(argument) {
 
 function replaceBookName(bookName) {
   // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
-  bookName = bookName.trim().replace(/\./, '').toLowerCase();
+  bookName = bookName.trim().toLowerCase();
 
   const foundBook = bookNameDictionary.booknames.find((book) => {
     const englishName = book.english.toLowerCase();
