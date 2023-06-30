@@ -43,11 +43,12 @@ function run(argument) {
     newArgument = argument;
   } else {
     // European Vers Notation
+
     argument = argument
-      // clean up capture (e.g. brackets) and formart errors (e.g. spaces before or after verse numbers) in entry
+      // argument clean up
       .trim()
-      .replace(/\(|\)/g, '')
-      .replace(/(\s+)?([\-–,:])(\s+)?/g, '$2');
+      .replace(/\(|\)/g, '') // remove brackets
+      .replace(/\s+/g, ' '); // remove multiple spaces
 
     // makes sure non-european styles get converted
     if (argument.includes(':')) {
@@ -56,12 +57,14 @@ function run(argument) {
 
     // convert book names
     newArgument = argument.replace(
-      /(?<![0-9,])\b([a-zžščöäüß ]+)\b\.?\s?/gi,
-      (match, p1) => ' ' + replaceBookName(p1) + ' '
+      /([a-zžščöäüß]+(?: [a-zžščöäüß]+)?)/gi,
+      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1)
     );
 
-    // special treatment for the pentateuch
+    // more clean up for accordance and special treatment for the pentateuch
     newArgument = newArgument
+      .replace(/\.( ?[a-zžščöäüß])/gi, '$1')
+      .replace(/([a-zžščöäüß])\./gi, '$1')
       .replace(/1 ?Moses/, 'Genesis')
       .replace(/2 ?Moses/, 'Exodus')
       .replace(/3 ?Moses/, 'Leviticus')
@@ -107,7 +110,8 @@ function displayText(newArgument, argument, translation) {
 
 function replaceBookName(bookName) {
   // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
-  bookName = bookName.trim().replace(/\./, '').toLowerCase();
+
+  bookName = bookName.trim().toLowerCase();
 
   const foundBook = bookNameDictionary.booknames.find((book) => {
     const englishName = book.english.toLowerCase();
