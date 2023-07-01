@@ -23,19 +23,19 @@ Raycast Extension:
 
 String.prototype.localizationTable = 'default';
 
-const localDataFile = Action.supportPath + '/list';
+const localDataFile = `${Action.supportPath}/list`;
 const op = '/usr/local/bin/op';
 
 function run() {
-  var accountID = Action.preferences.accountID;
+  const accountID = Action.preferences.accountID;
 
   if (
     !File.exists(op) ||
     !File.exists(localDataFile) ||
-    accountID == undefined ||
+    !accountID ||
     LaunchBar.options.controlKey
   ) {
-    var response = LaunchBar.alert(
+    const response = LaunchBar.alert(
       'First run info:'.localize(),
       '1) This action requires 1Password\'s CLI. Press "Open guide" for how to install and enable it.\n2) Then press "Get started" and choose your account.\nFor performance reasons the output is stored the action\'s support folder (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Passwords/).\nRefresh data in action settings (⌥↩).'.localize(),
       'Open guide'.localize(),
@@ -60,18 +60,18 @@ function run() {
     return settings();
   }
 
-  var list = JSON.parse(
+  const list = JSON.parse(
     File.readText(localDataFile).toStringFromBase64String()
   );
 
-  var results = [];
-  var logins = [];
-  list.forEach(function (item) {
-    // Choose icon per category
-    var category = item.category.toLowerCase();
-    var iconPath = Action.path + '/Contents/Resources/' + category + '.png';
+  let results = [];
+  let logins = [];
 
-    var pushData = {
+  for (item of list) {
+    const category = item.category.toLowerCase();
+    const iconPath = `${Action.path}/Contents/Resources/${category}.png`;
+
+    const pushData = {
       title: item.title,
       label: item.vault.name,
       icon: category,
@@ -83,32 +83,28 @@ function run() {
         vaultId: item.vault.id,
       },
       actionRunsInBackground: true,
+      alwaysShowsSubtitle: true,
     };
 
-    if (item.additional_information != '—') {
+    if (item.additional_information !== '—') {
       pushData.subtitle = item.additional_information;
     }
 
-    if (item.urls != undefined) {
-      item.urls.forEach(function (item) {
-        if (item.primary == true) {
-          pushData.actionArgument.url = item.href;
-        }
-      });
+    const primaryUrl = item.urls?.find((url) => url.primary === true);
+    if (primaryUrl) {
+      pushData.actionArgument.url = primaryUrl.href;
     }
 
     if (!File.exists(iconPath)) {
       pushData.icon = 'genericTemplate';
     }
 
-    // if (item.vault.name == 'Screenshots') {
-    if (category == 'login') {
+    if (category === 'login') {
       logins.push(pushData);
     } else {
       results.push(pushData);
     }
-    // }
-  });
+  }
 
   results.sort(function (a, b) {
     return a.icon.localeCompare(b.icon) || a.title.localeCompare(b.title);
@@ -118,18 +114,14 @@ function run() {
     return a.title > b.title;
   });
 
-  var all = logins.concat(results);
-  return all;
+  return logins.concat(results);
 }
 
 // SET UP AND MAINTAINANCE FUNCTIONS
 
 function settings() {
-  if (Action.preferences.secondaryBrowser != undefined) {
-    var browserIcon = Action.preferences.secondaryBrowser;
-  } else {
-    var browserIcon = 'browserTemplate';
-  }
+  const browserIcon = Action.preferences.secondaryBrowser ?? 'browserTemplate';
+
   return [
     {
       title: 'Secondary browser'.localize(),
@@ -158,10 +150,10 @@ function settings() {
 }
 
 function showAccounts() {
-  var accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
+  let accounts = LaunchBar.execute(op, 'account', 'list', '--format=json');
 
   if (accounts.trim() == '[]') {
-    var response = LaunchBar.alert(
+    const response = LaunchBar.alert(
       'Something went wrong!'.localize(),
       "Please check if you have 1Password-CLI enabled in 1Password Settings/Developer.\nIf you have and it still doesn't work let me know.".localize(),
       'Open 1Password Settings'.localize(),
@@ -184,26 +176,20 @@ function showAccounts() {
 
   accounts = JSON.parse(accounts);
 
-  var results = [];
-  accounts.forEach(function (item) {
-    var pushData = {
+  return accounts.map(function (item) {
+    return {
       title: item.url,
       subtitle: item.email,
-      icon: 'accountTemplate',
+      icon:
+        item.account_uuid == Action.preferences.accountID
+          ? 'selectedAccountTemplate'
+          : 'accountTemplate',
       badge: 'account'.localize(),
       action: 'setAccountID',
       actionArgument: item.account_uuid,
       actionRunsInBackground: true,
     };
-
-    if (item.account_uuid == Action.preferences.accountID) {
-      pushData.icon = 'selectedAccountTemplate';
-    }
-
-    results.push(pushData);
   });
-
-  return results;
 }
 
 function setAccountID(accountID) {
@@ -214,20 +200,13 @@ function setAccountID(accountID) {
 
 function updateLocalData() {
   LaunchBar.hide();
-  var test = signIn();
-
+  const test = signIn();
   if (test != 'success') {
-    LaunchBar.alert(test);
-    LaunchBar.hide();
-    LaunchBar.execute(
-      op,
-      'signout',
-      '--account=' + Action.preferences.accountID
-    );
+    errorAlertAndSignout(test);
     return;
   }
 
-  var list = LaunchBar.execute(
+  let list = LaunchBar.execute(
     op,
     'item',
     'list',
@@ -255,12 +234,11 @@ function updateLocalData() {
 }
 
 function signIn() {
-  if (Action.preferences.accountID == undefined) {
+  if (!Action.preferences.accountID) {
     return showAccounts();
   }
 
-  var cmd =
-    '/usr/local/bin/op signin --account ' + Action.preferences.accountID;
+  const cmd = `${op} signin --account ${Action.preferences.accountID}`;
 
   return LaunchBar.executeAppleScript(
     'try',
@@ -274,6 +252,12 @@ function signIn() {
   ).trim();
 }
 
+function errorAlertAndSignout(test) {
+  LaunchBar.alert(test);
+  LaunchBar.hide();
+  LaunchBar.execute(op, 'signout', '--account=' + Action.preferences.accountID);
+}
+
 function updateCLI() {
   LaunchBar.executeAppleScript(
     'tell application "Terminal"',
@@ -285,15 +269,10 @@ function updateCLI() {
 
 function chooseSecondaryBrowser() {
   // List all installed browser (from /Applications/ & Safari) execpt the default browser and the currently chosen browser
+  const secondaryBrowser = Action.preferences.secondaryBrowser ?? '';
+  const defaultBrowser = getDefaultBrowser();
 
-  var secondaryBrowser = Action.preferences.secondaryBrowser;
-  if (secondaryBrowser == undefined) {
-    secondaryBrowser = '';
-  }
-
-  var defaultBrowser = getDefaultBrowser();
-
-  var result = [];
+  let result = [];
   if (defaultBrowser != 'com.apple.safari') {
     result.push({
       title: 'Safari',
@@ -303,23 +282,24 @@ function chooseSecondaryBrowser() {
     });
   }
 
-  var installedApps = File.getDirectoryContents('/Applications/');
-  installedApps.forEach(function (item) {
+  const installedApps = File.getDirectoryContents('/Applications/');
+  // installedApps.forEach(function (item) {
+  for (item of installedApps) {
     if (item.endsWith('.app')) {
-      var infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+      const infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
 
       if (File.exists(infoPlistPath)) {
-        var infoPlist = File.readPlist(infoPlistPath);
-        var bundleName = infoPlist.CFBundleName;
-        var appID = infoPlist.CFBundleIdentifier;
-        var activityTypes = infoPlist.NSUserActivityTypes;
+        const infoPlist = File.readPlist(infoPlistPath);
+        const bundleName = infoPlist.CFBundleName;
+        const appID = infoPlist.CFBundleIdentifier;
+        const activityTypes = infoPlist.NSUserActivityTypes;
 
         if (
-          activityTypes != undefined &&
+          activityTypes &&
           defaultBrowser.toLowerCase() != appID.toLowerCase() &&
           secondaryBrowser.toLowerCase() != appID.toLowerCase()
         ) {
-          activityTypes.forEach(function (item) {
+          for (item of activityTypes) {
             if (item == 'NSUserActivityTypeBrowsingWeb') {
               result.push({
                 title: bundleName,
@@ -328,27 +308,25 @@ function chooseSecondaryBrowser() {
                 actionArgument: appID,
               });
             }
-          });
+          }
         }
       }
     }
-  });
+  }
+
   return result;
 }
 
 function getDefaultBrowser() {
-  var plist = File.readPlist(
+  const plist = File.readPlist(
     '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
   );
 
-  var defaultBrowser = '';
-  plist.LSHandlers.forEach(function (item) {
-    if (item.LSHandlerURLScheme == 'http') {
-      defaultBrowser = item.LSHandlerRoleAll.toLowerCase();
-    }
-  });
+  const defaultBrowser = plist.LSHandlers.find(
+    (item) => item.LSHandlerURLScheme == 'http'
+  );
 
-  return defaultBrowser;
+  return defaultBrowser ? defaultBrowser.LSHandlerRoleAll.toLowerCase() : '';
 }
 
 function setSecondaryBrowser(bID) {
@@ -361,7 +339,7 @@ function setSecondaryBrowser(bID) {
 function actions(item) {
   LaunchBar.hide();
 
-  if (item.url == undefined) {
+  if (!item.url) {
     viewItem(item);
     return;
   }
@@ -384,45 +362,25 @@ function actions(item) {
 
 function viewItem(item) {
   LaunchBar.openURL('file:///Applications/1Password.app/');
-
-  var urlScheme =
-    'onepassword://view-item/i?a=' +
-    Action.preferences.accountID +
-    '&v=' +
-    item.vaultId +
-    '&i=' +
-    item.id;
-
+  const urlScheme = `onepassword://view-item/i?a=${Action.preferences.accountID}&v=${item.vaultId}&i=${item.id}`;
   LaunchBar.openURL(urlScheme);
 }
 
 function openURL(item) {
   // Make shure Browser is live
-  if (LaunchBar.options.alternateKey) {
-    var browser = Action.preferences.secondaryBrowser;
-  } else {
-    var browser = getDefaultBrowser();
-  }
+  const browser = LaunchBar.options.alternateKey
+    ? Action.preferences.secondaryBrowser
+    : getDefaultBrowser();
 
   // Checks if the menu bar item to lock 1P is enabled. So 'true' means 1P is unlocked. If it is false it will try to sign in. The current method is not ideal because it relies on GUI scripting. But it seems currently the only possible way.
-  var test = checkLocked(browser);
+  const test = checkLocked(browser);
   if (test != 'success') {
-    LaunchBar.alert(test);
-    LaunchBar.hide();
-    LaunchBar.execute(
-      op,
-      'signout',
-      '--account=' + Action.preferences.accountID
-    );
+    errorAlertAndSignout(test);
     return;
   }
 
-  var url = item.url;
-  if (!url.startsWith('http')) {
-    url = 'https://' + url;
-  }
-
-  url = url + '?' + getRandomID() + '=' + item.id;
+  let url = item.url.startsWith('http') ? item.url : `https://${item.url}`;
+  url += `?${getRandomID()}=${item.id}`;
 
   LaunchBar.openURL(url, browser);
 
@@ -433,19 +391,20 @@ function getRandomID() {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
   let result = '';
-  for (var i = 0; i < 26; i++) {
+  let counter = 0;
+  while (counter < 26) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
+    counter++;
   }
   return result;
 }
 
 function checkLocked(browser) {
-  if (Action.preferences.accountID == undefined) {
+  if (!Action.preferences.accountID) {
     return showAccounts();
   }
 
-  var cmd =
-    '/usr/local/bin/op signin --account ' + Action.preferences.accountID;
+  const cmd = `${op} signin --account ${Action.preferences.accountID}`;
 
   return LaunchBar.executeAppleScript(
     'tell application "System Events"',
