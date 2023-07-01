@@ -219,6 +219,8 @@ function listTranslations(newArgument, argument) {
 
     const pushContent = {
       title: translationName,
+      subtitle: argument,
+      alwaysShowsSubtitle: true,
       action: isCommandKeyPressed ? 'setTranslation' : 'setDefaultTranslation',
       actionArgument: {
         newArgument: newArgument,
