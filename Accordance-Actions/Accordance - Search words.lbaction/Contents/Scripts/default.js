@@ -105,6 +105,7 @@ function chooseTranslation(argument) {
     const pushContent = {
       title: translationName,
       subtitle: argument,
+      alwaysShowsSubtitle: true,
       action: 'searchInTranslation',
       actionArgument: {
         translation: translation,
