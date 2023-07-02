@@ -1,7 +1,7 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-12-09
+2023-07-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -9,7 +9,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 include('update.js');
 
 function setApiKey() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'API-Token required',
     '1) Go to Settings/Integrations/Developer and copy the API-Token.\n2) Press »Set API-Token«',
     'Open Settings',
@@ -24,11 +24,11 @@ function setApiKey() {
       LaunchBar.hide();
       break;
     case 1:
-      var clipboardContent = LaunchBar.getClipboardString().trim();
+      const clipboardContent = LaunchBar.getClipboardString().trim();
 
       if (clipboardContent.length == 40) {
         // Test API-Token
-        var projectsOnline = HTTP.getJSON(
+        const projectsOnline = HTTP.getJSON(
           'https://api.todoist.com/rest/v2/projects',
           {
             headerFields: {
@@ -37,29 +37,32 @@ function setApiKey() {
           }
         );
 
-        if (projectsOnline.error != undefined) {
+        if (projectsOnline.error) {
           LaunchBar.alert(projectsOnline.error);
-        } else {
-          // Write new API-Token in Action preferences
-          Action.preferences.apiToken = clipboardContent;
-
-          LaunchBar.alert(
-            'Success!',
-            'API-Token set to: ' +
-              Action.preferences.apiToken +
-              '.\nProjects, sections and labels will be updated next.'
-          );
-
-          // Write or update local data
-          update();
+          break;
         }
-      } else {
+
+        // Write new API-Token in Action preferences
+        Action.preferences.apiToken = clipboardContent;
+
         LaunchBar.alert(
-          'The length of the clipboard content does not match the length of a correct API-Token',
-          'Make sure the API-Token is the most recent item in the clipboard!'
+          'Success!',
+          'API-Token set to: ' +
+            Action.preferences.apiToken +
+            '.\nProjects, sections and labels will be updated next.'
         );
+
+        // Write or update local data
+        update();
+        break;
       }
+
+      LaunchBar.alert(
+        'The length of the clipboard content does not match the length of a correct API-Token',
+        'Make sure the API-Token is the most recent item in the clipboard!'
+      );
       break;
+
     case 2:
       break;
   }

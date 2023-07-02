@@ -1,7 +1,7 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-12-09
+2023-07-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -21,97 +21,92 @@ include('setKey.js');
 include('update.js');
 
 function run(argument) {
-  if (apiToken == undefined) {
+  let prioMatch, prioValue, prioText, dueString, description, output;
+
+  if (!apiToken) {
     setApiKey();
-  } else {
-    if (LaunchBar.options.shiftKey) {
-      var output = settings();
-      return output;
-    } else {
-      argument = argument + ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
+    return;
+  }
 
-      // Priority
-      if (/(p[1-3] )|( p[1-3])/.test(argument)) {
-        var m = argument.match(/p[1-3]/);
-        if (m == 'p1') {
-          var prioValue = 4;
-          var prioText = p1;
-        } else if (m == 'p2') {
-          var prioValue = 3;
-          var prioText = p2;
-        } else if (m == 'p3') {
-          var prioValue = 2;
-          var prioText = p3;
-        }
-        argument = argument.replace(/(p[1-3] )|( p[1-3])/, '');
-      } else {
-        var prioValue = 1;
-        var prioText = '';
-      }
+  if (LaunchBar.options.shiftKey) {
+    return settings();
+  }
 
-      // Due/date String
-      var dueString = '';
+  argument += ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
 
-      if (argument.includes(' @')) {
-        // with @ (should work for most cenarios except for "@date <title>")
-        dueString = argument.match(/ @(.*?)(p\d|((^| )#($| ))|$)/)[1].trim();
+  // Priorities
+  prioMatch = argument.match(/p[1-3]/);
+  switch (prioMatch ? prioMatch[0] : '') {
+    case 'p1':
+      prioValue = 4;
+      prioText = p1;
+      break;
+    case 'p2':
+      prioValue = 3;
+      prioText = p2;
+      break;
+    case 'p3':
+      prioValue = 2;
+      prioText = p3;
+      break;
+    default:
+      prioValue = 1;
+      prioText = '';
+  }
 
-        argument = argument
-          .replace(/ @(.*?)(p\d|((^| )#($| ))|$)/, '$2')
-          .trim();
-      } else {
-        // dateStrings
-        for (var i = 0; i < dateStrings.length; i++) {
-          var dateString = dateStrings[i];
-          var re = new RegExp('(^| )' + dateString + '($| )', 'i');
-          if (re.test(argument)) {
-            dueString = argument.match(re)[0].trim();
-            argument = argument.replace(re, ' ');
-          }
-        }
-      }
+  argument = argument.replace(/(p[1-3] )|( p[1-3])/, '');
 
-      // Description
-      if (argument.includes(': ')) {
-        var description = argument.match(/(?:\: )(.*)/)[1];
+  // Due/date String
+  dueString = argument.includes(' @')
+    ? argument.match(/ @(.*?)(p\d|((^| )#($| ))|$)/)[1].trim()
+    : '';
 
-        // Capitalize first character of description
-        description =
-          description.charAt(0).toUpperCase() + description.slice(1);
+  argument = argument.includes(' @')
+    ? argument.replace(/ @(.*?)(p\d|((^| )#($| ))|$)/, '$2').trim()
+    : argument;
 
-        argument = argument.replace(/(?:\: )(.*)/, '');
-      }
-
-      argument = argument.replace(/\s+/g, ' ').trim();
-
-      // Capitalize first character of the content/title
-      argument = argument.charAt(0).toUpperCase() + argument.slice(1);
-
-      Action.preferences.taskDict = {
-        content: argument,
-        description: description,
-        dueString: dueString,
-        prioValue: prioValue,
-        prioText: prioText,
-        lang: lang,
-      };
-
-      if (LaunchBar.options.commandKey) {
-        if (argument == '') {
-          LaunchBar.alert(missingArg);
-          return;
-        }
-        var output = advancedOptions();
-        return output;
-      } else {
-        if (argument == '') {
-          LaunchBar.alert(missingArg);
-          return;
-        }
-        postTask();
+  if (!argument.includes(' @')) {
+    for (let i = 0; i < dateStrings.length; i++) {
+      var dateString = dateStrings[i];
+      var re = new RegExp('(^| )' + dateString + '($| )', 'i');
+      if (re.test(argument)) {
+        dueString = argument.match(re)[0].trim();
+        argument = argument.replace(re, ' ');
       }
     }
   }
+
+  // Description
+  description = argument.includes(': ')
+    ? argument.match(/(?:\: )(.*)/)[1]
+    : description;
+  argument = argument.includes(': ')
+    ? argument.replace(/(?:\: )(.*)/, '')
+    : argument;
+
+  argument = argument.replace(/\s+/g, ' ').trim();
+
+  argument = argument.charAt(0).toUpperCase() + argument.slice(1);
+
+  Action.preferences.taskDict = {
+    content: argument,
+    description: description,
+    dueString: dueString,
+    prioValue: prioValue,
+    prioText: prioText,
+    lang: lang,
+  };
+
+  if (argument == '') {
+    LaunchBar.alert(missingArg);
+    return;
+  }
+
+  if (LaunchBar.options.commandKey) {
+    return advancedOptions();
+  }
+
+  postTask();
 }
 
 function advancedOptions() {
@@ -124,81 +119,60 @@ function advancedOptions() {
     update();
   }
 
-  var taskDict = Action.preferences.taskDict;
+  const taskDict = Action.preferences.taskDict;
+  const content = taskDict.description
+    ? `${taskDict.content}: ${taskDict.description}`
+    : taskDict.content;
 
-  var resultProjects = [];
-  var resultPrioritized = [];
-  var projects = File.readJSON(projectsPath).data;
+  const sub = [
+    content,
+    taskDict.dueString ? dueStringTitle + taskDict.dueString : '',
+    taskDict.prioText,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  const words = taskDict.content
+    .replace(/\[(.+)\]\(.+\)/, '$1')
+    .toLowerCase()
+    .split(' ');
+
+  Action.preferences.taskDict.words = words;
+
+  const resultProjects = [];
+  const resultPrioritized = [];
+  const projects = File.readJSON(projectsPath).data;
 
   // Projects
-  for (var i = 0; i < projects.length; i++) {
-    var name = projects[i].name;
-    if (name == 'Inbox') {
-      name = inboxName;
-    }
-    var id = projects[i].id;
+  for (let i = 0; i < projects.length; i++) {
+    const project = projects[i];
+    const title = project.name == 'Inbox' ? inboxName : project.name;
+    const id = project.id;
 
-    if (taskDict.description != undefined) {
-      var content = taskDict.content + ': ' + taskDict.description;
-    } else {
-      var content = taskDict.content;
-    }
+    const usage = project.usage || 0;
 
-    if (taskDict.dueString != '') {
-      var sub =
-        content +
-        dueStringTitle +
-        taskDict.dueString +
-        ', ' +
-        taskDict.prioText;
-    } else {
-      var sub = content + ', ' + taskDict.prioText;
-    }
-    sub = sub.trim().replace(/,$/, '');
-
-    if (projects[i].usage == undefined) {
-      var usage = 0;
-    } else {
-      var usage = projects[i].usage;
-    }
-
-    var pushDataProject = {
-      title: name,
+    const pushDataProject = {
+      title,
       subtitle: sub,
       icon: 'projectTemplate',
-      usage: usage,
+      usage,
       action: 'postTask',
       actionArgument: {
         type: 'project',
-        id: id,
+        id,
         index: i,
       },
     };
 
-    var words = taskDict.content
-      .replace(/\[(.+)\]\(.+\)/, '$1')
-      .match(/[a-zäüööčžšß]+/gi);
-
-    var taskDictWords = [];
-    for (var j = 0; j < words.length; j++) {
-      taskDictWords.push(words[j].toLowerCase());
-    }
-    Action.preferences.taskDict.words = taskDictWords;
-    words = taskDictWords;
-
     // Prioritize projects with matching title and/or words
-    if (projects[i].usedWords != undefined) {
-      if (words.includes(projects[i].name.toLowerCase())) {
-        var matchCount = 2; // 2 to prioritize it more … might change back to 1
-      } else {
-        var matchCount = 0;
-      }
+    let matchCount = words.includes(project.name.toLowerCase()) ? 2 : 0;
 
-      for (var k = 0; k < words.length; k++) {
-        if (projects[i].usedWords.includes(words[k].toLowerCase())) {
-          matchCount = matchCount + 1;
+    if (project.usedWords) {
+      words.find((word) => {
+        if (project.usedWords.includes(word)) {
+          matchCount++;
         }
-      }
+      });
 
       if (matchCount > 0) {
         pushDataProject.matchCount = matchCount;
@@ -207,8 +181,8 @@ function advancedOptions() {
         resultProjects.push(pushDataProject);
       }
     } else {
-      if (words.includes(projects[i].name.toLowerCase())) {
-        pushDataProject.matchCount = 2; // 2 to prioritize it more … might change back to 1
+      if (words.includes(project.name.toLowerCase())) {
+        pushDataProject.matchCount = 2; // 2 to prioritize it more
         resultPrioritized.push(pushDataProject);
       } else {
         resultProjects.push(pushDataProject);
@@ -217,82 +191,43 @@ function advancedOptions() {
   }
 
   // Sections
-  var resultSections = [];
-  var sections = File.readJSON(sectionsPath).data;
+  const resultSections = [];
+  const sections = File.readJSON(sectionsPath).data;
 
-  for (var i = 0; i < sections.length; i++) {
-    var name = sections[i].name;
-    var id = sections[i].id;
-    var sectionProjectId = sections[i].project_id;
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    const name = section.name;
+    const id = section.id;
+    const sectionProjectId = section.project_id;
 
-    projects.forEach(function (item) {
-      if (item.id == sectionProjectId) {
-        sectionProjectName = item.name;
-      }
-    });
+    const project = projects.find((item) => item.id === sectionProjectId);
+    const sectionProjectName = project ? project.name : '';
 
-    if (taskDict.description != undefined) {
-      var content = taskDict.content + ': ' + taskDict.description;
-    } else {
-      var content = taskDict.content;
-    }
+    const usage = section.usage || 0;
 
-    if (taskDict.dueString != '') {
-      var sub =
-        content +
-        dueStringTitle +
-        taskDict.dueString +
-        ', ' +
-        taskDict.prioText;
-    } else {
-      var sub = content + ', ' + taskDict.prioText;
-    }
-    sub = sub.trim().replace(/,$/, '');
-
-    if (sections[i].usage == undefined) {
-      var usage = 0;
-    } else {
-      var usage = sections[i].usage;
-    }
-
-    var pushDataSection = {
+    const pushDataSection = {
       title: name + ' (' + sectionProjectName + ')',
       subtitle: sub,
       icon: 'sectionTemplate',
-      usage: usage,
+      usage,
       action: 'postTask',
       actionArgument: {
         type: 'section',
-        id: id,
-        sectionProjectId: sectionProjectId,
+        id,
+        sectionProjectId,
         index: i,
       },
     };
 
-    var words = taskDict.content
-      .replace(/\[(.+)\]\(.+\)/, '$1')
-      .match(/[a-zäüööčžšß]+/gi);
-
-    var taskDictWords = [];
-    for (var j = 0; j < words.length; j++) {
-      taskDictWords.push(words[j].toLowerCase());
-    }
-    Action.preferences.taskDict.words = taskDictWords;
-    words = taskDictWords;
-
     // Prioritize sections with matching title and/or words
-    if (sections[i].usedWords != undefined) {
-      if (words.includes(sections[i].name.toLowerCase())) {
-        var matchCount = 2; // 2 to prioritize it more … might change back to 1
-      } else {
-        var matchCount = 0;
-      }
+    let matchCount = words.includes(section.name.toLowerCase()) ? 2 : 0;
 
-      for (var k = 0; k < words.length; k++) {
-        if (sections[i].usedWords.includes(words[k].toLowerCase())) {
-          matchCount = matchCount + 1;
+    if (section.usedWords) {
+      words.find((word) => {
+        if (section.usedWords.includes(word)) {
+          matchCount++;
         }
-      }
+      });
 
       if (matchCount > 0) {
         pushDataSection.matchCount = matchCount;
@@ -301,8 +236,8 @@ function advancedOptions() {
         resultSections.push(pushDataSection);
       }
     } else {
-      if (words.includes(sections[i].name.toLowerCase())) {
-        pushDataSection.matchCount = 2; // 2 to prioritize it more … might change back to 1
+      if (words.includes(section.name.toLowerCase())) {
+        pushDataSection.matchCount = 2; // 2 to prioritize it more
         resultPrioritized.push(pushDataSection);
       } else {
         resultSections.push(pushDataSection);
@@ -310,72 +245,46 @@ function advancedOptions() {
     }
   }
 
-  var resultLabels = [];
-  var labels = File.readJSON(labelsPath).data;
-  for (var i = 0; i < labels.length; i++) {
-    var name = labels[i].name;
-    var id = labels[i].id;
+  // Labels
+  const resultLabels = [];
+  const labels = File.readJSON(labelsPath).data;
 
-    if (taskDict.description != undefined) {
-      var content = taskDict.content + ': ' + taskDict.description;
-    } else {
-      var content = taskDict.content;
-    }
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
+    const name = label.name;
+    const usage = label.usage || 0;
 
-    if (taskDict.dueString != '') {
-      var sub =
-        content +
-        dueStringTitle +
-        taskDict.dueString +
-        ', ' +
-        taskDict.prioText;
-    } else {
-      var sub = content + ', ' + taskDict.prioText;
-    }
-    sub = sub.trim().replace(/,$/, '');
-
-    if (labels[i].usage == undefined) {
-      var usage = 0;
-    } else {
-      var usage = labels[i].usage;
-    }
-
-    var pushDataLabel = {
+    const pushDataLabel = {
       title: name,
       subtitle: sub,
       icon: 'labelTemplate',
-      usage: usage,
+      usage,
       action: 'addProject',
       actionArgument: {
-        name: name,
-        id: id,
-        index: i,
+        labelName: name,
+        labelIndex: i,
       },
     };
 
     // Prioritize labels with matching title and/or words
-    if (labels[i].usedWords != undefined) {
-      if (words.includes(labels[i].name.toLowerCase())) {
-        var labelMatchCount = 2; // 2 to prioritize it more … might change back to 1
-      } else {
-        var labelMatchCount = 0;
-      }
+    let matchCount = words.includes(label.name.toLowerCase()) ? 2 : 0;
 
-      for (var j = 0; j < words.length; j++) {
-        if (labels[i].usedWords.includes(words[j].toLowerCase())) {
-          labelMatchCount = labelMatchCount + 1;
+    if (label.usedWords) {
+      words.find((word) => {
+        if (label.usedWords.includes(word)) {
+          matchCount++;
         }
-      }
+      });
 
-      if (labelMatchCount > 0) {
-        pushDataLabel.matchCount = labelMatchCount;
+      if (matchCount > 0) {
+        pushDataLabel.matchCount = matchCount;
         resultPrioritized.push(pushDataLabel);
       } else {
         resultLabels.push(pushDataLabel);
       }
     } else {
-      if (words.includes(labels[i].name.toLowerCase())) {
-        pushDataLabel.matchCount = 2; // 2 to prioritize it more … might change back to 1
+      if (words.includes(label.name.toLowerCase())) {
+        pushDataLabel.matchCount = 2; // 2 to prioritize it more
         resultPrioritized.push(pushDataLabel);
       } else {
         resultLabels.push(pushDataLabel);
@@ -387,328 +296,114 @@ function advancedOptions() {
     return b.matchCount - a.matchCount || b.usage - a.usage;
   });
 
-  var all = resultProjects.concat(resultSections.concat(resultLabels));
+  const all = resultProjects.concat(resultSections.concat(resultLabels));
 
   all.sort(function (a, b) {
     return b.usage - a.usage;
   });
 
-  var result = resultPrioritized.concat(all);
-  return result;
+  return resultPrioritized.concat(all);
 }
 
-function addProject(labelDict) {
-  var labelName = labelDict.name;
-  var labelIndex = labelDict.index;
-  var taskDict = Action.preferences.taskDict;
-  var labels = File.readJSON(labelsPath).data;
-  var lastUsed = labels[labelIndex].lastUsed;
-  var lastUsedCategoryId = labels[labelIndex].lastUsedCategoryId;
-  var lastUsedSectionId = labels[labelIndex].lastUsedSectionId;
+function addProject({ labelName, labelIndex }) {
+  const labels = File.readJSON(labelsPath).data;
+  const lastUsed = labels[labelIndex].lastUsed;
+  const lastUsedCategoryId = labels[labelIndex].lastUsedCategoryId;
+  const lastUsedSectionId = labels[labelIndex].lastUsedSectionId;
 
-  var pinnedItem = [];
-  var projectItems = [];
-  var sectionItems = [];
+  const pinnedItem = [];
+  const projectItems = [];
+  const sectionItems = [];
+
+  const taskDict = Action.preferences.taskDict;
+  const content = taskDict.description
+    ? `${taskDict.content}: ${taskDict.description}`
+    : taskDict.content;
+
+  const sub = [
+    `@${labelName}: ${content}`,
+    taskDict.dueString ? dueStringTitle + taskDict.dueString : '',
+    taskDict.prioText,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   // Projects
-  var projects = File.readJSON(projectsPath).data;
-  for (var i = 0; i < projects.length; i++) {
-    var name = projects[i].name;
-    if (name == 'Inbox') {
-      name = inboxName;
-    }
-    var id = projects[i].id;
+  const projects = File.readJSON(projectsPath).data;
+  for (let i = 0; i < projects.length; i++) {
+    const project = projects[i];
+    const title = project.name == 'Inbox' ? inboxName : project.name;
+    const id = project.id;
 
-    if (taskDict.description != undefined) {
-      var content = taskDict.content + ': ' + taskDict.description;
-    } else {
-      var content = taskDict.content;
-    }
-
-    if (taskDict.dueString != '') {
-      var sub =
-        '@' +
-        labelName +
-        ': ' +
-        content +
-        dueStringTitle +
-        taskDict.dueString +
-        ', ' +
-        taskDict.prioText;
-    } else {
-      var sub = '@' + labelName + ': ' + content + ', ' + taskDict.prioText;
-    }
-    sub = sub.trim().replace(/,$/, '');
-
-    var projectPushData = {
-      title: name,
+    const projectPushData = {
+      title: title,
       subtitle: sub,
       icon: 'projectTemplate',
       action: 'postTask',
       actionArgument: {
         type: 'projectAndLabel',
-        id: id,
+        id,
         index: i,
-        labelName: labelName,
-        labelIndex: labelIndex,
+        labelName,
+        labelIndex,
       },
     };
 
-    if (lastUsed == 'project' || lastUsed == undefined) {
-      if (lastUsedCategoryId != undefined && lastUsedCategoryId == id) {
-        pinnedItem.push(projectPushData);
-      } else {
-        projectItems.push(projectPushData);
-      }
+    if (lastUsed == 'project' && lastUsedCategoryId == id) {
+      pinnedItem.push(projectPushData);
     } else {
       projectItems.push(projectPushData);
     }
   }
 
   // Sections
-  var sections = File.readJSON(sectionsPath).data;
-  for (var i = 0; i < sections.length; i++) {
-    var name = sections[i].name;
-    var id = sections[i].id;
-    var sectionProjectId = sections[i].project_id;
+  const sections = File.readJSON(sectionsPath).data;
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    const name = section.name;
+    const id = section.id;
+    const sectionProjectId = section.project_id;
 
-    projects.forEach(function (item) {
-      if (item.id == sectionProjectId) {
-        sectionProjectName = item.name;
-      }
-    });
+    const project = projects.find((item) => item.id === sectionProjectId);
+    const sectionProjectName = project ? project.name : '';
 
-    if (taskDict.description != undefined) {
-      var content = taskDict.content + ': ' + taskDict.description;
-    } else {
-      var content = taskDict.content;
-    }
-
-    if (taskDict.dueString != '') {
-      var sub =
-        '@' +
-        labelName +
-        ': ' +
-        content +
-        dueStringTitle +
-        taskDict.dueString +
-        ', ' +
-        taskDict.prioText;
-    } else {
-      var sub = '@' + labelName + ': ' + content + ', ' + taskDict.prioText;
-    }
-    sub = sub.trim().replace(/,$/, '');
-
-    var sectionPushData = {
+    const sectionPushData = {
       title: name + ' (' + sectionProjectName + ')',
       subtitle: sub,
       icon: 'sectionTemplate',
       action: 'postTask',
       actionArgument: {
         type: 'sectionAndLabel',
-        id: id,
-        sectionProjectId: sectionProjectId,
+        id,
+        sectionProjectId,
         index: i,
-        labelName: labelName,
-        labelIndex: labelIndex,
+        labelName,
+        labelIndex,
       },
     };
 
-    if (lastUsed == 'section') {
-      if (lastUsedSectionId != undefined && lastUsedSectionId == id) {
-        pinnedItem.push(sectionPushData);
-      } else {
-        sectionItems.push(sectionPushData);
-      }
+    if (lastUsed == 'section' && lastUsedSectionId == id) {
+      pinnedItem.push(sectionPushData);
     } else {
       sectionItems.push(sectionPushData);
     }
   }
 
-  var result = pinnedItem.concat(projectItems.concat(sectionItems));
-  return result;
+  return pinnedItem.concat(projectItems.concat(sectionItems));
 }
 
 function postTask(advancedData) {
   LaunchBar.hide();
 
-  var taskDict = Action.preferences.taskDict;
-  var sections = File.readJSON(sectionsPath);
-  var projects = File.readJSON(projectsPath);
-  var labels = File.readJSON(labelsPath);
+  const taskDict = Action.preferences.taskDict;
+  let sections = File.readJSON(sectionsPath);
+  let projects = File.readJSON(projectsPath);
+  let body;
 
-  if (advancedData != undefined) {
-    if (advancedData.type.includes('section')) {
-      // Sections & Section with Labels
-      var sectionIndex = advancedData.index;
-
-      // Remember used words
-      var sectionUsedWords = sections.data[sectionIndex].usedWords;
-      if (sectionUsedWords == undefined) {
-        sections.data[sectionIndex].usedWords = [];
-        var sectionUsedWords = sections.data[sectionIndex].usedWords;
-      }
-      for (var i = 0; i < taskDict.words.length; i++) {
-        if (
-          !sectionUsedWords.includes(taskDict.words[i]) &&
-          !stopwords.includes(taskDict.words[i].toLowerCase())
-        ) {
-          sectionUsedWords.push(taskDict.words[i].toLowerCase());
-        }
-      }
-
-      // Count usage
-      var sectionUsageCount = sections.data[sectionIndex].usage;
-      if (sectionUsageCount == undefined) {
-        sections.data[sectionIndex].usage = 1;
-      } else {
-        var newSectionCount = sectionUsageCount + 1;
-        sections.data[sectionIndex].usage = newSectionCount;
-      }
-
-      if (advancedData.type == 'section') {
-        var body = {
-          content: taskDict.content,
-          description: taskDict.description,
-          due_lang: taskDict.lang,
-          due_string: taskDict.dueString,
-          priority: taskDict.prioValue,
-          project_id: advancedData.sectionProjectId,
-          section_id: advancedData.id,
-        };
-      } else if (advancedData.type == 'sectionAndLabel') {
-        var labelName = advancedData.labelName;
-
-        var body = {
-          content: taskDict.content,
-          description: taskDict.description,
-          due_lang: taskDict.lang,
-          due_string: taskDict.dueString,
-          labels: [labelName],
-          priority: taskDict.prioValue,
-          project_id: advancedData.sectionProjectId,
-          section_id: advancedData.id,
-        };
-
-        var labelIndex = advancedData.labelIndex;
-
-        // Remember section used for the label
-        labels.data[labelIndex].lastUsed = 'section';
-        labels.data[labelIndex].lastUsedSectionId = advancedData.id;
-
-        // Remember used words
-        var labelUsedWords = labels.data[labelIndex].usedWords;
-        if (labelUsedWords == undefined) {
-          labels.data[labelIndex].usedWords = [];
-          labelUsedWords = labels.data[labelIndex].usedWords;
-        }
-        for (var i = 0; i < taskDict.words.length; i++) {
-          if (
-            !labelUsedWords.includes(taskDict.words[i]) &&
-            !stopwords.includes(taskDict.words[i].toLowerCase())
-          ) {
-            labelUsedWords.push(taskDict.words[i].toLowerCase());
-          }
-        }
-
-        // Count usage
-        var labelUsageCount = labels.data[labelIndex].usage;
-        if (labelUsageCount == undefined) {
-          labels.data[labelIndex].usage = 1;
-        } else {
-          var newLabelCount = labelUsageCount + 1;
-          labels.data[labelIndex].usage = newLabelCount;
-        }
-
-        File.writeJSON(labels, labelsPath);
-      }
-      File.writeJSON(sections, sectionsPath);
-    } else {
-      // Projects & Projects with Labels
-      var projectIndex = advancedData.index;
-
-      // Remember used words
-      var projectUsedWords = projects.data[projectIndex].usedWords;
-      if (projectUsedWords == undefined) {
-        projects.data[projectIndex].usedWords = [];
-        var projectUsedWords = projects.data[projectIndex].usedWords;
-      }
-      for (var i = 0; i < taskDict.words.length; i++) {
-        if (
-          !projectUsedWords.includes(taskDict.words[i]) &&
-          !stopwords.includes(taskDict.words[i].toLowerCase())
-        ) {
-          projectUsedWords.push(taskDict.words[i].toLowerCase());
-        }
-      }
-
-      // Count usage
-      var projectUsageCount = projects.data[projectIndex].usage;
-      if (projectUsageCount == undefined) {
-        projects.data[projectIndex].usage = 1;
-      } else {
-        var newProjectCount = projectUsageCount + 1;
-        projects.data[projectIndex].usage = newProjectCount;
-      }
-
-      if (advancedData.type == 'project') {
-        var body = {
-          content: taskDict.content,
-          description: taskDict.description,
-          due_lang: taskDict.lang,
-          due_string: taskDict.dueString,
-          priority: taskDict.prioValue,
-          project_id: advancedData.id,
-        };
-      } else if (advancedData.type == 'projectAndLabel') {
-        var labelName = advancedData.labelName;
-
-        var body = {
-          content: taskDict.content,
-          description: taskDict.description,
-          due_lang: taskDict.lang,
-          due_string: taskDict.dueString,
-          labels: [labelName],
-          priority: taskDict.prioValue,
-          project_id: advancedData.id,
-        };
-
-        var labelIndex = advancedData.labelIndex;
-
-        // Remember project used for the label
-        labels.data[labelIndex].lastUsed = 'project';
-        labels.data[labelIndex].lastUsedCategoryId = advancedData.id;
-
-        // Remember used words
-        var labelUsedWords = labels.data[labelIndex].usedWords;
-        if (labelUsedWords == undefined) {
-          labels.data[labelIndex].usedWords = [];
-          var labelUsedWords = labels.data[labelIndex].usedWords;
-        }
-        for (var i = 0; i < taskDict.words.length; i++) {
-          if (
-            !labelUsedWords.includes(taskDict.words[i]) &&
-            !stopwords.includes(taskDict.words[i].toLowerCase())
-          ) {
-            labelUsedWords.push(taskDict.words[i].toLowerCase());
-          }
-        }
-
-        // Count usage
-        var labelUsageCount = labels.data[labelIndex].usage;
-        if (labelUsageCount == undefined) {
-          labels.data[labelIndex].usage = 1;
-        } else {
-          var newLabelCount = labelUsageCount + 1;
-          labels.data[labelIndex].usage = newLabelCount;
-        }
-
-        File.writeJSON(labels, labelsPath);
-      }
-      File.writeJSON(projects, projectsPath);
-    }
+  if (advancedData) {
+    body = processAdvancedData(advancedData, taskDict, sections, projects);
   } else {
-    var body = {
+    body = {
       content: taskDict.content,
       description: taskDict.description,
       due_lang: taskDict.lang,
@@ -717,15 +412,125 @@ function postTask(advancedData) {
     };
   }
 
-  // Post
-  var result = HTTP.postJSON('https://api.todoist.com/rest/v2/tasks', {
+  const result = HTTP.postJSON('https://api.todoist.com/rest/v2/tasks', {
     body: body,
     headerFields: {
       Authorization: 'Bearer ' + apiToken,
     },
   });
+  processPostResponse(result, sections, projects);
+}
 
-  if (result.error == undefined) {
+function processAdvancedData(advancedData, taskDict, sections, projects) {
+  const labels = File.readJSON(labelsPath);
+  const newWords = taskDict.words.filter((word) => !stopwords.has(word));
+  const labelName = advancedData.labelName;
+  const labelIndex = advancedData.labelIndex;
+  let body;
+
+  // Sections & Section with Labels
+
+  if (advancedData.type.includes('section')) {
+    const sectionIndex = advancedData.index;
+
+    // Remember used words
+    const sectionUsedWords = sections.data[sectionIndex].usedWords || [];
+    sections.data[sectionIndex].usedWords = [
+      ...new Set([...sectionUsedWords, ...newWords]),
+    ];
+
+    // Count usage
+    sections.data[sectionIndex].usage
+      ? sections.data[sectionIndex].usage++
+      : (sections.data[sectionIndex].usage = 1);
+
+    body = {
+      content: taskDict.content,
+      description: taskDict.description,
+      due_lang: taskDict.lang,
+      due_string: taskDict.dueString,
+      priority: taskDict.prioValue,
+      project_id: advancedData.sectionProjectId,
+      section_id: advancedData.id,
+    };
+
+    if (advancedData.type == 'sectionAndLabel') {
+      // Add label to body
+      body.labels = [labelName];
+
+      // Remember section used for the label
+      labels.data[labelIndex].lastUsed = 'section';
+      labels.data[labelIndex].lastUsedSectionId = advancedData.id;
+
+      // Remember used words
+      const labelUsedWords = labels.data[labelIndex].usedWords || [];
+      labels.data[labelIndex].usedWords = [
+        ...new Set([...labelUsedWords, ...newWords]),
+      ];
+
+      // Count usage
+      labels.data[labelIndex].usage
+        ? labels.data[labelIndex].usage++
+        : (labels.data[labelIndex].usage = 1);
+
+      File.writeJSON(labels, labelsPath);
+    }
+
+    File.writeJSON(sections, sectionsPath);
+    return body;
+  }
+
+  // Projects & Projects with Labels
+  const projectIndex = advancedData.index;
+
+  // Remember used words
+  const projectUsedWords = projects.data[projectIndex].usedWords || [];
+  projects.data[projectIndex].usedWords = [
+    ...new Set([...projectUsedWords, ...newWords]),
+  ];
+
+  // Count usage
+  projects.data[projectIndex].usage
+    ? projects.data[projectIndex].usage++
+    : (projects.data[projectIndex].usage = 1);
+
+  body = {
+    content: taskDict.content,
+    description: taskDict.description,
+    due_lang: taskDict.lang,
+    due_string: taskDict.dueString,
+    priority: taskDict.prioValue,
+    project_id: advancedData.id,
+  };
+
+  if (advancedData.type == 'projectAndLabel') {
+    // Add label to body
+    body.labels = [labelName];
+
+    // Remember project used for the label
+    labels.data[labelIndex].lastUsed = 'project';
+    labels.data[labelIndex].lastUsedCategoryId = advancedData.id;
+
+    // Remember used words
+    const labelUsedWords = labels.data[labelIndex].usedWords || [];
+    labels.data[labelIndex].usedWords = [
+      ...new Set([...labelUsedWords, ...newWords]),
+    ];
+
+    // Count usage
+    labels.data[labelIndex].usage
+      ? labels.data[labelIndex].usage++
+      : (labels.data[labelIndex].usage = 1);
+
+    File.writeJSON(labels, labelsPath);
+  }
+
+  File.writeJSON(projects, projectsPath);
+  return body;
+}
+
+function processPostResponse(result, sections, projects) {
+  if (!result.error) {
     if (result.response.status != 200) {
       LaunchBar.displayNotification({
         title: 'Todoist Action Error',
@@ -739,123 +544,107 @@ function postTask(advancedData) {
       if (result.response.status == 401) {
         Action.preferences.apiToken = undefined; // to promt API token entry dialog
       }
-    } else {
-      if (Action.preferences.notifications != false) {
-        // Confirmation notification
-        var data = eval('[' + result.data + ']')[0];
-        var taskId = data.id;
-        var link = 'todoist://showTask?id=' + taskId;
+      return;
+    }
 
-        var projectId = data.project_id;
-        var projects = File.readJSON(projectsPath).data;
-        for (var i = 0; i < projects.length; i++) {
-          var id = projects[i].id;
-          if (projectId == id) {
-            var projectName = projects[i].name;
-            break;
-          }
+    if (Action.preferences.notifications != 'off') {
+      // Confirmation notification
+      const data = eval('[' + result.data + ']')[0];
+      var taskId = data.id;
+      var link = 'todoist://showTask?id=' + taskId;
+
+      // Section & Project
+      const project = projects.data.find((p) => p.id === data.project_id);
+
+      const projectName = project ? project.name : '';
+      const projectString = projectName != 'Inbox' ? `#${projectName}` : '';
+
+      if (data.section_id) {
+        const section = sections.data.find((s) => s.id === data.section_id);
+        if (section) {
+          projectString += '/' + section.name;
         }
+      }
 
-        if (projectName != 'Inbox') {
-          var projectString = '#' + projectName;
-        } else {
-          var projectString = '';
-        }
-
-        if (data.section_id != undefined) {
-          var sections = File.readJSON(sectionsPath).data;
-          for (var i = 0; i < sections.length; i++) {
-            var id = sections[i].id;
-            if (data.section_id == id) {
-              var sectionName = sections[i].name;
-              break;
-            }
-          }
-          projectString = projectString + '/' + sectionName;
-        }
-
-        var dueInfo = data.due;
-        if (dueInfo != undefined) {
-          if (dueInfo.datetime != undefined) {
-            var dueDateTime = LaunchBar.formatDate(new Date(dueInfo.datetime), {
+      // Due
+      const dueInfo = data.due;
+      const dueDateTime = dueInfo
+        ? dueInfo.datetime
+          ? LaunchBar.formatDate(new Date(dueInfo.datetime), {
               relativeDateFormatting: true,
-            });
-          } else {
-            var dueDateTime = LaunchBar.formatDate(new Date(dueInfo.date), {
+            })
+          : LaunchBar.formatDate(new Date(dueInfo.date), {
               relativeDateFormatting: true,
               timeStyle: 'none',
-            });
-          }
-          if (dueInfo.recurring == true) {
-            var notificationString =
-              '⏰ ' +
-              dueDateTime +
-              ' 🔁 ' +
-              dueInfo.string +
-              '\n' +
-              projectString;
-          } else {
-            var notificationString = '⏰ ' + dueDateTime + '\n' + projectString;
-          }
-        } else {
-          var notificationString = projectString;
-        }
+            })
+        : null;
 
-        if (data.labels[0] != undefined) {
-          notificationString = notificationString + ' @' + data.labels[0];
-        }
+      var notificationString = dueInfo
+        ? dueInfo.recurring
+          ? `⏰ ${dueDateTime} 🔁 ${dueInfo.string}\n${projectString}`
+          : `⏰ ${dueDateTime}\n${projectString}`
+        : projectString;
 
-        if (data.priority == 4) {
-          notificationString = '🔴 ' + notificationString;
-        } else if (data.priority == 3) {
-          notificationString = '🟠 ' + notificationString;
-        } else if (data.priority == 2) {
-          notificationString = '🔵 ' + notificationString;
-        }
-
-        // Description
-        if (data.description != undefined) {
-          var descriptionString = data.description;
-
-          // truncate
-          if (descriptionString.length > 40) {
-            var m = descriptionString.match(/.{1,40}/g);
-            descriptionString = m[0] + '…';
-          }
-
-          notificationString = descriptionString + '\n' + notificationString;
-        }
-
-        // Fallback
-        if (notificationString == '') {
-          notificationString = notificationStringFallback;
-        }
-
-        // Send Notification
-        LaunchBar.displayNotification({
-          title: data.content,
-          string: notificationString,
-          url: link,
-        });
+      // Label
+      if (data.labels[0]) {
+        notificationString += ' @' + data.labels[0];
       }
+
+      // Priority
+      const priorityEmojis = {
+        4: '🔴',
+        3: '🟠',
+        2: '🔵',
+      };
+      if (priorityEmojis.hasOwnProperty(data.priority)) {
+        notificationString =
+          priorityEmojis[data.priority] + ' ' + notificationString;
+      }
+
+      // Description
+      if (data.description) {
+        let descriptionString = data.description;
+
+        // truncate
+        if (descriptionString.length > 40) {
+          descriptionString = descriptionString.substring(0, 37) + '…';
+        }
+
+        notificationString = descriptionString + '\n' + notificationString;
+      }
+
+      // Fallback
+      notificationString = notificationString
+        ? notificationString
+        : notificationStringFallback;
+
+      // Send Notification
+      LaunchBar.displayNotification({
+        title: data.content,
+        string: notificationString,
+        url: link,
+      });
     }
-  } else {
-    LaunchBar.displayNotification({
-      title: 'Todoist Action Error',
-      string: result.error,
-    });
+    return;
   }
+
+  LaunchBar.displayNotification({
+    title: 'Todoist Action Error',
+    string: result.error,
+  });
 }
 
 function settings() {
-  if (Action.preferences.notifications == undefined) {
-    var nIcon = 'notiTemplate';
-    var nArgument = 'off';
-    var nSub = nSubOff;
+  let nIcon, nArgument, nSub;
+
+  if (Action.preferences.notifications == 'off') {
+    nIcon = 'notiOffTemplate';
+    nArgument = 'on';
+    nSub = nSubOn;
   } else {
-    var nIcon = 'notiOffTemplate';
-    var nArgument = 'on';
-    var nSub = nSubOn;
+    nIcon = 'notiTemplate';
+    nArgument = 'off';
+    nSub = nSubOff;
   }
 
   return [
@@ -865,6 +654,7 @@ function settings() {
       icon: nIcon,
       action: 'notificationSetting',
       actionArgument: nArgument,
+      alwaysShowsSubtitle: true,
     },
     {
       title: setKey,
@@ -881,40 +671,41 @@ function settings() {
 
 function notificationSetting(nArgument) {
   if (nArgument == 'off') {
-    Action.preferences.notifications = false;
+    Action.preferences.notifications = 'off';
   } else {
     Action.preferences.notifications = undefined;
   }
-  var output = settings();
-  return output;
+  return settings();
 }
 
 function refreshData() {
-  if (apiToken == undefined) {
+  if (!apiToken) {
     setApiKey();
-  } else {
-    return [
-      {
-        title: titleUpdate,
-        subtitle: subUpdate,
-        icon: 'refreshTemplate',
-        action: 'update',
-      },
-      {
-        title: titleReset,
-        subtitle: subReset,
-        icon: 'refreshTemplate',
-        action: 'reset',
-      },
-    ];
+    return;
   }
+  return [
+    {
+      title: titleUpdate,
+      subtitle: subUpdate,
+      icon: 'refreshTemplate',
+      action: 'update',
+      alwaysShowsSubtitle: true,
+    },
+    {
+      title: titleReset,
+      subtitle: subReset,
+      icon: 'refreshTemplate',
+      action: 'reset',
+      alwaysShowsSubtitle: true,
+    },
+  ];
 }
 
 function reset() {
   LaunchBar.hide();
 
   // Projects & Check
-  var projectsOnline = HTTP.getJSON(
+  const projectsOnline = HTTP.getJSON(
     'https://api.todoist.com/rest/v2/projects',
     {
       headerFields: {
@@ -923,33 +714,34 @@ function reset() {
     }
   );
 
-  if (projectsOnline.error != undefined) {
+  if (projectsOnline.error) {
     LaunchBar.alert(projectsOnline.error);
-  } else {
-    File.writeJSON(projectsOnline, projectsPath);
+    return;
+  }
 
-    // Sections
-    var sectionsOnline = HTTP.getJSON(
-      'https://api.todoist.com/rest/v2/sections',
-      {
-        headerFields: {
-          Authorization: 'Bearer ' + apiToken,
-        },
-      }
-    );
-    File.writeJSON(sectionsOnline, sectionsPath);
+  File.writeJSON(projectsOnline, projectsPath);
 
-    // Labels
-    var labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
+  // Sections
+  const sectionsOnline = HTTP.getJSON(
+    'https://api.todoist.com/rest/v2/sections',
+    {
       headerFields: {
         Authorization: 'Bearer ' + apiToken,
       },
-    });
-    File.writeJSON(labelsOnline, labelsPath);
+    }
+  );
+  File.writeJSON(sectionsOnline, sectionsPath);
 
-    // Notification
-    LaunchBar.displayNotification({
-      title: resetNotificationTitle,
-    });
-  }
+  // Labels
+  const labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
+    headerFields: {
+      Authorization: 'Bearer ' + apiToken,
+    },
+  });
+  File.writeJSON(labelsOnline, labelsPath);
+
+  // Notification
+  LaunchBar.displayNotification({
+    title: resetNotificationTitle,
+  });
 }

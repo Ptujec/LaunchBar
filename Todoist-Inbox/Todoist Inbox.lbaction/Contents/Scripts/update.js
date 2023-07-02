@@ -1,18 +1,28 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-12-09
+2023-07-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function update() {
-  const apiToken = Action.preferences.apiToken; // Repeated because if ApiToken is set right before this it returns "undifined"
-
   LaunchBar.hide(); // causes notification not to show when the api key was set just before the updating process
 
+  const apiToken = Action.preferences.apiToken; // Repeated because if ApiToken is set right before this it returns "undifined"
+
+  let newProjectIds,
+    oldProjectIds = [],
+    newSectionIds,
+    oldSectionIds = [],
+    newLabelIds,
+    oldLabelIds = [],
+    updatedProjectNameCount = 0,
+    updatedSectionNameCount = 0,
+    updatedLabelNameCount = 0;
+
   // Projects
-  var projectsOnline = HTTP.getJSON(
+  const projectsOnline = HTTP.getJSON(
     'https://api.todoist.com/rest/v2/projects',
     {
       headerFields: {
@@ -21,60 +31,53 @@ function update() {
     }
   );
 
-  if (projectsOnline.error != undefined) {
+  if (projectsOnline.error) {
     LaunchBar.alert(projectsOnline.error);
+  }
+
+  if (!File.exists(projectsPath)) {
+    File.writeJSON(projectsOnline, projectsPath);
+    newProjectIds = projectsOnline.data; // for Counter
   } else {
-    var updatedProjectNameCount = 0;
+    const projectsLocal = File.readJSON(projectsPath);
 
-    if (!File.exists(projectsPath)) {
-      File.writeJSON(projectsOnline, projectsPath);
-      var newProjectIds = projectsOnline.data; // for Counter
-      var oldProjectIds = [];
-    } else {
-      var projectsLocal = File.readJSON(projectsPath);
-
-      // Update project names
-      for (var i = 0; i < projectsLocal.data.length; i++) {
-        projectsOnline.data.forEach(function (item) {
-          if (item.id == projectsLocal.data[i].id) {
-            if (item.name != projectsLocal.data[i].name) {
-              projectsLocal.data[i].name = item.name;
-              updatedProjectNameCount++;
-            }
-          }
-        });
-      }
-
-      // Add new projects
-      var localProjectIds = projectsLocal.data.map((ch) => ch.id);
-      var newProjectIds = projectsOnline.data.filter(
-        (ch) => !localProjectIds.includes(ch.id)
+    // Update project names
+    projectsLocal.data = projectsLocal.data.map((localProject) => {
+      const onlineProject = projectsOnline.data.find(
+        (project) => project.id === localProject.id
       );
-
-      for (var i = 0; i < newProjectIds.length; i++) {
-        projectsLocal.data.push(newProjectIds[i]);
+      if (onlineProject && localProject.name !== onlineProject.name) {
+        localProject.name = onlineProject.name;
+        updatedProjectNameCount++;
       }
+      return localProject;
+    });
 
-      // Remove old projects
-      var onlineProjectIds = projectsOnline.data.map((ch) => ch.id);
-      var oldProjectIds = projectsLocal.data.filter(
-        (ch) => !onlineProjectIds.includes(ch.id)
-      );
+    // Add new projects
+    const localProjectIds = projectsLocal.data.map((ch) => ch.id);
+    newProjectIds = projectsOnline.data.filter(
+      (ch) => !localProjectIds.includes(ch.id)
+    );
 
-      for (var i = 0; i < oldProjectIds.length; i++) {
-        for (var j = 0; j < projectsLocal.data.length; j++) {
-          if (projectsLocal.data[j] == oldProjectIds[i]) {
-            projectsLocal.data.splice(j, 1);
-          }
-        }
-      }
-
-      File.writeJSON(projectsLocal, projectsPath);
+    for (const id of newProjectIds) {
+      projectsLocal.data.push(id);
     }
+
+    // Remove old projects
+    const onlineProjectIds = projectsOnline.data.map((ch) => ch.id);
+    oldProjectIds = projectsLocal.data.filter(
+      (ch) => !onlineProjectIds.includes(ch.id)
+    );
+
+    projectsLocal.data = projectsLocal.data.filter(
+      (project) => !oldProjectIds.includes(project)
+    );
+
+    File.writeJSON(projectsLocal, projectsPath);
   }
 
   // Sections
-  var sectionsOnline = HTTP.getJSON(
+  const sectionsOnline = HTTP.getJSON(
     'https://api.todoist.com/rest/v2/sections',
     {
       headerFields: {
@@ -83,56 +86,51 @@ function update() {
     }
   );
 
-  if (sectionsOnline.error != undefined) {
+  if (sectionsOnline.error) {
     LaunchBar.alert(sectionsOnline.error);
+  }
+
+  if (!File.exists(sectionsPath)) {
+    File.writeJSON(sectionsOnline, sectionsPath);
+    newSectionIds = sectionsOnline.data;
   } else {
-    var updatedSectionNameCount = 0;
+    const sectionsLocal = File.readJSON(sectionsPath);
 
-    if (!File.exists(sectionsPath)) {
-      File.writeJSON(sectionsOnline, sectionsPath);
-      var newSectionIds = sectionsOnline.data;
-      var oldSectionIds = [];
-    } else {
-      var sectionsLocal = File.readJSON(sectionsPath);
+    // Update section names
+    let updatedSectionNameCount = 0;
 
-      // Update section names
-      for (var i = 0; i < sectionsLocal.data.length; i++) {
-        sectionsOnline.data.forEach(function (item) {
-          if (item.id == sectionsLocal.data[i].id) {
-            if (item.name != sectionsLocal.data[i].name) {
-              sectionsLocal.data[i].name = item.name;
-              updatedSectionNameCount++;
-            }
-          }
-        });
-      }
-
-      // Add new sections
-      var localSectionIds = sectionsLocal.data.map((ch) => ch.id);
-      var newSectionIds = sectionsOnline.data.filter(
-        (ch) => !localSectionIds.includes(ch.id)
+    sectionsLocal.data = sectionsLocal.data.map((localSection) => {
+      const onlineSection = sectionsOnline.data.find(
+        (section) => section.id === localSection.id
       );
-
-      for (var i = 0; i < newSectionIds.length; i++) {
-        sectionsLocal.data.push(newSectionIds[i]);
+      if (onlineSection && onlineSection.name !== localSection.name) {
+        localSection.name = onlineSection.name;
+        updatedSectionNameCount++;
       }
+      return localSection;
+    });
 
-      // Remove old sectionss
-      var onlineSectionIds = sectionsOnline.data.map((ch) => ch.id);
-      var oldSectionIds = sectionsLocal.data.filter(
-        (ch) => !onlineSectionIds.includes(ch.id)
-      );
+    // Add new sections
+    const localSectionIds = sectionsLocal.data.map((ch) => ch.id);
+    newSectionIds = sectionsOnline.data.filter(
+      (ch) => !localSectionIds.includes(ch.id)
+    );
 
-      for (var i = 0; i < oldSectionIds.length; i++) {
-        for (var j = 0; j < sectionsLocal.data.length; j++) {
-          if (sectionsLocal.data[j] == oldSectionIds[i]) {
-            sectionsLocal.data.splice(j, 1);
-          }
-        }
-      }
-
-      File.writeJSON(sectionsLocal, sectionsPath);
+    for (const id of newSectionIds) {
+      sectionsLocal.data.push(id);
     }
+
+    // Remove old sectionss
+    const onlineSectionIds = sectionsOnline.data.map((ch) => ch.id);
+    oldSectionIds = sectionsLocal.data.filter(
+      (ch) => !onlineSectionIds.includes(ch.id)
+    );
+
+    sectionsLocal.data = sectionsLocal.data.filter(
+      (section) => !oldSectionIds.includes(section)
+    );
+
+    File.writeJSON(sectionsLocal, sectionsPath);
   }
 
   // Labels
@@ -142,60 +140,54 @@ function update() {
     },
   });
 
-  if (labelsOnline.error != undefined) {
+  if (labelsOnline.error) {
     LaunchBar.alert(labelsOnline.error);
+  }
+
+  if (!File.exists(labelsPath)) {
+    File.writeJSON(labelsOnline, labelsPath);
+    newLabelIds = labelsOnline.data;
   } else {
-    var updatedLabelNameCount = 0;
+    const labelsLocal = File.readJSON(labelsPath);
 
-    if (!File.exists(labelsPath)) {
-      File.writeJSON(labelsOnline, labelsPath);
-      var newLabelIds = labelsOnline.data;
-      var oldLabelIds = [];
-    } else {
-      var labelsLocal = File.readJSON(labelsPath);
+    // Update label names
 
-      // Update label names
-      for (var i = 0; i < labelsLocal.data.length; i++) {
-        labelsOnline.data.forEach(function (item) {
-          if (item.id == labelsLocal.data[i].id) {
-            if (item.name != labelsLocal.data[i].name) {
-              labelsLocal.data[i].name = item.name;
-              updatedLabelNameCount++;
-            }
-          }
-        });
-      }
-
-      // Add new labels
-      var localLabelIds = labelsLocal.data.map((ch) => ch.id);
-      var newLabelIds = labelsOnline.data.filter(
-        (ch) => !localLabelIds.includes(ch.id)
+    labelsLocal.data = labelsLocal.data.map((localLabel) => {
+      const onlineLabel = labelsOnline.data.find(
+        (label) => label.id === localLabel.id
       );
-
-      for (var i = 0; i < newLabelIds.length; i++) {
-        labelsLocal.data.push(newLabelIds[i]);
+      if (onlineLabel && onlineLabel.name !== localLabel.name) {
+        localLabel.name = onlineLabel.name;
+        updatedLabelNameCount++;
       }
+      return localLabel;
+    });
 
-      // Remove old labels
-      var onlineLabelIds = labelsOnline.data.map((ch) => ch.id);
-      var oldLabelIds = labelsLocal.data.filter(
-        (ch) => !onlineLabelIds.includes(ch.id)
-      );
+    // Add new labels
+    const localLabelIds = labelsLocal.data.map((ch) => ch.id);
+    newLabelIds = labelsOnline.data.filter(
+      (ch) => !localLabelIds.includes(ch.id)
+    );
 
-      for (var i = 0; i < oldLabelIds.length; i++) {
-        for (var j = 0; j < labelsLocal.data.length; j++) {
-          if (labelsLocal.data[j] == oldLabelIds[i]) {
-            labelsLocal.data.splice(j, 1);
-          }
-        }
-      }
-
-      File.writeJSON(labelsLocal, labelsPath);
+    for (const id of newLabelIds) {
+      labelsLocal.data.push(id);
     }
+
+    // Remove old labels
+    const onlineLabelIds = labelsOnline.data.map((ch) => ch.id);
+    oldLabelIds = labelsLocal.data.filter(
+      (ch) => !onlineLabelIds.includes(ch.id)
+    );
+
+    labelsLocal.data = labelsLocal.data.filter(
+      (label) => !oldLabelIds.includes(label)
+    );
+
+    File.writeJSON(labelsLocal, labelsPath);
   }
 
   // Changes Notification
-  var changes =
+  const changes =
     newSectionIds.length +
     oldSectionIds.length +
     newLabelIds.length +

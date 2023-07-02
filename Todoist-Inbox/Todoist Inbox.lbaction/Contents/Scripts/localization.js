@@ -1,68 +1,95 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-12-09
+2023-07-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
+let missingArg,
+  p1,
+  p2,
+  p3,
+  lang,
+  refresh,
+  titleReset,
+  subReset,
+  titleUpdate,
+  subUpdate,
+  resetNotificationTitle,
+  updateNotificationTitle,
+  updateNotificationString,
+  setKey,
+  dueStringTitle,
+  notiSettings,
+  nSubOff,
+  nSubOn,
+  notificationStringFallback,
+  inboxName,
+  done,
+  updateNeeded,
+  dateStrings,
+  stopwords;
+
 if (LaunchBar.currentLocale == 'de') {
-  var missingArg = 'Die Aufgabe hat keinen Namen!';
-  var p1 = 'Priorität 1';
-  var p2 = 'Priorität 2';
-  var p3 = 'Priorität 3';
-  var lang = 'de';
-  var refresh = 'Projekte, Abschitte & Etiketten aktualisieren';
-  var titleReset = 'Zurücksetzen';
-  var subReset = 'Nutzungsdaten werden zurückgesetzt!';
-  var titleUpdate = 'Aktualisieren';
-  var subUpdate =
+  missingArg = 'Die Aufgabe hat keinen Namen!';
+  p1 = 'Priorität 1';
+  p2 = 'Priorität 2';
+  p3 = 'Priorität 3';
+  lang = 'de';
+  refresh = 'Projekte, Abschitte & Etiketten aktualisieren';
+  titleReset = 'Zurücksetzen';
+  subReset = 'Nutzungsdaten werden zurückgesetzt!';
+  titleUpdate = 'Aktualisieren';
+  subUpdate =
     'Projekte, Abschnitte und Etiketten werden aktualisiert. Nutzungsdaten bleiben erhalten.';
-  var resetNotificationTitle =
+  resetNotificationTitle =
     'Projekte, Abschitte & Etiketten wurden zurückgesetzt.';
-  var updateNotificationTitle =
+  updateNotificationTitle =
     'Projekte, Abschitte & Etiketten wurden aktualisiert.';
-  var updateNotificationString = ' Änderung(en)';
-  var setKey = 'API-Token erneuern';
-  var dueStringTitle = ', Fällig: ';
-  var notiSettings = 'Bestätigungsmitteilungen';
-  var nSubOff = 'Eingabetaste drücken, um Mitteilungen auszuschalten.';
-  var nSubOn = 'Eingabetaste drücken, um Mitteilungen anzuschalten.';
-  var notificationStringFallback = 'wurde zu Todoist hinzugefügt!';
-  var inboxName = 'Eingang';
-  var done = 'Fertig!';
-  var updateNeeded =
+  updateNotificationString = ' Änderung(en)';
+  setKey = 'API-Token erneuern';
+  dueStringTitle = 'Fällig: ';
+  notiSettings = 'Bestätigungsmitteilungen';
+  nSubOff = 'Eingabetaste drücken, um Mitteilungen auszuschalten.';
+  nSubOn = 'Eingabetaste drücken, um Mitteilungen anzuschalten.';
+  notificationStringFallback = 'wurde zu Todoist hinzugefügt!';
+  inboxName = 'Eingang';
+  done = 'Fertig!';
+  updateNeeded =
     'Einen Moment, bitte! Lokale Daten müssen aktualisiert werden.';
 
-  var dateStrings = dateStringsJSON.de;
-  var stopwords = stopwordsJSON.de.concat(
-    stopwordsJSON.en.concat(stopwordsJSON.social)
-  );
+  dateStrings = dateStringsJSON.de;
+  stopwords = new Set([
+    ...stopwordsJSON.de,
+    ...stopwordsJSON.en,
+    ...stopwordsJSON.social,
+  ]);
 } else {
-  var missingArg = 'This task has no name!';
-  var p1 = 'Priority 1';
-  var p2 = 'Priority 2';
-  var p3 = 'Priority 3';
-  var lang = 'en';
-  var refresh = 'Refresh projects, sections & labels.';
-  var titleReset = 'Reset';
-  var subReset = 'A complete reset including usage data.';
-  var titleUpdate = 'Update';
-  var subUpdate =
+  missingArg = 'This task has no name!';
+  p1 = 'Priority 1';
+  p2 = 'Priority 2';
+  p3 = 'Priority 3';
+  lang = 'en';
+  refresh = 'Refresh projects, sections & labels.';
+  titleReset = 'Reset';
+  subReset = 'A complete reset including usage data.';
+  titleUpdate = 'Update';
+  subUpdate =
     'Projects, sections and lables will be updated without impacting usage data.';
-  var resetNotificationTitle = 'Projects, sections & labels reset.';
-  var updateNotificationTitle = 'Projects, sections & labels updated.';
-  var updateNotificationString = ' change(s)';
-  var setKey = 'Reset API-Token';
-  var dueStringTitle = ', Due: ';
-  var notiSettings = 'Confirmation Notifications';
-  var nSubOff = 'Hit enter to turn off notifications';
-  var nSubOn = 'Hit enter to turn on notifications';
-  var notificationStringFallback = 'has been added to Todoist!';
-  var inboxName = 'Inbox';
-  var done = 'Done!';
-  var updateNeeded = 'Just a second! Local data needs to be updated';
+  resetNotificationTitle = 'Projects, sections & labels reset.';
+  updateNotificationTitle = 'Projects, sections & labels updated.';
+  updateNotificationString = ' change(s)';
+  setKey = 'Reset API-Token';
+  dueStringTitle = 'Due: ';
+  notiSettings = 'Confirmation Notifications';
+  nSubOff = 'Hit enter to turn off notifications';
+  nSubOn = 'Hit enter to turn on notifications';
+  notificationStringFallback = 'has been added to Todoist!';
+  inboxName = 'Inbox';
+  done = 'Done!';
+  updateNeeded = 'Just a second! Local data needs to be updated';
 
-  var dateStrings = dateStringsJSON.en;
-  var stopwords = stopwordsJSON.en.concat(stopwordsJSON.social);
+  dateStrings = dateStringsJSON.en;
+  stopwords = new Set([...stopwordsJSON.en, ...stopwordsJSON.social]);
 }
