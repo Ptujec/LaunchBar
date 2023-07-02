@@ -11,9 +11,10 @@ function run(argument) {
 
   json = JSON.parse(json);
 
-  json.forEach(function (item) {
+  for (const item of json) {
     item.subtitle = item.url;
-  });
+    item.alwaysShowsSubtitle = true;
+  }
 
   return json;
 }
