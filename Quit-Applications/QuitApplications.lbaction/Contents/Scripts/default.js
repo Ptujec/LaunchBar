@@ -105,7 +105,7 @@ function showOptions() {
   const showAlert = contextJSON.showAlert;
   const keepCurrent = contextJSON.keepCurrent;
   const activate = contextJSON.activate;
-  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  const keepFinderWindowsOption = contextJSON.keepFinderWindowsOption;
 
   // Alert
   const alert = [
@@ -114,6 +114,7 @@ function showOptions() {
       subtitle: 'Show alert before quitting.'.localize(),
       action: 'toggleAlert',
       icon: 'alertTemplate',
+      alwaysShowsSubtitle: true,
     },
   ];
 
@@ -127,6 +128,7 @@ function showOptions() {
       subtitle: 'Activate Appliction before closing.'.localize(),
       action: 'toggleActivate',
       icon: 'activateTemplate',
+      alwaysShowsSubtitle: true,
     },
   ];
 
@@ -140,6 +142,7 @@ function showOptions() {
       subtitle: "Don't quit the frontmost application.".localize(),
       action: 'toggleCurrent',
       icon: 'currentTemplate',
+      alwaysShowsSubtitle: true,
     },
   ];
 
@@ -150,14 +153,14 @@ function showOptions() {
   const finderWindows = [
     {
       title: 'Finder Windows'.localize(),
-      subtitle: 'Close Finder Windows.'.localize(),
-      action: 'toggleCloseFinderWindows',
-      // icon: 'com.apple.finder',
+      subtitle: 'Keep Finder Windows.'.localize(),
+      action: 'toggleKeepFinderWindows',
       icon: 'windowStackTemplate',
+      alwaysShowsSubtitle: true,
     },
   ];
 
-  if (closeFinderWindowsOption == true)
+  if (keepFinderWindowsOption == true || keepFinderWindowsOption == undefined)
     finderWindows[0].label = contextTitle.localize() + ': ✔︎';
 
   // Add Applications manually
@@ -167,6 +170,7 @@ function showOptions() {
       subtitle: 'Add application missing in this list.'.localize(),
       icon: 'addTemplate',
       action: 'addApplication',
+      alwaysShowsSubtitle: true,
       actionRunsInBackground: true,
     },
   ];
@@ -190,6 +194,7 @@ function showOptions() {
       action: 'toggleExclude',
       actionArgument: item.path,
       label: contextTitle.localize() + ': ✔︎',
+      alwaysShowsSubtitle: true,
     });
     exList.push(item.path);
     return true;
@@ -339,12 +344,12 @@ function toggleActivate(path) {
   return showOptions();
 }
 
-function toggleCloseFinderWindows(path) {
+function toggleKeepFinderWindows(path) {
   const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  const keepFinderWindowsOption = contextJSON.keepFinderWindowsOption;
 
-  contextJSON.closeFinderWindowsOption =
-    closeFinderWindowsOption == true ? false : true;
+  contextJSON.keepFinderWindowsOption =
+    keepFinderWindowsOption == false ? true : false;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
   return showOptions();
@@ -377,9 +382,8 @@ function toggleExclude(path) {
 function alert(exclusions) {
   const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
   const keepCurrent = contextJSON.keepCurrent;
-
-  const closeFinderWindowsOption =
-    contextJSON.closeFinderWindowsOption || false;
+  const keepFinderWindowsOption =
+    contextJSON.keepFinderWindowsOption == false ? false : true;
 
   let allAppsAS =
     'tell application "System Events" \n' +
@@ -409,7 +413,7 @@ function alert(exclusions) {
 
   let returnAS = 'return toQuit';
 
-  if (closeFinderWindowsOption == true) {
+  if (keepFinderWindowsOption == false) {
     allAppsAS = allAppsAS + countWindowsAS;
     returnAS = returnAS + ' & windowCount';
   }
@@ -450,8 +454,8 @@ function alert(exclusions) {
     toQuit = appleScriptResult.join(', ');
   }
 
-  if (toQuit || closeFinderWindowsOption == true) {
-    if (closeFinderWindowsOption == true && toQuit != '') {
+  if (toQuit || keepFinderWindowsOption == false) {
+    if (keepFinderWindowsOption == false && toQuit) {
       if (toClose > 0) {
         dialog =
           'Quit '.localize() +
@@ -462,7 +466,7 @@ function alert(exclusions) {
       } else {
         dialog = toQuit;
       }
-    } else if (closeFinderWindowsOption == false && toQuit != '') {
+    } else if (keepFinderWindowsOption == true && toQuit) {
       dialog = toQuit;
     } else {
       if (toClose > 0) {
@@ -488,13 +492,12 @@ function alert(exclusions) {
         LaunchBar.hide();
         quitApplications(exclusions);
       case 1:
-        // LaunchBar.hide();
         break;
     }
     return;
   }
 
-  if (closeFinderWindowsOption == false) {
+  if (keepFinderWindowsOption == true) {
     LaunchBar.alert('No Application to hide.'.localize());
     LaunchBar.hide();
     return;
@@ -509,7 +512,7 @@ function quitApplications(exclusions) {
   LaunchBar.hide();
 
   const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  const keepFinderWindowsOption = contextJSON.keepFinderWindowsOption;
   const keepCurrent = contextJSON.keepCurrent;
   const activate = contextJSON.activate;
 
@@ -575,7 +578,7 @@ function quitApplications(exclusions) {
     appleScript = allAppsAS + endTellSysEventsAS + exclusionsAS + quitAS;
   }
 
-  if (closeFinderWindowsOption == true) {
+  if (keepFinderWindowsOption == false) {
     appleScript = closeFinderWindowsAS + appleScript;
   }
 
