@@ -9,26 +9,19 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 const finbarCLI = '/Applications/Finbar.app/Contents/MacOS/finbar-cli';
 
 function run() {
-  var list = JSON.parse(LaunchBar.execute(finbarCLI, 'list'));
+  const list = JSON.parse(LaunchBar.execute(finbarCLI, 'list'));
 
-  var recentItems = Action.preferences.recentItems;
+  const recentItems = Action.preferences.recentItems;
 
-  var recentUIDs = [];
-  if (recentItems != undefined) {
-    recentItems.forEach(function (item) {
-      recentUIDs.push(item.bundleID + '.' + item.indices.join('.'));
-    });
-  }
+  const recentUIDs = recentItems
+    ? recentItems.map((item) => item.bundleID + '.' + item.indices.join('.'))
+    : [];
 
   const processedList = list
     .map((item) => {
       const uID = item.bundleID + '.' + item.indices.join('.');
       const sub = item.path.join(' > ');
-      let title = item.title;
-
-      if (item.mark != undefined) {
-        title = title + ' ' + item.mark;
-      }
+      const title = item.mark ? `${item.title} ${item.mark}` : item.title;
 
       if (
         item.indices[1] != 0 &&
@@ -40,8 +33,8 @@ function run() {
         !item.path.includes('Dienste')
       ) {
         const pushData = {
-          uID: uID,
-          title: title,
+          uID,
+          title,
           subtitle: sub,
           icon: item.bundleID,
           action: 'click',
@@ -51,16 +44,17 @@ function run() {
             title: item.title,
           },
           actionRunsInBackground: true,
+          alwaysShowsSubtitle: true,
         };
 
-        if (item.shortcut != undefined) {
+        if (item.shortcut) {
           pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
         }
 
         return pushData;
       }
     })
-    .filter((item) => item !== undefined);
+    .filter((item) => item);
 
   const resultRecent = processedList.filter((item) =>
     recentUIDs.includes(item.uID)
@@ -69,26 +63,16 @@ function run() {
     (item) => !recentUIDs.includes(item.uID)
   );
 
-  const result = resultRecent.concat(resultAll);
-  return result;
+  return [...resultRecent, ...resultAll];
 }
 
 function click(item) {
-  if (item.bundleID != 'at.obdev.LaunchBar') {
-    LaunchBar.hide();
-  }
+  if (item.bundleID != 'at.obdev.LaunchBar') LaunchBar.hide();
 
   /// Remember Used Menu Item (per App)
-  var recentItems = Action.preferences.recentItems;
-  if (recentItems == undefined) {
-    recentItems = [];
-  }
+  let recentItems = Action.preferences.recentItems || [];
 
-  recentItems.forEach(function (item2, index) {
-    if (item2.bundleID == item.bundleID) {
-      recentItems.splice(index, 1);
-    }
-  });
+  recentItems = recentItems.filter((item2) => item2.bundleID !== item.bundleID);
 
   recentItems.push(item);
   Action.preferences.recentItems = recentItems;
