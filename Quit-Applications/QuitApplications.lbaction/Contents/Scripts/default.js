@@ -11,62 +11,59 @@ String.prototype.localizationTable = 'default';
 const textFilePath = Action.supportPath + '/contexts.txt';
 
 function run() {
-  var firstrun = Action.preferences.firstrun;
+  const firstrun = Action.preferences.firstrun;
 
   // Add Safari Location on Ventura and above
   if (parseInt(LaunchBar.systemVersion) > 12) {
     const safariLocation =
       '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app';
-    var customApps = Action.preferences.customApps;
-    if (customApps == undefined) {
-      var customApps = [];
-    }
-    if (!customApps.includes(safariLocation)) {
-      customApps.push(safariLocation);
-    }
+    let customApps = Action.preferences.customApps || [];
+    if (!customApps.includes(safariLocation)) customApps.push(safariLocation);
     Action.preferences.customApps = customApps;
   }
 
   if (firstrun == undefined || !File.exists(textFilePath)) {
     LaunchBar.hide();
     Action.preferences.firstrun = false;
-    var text = File.readText(Action.path + '/Contents/Resources/contexts.txt');
+    const text = File.readText(
+      Action.path + '/Contents/Resources/contexts.txt'
+    );
     File.writeText(text, textFilePath);
-    LaunchBar.openURL(File.fileURLForPath(textFilePath));
-  } else if (LaunchBar.options.alternateKey) {
+    LaunchBar.openURL(File.fileURLForPath(textFilePath), 'BBEdit');
+    return;
+  }
+
+  if (LaunchBar.options.alternateKey) {
     LaunchBar.hide();
     LaunchBar.openURL(File.fileURLForPath(textFilePath), 'BBEdit');
-  } else {
-    // Show Contexts
-    var names = File.readText(textFilePath).split('\n');
-    var result = [];
-    names.forEach(function (item) {
-      if (!item.startsWith('--') && item != '') {
-        var contextTitle = item.split(':')[0];
-        var icon = item.split(':')[1];
-        if (icon == undefined) {
-          icon = 'iconTemplate';
-        } else {
-          icon = icon.trim();
-        }
-        result.push({
-          title: contextTitle.localize(),
-          subtitle:
-            'Quits applications not in "'.localize() +
-            contextTitle.localize() +
-            '". (Edit: ⌥⏎)'.localize(),
-          icon: icon,
-          action: 'main',
-          actionArgument: contextTitle,
-        });
-      }
-    });
-    return result;
+    return;
   }
+
+  // Show Contexts
+  const names = File.readText(textFilePath).split('\n');
+  return names
+    .filter((item) => !item.startsWith('--') && item)
+    .map((item) => {
+      let [contextTitle, icon] = item.split(':');
+      icon = icon ? icon.trim() : 'iconTemplate';
+
+      return {
+        title: contextTitle.localize(),
+        subtitle:
+          'Quits applications not in "'.localize() +
+          contextTitle.localize() +
+          '". (Edit: ⌥ ⏎)'.localize(),
+        icon,
+        action: 'main',
+        actionArgument: contextTitle,
+        alwaysShowsSubtitle: true,
+      };
+    });
 }
 
 function main(contextTitle) {
-  var contextJSONFile = Action.supportPath + '/' + contextTitle + '.json';
+  const contextJSONFile = `${Action.supportPath}/${contextTitle}.json`;
+
   Action.preferences.contextJSONFile = contextJSONFile;
 
   if (LaunchBar.options.alternateKey || !File.exists(contextJSONFile)) {
@@ -74,43 +71,44 @@ function main(contextTitle) {
 
     if (!File.exists(contextJSONFile)) {
       // Create
-      var data = {
+      const data = {
         title: contextTitle,
         apps: [],
       };
       File.writeJSON(data, contextJSONFile);
     }
     // Modifiy
-    var output = showOptions();
-    return output;
+    return showOptions();
+  }
+
+  // Launch
+  const contextJSON = File.readJSON(contextJSONFile);
+  const showAlert = contextJSON.showAlert;
+  const apps = contextJSON.apps;
+
+  const exclusions = ['com.apple.finder', 'at.obdev.LaunchBar'];
+
+  for (const item of apps) {
+    exclusions.push(item.id);
+  }
+
+  if (showAlert == true || showAlert == undefined) {
+    alert(exclusions);
   } else {
-    // Launch
-    var contextJSON = File.readJSON(contextJSONFile);
-    var showAlert = contextJSON.showAlert;
-    var apps = contextJSON.apps;
-
-    var exclusions = ['com.apple.finder', 'at.obdev.LaunchBar'];
-
-    apps.forEach(function (item) {
-      exclusions.push(item.id);
-    });
-
-    if (showAlert == true || showAlert == undefined) {
-      alert(exclusions);
-    } else {
-      quitApplications(exclusions);
-    }
+    quitApplications(exclusions);
   }
 }
 
 function showOptions() {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var contextTitle = contextJSON.title;
-  var showAlert = contextJSON.showAlert;
-  var keepCurrent = contextJSON.keepCurrent;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const contextTitle = contextJSON.title;
+  const showAlert = contextJSON.showAlert;
+  const keepCurrent = contextJSON.keepCurrent;
+  const activate = contextJSON.activate;
+  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
 
   // Alert
-  var alert = [
+  const alert = [
     {
       title: 'Show Alert'.localize(),
       subtitle: 'Show alert before quitting.'.localize(),
@@ -119,15 +117,11 @@ function showOptions() {
     },
   ];
 
-  if (showAlert == true || showAlert == undefined) {
-    // alert[0].label = '✔︎';
+  if (showAlert == true || showAlert == undefined)
     alert[0].label = contextTitle.localize() + ': ✔︎';
-  }
 
   // Activate Applications
-  var activate = contextJSON.activate;
-
-  var activateOption = [
+  const activateOption = [
     {
       title: 'Activate Application'.localize(),
       subtitle: 'Activate Appliction before closing.'.localize(),
@@ -136,12 +130,11 @@ function showOptions() {
     },
   ];
 
-  if (activate == true) {
+  if (activate == true)
     activateOption[0].label = contextTitle.localize() + ': ✔︎';
-  }
 
   // Currently Frontmost Application
-  var current = [
+  const current = [
     {
       title: 'Frontmost Application'.localize(),
       subtitle: "Don't quit the frontmost application.".localize(),
@@ -150,14 +143,11 @@ function showOptions() {
     },
   ];
 
-  if (keepCurrent == true || keepCurrent == undefined) {
+  if (keepCurrent == true || keepCurrent == undefined)
     current[0].label = contextTitle.localize() + ': ✔︎';
-  }
 
   // Finder Windows
-  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
-
-  var finderWindows = [
+  const finderWindows = [
     {
       title: 'Finder Windows'.localize(),
       subtitle: 'Close Finder Windows.'.localize(),
@@ -167,12 +157,11 @@ function showOptions() {
     },
   ];
 
-  if (closeFinderWindowsOption == true) {
+  if (closeFinderWindowsOption == true)
     finderWindows[0].label = contextTitle.localize() + ': ✔︎';
-  }
 
   // Add Applications manually
-  var addApp = [
+  const addApp = [
     {
       title: 'Add Unlisted Application'.localize(),
       subtitle: 'Add application missing in this list.'.localize(),
@@ -183,145 +172,130 @@ function showOptions() {
   ];
 
   // Excluded Applications
-  var apps = contextJSON.apps;
+  let excludedApps = [];
+  let exList = [];
+  let contextApps = contextJSON.apps || [];
 
-  var resultEx = [];
-  var exList = [];
-
-  if (apps != undefined) {
-    apps.forEach(function (item, index, apps) {
-      if (!File.exists(item.path)) {
-        // remove deleted apps from the list
-        apps.splice(index, 1);
-      } else {
-        var title = File.displayName(item.path).replace('.app', '');
-        resultEx.push({
-          title: title,
-          subtitle: title + ' will keep running'.localize(),
-          path: item.path,
-          icon: item.id,
-          action: 'toggleExclude',
-          actionArgument: item.path,
-          label: contextTitle.localize() + ': ✔︎',
-        });
-        exList.push(item.path);
-      }
-    });
-
-    contextJSON.apps = apps;
-    File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-    resultEx.sort(function (a, b) {
-      return a.title > b.title;
-    });
-  }
-
-  // Other Applications
-  var result = [];
-
-  // Manually Added Applications
-  var customApps = Action.preferences.customApps;
-
-  if (customApps != undefined) {
-    customApps.forEach(function (item, index, customApps) {
-      var path = item;
-      var title = File.displayName(path).replace('.app', '');
-      var infoPlistPath = path + '/Contents/Info.plist';
-
-      if (!File.exists(infoPlistPath)) {
-        // remove deleted apps from the list
-        customApps.splice(index, 1);
-      } else {
-        var infoPlist = File.readPlist(infoPlistPath);
-        var appID = infoPlist.CFBundleIdentifier;
-
-        if (!exList.includes(path)) {
-          result.push({
-            title: title,
-            path: path,
-            icon: appID,
-            action: 'toggleExclude',
-            actionArgument: path,
-          });
-        }
-      }
-    });
-  }
-
-  // System Applications
-  var sysAppsPath = '/System/Applications/';
-  var sysApps = File.getDirectoryContents(sysAppsPath);
-
-  sysApps.forEach(function (item) {
-    if (item.endsWith('.app')) {
-      var path = sysAppsPath + item;
-      var title = File.displayName(path).replace('.app', '');
-
-      var infoPlistPath = path + '/Contents/Info.plist';
-      var infoPlist = File.readPlist(infoPlistPath);
-
-      var agentApp = infoPlist.LSUIElement;
-      // var appType = infoPlist.LSApplicationCategoryType;
-      var appID = infoPlist.CFBundleIdentifier;
-
-      if (
-        !exList.includes(path) &&
-        title != 'LaunchBar' &&
-        // appType != 'public.app-category.utilities' &&
-        agentApp != true
-      ) {
-        result.push({
-          title: title,
-          path: path,
-          icon: appID,
-          action: 'toggleExclude',
-          actionArgument: path,
-        });
-      }
+  contextJSON.apps = contextApps.filter((item) => {
+    if (!File.exists(item.path)) {
+      // remove deleted apps from the list
+      return false;
     }
+    const title = File.displayName(item.path).replace('.app', '');
+    excludedApps.push({
+      title,
+      subtitle: title + ' will keep running'.localize(),
+      path: item.path,
+      icon: item.id,
+      action: 'toggleExclude',
+      actionArgument: item.path,
+      label: contextTitle.localize() + ': ✔︎',
+    });
+    exList.push(item.path);
+    return true;
   });
 
+  File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
+
+  excludedApps.sort((a, b) => a.title > b.title);
+
+  // Included Applications
+  let includedApps = [];
+
+  // Manually Added Applications
+  let customApps = Action.preferences.customApps || [];
+
+  Action.preferences.customApps = customApps.filter((item, index) => {
+    const path = item;
+    const title = File.displayName(path).replace('.app', '');
+    const infoPlistPath = `${path}/Contents/Info.plist`;
+    if (!File.exists(infoPlistPath)) return false; // remove deleted apps from the list
+
+    const infoPlist = File.readPlist(infoPlistPath);
+    const appID = infoPlist.CFBundleIdentifier;
+
+    if (!exList.includes(path)) {
+      includedApps.push({
+        title,
+        path,
+        icon: appID,
+        action: 'toggleExclude',
+        actionArgument: path,
+      });
+    }
+
+    return true;
+  });
+
+  // System Applications
+  const sysAppsPath = '/System/Applications/';
+  const sysApps = File.getDirectoryContents(sysAppsPath);
+  includedApps = getApplications(sysAppsPath, sysApps, includedApps, exList);
+
   // Installed Applications
-  var installedAppsPath = '/Applications/';
-  var installedApps = File.getDirectoryContents(installedAppsPath);
+  const installedAppsPath = '/Applications/';
+  const installedApps = File.getDirectoryContents(installedAppsPath);
+  includedApps = getApplications(
+    installedAppsPath,
+    installedApps,
+    includedApps,
+    exList
+  );
 
-  installedApps.forEach(function (item) {
+  // Utility Applications
+  const utilityAppsPath = '/System/Applications/Utilities/';
+  const utilityApps = File.getDirectoryContents(utilityAppsPath);
+
+  includedApps = getApplications(
+    utilityAppsPath,
+    utilityApps,
+    includedApps,
+    exList
+  );
+
+  includedApps.sort((a, b) => a.title > b.title);
+
+  return [
+    ...alert,
+    ...activateOption,
+    ...current,
+    ...finderWindows,
+    ...addApp,
+    ...excludedApps,
+    ...includedApps,
+  ];
+}
+
+function getApplications(appsPath, apps, includedApps, exList) {
+  for (const item of apps) {
     if (item.endsWith('.app')) {
-      var path = installedAppsPath + item;
-      var title = File.displayName(path).replace('.app', '');
-
-      var infoPlistPath = path + '/Contents/Info.plist';
+      const path = appsPath + item;
+      const title = File.displayName(path).replace('.app', '');
+      let infoPlistPath = path + '/Contents/Info.plist';
 
       if (!File.exists(infoPlistPath)) {
-        var wrapper = path + '/Wrapper/'; // iOS Apps on Macs with Apple Silicon should have that
+        const wrapper = path + '/Wrapper/'; // iOS Apps on Macs with Apple Silicon should have that
 
         if (File.exists(wrapper)) {
-          var contents = File.getDirectoryContents(wrapper);
-          contents.forEach(function (item) {
-            if (item.endsWith('.app')) {
-              // LaunchBar.alert(item);
+          const contents = File.getDirectoryContents(wrapper);
+
+          for (const item of contents)
+            if (item.endsWith('.app'))
               infoPlistPath = path + '/Wrapper/' + item + '/Info.plist';
-            }
-          });
         }
-      }
-
-      if (File.exists(infoPlistPath)) {
-        var infoPlist = File.readPlist(infoPlistPath);
-
-        var agentApp = infoPlist.LSUIElement;
-        // var appType = infoPlist.LSApplicationCategoryType;
-        var appID = infoPlist.CFBundleIdentifier;
+      } else {
+        const infoPlist = File.readPlist(infoPlistPath);
+        const agentApp = infoPlist.LSUIElement;
+        const appID = infoPlist.CFBundleIdentifier;
 
         if (
           !exList.includes(path) &&
           title != 'LaunchBar' &&
-          // appType != 'public.app-category.utilities' &&
           agentApp != true
         ) {
-          result.push({
-            title: title,
-            path: path,
+          includedApps.push({
+            title,
+            path,
             icon: appID,
             action: 'toggleExclude',
             actionArgument: path,
@@ -329,171 +303,102 @@ function showOptions() {
         }
       }
     }
-  });
-
-  // Utility Applications
-  var utilityAppsPath = '/System/Applications/Utilities/';
-  var utilityApps = File.getDirectoryContents(utilityAppsPath);
-
-  utilityApps.forEach(function (item) {
-    if (item.endsWith('.app')) {
-      var path = utilityAppsPath + item;
-      var title = File.displayName(path).replace('.app', '');
-
-      var infoPlistPath = path + '/Contents/Info.plist';
-
-      var infoPlist = File.readPlist(infoPlistPath);
-
-      var agentApp = infoPlist.LSUIElement;
-      var appID = infoPlist.CFBundleIdentifier;
-
-      if (!exList.includes(path) && title != 'LaunchBar' && agentApp != true) {
-        result.push({
-          title: title,
-          path: path,
-          icon: appID,
-          action: 'toggleExclude',
-          actionArgument: path,
-        });
-      }
-    }
-  });
-
-  result.sort(function (a, b) {
-    return a.title > b.title;
-  });
-
-  var resultAll = alert.concat(
-    activateOption.concat(
-      current.concat(
-        finderWindows.concat(addApp.concat(resultEx.concat(result)))
-      )
-    )
-  );
-
-  return resultAll;
+  }
+  return includedApps;
 }
 
 function toggleAlert() {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var showAlert = contextJSON.showAlert;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const showAlert = contextJSON.showAlert;
 
-  if (showAlert == true || showAlert == undefined) {
-    contextJSON.showAlert = false;
-  } else {
-    contextJSON.showAlert = true;
-  }
+  contextJSON.showAlert =
+    showAlert == true || showAlert == undefined ? false : true;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
 
 function toggleCurrent() {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var keepCurrent = contextJSON.keepCurrent;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const keepCurrent = contextJSON.keepCurrent;
 
-  if (keepCurrent == true || keepCurrent == undefined) {
-    contextJSON.keepCurrent = false;
-  } else {
-    contextJSON.keepCurrent = true;
-  }
+  contextJSON.keepCurrent =
+    keepCurrent == true || keepCurrent == undefined ? false : true;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
 
 function toggleActivate(path) {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var activate = contextJSON.activate;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const activate = contextJSON.activate;
 
-  if (activate == true) {
-    contextJSON.activate = false;
-  } else {
-    contextJSON.activate = true;
-  }
+  contextJSON.activate = activate == true ? false : true;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
 
 function toggleCloseFinderWindows(path) {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
 
-  if (closeFinderWindowsOption == true) {
-    contextJSON.closeFinderWindowsOption = false;
-  } else {
-    contextJSON.closeFinderWindowsOption = true;
-  }
+  contextJSON.closeFinderWindowsOption =
+    closeFinderWindowsOption == true ? false : true;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
 
 function toggleExclude(path) {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var apps = contextJSON.apps;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const contextApps = contextJSON.apps;
 
-  var excludeID = LaunchBar.executeAppleScript(
+  const excludeID = LaunchBar.executeAppleScript(
     'set appID to bundle identifier of (info for ("' + path + '"))'
   ).trim();
 
-  var exclude = {
+  const exclude = {
     path: path,
     id: excludeID,
   };
 
-  for (var i = 0; i < apps.length; i++) {
-    if (apps[i].id == exclude.id) {
-      contextJSON.apps.splice(i, 1);
-      var broke = true;
-      break;
-    }
-  }
-  if (broke != true) {
-    contextJSON.apps.push(exclude);
-  }
+  const updatedApps = contextJSON.apps.filter((app) => app.id !== exclude.id);
+
+  contextJSON.apps =
+    updatedApps.length === contextJSON.apps.length
+      ? [...updatedApps, exclude]
+      : updatedApps;
 
   File.writeJSON(contextJSON, Action.preferences.contextJSONFile);
-
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
 
 function alert(exclusions) {
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var keepCurrent = contextJSON.keepCurrent;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const keepCurrent = contextJSON.keepCurrent;
 
-  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
-  if (closeFinderWindowsOption == undefined) {
-    closeFinderWindowsOption = false;
-  }
+  const closeFinderWindowsOption =
+    contextJSON.closeFinderWindowsOption || false;
 
-  var allAppsAS =
+  let allAppsAS =
     'tell application "System Events" \n' +
     '  set allApps to bundle identifier of (every process whose background only is false) as list \n';
 
-  var countWindowsAS =
+  const countWindowsAS =
     '  tell application process "Finder" to set windowCount to count windows\n';
 
-  var currentAppAS =
+  const currentAppAS =
     '  set currentApp to bundle identifier of (process 1 where frontmost is true)\n';
 
-  var endTellSysEventsAS = 'end tell\n';
+  const endTellSysEventsAS = 'end tell\n';
 
-  var exclusionsAS = 'set exclusions to "' + exclusions + '"\n';
+  const exclusionsAS = 'set exclusions to "' + exclusions + '"\n';
 
-  var exclusionsPlusCurrentAS = 'set exclusions to exclusions & currentApp \n';
+  const exclusionsPlusCurrentAS =
+    'set exclusions to exclusions & currentApp \n';
 
-  var toQuitAS =
+  const toQuitAS =
     'set toQuit to {}\n' +
     'repeat with thisApp in allApps\n' +
     '  set thisApp to thisApp as text\n' +
@@ -502,19 +407,21 @@ function alert(exclusions) {
     '  end if\n' +
     'end repeat\n';
 
-  var returnAS = 'return toQuit';
+  let returnAS = 'return toQuit';
 
   if (closeFinderWindowsOption == true) {
     allAppsAS = allAppsAS + countWindowsAS;
     returnAS = returnAS + ' & windowCount';
   }
 
+  let appleScript;
+
   if (
     keepCurrent == true ||
     keepCurrent == undefined ||
     LaunchBar.options.commandKey
   ) {
-    var appleScript =
+    appleScript =
       allAppsAS +
       currentAppAS +
       endTellSysEventsAS +
@@ -523,41 +430,43 @@ function alert(exclusions) {
       toQuitAS +
       returnAS;
   } else {
-    var appleScript =
+    appleScript =
       allAppsAS + endTellSysEventsAS + exclusionsAS + toQuitAS + returnAS;
   }
 
-  var appleScriptResult = LaunchBar.executeAppleScript(appleScript)
+  const appleScriptResult = LaunchBar.executeAppleScript(appleScript)
     .trim()
     .split(', ');
 
-  var lastItem = appleScriptResult[appleScriptResult.length - 1];
+  const lastItem = appleScriptResult[appleScriptResult.length - 1];
+
+  let toClose, toQuit, dialog;
 
   if (isNaN(lastItem) == false) {
     // Last time IS a number (-> Finder Windows)
-    var toClose = appleScriptResult.pop();
-    var toQuit = appleScriptResult.join(', ');
+    toClose = appleScriptResult.pop();
+    toQuit = appleScriptResult.join(', ');
   } else {
-    var toQuit = appleScriptResult.join(', ');
+    toQuit = appleScriptResult.join(', ');
   }
 
-  if (toQuit != '' || closeFinderWindowsOption == true) {
+  if (toQuit || closeFinderWindowsOption == true) {
     if (closeFinderWindowsOption == true && toQuit != '') {
       if (toClose > 0) {
-        var dialog =
+        dialog =
           'Quit '.localize() +
           toQuit +
           ' and close '.localize() +
           toClose +
           ' Finder windows.'.localize();
       } else {
-        var dialog = toQuit;
+        dialog = toQuit;
       }
     } else if (closeFinderWindowsOption == false && toQuit != '') {
-      var dialog = toQuit;
+      dialog = toQuit;
     } else {
       if (toClose > 0) {
-        var dialog =
+        dialog =
           'Close '.localize() + toClose + ' Finder Window(s).'.localize();
       } else {
         LaunchBar.alert(
@@ -568,7 +477,7 @@ function alert(exclusions) {
       }
     }
 
-    var response = LaunchBar.alert(
+    const response = LaunchBar.alert(
       'Quit Applications'.localize(),
       dialog,
       'Ok',
@@ -582,49 +491,53 @@ function alert(exclusions) {
         // LaunchBar.hide();
         break;
     }
+    return;
+  }
+
+  if (closeFinderWindowsOption == false) {
+    LaunchBar.alert('No Application to hide.'.localize());
+    LaunchBar.hide();
+    return;
   } else {
-    if (closeFinderWindowsOption == false) {
-      LaunchBar.alert('No Application to hide.'.localize());
-      LaunchBar.hide();
-      return;
-    } else {
-      LaunchBar.alert('No Application to hide, no window to close.'.localize());
-      LaunchBar.hide();
-      return;
-    }
+    LaunchBar.alert('No Application to hide, no window to close.'.localize());
+    LaunchBar.hide();
+    return;
   }
 }
 
 function quitApplications(exclusions) {
   LaunchBar.hide();
 
-  var contextJSON = File.readJSON(Action.preferences.contextJSONFile);
-  var closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
-  var keepCurrent = contextJSON.keepCurrent;
-  var activate = contextJSON.activate;
+  const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
+  const closeFinderWindowsOption = contextJSON.closeFinderWindowsOption;
+  const keepCurrent = contextJSON.keepCurrent;
+  const activate = contextJSON.activate;
 
-  var closeFinderWindowsAS =
+  const closeFinderWindowsAS =
     'tell application "Finder"\n' +
     ' activate\n' +
     ' close every window\n' +
     'end tell\n' +
     'tell application "System Events" to set visible of application process "Finder" to false\n';
 
-  var allAppsAS =
+  const allAppsAS =
     'tell application "System Events" \n' +
     '  set allApps to bundle identifier of (every process whose background only is false) as list \n';
 
-  var currentAppAS =
+  const currentAppAS =
     '  set currentApp to bundle identifier of (process 1 where frontmost is true)\n';
 
-  var endTellSysEventsAS = 'end tell\n';
+  const endTellSysEventsAS = 'end tell\n';
 
-  var exclusionsAS = 'set exclusions to "' + exclusions + '"\n';
+  const exclusionsAS = 'set exclusions to "' + exclusions + '"\n';
 
-  var exclusionsPlusCurrentAS = 'set exclusions to exclusions & currentApp \n';
+  const exclusionsPlusCurrentAS =
+    'set exclusions to exclusions & currentApp \n';
+
+  let quitAS, appleScript;
 
   if (activate == true) {
-    var quitAS =
+    quitAS =
       'repeat with thisApp in allApps\n' +
       '  set thisApp to thisApp as text\n' +
       '  if thisApp is not in exclusions then\n' +
@@ -635,7 +548,7 @@ function quitApplications(exclusions) {
       '  end if\n' +
       'end repeat';
   } else {
-    var quitAS =
+    quitAS =
       'repeat with thisApp in allApps\n' +
       '  set thisApp to thisApp as text\n' +
       '  if thisApp is not in exclusions then\n' +
@@ -651,7 +564,7 @@ function quitApplications(exclusions) {
     keepCurrent == undefined ||
     LaunchBar.options.commandKey
   ) {
-    var appleScript =
+    appleScript =
       allAppsAS +
       currentAppAS +
       endTellSysEventsAS +
@@ -659,7 +572,7 @@ function quitApplications(exclusions) {
       exclusionsPlusCurrentAS +
       quitAS;
   } else {
-    var appleScript = allAppsAS + endTellSysEventsAS + exclusionsAS + quitAS;
+    appleScript = allAppsAS + endTellSysEventsAS + exclusionsAS + quitAS;
   }
 
   if (closeFinderWindowsOption == true) {
@@ -671,7 +584,7 @@ function quitApplications(exclusions) {
 
 function addApplication() {
   LaunchBar.hide();
-  var customApp = LaunchBar.executeAppleScript(
+  let customApp = LaunchBar.executeAppleScript(
     'tell application "Finder"',
     '   activate',
     '   set _default to "Applications:" as alias',
@@ -682,22 +595,13 @@ function addApplication() {
     .trim()
     .replace(/\/$/, '');
 
-  if (customApp == '') {
-    return;
-  }
+  if (customApp == '') return;
 
-  var customApps = Action.preferences.customApps;
-
-  if (customApps == undefined) {
-    var customApps = [];
+  const customApps = Action.preferences.customApps || [];
+  if (!customApps.includes(customApp)) {
     customApps.push(customApp);
     Action.preferences.customApps = customApps;
-  } else {
-    if (!customApps.includes(customApp)) {
-      customApps.push(customApp);
-    }
   }
 
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
