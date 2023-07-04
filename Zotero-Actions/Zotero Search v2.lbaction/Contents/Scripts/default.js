@@ -76,6 +76,7 @@ function run(argument) {
   if (argument != undefined) {
     return search(argument, data);
   }
+  // return browse(data);
   return browse(data);
 }
 
@@ -301,27 +302,6 @@ function showItemsWithCollection({ collectionID }) {
   return showEntries(itemIDs, data);
 }
 
-// function showAllItems() {
-//   // Get data from JSON
-//   const data = File.readJSON(dataPath);
-//   const fields = Action.preferences.fields;
-
-//   const itemIDs = data.meta
-//     .reduce(
-//       (acc, item) =>
-//         item.fieldID == fields.title ||
-//         item.fieldID == fields.caseName ||
-//         item.fieldID == fields.nameOfAct ||
-//         item.fieldID == fields.subject
-//           ? [...acc, item.itemID]
-//           : acc,
-//       []
-//     )
-//     .reverse();
-
-//   return showEntries(itemIDs, data);
-// }
-
 function showAllItems() {
   const data = File.readJSON(dataPath);
   const fields = Action.preferences.fields;
@@ -338,9 +318,7 @@ function showAllItems() {
     return acc;
   }, new Set());
 
-  const reversedItemIDs = [...itemIDs].reverse();
-
-  return showEntries(reversedItemIDs, data);
+  return showEntries([...itemIDs].reverse(), data);
 }
 
 function showEntries(itemIDs, data) {
@@ -374,6 +352,7 @@ function showEntries(itemIDs, data) {
         .join(', '),
       lastName: itemCreator.lastName,
       typeID: itemCreator.creatorTypeID,
+      creatorID: itemCreator.creatorID,
     });
     return map;
   }, {});
@@ -512,27 +491,26 @@ function showItemDetails(dict) {
   let journalTitle, bookTitle, seriesTitle, dictionaryTitle, encyclopediaTitle;
 
   const attachedUrlsItemIDs = [];
-  const paths = data.itemAttachments
-    .filter((item) => itemID == item.parentItemID)
-    .map((item) => {
+
+  const paths = data.itemAttachments.reduce((acc, item) => {
+    if (itemID == item.parentItemID) {
       if (item.path) {
-        return {
+        acc.push({
           path: item.path.replace(
             'storage:',
             storageDirectory + item.key + '/'
           ),
           type: item.contentType,
-        };
-      }
-      if (
+        });
+      } else if (
         !item.path &&
         (item.contentType == 'text/html' || item.contentType == null)
       ) {
         attachedUrlsItemIDs.push(item.itemID);
       }
-      return null;
-    })
-    .filter((path) => path !== null);
+    }
+    return acc;
+  }, []);
 
   const attachedUrlsItems = [];
   let urls = [];
@@ -541,8 +519,14 @@ function showItemDetails(dict) {
     if (item.itemID == itemID) {
       if (item.fieldID == fields.url) {
         urls.push({
-          urlTitle: item.value,
+          title: item.value,
           url: item.value,
+          icon: 'linkTemplate',
+          action: 'openURL',
+          actionArgument: {
+            itemID,
+            url: item.value,
+          },
         });
       }
       if (item.fieldID == fields.series) {
@@ -590,23 +574,29 @@ function showItemDetails(dict) {
   urls = [
     ...urls,
     ...attachedUrls.map((item) => ({
+      title: item.title,
       url: item.url,
-      urlTitle: item.title,
+      icon: 'linkTemplate',
+      action: 'openURL',
+      actionArgument: {
+        itemID,
+        url: item.url,
+      },
     })),
   ];
 
   // Creator IDs
-  const creatorIDs = data.itemCreators.reduce(
+  const itemCreators = dict.creators || [];
+  const creatorIDs = itemCreators.reduce(
     (acc, item) => {
-      if (item.itemID === dict.itemID) {
-        if (item.creatorTypeID === creatorTypes.author) {
-          acc.authorIDs.push(item.creatorID);
-        } else if (item.creatorTypeID === creatorTypes.editor) {
-          acc.editorIDs.push(item.creatorID);
-        } else {
-          acc.otherIDs.push(item.creatorID);
-        }
+      if (item.creatorTypeID === creatorTypes.author) {
+        acc.authorIDs.push(item.creatorID);
+      } else if (item.creatorTypeID === creatorTypes.editor) {
+        acc.editorIDs.push(item.creatorID);
+      } else {
+        acc.otherIDs.push(item.creatorID);
       }
+
       return acc;
     },
     {
@@ -624,38 +614,58 @@ function showItemDetails(dict) {
       : creatorIDs.otherIDs;
 
   // Collections
-  const collectionsArr = data.collectionItems
-    .filter((item) => item.itemID == itemID)
-    .map((item) => ({
-      collectionName: item.collectionName,
-      collectionID: item.collectionID,
-    }));
-
-  const collections = collectionsArr.map((item) => item.collectionName);
+  const collections = data.collectionItems.reduce(
+    (acc, item) => {
+      if (item.itemID === itemID) {
+        acc.collectionNames.push(item.collectionName);
+        acc.collectionsArr.push({
+          collectionName: item.collectionName,
+          collectionID: item.collectionID,
+        });
+      }
+      return acc;
+    },
+    { collectionNames: [], collectionsArr: [] }
+  );
+  const collectionNames = collections.collectionNames;
+  const collectionsArr = collections.collectionsArr;
 
   // Tags
-  const tagsArr = data.itemTags
-    .filter((item) => item.itemID == itemID)
-    .map((item) => ({
-      name: item.name,
-      tagID: item.tagID,
-    }));
-
-  const tags = tagsArr.map((item) => item.name);
+  const tags = data.itemTags.reduce(
+    (acc, item) => {
+      if (item.itemID === itemID) {
+        acc.tagNames.push(item.name);
+        acc.tagsArr.push({
+          name: item.name,
+          tagID: item.tagID,
+        });
+      }
+      return acc;
+    },
+    { tagNames: [], tagsArr: [] }
+  );
+  const tagNames = tags.tagNames;
+  const tagsArr = tags.tagsArr;
 
   // Notes
-  const notes = data.itemNotes
-    .filter((item) => itemID == item.parentItemID)
-    .map((item) => {
-      return {
+  const notes = data.itemNotes.reduce((acc, item) => {
+    if (itemID == item.parentItemID) {
+      acc.push({
         title: item.title,
-        itemID: item.itemID,
-        parentItemID: item.parentItemID,
-      };
-    })
-    .sort((a, b) => a.title.localeCompare(b.title));
+        icon: 'noteTemplate',
+        action: 'openNote',
+        actionArgument: {
+          itemID: item.itemID,
+          parentItemID: item.parentItemID,
+        },
+      });
+    }
+    return acc;
+  }, []);
 
   dict.url = urls[0] ? urls[0].url : '';
+
+  // Details Array Construction
 
   details = [
     {
@@ -667,17 +677,19 @@ function showItemDetails(dict) {
   ];
 
   if (creatorsArr.length > 0) {
-    const creators = dict.creators;
+    const creatorsLength = itemCreators.length;
+    const lastIndex = creatorsLength - 1;
+
     const creatorString =
-      creators.length === 1
-        ? creators[0].name
-        : creators.length === 2
-        ? creators.map((creator) => creator.name).join(' & ')
-        : creators.length > 2
-        ? `${creators
+      creatorsLength === 1
+        ? itemCreators[0].name
+        : creatorsLength === 2
+        ? itemCreators.map((creator) => creator.name).join(' & ')
+        : creatorsLength > 2
+        ? `${itemCreators
             .slice(0, -1)
             .map((creator) => creator.lastName)
-            .join(', ')} & ${creators[creators.length - 1].lastName}`
+            .join(', ')} & ${itemCreators[lastIndex].lastName}`
         : '';
 
     details.push({
@@ -685,7 +697,7 @@ function showItemDetails(dict) {
       icon: 'creatorTemplate',
       action: 'showItemCreatorIDs',
       actionArgument: {
-        creatorsArr: creatorsArr,
+        creatorsArr,
       },
     });
   }
@@ -740,71 +752,46 @@ function showItemDetails(dict) {
     });
   }
 
-  if (collections.length > 0) {
+  if (collectionNames.length > 0) {
     details.push({
-      title: collections.join(', '),
+      title: collectionNames.join(', '),
       icon: 'collectionTemplate',
       action: 'showItemCollections',
       actionArgument: {
-        collectionsArr: collectionsArr,
+        collectionsArr,
       },
     });
   }
 
   // Tags
-  if (tags.length > 0) {
+  if (tagNames.length > 0) {
     details.push({
-      title: tags.join(', '),
+      title: tagNames.join(', '),
       icon: 'tagTemplate',
       action: 'showItemTags',
       actionArgument: {
-        tagsArr: tagsArr,
+        tagsArr,
       },
     });
   }
 
-  // Notes
-
-  for (const item of notes) {
-    details.push({
-      title: item.title,
-      icon: 'noteTemplate',
-      action: 'openNote',
-      actionArgument: {
-        itemID: item.itemID,
-        parentItemID: item.parentItemID,
-      },
-    });
-  }
-
-  for (const item of urls) {
-    details.push({
-      title: item.urlTitle,
-      url: item.url,
-      icon: 'linkTemplate',
-      action: 'openURL',
-      actionArgument: {
-        itemID: itemID,
-        url: item.url,
-      },
-    });
-  }
+  // Notes & URLs
+  details = [...details, ...notes, ...urls];
 
   // Add Storage paths
   if (paths.length > 0) {
-    for (let i = 0; i < paths.length; i++) {
+    let found = false;
+    for (const item of paths) {
       if (
-        paths[i].type == 'application/pdf' ||
-        paths[i].type == 'application/epub+zip'
+        !found &&
+        (item.type === 'application/pdf' ||
+          item.type === 'application/epub+zip')
       ) {
         details[0].subtitle = '';
-        details[0].path = paths[i].path;
-        details[0].actionArgument.path = paths[i].path;
-        break;
+        details[0].path = item.path;
+        details[0].actionArgument.path = item.path;
+        found = true;
       }
-    }
-
-    for (const item of paths) {
       const title = item.path.split('/').slice(-1)[0] || '';
       details.push({
         title: title,
@@ -904,9 +891,7 @@ function showJournalArticles(journalTitle) {
   return showEntries(Array.from(itemIDs), data);
 }
 
-function showItemCreatorIDs(dict) {
-  let creatorsArr = dict.creatorsArr;
-
+function showItemCreatorIDs({ creatorsArr }) {
   // Get data from JSON
   let data = File.readJSON(dataPath);
 
@@ -959,25 +944,23 @@ function showItemTags({ tagsArr }) {
 
 function pasteCitation(dict) {
   // TODO: Build citation according to a csl style sheet?
+  const itemID = dict.itemID;
+  const itemCreators = dict.creators || [];
 
-  saveRecent(dict.itemID);
+  saveRecent(itemID);
 
   const prefs = Action.preferences;
   const creatorTypes = prefs.creatorTypes;
   const fields = prefs.fields;
 
-  const data = File.readJSON(dataPath);
-
-  const creatorNames = data.itemCreators.reduce(
+  const creatorNames = itemCreators.reduce(
     (acc, item) => {
-      if (item.itemID === dict.itemID) {
-        if (item.creatorTypeID === creatorTypes.author) {
-          acc.authorNames.push(item.lastName);
-        } else if (item.creatorTypeID === creatorTypes.editor) {
-          acc.editorNames.push(item.lastName);
-        } else {
-          acc.otherNames.push(item.lastName);
-        }
+      if (item.creatorTypeID === creatorTypes.author) {
+        acc.authorNames.push(item.lastName);
+      } else if (item.creatorTypeID === creatorTypes.editor) {
+        acc.editorNames.push(item.lastName);
+      } else {
+        acc.otherNames.push(item.lastName);
       }
       return acc;
     },
@@ -1009,8 +992,9 @@ function pasteCitation(dict) {
   let institution, title;
 
   if (!creatorString) {
+    const data = File.readJSON(dataPath);
     for (let item of data.meta) {
-      if (item.itemID === dict.itemID) {
+      if (item.itemID === itemID) {
         if (item.fieldID === fields.institution) {
           institution = item.value;
           break;
@@ -1056,15 +1040,15 @@ function pasteCitation(dict) {
   }
 }
 
-function openURL(dict) {
+function openURL({ itemID, url }) {
   LaunchBar.hide();
-  saveRecent(dict.itemID);
-  LaunchBar.openURL(dict.url);
+  saveRecent(itemID);
+  LaunchBar.openURL(url);
 }
 
-function openZoteroURL(dict) {
+function openZoteroURL({ itemID, zoteroURL }) {
   LaunchBar.hide();
-  saveRecent(dict.itemID);
+  saveRecent(itemID);
 
   if (checkZoteroVersion()) {
     LaunchBar.executeAppleScript(
@@ -1072,17 +1056,17 @@ function openZoteroURL(dict) {
     );
   }
 
-  LaunchBar.openURL(dict.zoteroURL);
+  LaunchBar.openURL(zoteroURL);
 }
 
-function openNote(dict) {
+function openNote({ parentItemID, itemID }) {
   // dict.itemID
   LaunchBar.hide();
-  saveRecent(dict.parentItemID);
+  saveRecent(parentItemID);
 
   const data = File.readJSON(dataPath);
 
-  const foundItem = data.items.filter((item) => dict.itemID === item.itemID)[0];
+  const foundItem = data.items.filter((item) => itemID === item.itemID)[0];
   if (foundItem) {
     zoteroURL =
       'zotero://select/items/' + foundItem.libraryID + '_' + foundItem.key;
