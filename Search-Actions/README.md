@@ -15,7 +15,7 @@
 - DuckDuckGo (with "Feeling ducky")
 - Kagi 
 - Neeva
-- Phind
+- ~~Phind~~ ([Moved to it's own folder](https://github.com/Ptujec/LaunchBar/tree/master/Phind))
 - Wikipedia EN/DE (Shows summary or website on ⌘↩)
 - MuseScore Sheetmusic
 - Ultimate-Guitar.Com
