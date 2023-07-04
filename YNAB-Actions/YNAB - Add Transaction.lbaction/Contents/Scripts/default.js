@@ -19,6 +19,7 @@ function run(argument) {
           icon: 'budgetTemplate',
           badge: 'Settings',
           action: 'budgetSettings',
+          alwaysShowsSubtitle: true,
         },
         {
           title: 'Cleared/Uncleared',
@@ -27,6 +28,7 @@ function run(argument) {
           icon: 'gearTemplate',
           badge: 'Settings',
           action: 'clearedSettings',
+          alwaysShowsSubtitle: true,
         },
         {
           title: 'Pin Category',
@@ -34,6 +36,7 @@ function run(argument) {
           icon: 'pinTemplate',
           badge: 'Settings',
           action: 'pinCategory',
+          alwaysShowsSubtitle: true,
         },
         {
           title: 'Refresh Options',
@@ -41,6 +44,7 @@ function run(argument) {
           icon: 'refreshTemplate',
           badge: 'Settings',
           action: 'dataRefresh',
+          alwaysShowsSubtitle: true,
           // actionRunsInBackground: true,
         },
       ];
@@ -55,6 +59,7 @@ function run(argument) {
           subtitle: 'Choose the budget you want to use this action for.',
           icon: 'budgetTemplate',
           action: 'budgetSettings',
+          alwaysShowsSubtitle: true,
         },
       ];
     } else {
@@ -248,6 +253,7 @@ function setPayeeAndContinue(p) {
         icon: 'categoryTemplate.png',
         action: 'setCategoryAndContinue',
         actionArgument: categories[j].id,
+        alwaysShowsSubtitle: true,
       };
 
       if (cGroups[i].name == 'Internal Master Category') {
@@ -725,30 +731,35 @@ function setMemoAndComplete(m) {
           subtitle: tSub,
           icon: cIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tDate,
           subtitle: 'Date',
           icon: 'calTemplate',
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tPayee,
           subtitle: 'Payee',
           icon: pIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tCat,
           subtitle: catSub,
           icon: catIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tAcc,
           subtitle: accSub, // 'Account',
           icon: aIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
       ];
     } else {
@@ -758,36 +769,42 @@ function setMemoAndComplete(m) {
           subtitle: tSub,
           icon: cIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tDate,
           subtitle: 'Date',
           icon: 'calTemplate',
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tPayee,
           subtitle: 'Payee',
           icon: pIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tCat,
           subtitle: catSub,
           icon: catIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tAcc,
           subtitle: accSub, // 'Account',
           icon: aIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
         {
           title: tMemo,
           subtitle: 'Memo',
           icon: Action.preferences.recentMemoIcon,
           url: link,
+          alwaysShowsSubtitle: true,
         },
       ];
     }
@@ -992,6 +1009,7 @@ function clearedSettings() {
         cState: cashState,
         aType: 'cash',
       },
+      alwaysShowsSubtitle: true,
     },
     {
       title: 'Checking: ' + checking,
@@ -1003,6 +1021,7 @@ function clearedSettings() {
         cState: checkingState,
         aType: 'checking',
       },
+      alwaysShowsSubtitle: true,
     },
     {
       title: 'Other Asset: ' + oA,
@@ -1014,6 +1033,7 @@ function clearedSettings() {
         cState: oState,
         aType: 'otherAsset',
       },
+      alwaysShowsSubtitle: true,
     },
   ];
 }
@@ -1099,6 +1119,7 @@ function pinCategory() {
           pinSubtitle: cGroups[i].name,
           pinID: categories[j].id,
         },
+        alwaysShowsSubtitle: true,
       };
       if (cGroups[i].name == 'Internal Master Category') {
         if (pinnedCategory != undefined) {
@@ -1130,6 +1151,7 @@ function pinCategory() {
         badge: 'Pinned',
         action: 'setPin',
         actionArgument: 'unpin',
+        alwaysShowsSubtitle: true,
       },
     ];
     var result = pinnedCategory.concat(pin);
@@ -1152,6 +1174,7 @@ function setPin(pin) {
       badge: 'Pinned',
       action: 'setCategoryAndContinue',
       actionArgument: pin.pinID,
+      alwaysShowsSubtitle: true,
     };
     File.writeJSON(pinnedCategory, fileLocation);
   }
@@ -1169,6 +1192,7 @@ function dataRefresh() {
       icon: 'refreshTemplate',
       action: 'updatePayees',
       actionRunsInBackground: true,
+      alwaysShowsSubtitle: true,
     },
     {
       title: 'Update other data for current budget',
@@ -1176,6 +1200,7 @@ function dataRefresh() {
       icon: 'refreshTemplate',
       action: 'updateRest',
       actionRunsInBackground: true,
+      alwaysShowsSubtitle: true,
     },
     {
       title: 'Reset all data for all budgets',
@@ -1184,6 +1209,7 @@ function dataRefresh() {
       icon: 'refreshTemplate',
       action: 'resetData',
       actionRunsInBackground: true,
+      alwaysShowsSubtitle: true,
     },
   ];
 }
