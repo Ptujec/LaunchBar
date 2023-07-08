@@ -458,6 +458,17 @@ function showEntries(itemIDs, data) {
     }
   }
 
+  if (result.length === 0) {
+    return [
+      {
+        title: 'No results',
+        icon: 'greyIcon',
+        action: 'browse',
+        actionArgument: data,
+      },
+    ];
+  }
+
   return result;
 }
 
