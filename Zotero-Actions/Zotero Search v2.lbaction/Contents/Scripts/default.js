@@ -462,7 +462,7 @@ function showEntries(itemIDs, data) {
     return [
       {
         title: 'No results',
-        icon: 'greyIcon',
+        icon: 'greyTemplate',
         action: 'browse',
         actionArgument: data,
       },
