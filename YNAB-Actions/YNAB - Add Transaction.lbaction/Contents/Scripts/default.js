@@ -1,204 +1,178 @@
-/* YNAB - Add Transactions by Christian Bender (@Ptujec)
+/* 
+YNAB - Add Transaction Action for LaunchBar
+by Christian Bender (@ptujec)
+2023-07-04
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Documentation:
 https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
-https://api.youneedabudget.com/v1
+https://api.youneedabudget.com/
 */
 
-const token = Action.preferences.accessToken;
-const budgetID = Action.preferences.budgetID;
+const ActionPrefs = Action.preferences;
+const token = ActionPrefs.accessToken;
+const apiBaseURL = 'https://api.youneedabudget.com/v1';
+const budgetID = ActionPrefs.budgetID;
+const budgetDataDir = `${Action.supportPath}/${budgetID}`;
+const pinnedCategories = Action.preferences.pinnedCategories ?? {};
+const cLocale = LaunchBar.currentLocale;
 
 // Check token, budget ID, entry, set amount and show payees
 function run(argument) {
-  if (argument == undefined) {
-    if (token == undefined) {
-      setToken();
+  if (!token) {
+    setToken();
+    return;
+  }
+
+  if (!budgetID) {
+    return [
+      {
+        title: 'Choose Budget',
+        subtitle: 'Choose the budget you want to use this action for.',
+        icon: 'budgetTemplate',
+        action: 'budgetSettings',
+        alwaysShowsSubtitle: true,
+      },
+    ];
+  }
+
+  if (!argument) return settings();
+
+  // Check if entry is valid
+  if (!/\d/.test(argument)) {
+    return [
+      {
+        title: 'No valid entry!',
+        icon: 'warningTemplate',
+      },
+    ];
+  }
+
+  // Check if currency is set -- for update to 2.4
+  if (budgetID && !ActionPrefs.budgetCurrency) {
+    if (File.exists(`${Action.supportPath}/${budgetID}`)) {
+      ActionPrefs.budgetCurrency = File.readJSON(
+        `${Action.supportPath}/${budgetID}/budgetSettings.json`
+      ).data.settings.currency_format.iso_code;
     } else {
-      return [
-        {
-          title: 'Choose Budget',
-          subtitle: 'Choose the budget you want to use this action for.',
-          icon: 'budgetTemplate',
-          badge: 'Settings',
-          action: 'budgetSettings',
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: 'Cleared/Uncleared',
-          subtitle:
-            'Decide if new transactions should be automatically cleared or not.',
-          icon: 'gearTemplate',
-          badge: 'Settings',
-          action: 'clearedSettings',
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: 'Pin Category',
-          subtitle: 'Pick a category you want to show on top.',
-          icon: 'pinTemplate',
-          badge: 'Settings',
-          action: 'pinCategory',
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: 'Refresh Options',
-          subtitle: 'Refresh preloaded data.',
-          icon: 'refreshTemplate',
-          badge: 'Settings',
-          action: 'dataRefresh',
-          alwaysShowsSubtitle: true,
-          // actionRunsInBackground: true,
-        },
-      ];
+      return budgetSettings();
     }
+  }
+
+  return setAmount(argument);
+}
+
+function setAmount(argument) {
+  // Check if income or expense
+  let income;
+  if (argument.startsWith('+')) {
+    income = true;
+    argument = argument.replace(/\+/, '');
   } else {
-    if (token == undefined) {
-      setToken();
-    } else if (budgetID == undefined) {
-      return [
-        {
-          title: 'Choose Budget',
-          subtitle: 'Choose the budget you want to use this action for.',
-          icon: 'budgetTemplate',
-          action: 'budgetSettings',
-          alwaysShowsSubtitle: true,
-        },
-      ];
+    income = false;
+  }
+
+  // Amount
+  if (argument.includes(',') || argument.includes('.')) {
+    argument = argument.replace(/[^\d,.+]/g, '').trim();
+
+    const test = argument.match(/(?:,|\.)(\d*)/);
+    const testLength = test[1].length;
+
+    if (testLength == 1) {
+      amount = `${argument}00`;
+    } else if (testLength < 1) {
+      amount = `${argument}000`;
     } else {
-      // Check if entry is valid
-      var valid = /\d/.test(argument);
-      if (valid == false) {
+      amount = `${argument}0`;
+    }
+    amount = amount.replace(/,|\./, '');
+  } else {
+    argument = argument.replace(/[^\d,.+€\$]/g, '').trim();
+
+    if (argument.includes('€') || argument.includes('$')) {
+      argument = argument.replace(/€|\$/g, '').trim();
+
+      if (argument) {
+        amount = `${argument}000`;
+      } else {
         return [
           {
-            title: 'No valid entry!',
+            title: 'No valid amount',
             icon: 'warningTemplate',
           },
         ];
       }
-
-      // Check if income or expense
-      if (argument.startsWith('+')) {
-        var income = true;
-        argument = argument.replace(/\+/, '');
-      } else {
-        var income = false;
-      }
-
-      // Amount
-      if (argument.includes(',') || argument.includes('.')) {
-        argument = argument.replace(/[^\d,.+]/g, '').trim();
-
-        var test = argument.match(/(?:,|\.)(\d*)/);
-
-        if (test[1].length == 1) {
-          amount = argument + '00';
-        } else if (test[1].length < 1) {
-          amount = argument + '000';
-        } else {
-          amount = argument + '0';
-        }
-        amount = amount.replace(/,|\./, '');
-      } else {
-        argument = argument.replace(/[^\d,.+€\$]/g, '').trim();
-
-        if (argument.includes('€') || argument.includes('$')) {
-          argument = argument.replace(/€|\$/g, '').trim();
-
-          if (argument != '') {
-            amount = argument + '000';
-          } else {
-            return [
-              {
-                title: 'No valid amount',
-                icon: 'warningTemplate',
-              },
-            ];
-          }
-        } else {
-          amount = argument + '0';
-        }
-      }
-
-      if (income == false) {
-        amount = '-' + amount;
-      }
-
-      Action.preferences.recentAmount = parseInt(amount);
-
-      // Check if local data is available
-      if (!File.exists(Action.supportPath + '/' + budgetID)) {
-        // Update
-        LaunchBar.alert('Your data needs to be updated.');
-        var output = resetData();
-
-        if (output != 'success') {
-          return;
-        }
-      }
-
-      // Payee
-      try {
-        // var yData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/payees?access_token=' + token, 3)
-        // yData = yData.data
-        var yData = File.readJSON(
-          Action.supportPath + '/' + budgetID + '/payees.json'
-        );
-      } catch (exception) {
-        LaunchBar.alert('Error while reading JSON: ' + exception);
-      }
-
-      var payees = yData.data.payees;
-      var p = [];
-
-      for (var i = 0; i < payees.length; i++) {
-        var pName = payees[i].name;
-        var pId = payees[i].id;
-        var pUsage = payees[i].usage;
-        var lastUsedCategoryId = payees[i].last_used_category_id;
-        var lastUsedAccountId = payees[i].last_used_account_id;
-
-        if (pName.includes('Transfer')) {
-          var icon = 'transferTemplate';
-        } else {
-          var icon = 'payeeTemplate';
-        }
-
-        var pPushData = {
-          title: pName,
-          icon: icon,
-          action: 'setPayeeAndContinue',
-          actionArgument: {
-            pName: pName,
-            pId: pId,
-            pIndex: i,
-            lastUsedCategoryId: lastUsedCategoryId,
-            lastUsedAccountId: lastUsedAccountId,
-          },
-        };
-        p.push(pPushData);
-      }
-
-      p.sort(function (a, b) {
-        return a.title > b.title;
-      });
-
-      var newPayee = [
-        {
-          title: 'New Payee',
-          icon: 'newTemplate.png',
-          action: 'setPayeeAndContinue',
-          actionArgument: {
-            pName: 'Enter New Payee',
-          },
-        },
-      ];
-      var pResults = newPayee.concat(p);
-      return pResults;
+    } else {
+      amount = `${argument}0`;
     }
   }
-}
-// Set payee and show categories
-function setPayeeAndContinue(p) {
-  var pName = p.pName;
 
+  if (income == false) amount = `-${amount}`;
+
+  ActionPrefs.recentAmount = parseInt(amount);
+
+  return showPayees();
+}
+
+function showPayees() {
+  // Check if local data is available
+  if (!File.exists(budgetDataDir)) {
+    // Update
+    LaunchBar.alert('Your data needs to be updated.');
+    const output = resetData();
+    if (output != 'success') return;
+  }
+
+  const payees = File.readJSON(`${budgetDataDir}/payees.json`).data.payees;
+
+  const existingPayees = payees
+    .map((payee, index) => {
+      const pName = payee.name;
+      const pId = payee.id;
+      const lastUsedCategoryId = payee.last_used_category_id;
+      const lastUsedAccountId = payee.last_used_account_id;
+
+      const icon = pName.includes('Transfer')
+        ? 'transferTemplate'
+        : 'payeeTemplate';
+
+      return {
+        title: pName,
+        icon: icon,
+        action: 'setPayee',
+        actionArgument: {
+          pName,
+          pId,
+          pIndex: index,
+          lastUsedCategoryId,
+          lastUsedAccountId,
+        },
+      };
+    })
+    .sort((a, b) => a.title > b.title);
+
+  const newPayee = [
+    {
+      title: 'New Payee',
+      icon: 'newTemplate.png',
+      action: 'setPayee',
+      actionArgument: {
+        pName: 'Enter New Payee',
+      },
+    },
+  ];
+  return [...newPayee, ...existingPayees];
+}
+
+function setPayee({
+  pName,
+  pId,
+  pIndex,
+  lastUsedAccountId,
+  lastUsedCategoryId,
+}) {
   if (pName == 'Enter New Payee') {
     LaunchBar.hide();
     pName = LaunchBar.executeAppleScript(
@@ -209,106 +183,83 @@ function setPayeeAndContinue(p) {
     if (pName == '') {
       return;
     }
-    Action.preferences.updatePayees = true;
+    ActionPrefs.updatePayees = true;
   } else {
-    Action.preferences.updatePayees = false;
+    ActionPrefs.updatePayees = false;
   }
 
-  Action.preferences.recentPayeeName = pName;
-  Action.preferences.recentPayeeId = p.pId;
-  Action.preferences.recentPayeeIndex = p.pIndex;
-  Action.preferences.recentPayeeLastUsedAccountId = p.lastUsedAccountId;
+  ActionPrefs.recentPayeeName = pName;
+  ActionPrefs.recentPayeeId = pId;
+  ActionPrefs.recentPayeeIndex = pIndex;
+  ActionPrefs.recentPayeeLastUsedAccountId = lastUsedAccountId;
 
-  // Category
-  var pinnedCategoryPath =
-    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
-  if (File.exists(pinnedCategoryPath)) {
-    var pinnedCategory = File.readJSON(pinnedCategoryPath);
-  }
+  return showCategories({ lastUsedCategoryId });
+}
 
-  try {
-    var cData = File.readJSON(
-      Action.supportPath + '/' + budgetID + '/categories.json'
-    );
-  } catch (exception) {
-    LaunchBar.alert('Error while reading JSON: ' + exception);
-  }
+function showCategories({ lastUsedCategoryId, isSetting }) {
+  const cGroups = File.readJSON(
+    `${budgetDataDir}/categories.json`
+  ).data.category_groups.filter((group) => group.name != 'Hidden Categories');
 
-  var cGroups = cData.data.category_groups;
-  cGroups = cGroups.filter(function (el) {
-    return el.name != 'Hidden Categories';
-  });
+  const pinnedCategoryID = pinnedCategories[budgetID];
 
-  var internalCategories = [];
-  var userCategories = [];
-  var categoryMatchingPayee = [];
-  var i = 0;
-  for (i = 0; i < cGroups.length; i++) {
-    var categories = cGroups[i].categories;
-    var j = 0;
-    for (j = 0; j < categories.length; j++) {
-      var categoryPushData = {
-        title: categories[j].name,
-        subtitle: cGroups[i].name,
+  let internalCategories = [];
+  let userCategories = [];
+  let categoryMatchingPayee = [];
+  let pinnedCategory = [];
+
+  for (const cGroup of cGroups) {
+    const categories = cGroup.categories.filter((category) => !category.hidden);
+    const cGroupName = cGroup.name;
+    const categoriesArray =
+      cGroupName == 'Internal Master Category'
+        ? internalCategories
+        : userCategories;
+
+    for (const category of categories) {
+      const categoryName = category.name;
+      const categoryID = category.id;
+
+      const categoryPushData = {
+        title: categoryName,
+        subtitle: cGroupName,
         icon: 'categoryTemplate.png',
-        action: 'setCategoryAndContinue',
-        actionArgument: categories[j].id,
+        badge: isSetting ? 'Pin Category Setting' : undefined,
+        action: isSetting ? 'setPin' : 'setCategory',
+        actionArgument: {
+          categoryID,
+          unpin: false,
+        },
         alwaysShowsSubtitle: true,
       };
 
-      if (cGroups[i].name == 'Internal Master Category') {
-        if (pinnedCategory != undefined) {
-          if (categories[j].name != pinnedCategory.title) {
-            if (categories[j].id == p.lastUsedCategoryId) {
-              categoryPushData.badge = 'Used Last Time';
-              categoryMatchingPayee.push(categoryPushData);
-            } else {
-              internalCategories.push(categoryPushData);
-            }
-          }
-        } else {
-          if (categories[j].id == p.lastUsedCategoryId) {
-            categoryPushData.badge = 'Used Last Time';
-            categoryMatchingPayee.push(categoryPushData);
-          } else {
-            internalCategories.push(categoryPushData);
-          }
+      if (categoryID == lastUsedCategoryId) {
+        categoryPushData.badge = 'Used Last Time';
+        categoryMatchingPayee = categoryPushData;
+      } else if (categoryID == pinnedCategoryID) {
+        categoryPushData.badge = 'Pinned';
+        if (isSetting) {
+          categoryPushData.subtitle = 'Hit enter to unpin this category!';
+          categoryPushData.icon = 'selectedCategoryTemplate';
+          categoryPushData.action = 'setPin';
+          categoryPushData.actionArgument.unpin = true;
         }
+        pinnedCategory = categoryPushData;
       } else {
-        if (pinnedCategory != undefined) {
-          if (categories[j].name != pinnedCategory.title) {
-            if (categories[j].id == p.lastUsedCategoryId) {
-              categoryPushData.badge = 'Used Last Time';
-              categoryMatchingPayee.push(categoryPushData);
-            } else {
-              userCategories.push(categoryPushData);
-            }
-          }
-        } else {
-          if (categories[j].id == p.lastUsedCategoryId) {
-            categoryPushData.badge = 'Used Last Time';
-            categoryMatchingPayee.push(categoryPushData);
-          } else {
-            userCategories.push(categoryPushData);
-          }
-        }
+        categoriesArray.push(categoryPushData);
       }
     }
   }
 
-  // return categoryMatchingPayee;
-  var allCategories = userCategories.concat(internalCategories);
+  const result = [
+    categoryMatchingPayee,
+    pinnedCategory,
+    ...userCategories,
+    ...internalCategories,
+  ];
 
-  if (pinnedCategory != undefined) {
-    var result = categoryMatchingPayee.concat(
-      [pinnedCategory].concat(allCategories)
-    );
-  } else {
-    var result = categoryMatchingPayee.concat(allCategories);
-  }
-
-  if (result == '') {
-    var response = LaunchBar.alert(
+  if (!result) {
+    const response = LaunchBar.alert(
       'No categories!',
       'Go to the YNAB.com and try editing some category name. Then update preloaded data.',
       'Open YNAB.com',
@@ -318,9 +269,7 @@ function setPayeeAndContinue(p) {
     switch (response) {
       case 0:
         LaunchBar.hide();
-        LaunchBar.openURL(
-          'https://app.youneedabudget.com/' + budgetID + '/budget'
-        );
+        LaunchBar.openURL(`https://app.youneedabudget.com/${budgetID}/budget`);
         break;
       case 1:
         updateRest();
@@ -328,216 +277,173 @@ function setPayeeAndContinue(p) {
       case 2:
         break;
     }
-  } else {
-    return result;
+    return;
   }
-}
-// Set category and show accounts
-function setCategoryAndContinue(c) {
-  // Set Category
-  Action.preferences.recentCategory = c;
-
-  // Show Accounts
-  try {
-    // var aData = HTTP.getJSON('https://api.youneedabudget.com/v1/budgets/' + budgetID + '/accounts?access_token=' + token, 3)
-    // aData = aData.data
-    var aData = File.readJSON(
-      Action.supportPath + '/' + budgetID + '/accounts.json'
-    );
-  } catch (exception) {
-    LaunchBar.alert('Error while reading JSON: ' + exception);
-  }
-
-  var accounts = aData.data.accounts;
-  var a = [];
-  var accountMatchingPayee = [];
-
-  for (var i = 0; i < accounts.length; i++) {
-    if (accounts[i].closed == false) {
-      if (accounts[i].type == 'cash') {
-        var icon = 'cashTemplate.png';
-      } else if (accounts[i].type == 'otherAsset') {
-        var icon = 'trackingAccountTemplate.png';
-      } else {
-        var icon = 'accountTemplate.png';
-      }
-
-      var pushData = {
-        title: accounts[i].name,
-        icon: icon,
-        action: 'setAccountAndContinue',
-        actionArgument: {
-          aId: accounts[i].id,
-          aType: accounts[i].type,
-          aIcon: icon,
-        },
-      };
-
-      if (accounts[i].id == Action.preferences.recentPayeeLastUsedAccountId) {
-        pushData.badge = 'Used Last Time';
-        accountMatchingPayee.push(pushData);
-      } else {
-        a.push(pushData);
-      }
-    }
-  }
-  var result = accountMatchingPayee.concat(a);
   return result;
 }
-// Set account and show date options
-function setAccountAndContinue(a) {
-  Action.preferences.recentAccountID = a.aId;
-  Action.preferences.recentAccountType = a.aType;
-  Action.preferences.recentAccountIcon = a.aIcon;
 
+function setCategory({ categoryID }) {
+  ActionPrefs.recentCategory = categoryID;
+  return showAccounts();
+}
+
+function showAccounts() {
+  var accounts = File.readJSON(
+    `${budgetDataDir}/accounts.json`
+  ).data.accounts.filter((account) => !account.closed);
+
+  var allAccounts = [];
+  var accountMatchingPayee = [];
+
+  const iconMap = {
+    cash: 'cashTemplate.png',
+    otherAsset: 'trackingAccountTemplate.png',
+    default: 'accountTemplate',
+  };
+
+  for (const account of accounts) {
+    const icon = iconMap[account.type] || iconMap.default;
+
+    const pushData = {
+      title: account.name,
+      icon,
+      action: 'setAccountAndCleared',
+      actionArgument: {
+        accountID: account.id,
+        accountType: account.type,
+        accountIcon: icon,
+      },
+    };
+
+    if (account.id === ActionPrefs.recentPayeeLastUsedAccountId) {
+      pushData.badge = 'Used Last Time';
+      accountMatchingPayee.push(pushData);
+    } else {
+      allAccounts.push(pushData);
+    }
+  }
+
+  return [...accountMatchingPayee, ...allAccounts];
+}
+
+function setAccountAndCleared({ accountID, accountType, accountIcon }) {
+  ActionPrefs.recentAccountID = accountID;
+  ActionPrefs.recentAccountIcon = accountIcon;
+
+  // Cleared Settings
+  let cleared =
+    accountType == 'otherAsset'
+      ? ActionPrefs.clearedSettingsOtherAsset
+      : accountType == 'checking'
+      ? ActionPrefs.clearedSettingsChecking
+      : accountType == 'cash'
+      ? ActionPrefs.clearedSettingsCash
+      : undefined;
+
+  cleared = cleared || (accountType == 'cash' ? 'cleared' : 'uncleared');
+  ActionPrefs.recentCleared = cleared;
+
+  return showDates();
+}
+
+function showDates() {
   // Dates
-  var dates = [];
+  let dates = [];
   for (var i = 0; i > -180; i--) {
-    var date = new Date();
+    const date = new Date();
+    date.setDate(date.getDate() + i);
 
-    // Add or subtrackt days
-    var offsetNumber = i;
-    date.setDate(date.getDate() + offsetNumber);
-
-    var dateString = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    const dateString = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000
+    )
       .toISOString()
       .split('T')[0];
 
     dates.push({
       title: dateString,
       icon: 'calTemplate',
-      action: 'setDateAndContinue',
+      action: 'setDate',
       actionArgument: dateString,
     });
   }
   return dates;
 }
-// Set date and show memo dialog
-function setDateAndContinue(d) {
-  Action.preferences.recentDate = d;
 
-  // Check for Mail URL and show memo dialog
-  var result = LaunchBar.executeAppleScriptFile('./mail.applescript')
-    .trim()
-    .split('\n');
-
-  if (result != '') {
-    var title = result[1].replace(/fwd: |aw: |wtr: |re: |fw: /gi, '');
-
-    Action.preferences.tempMailSubject = title;
-
-    var link = encodeURI(decodeURI(result[0]));
-
-    return [
-      {
-        title: 'No Memo',
-        icon: 'noTemplate.png',
-        action: 'setMemoAndComplete',
-        actionArgument: 'No Memo',
-      },
-      {
-        title: 'Link to Email: ' + title,
-        icon: 'linkTemplate.png',
-        action: 'setMemoAndComplete',
-        actionArgument: link,
-      },
-      {
-        title: 'Add Memo',
-        icon: 'newTemplate.png',
-        action: 'setMemoAndComplete',
-        actionArgument: 'Add Memo',
-      },
-    ];
-  } else {
-    return [
-      {
-        title: 'No Memo',
-        icon: 'noTemplate.png',
-        action: 'setMemoAndComplete',
-        actionArgument: 'No Memo',
-      },
-      {
-        title: 'Add Memo',
-        icon: 'newTemplate.png',
-        action: 'setMemoAndComplete',
-        actionArgument: 'Add Memo',
-      },
-    ];
-  }
+function setDate(dateString) {
+  ActionPrefs.recentDate = dateString;
+  return showMemoOptions();
 }
-// Set memo, create transaction and show response
-function setMemoAndComplete(m) {
-  // Memo
-  if (m == 'No Memo') {
-    Action.preferences.recentMemo = '';
-  } else if (m == 'Add Memo') {
+
+function showMemoOptions() {
+  return [
+    {
+      title: 'No Memo',
+      icon: 'noTemplate.png',
+      action: 'setMemo',
+      actionArgument: '',
+    },
+    {
+      title: 'Add Memo',
+      icon: 'newTemplate.png',
+      action: 'setMemo',
+      actionArgument: 'Add Memo',
+    },
+  ];
+}
+
+function setMemo(memo) {
+  if (memo == 'Add Memo') {
     LaunchBar.hide();
-    var memo = LaunchBar.executeAppleScript(
-      'set result to display dialog "Memo" with title "Memo" default answer ""',
+
+    // Check for Mail URL and show memo dialog
+    const [mailLinkRaw, subjectRaw] = LaunchBar.executeAppleScriptFile(
+      './mail.applescript'
+    )
+      .trim()
+      .split('\n');
+
+    let defaultAnswer = '';
+
+    if (mailLinkRaw && subjectRaw) {
+      const mailLink = encodeURI(decodeURI(mailLinkRaw));
+      let subject = subjectRaw.replace(/fwd: |aw: |wtr: |re: |fw: /gi, '');
+
+      // Trim subject if combined length exceeds 199
+      const maxLength = 199 - mailLink.length;
+      if (subject.length > maxLength) {
+        subject = `${subject.substring(0, maxLength - 1)}…`;
+      }
+
+      defaultAnswer = `${subject} ${mailLink}`;
+    }
+
+    // Display dialog for memo input
+    memo = LaunchBar.executeAppleScript(
+      `set result to display dialog "Memo" with title "Memo" default answer "${defaultAnswer}"`,
       'set result to text returned of result'
     ).trim();
 
-    if (memo == '') {
-      return;
-    }
-
-    Action.preferences.recentMemo = memo;
-    Action.preferences.recentMemoIcon = 'memoTemplate';
-  } else {
-    // AppleScript Link
-    // Truncate if more than 200 characters
-    var subject = Action.preferences.tempMailSubject;
-
-    var length = (subject + m).length;
-
-    if (length > 199) {
-      var difference = length - 199;
-      var subjectLength = subject.length - difference - 1;
-      subject = subject.substring(0, subjectLength) + '…';
-    }
-
-    Action.preferences.recentMemo = subject + ' ' + m;
-    Action.preferences.recentMemoIcon = 'linkTemplate';
+    if (!memo) return; // If a user cancels
   }
 
-  // LaunchBar.alert(Action.preferences.recentMemo.length);
+  ActionPrefs.recentMemo = memo;
+  return postTransaction();
+}
 
-  // return;
-
-  // Cleared Settings
-  if (Action.preferences.recentAccountType == 'otherAsset') {
-    var cleared = Action.preferences.clearedSettingsOtherAsset;
-  } else if (Action.preferences.recentAccountType == 'checking') {
-    var cleared = Action.preferences.clearedSettingsChecking;
-  } else if (Action.preferences.recentAccountType == 'cash') {
-    var cleared = Action.preferences.clearedSettingsCash;
-  }
-
-  if (cleared == undefined) {
-    if (Action.preferences.recentAccountType == 'cash') {
-      cleared = 'cleared';
-    } else {
-      cleared = 'uncleared';
-    }
-  }
-
-  // Add Transaction
-  var tResult = HTTP.postJSON(
-    'https://api.youneedabudget.com/v1/budgets/' +
-      budgetID +
-      '/transactions?access_token=' +
-      token,
+function postTransaction() {
+  const transactionResult = HTTP.postJSON(
+    `${apiBaseURL}/budgets/${budgetID}/transactions?access_token=${token}`,
     {
       body: {
         transaction: {
-          account_id: Action.preferences.recentAccountID,
-          date: Action.preferences.recentDate,
-          amount: Action.preferences.recentAmount,
-          payee_id: Action.preferences.recentPayeeId,
-          payee_name: Action.preferences.recentPayeeName,
-          category_id: Action.preferences.recentCategory,
-          memo: Action.preferences.recentMemo,
-          cleared: cleared,
+          account_id: ActionPrefs.recentAccountID,
+          date: ActionPrefs.recentDate,
+          amount: ActionPrefs.recentAmount,
+          payee_id: ActionPrefs.recentPayeeId,
+          payee_name: ActionPrefs.recentPayeeName,
+          category_id: ActionPrefs.recentCategory,
+          memo: ActionPrefs.recentMemo,
+          cleared: ActionPrefs.recentCleared,
           approved: true,
           flag_color: null,
           import_id: null,
@@ -546,274 +452,140 @@ function setMemoAndComplete(m) {
       },
     }
   );
+  return processTransactionResult(transactionResult);
+}
 
-  if (tResult.error != undefined) {
-    LaunchBar.alert(tResult.error);
-  } else {
-    // Evaluate result
-    var currencySymbol = Action.preferences.budgetCurrencySymbol;
+function processTransactionResult(transactionResult) {
+  const currency = ActionPrefs.budgetCurrency;
 
-    tResult = eval('[' + tResult.data + ']');
-
-    if (tResult[0].error != undefined) {
-      LaunchBar.alert(
-        tResult[0].error.id +
-          ' ' +
-          tResult[0].error.name +
-          ': ' +
-          tResult[0].error.detail
-      );
-      return;
-    }
-
-    var tData = tResult[0].data.transaction;
-    var tAmount = tData.amount / 1000;
-    tAmount = tAmount.toFixed(2).toString();
-    var tCleared = tData.cleared;
-
-    if (tCleared == 'uncleared') {
-      var tSub = 'Amount (uncleared)';
-    } else {
-      var tSub = 'Amount';
-    }
-
-    var tDate = tData.date;
-    var tPayee = tData.payee_name;
-    var tCat = tData.category_name;
-    var tCatId = tData.category_id;
-    var tAcc = tData.account_name;
-    var tAccId = tData.account_id; // To check Account balance
-    var tMemo = tData.memo;
-    var link = 'https://app.youneedabudget.com/' + budgetID + '/accounts';
-
-    if (tMemo != null && tMemo.includes('message://')) {
-      link = tMemo.match(/(message:\S*)/).toString();
-    }
-
-    if (tPayee.includes('Transfer')) {
-      var pIcon = 'transferInTemplate';
-      var aIcon = 'transferOutTemplate';
-    } else {
-      var pIcon = 'payeeTemplate';
-      var aIcon = Action.preferences.recentAccountIcon;
-    }
-
-    if (currencySymbol == '€') {
-      var cIcon = 'euroTemplate';
-      tAmount = tAmount.replace(/\./, ',') + currencySymbol;
-    } else {
-      var cIcon = 'dollarTemplate';
-      tAmount = tAmount.replace(/-/, '');
-      tAmount = '-' + currencySymbol + tAmount;
-    }
-
-    // Refresh Payees (if a new one was added)
-    if (Action.preferences.updatePayees == true) {
-      var pOnlineData = HTTP.getJSON(
-        'https://api.youneedabudget.com/v1/budgets/' +
-          budgetID +
-          '/payees?access_token=' +
-          token,
-        3
-      ).data;
-
-      var pLocalData = File.readJSON(
-        Action.supportPath + '/' + budgetID + '/payees.json'
-      );
-
-      // Compare Online to Local payee data
-      var ids = pLocalData.data.payees.map((ch) => ch.id);
-      var newIds = pOnlineData.data.payees.filter((ch) => !ids.includes(ch.id));
-
-      for (var i = 0; i < newIds.length; i++) {
-        // Add last used category id info to the new payee
-        if (newIds[i].name == Action.preferences.recentPayeeName) {
-          newIds[i].last_used_category_id = Action.preferences.recentCategory;
-        }
-        pLocalData.data.payees.push(newIds[i]);
-      }
-
-      File.writeJSON(
-        pLocalData,
-        Action.supportPath + '/' + budgetID + '/payees.json'
-      );
-    } else {
-      // Set last_used_category and last_used_payee in payee.json
-
-      var payeeDataPath = Action.supportPath + '/' + budgetID + '/payees.json';
-      var payeeData = File.readJSON(payeeDataPath);
-
-      var recentPayeeIndex = Action.preferences.recentPayeeIndex;
-
-      payeeData.data.payees[recentPayeeIndex].last_used_category_id =
-        Action.preferences.recentCategory;
-
-      payeeData.data.payees[recentPayeeIndex].last_used_account_id =
-        Action.preferences.recentAccountID;
-
-      File.writeJSON(payeeData, payeeDataPath);
-    }
-
-    // Check Category Balance
-    var cData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        budgetID +
-        '/categories/' +
-        tCatId +
-        '?access_token=' +
-        token
-    );
-
-    if (tCat != 'Uncategorized' && tCat != 'Inflow: Ready to Assign') {
-      var balance = cData.data.data.category.balance / 1000;
-      balance = balance.toFixed(2).toString();
-      if (currencySymbol == '€') {
-        balance = balance.replace(/\./, ',') + currencySymbol;
-        if (balance.includes('-')) {
-          var catIcon = 'categoryRed';
-        } else {
-          var catIcon = 'categoryTemplate';
-        }
-      } else {
-        if (balance.includes('-')) {
-          balance = balance.replace(/-/, '');
-          balance = '-' + currencySymbol + balance;
-          var catIcon = 'categoryRed';
-          link = 'https://app.youneedabudget.com/' + budgetID + '/accounts';
-        } else {
-          balance = currencySymbol + balance;
-          var catIcon = 'categoryTemplate';
-        }
-      }
-      var catSub = 'Category' + ' (Balance: ' + balance + ')';
-    } else {
-      var catIcon = 'categoryTemplate';
-      var catSub = 'Category';
-    }
-
-    // Check Account Balance
-    var aBalanceData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        budgetID +
-        '/accounts/' +
-        tAccId +
-        '?access_token=' +
-        token
-    );
-
-    var accountBalance = aBalanceData.data.data.account.cleared_balance / 1000;
-    accountBalance = accountBalance.toFixed(2).toString();
-    if (currencySymbol == '€') {
-      accountBalance = accountBalance.replace(/\./, ',') + currencySymbol;
-      // if (accountBalance.includes('-')) {
-      //     var aIcon = 'accountRed'
-      // } else {
-      //     var aIcon = 'accountTemplate'
-      // }
-    } else {
-      if (accountBalance.includes('-')) {
-        accountBalance = accountBalance.replace(/-/, '');
-        accountBalance = '-' + currencySymbol + accountBalance;
-        // var catIcon = 'accountRed'
-        link = 'https://app.youneedabudget.com/' + budgetID + '/accounts';
-      } else {
-        accountBalance = currencySymbol + accountBalance;
-        // var catIcon = 'accountTemplate'
-      }
-    }
-    var accSub = 'Account' + ' (Balance: ' + accountBalance + ')';
-
-    // Show Result
-    if (tMemo == '') {
-      return [
-        {
-          title: tAmount,
-          subtitle: tSub,
-          icon: cIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tDate,
-          subtitle: 'Date',
-          icon: 'calTemplate',
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tPayee,
-          subtitle: 'Payee',
-          icon: pIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tCat,
-          subtitle: catSub,
-          icon: catIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tAcc,
-          subtitle: accSub, // 'Account',
-          icon: aIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-      ];
-    } else {
-      return [
-        {
-          title: tAmount,
-          subtitle: tSub,
-          icon: cIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tDate,
-          subtitle: 'Date',
-          icon: 'calTemplate',
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tPayee,
-          subtitle: 'Payee',
-          icon: pIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tCat,
-          subtitle: catSub,
-          icon: catIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tAcc,
-          subtitle: accSub, // 'Account',
-          icon: aIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-        {
-          title: tMemo,
-          subtitle: 'Memo',
-          icon: Action.preferences.recentMemoIcon,
-          url: link,
-          alwaysShowsSubtitle: true,
-        },
-      ];
-    }
+  if (transactionResult.error) {
+    LaunchBar.alert(transactionResult.error);
+    return;
   }
+
+  transactionResult = eval(`[${transactionResult.data}]`)[0];
+
+  if (transactionResult.error) {
+    const error = transactionResult.error;
+    LaunchBar.alert(`${error.id} ${error.name}: ${error.detail}`);
+    return;
+  }
+
+  const transaction = transactionResult.data.transaction;
+
+  let amount = (transaction.amount / 1000).toLocaleString(cLocale, {
+    style: 'currency',
+    currency,
+  });
+
+  const subtitle =
+    transaction.cleared == 'uncleared' ? 'Amount (uncleared)' : 'Amount';
+
+  const transactionDate = transaction.date;
+  const payeeName = transaction.payee_name;
+  const categoryName = transaction.category_name;
+  const categoryID = transaction.category_id;
+  const accountName = transaction.account_name;
+  const accountNameId = transaction.account_id;
+  const memo = transaction.memo;
+  let url = `https://app.youneedabudget.com/${budgetID}/accounts`;
+
+  if (memo != null && memo.includes('message://')) {
+    url = memo.match(/(message:\S*)/).toString();
+  }
+
+  const payeeIcon = payeeName.includes('Transfer')
+    ? 'transferInTemplate'
+    : 'payeeTemplate';
+  const accountIcon = payeeName.includes('Transfer')
+    ? 'transferOutTemplate'
+    : ActionPrefs.recentAccountIcon;
+
+  const currencyIcon = currency == 'EUR' ? 'euroTemplate' : 'dollarTemplate';
+
+  // Refresh Payees (if a new one was added)
+  if (ActionPrefs.updatePayees == true) {
+    updatePayees({ isSetting: false });
+  } else {
+    // Set last_used_category and last_used_payee in payee.json
+    const payeeDataPath = `${budgetDataDir}/payees.json`;
+    const payeeData = File.readJSON(payeeDataPath);
+    const recentPayeeIndex = ActionPrefs.recentPayeeIndex;
+
+    payeeData.data.payees[recentPayeeIndex].last_used_category_id =
+      ActionPrefs.recentCategory;
+
+    payeeData.data.payees[recentPayeeIndex].last_used_account_id =
+      ActionPrefs.recentAccountID;
+
+    File.writeJSON(payeeData, payeeDataPath);
+  }
+
+  let categorySubtitle = 'Category';
+  let categoryIcon = 'categoryTemplate';
+
+  if (
+    categoryName != 'Uncategorized' &&
+    categoryName != 'Inflow: Ready to Assign'
+  ) {
+    // Check Category Balance
+    const categoryBalance = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/categories/${categoryID}?access_token=${token}`
+    ).data.data.category.balance;
+
+    const categoryBalanceString = (categoryBalance / 1000).toLocaleString(
+      cLocale,
+      {
+        style: 'currency',
+        currency,
+      }
+    );
+
+    categoryIcon = categoryBalanceString.includes('-')
+      ? 'categoryRed'
+      : categoryIcon;
+
+    categorySubtitle += ` (Balance: ${categoryBalanceString})`;
+  }
+
+  // Check Account Balance
+  const accountBalance = HTTP.getJSON(
+    `${apiBaseURL}/budgets/${budgetID}/accounts/${accountNameId}?access_token=${token}`
+  ).data.data.account.cleared_balance;
+
+  const accountBalanceString = (accountBalance / 1000).toLocaleString(cLocale, {
+    style: 'currency',
+    currency,
+  });
+
+  const accountSubtitle = `Account (Balance: ${accountBalanceString})`;
+
+  // Show Result
+  let result = [
+    { title: amount, subtitle: subtitle, icon: currencyIcon },
+    { title: transactionDate, subtitle: 'Date', icon: 'calTemplate' },
+    { title: payeeName, subtitle: 'Payee', icon: payeeIcon },
+    { title: categoryName, subtitle: categorySubtitle, icon: categoryIcon },
+    { title: accountName, subtitle: accountSubtitle, icon: accountIcon },
+  ];
+
+  if (memo)
+    result = [
+      ...result,
+      { title: memo, subtitle: 'Memo', icon: 'memoTemplate' },
+    ];
+
+  for (const item of result) {
+    item.url = url;
+    item.alwaysShowsSubtitle = true;
+  }
+
+  return result;
 }
 
 // Setting Functions
 function setToken() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'Personal Access Token required',
     'You can creat your Personal Access Token at https://app.youneedabudget.com/settings/developer. Copy it to your clipboard, run the action again and choose »Set Token«.\n\nYour clipboard is currently set to: ' +
       LaunchBar.getClipboardString().trim(),
@@ -827,370 +599,249 @@ function setToken() {
       LaunchBar.hide();
       break;
     case 1:
-      Action.preferences.accessToken = LaunchBar.getClipboardString().trim();
-      LaunchBar.alert(
-        'Success!',
-        'Token set to: ' + Action.preferences.accessToken
-      );
+      ActionPrefs.accessToken = LaunchBar.getClipboardString().trim();
+      LaunchBar.alert('Success!', `Token set to: ${ActionPrefs.accessToken}`);
       break;
     case 2:
       break;
   }
 }
 
-function budgetSettings() {
-  var bData = HTTP.getJSON(
-    'https://api.youneedabudget.com/v1/budgets/?access_token=' + token
-  );
-
-  if (bData.error != undefined) {
-    LaunchBar.alert(bData.error);
-  } else {
-    if (bData.data.error != undefined) {
-      LaunchBar.alert(
-        'Error ' + bData.data.error.id + ' ' + bData.data.error.name,
-        'Your token "' +
-          Action.preferences.accessToken +
-          '" seems to be invalid. Try to set your token again!'
-      );
-      setToken();
-    } else {
-      var results = [];
-      for (var i = 0; i < bData.data.data.budgets.length; i++) {
-        var bName = bData.data.data.budgets[i].name;
-        var bId = bData.data.data.budgets[i].id;
-
-        if (bId == Action.preferences.budgetID) {
-          var icon = 'selectedBudgetTemplate';
-          var badge = 'Current Budget';
-        } else {
-          var icon = 'budgetTemplate';
-          var badge = 'Budget Setting';
-        }
-
-        results.push({
-          title: bName,
-          icon: icon,
-          action: 'setBudgetID',
-          badge: badge,
-          actionArgument: bId,
-        });
-      }
-      results.sort(function (a, b) {
-        return a.title > b.title;
-      });
-      return results;
-    }
-  }
-}
-function setBudgetID(bId) {
-  // Set Budget ID
-  Action.preferences.budgetID = bId;
-
-  if (File.exists(Action.supportPath + '/' + bId)) {
-    // File or folder exists
-    var bData = File.readJSON(
-      Action.supportPath + '/' + bId + '/budgetSettings.json'
-    );
-    Action.preferences.budgetCurrencySymbol =
-      bData.data.settings.currency_format.currency_symbol;
-
-    // TODO: Daten abgleichen und aktualisieren
-    //
-    //
-  } else {
-    // Preload data
-    LaunchBar.hide();
-
-    var bData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        bId +
-        '/settings/?access_token=' +
-        token
-    );
-
-    Action.preferences.budgetCurrencySymbol =
-      bData.data.data.settings.currency_format.currency_symbol;
-
-    var pData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        bId +
-        '/payees?access_token=' +
-        token,
-      3
-    );
-    var cData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        bId +
-        '/categories?access_token=' +
-        token,
-      3
-    );
-    var aData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        bId +
-        '/accounts?access_token=' +
-        token,
-      3
-    );
-
-    File.createDirectory(Action.supportPath + '/' + bId);
-
-    File.writeJSON(
-      bData.data,
-      Action.supportPath + '/' + bId + '/budgetSettings.json'
-    );
-
-    File.writeJSON(
-      cData.data,
-      Action.supportPath + '/' + bId + '/categories.json'
-    );
-    File.writeJSON(pData.data, Action.supportPath + '/' + bId + '/payees.json');
-    File.writeJSON(
-      aData.data,
-      Action.supportPath + '/' + bId + '/accounts.json'
-    );
-  }
-
-  var output = budgetSettings();
-  return output;
-}
-
-function clearedSettings() {
-  var sub = 'Hit return to change!';
-
-  if (Action.preferences.clearedSettingsOtherAsset == undefined) {
-    var oA = 'uncleared';
-    var oState = 'cleared'; // to be set
-  } else {
-    var oA = Action.preferences.clearedSettingsOtherAsset;
-
-    if (oA == 'uncleared') {
-      var oState = 'cleared';
-    } else {
-      var oState = 'uncleared';
-    }
-  }
-
-  if (Action.preferences.clearedSettingsCash == undefined) {
-    var cash = 'cleared';
-    var cashState = 'uncleared';
-  } else {
-    var cash = Action.preferences.clearedSettingsCash;
-
-    if (cash == 'uncleared') {
-      var cashState = 'cleared';
-    } else {
-      var cashState = 'uncleared';
-    }
-  }
-
-  if (Action.preferences.clearedSettingsChecking == undefined) {
-    var checking = 'uncleared';
-    var checkingState = 'cleared';
-  } else {
-    var checking = Action.preferences.clearedSettingsChecking;
-
-    if (checking == 'uncleared') {
-      var checkingState = 'cleared';
-    } else {
-      var checkingState = 'uncleared';
-    }
-  }
-
+function settings() {
   return [
     {
-      title: 'Cash: ' + cash,
-      subtitle: sub,
-      icon: 'cashTemplate',
-      badge: 'Cleared/Uncleared Setting',
-      action: 'setClearedSetting',
+      title: 'Choose Budget',
+      subtitle: 'Choose the budget you want to use this action for.',
+      icon: 'budgetTemplate',
+      badge: 'Settings',
+      action: 'budgetSettings',
+      alwaysShowsSubtitle: true,
+    },
+    {
+      title: 'Cleared/Uncleared',
+      subtitle:
+        'Decide if new transactions should be automatically cleared or not.',
+      icon: 'gearTemplate',
+      badge: 'Settings',
+      action: 'clearedSettings',
+      alwaysShowsSubtitle: true,
+    },
+    {
+      title: 'Pin Category',
+      subtitle: 'Pick a category you want to show on top.',
+      icon: 'pinTemplate',
+      badge: 'Settings',
+      action: 'showCategories',
       actionArgument: {
-        cState: cashState,
-        aType: 'cash',
+        isSetting: true,
       },
       alwaysShowsSubtitle: true,
     },
     {
-      title: 'Checking: ' + checking,
-      subtitle: sub,
-      icon: 'accountTemplate',
-      badge: 'Cleared/Uncleared Setting',
-      action: 'setClearedSetting',
-      actionArgument: {
-        cState: checkingState,
-        aType: 'checking',
-      },
-      alwaysShowsSubtitle: true,
-    },
-    {
-      title: 'Other Asset: ' + oA,
-      subtitle: sub,
-      icon: 'trackingAccountTemplate',
-      badge: 'Cleared/Uncleared Setting',
-      action: 'setClearedSetting',
-      actionArgument: {
-        cState: oState,
-        aType: 'otherAsset',
-      },
+      title: 'Refresh Options',
+      subtitle: 'Refresh preloaded data.',
+      icon: 'refreshTemplate',
+      badge: 'Settings',
+      action: 'dataRefresh',
       alwaysShowsSubtitle: true,
     },
   ];
 }
-function setClearedSetting(cInfo) {
-  cState = cInfo.cState;
-  aType = cInfo.aType;
 
-  if (aType == undefined) {
-    Action.preferences.clearedSettingsOtherAsset = cState;
-    Action.preferences.clearedSettingsCash = cState;
-    Action.preferences.clearedSettingsChecking = cState;
-  } else if (aType == 'otherAsset') {
-    Action.preferences.clearedSettingsOtherAsset = cState;
-  } else if (aType == 'cash') {
-    Action.preferences.clearedSettingsCash = cState;
-  } else if (aType == 'checking') {
-    Action.preferences.clearedSettingsChecking = cState;
-  }
-  output = clearedSettings();
-  return output;
-}
+function budgetSettings() {
+  const budgetData = HTTP.getJSON(
+    `${apiBaseURL}/budgets/?access_token=${token}`
+  );
 
-function pinCategory() {
-  // Check if local data is available
-  if (!File.exists(Action.supportPath + '/' + budgetID)) {
-    // Update
-    LaunchBar.alert('Your data needs to be updated.');
-    var output = resetData();
-
-    if (output != 'success') {
-      return;
-    }
+  if (budgetData.error) {
+    LaunchBar.alert(budgetData.error);
+    return;
   }
 
-  // Pinned Category
-  var pinnedCategoryPath =
-    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
-  if (File.exists(pinnedCategoryPath)) {
-    var pinnedCategory = File.readJSON(pinnedCategoryPath);
-  }
-
-  // Category
-  try {
-    var cData = File.readJSON(
-      Action.supportPath + '/' + budgetID + '/categories.json'
-    );
-    // Use object
-  } catch (exception) {
-    LaunchBar.alert('Error while reading JSON: ' + exception);
-  }
-
-  if (cData.error != undefined) {
+  if (budgetData.data.error) {
     LaunchBar.alert(
-      'Error ' + cData.error.id + ' ' + cData.error.name,
-      'Your token "' +
-        Action.preferences.accessToken +
-        '" seems to be invalid. Try to set your token again!'
+      `Error ${budgetData.data.error.id} ${budgetData.data.error.name}`,
+      `Your token "${ActionPrefs.accessToken}" seems to be invalid. Try to set your token again!`
     );
     setToken();
     return;
   }
 
-  var cGroups = cData.data.category_groups;
-  cGroups = cGroups.filter(function (el) {
-    return el.name != 'Hidden Categories';
-  });
+  let results = [];
+  for (const budget of budgetData.data.data.budgets) {
+    const bName = budget.name;
+    const bId = budget.id;
 
-  var internalCategories = [];
-  var userCategories = [];
-  var i = 0;
-  for (i = 0; i < cGroups.length; i++) {
-    var categories = cGroups[i].categories;
-    var j = 0;
-    for (j = 0; j < categories.length; j++) {
-      var categoryPushData = {
-        title: categories[j].name,
-        subtitle: cGroups[i].name,
-        icon: 'categoryTemplate.png',
-        badge: 'Pin Category Setting',
-        action: 'setPin',
-        actionArgument: {
-          pinTitle: categories[j].name,
-          pinSubtitle: cGroups[i].name,
-          pinID: categories[j].id,
-        },
-        alwaysShowsSubtitle: true,
-      };
-      if (cGroups[i].name == 'Internal Master Category') {
-        if (pinnedCategory != undefined) {
-          if (categories[j].name != pinnedCategory.title) {
-            internalCategories.push(categoryPushData);
-          }
-        } else {
-          internalCategories.push(categoryPushData);
-        }
-      } else {
-        if (pinnedCategory != undefined) {
-          if (categories[j].name != pinnedCategory.title) {
-            userCategories.push(categoryPushData);
-          }
-        } else {
-          userCategories.push(categoryPushData);
-        }
-      }
+    let icon, badge;
+
+    if (bId == ActionPrefs.budgetID) {
+      icon = 'selectedBudgetTemplate';
+      badge = 'Current Budget';
+    } else {
+      icon = 'budgetTemplate';
+      badge = 'Budget Setting';
     }
-  }
-  var pin = userCategories.concat(internalCategories);
 
-  if (pinnedCategory != undefined) {
-    var pinnedCategory = [
-      {
-        title: pinnedCategory.title, // TODO: ändern
-        subtitle: 'Hit enter to unpin this category!',
-        icon: 'selectedCategoryTemplate.png',
-        badge: 'Pinned',
-        action: 'setPin',
-        actionArgument: 'unpin',
-        alwaysShowsSubtitle: true,
-      },
-    ];
-    var result = pinnedCategory.concat(pin);
+    results.push({
+      title: bName,
+      icon,
+      action: 'setBudgetID',
+      badge,
+      actionArgument: bId,
+    });
+  }
+  results.sort((a, b) => a.title > b.title);
+
+  return results;
+}
+
+function setBudgetID(bId) {
+  // Set Budget ID
+  ActionPrefs.budgetID = bId;
+
+  if (File.exists(`${Action.supportPath}/${bId}`)) {
+    // File or folder exists
+    const budgetSettingsData = File.readJSON(
+      `${Action.supportPath}/${bId}/budgetSettings.json`
+    );
+    ActionPrefs.budgetCurrency =
+      budgetSettingsData.data.settings.currency_format.iso_code;
   } else {
-    var result = pin;
+    // Preload data
+    LaunchBar.hide();
+
+    const budgetSettingsData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${bId}/settings/?access_token=${token}`
+    );
+
+    ActionPrefs.budgetCurrency =
+      budgetSettingsData.data.data.settings.currency_format.iso_code;
+
+    const payeeData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${bId}/payees?access_token=${token}`
+    );
+    const categoryData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${bId}/categories?access_token=${token}`
+    );
+    const accountData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${bId}/accounts?access_token=${token}`
+    );
+
+    File.createDirectory(`${Action.supportPath}/${bId}`);
+
+    File.writeJSON(
+      budgetSettingsData.data,
+      `${Action.supportPath}/${bId}/budgetSettings.json`
+    );
+
+    File.writeJSON(
+      categoryData.data,
+      `${Action.supportPath}/${bId}/categories.json`
+    );
+
+    File.writeJSON(payeeData.data, `${Action.supportPath}/${bId}/payees.json`);
+
+    File.writeJSON(
+      accountData.data,
+      `${Action.supportPath}/${bId}/accounts.json`
+    );
+  }
+
+  return budgetSettings();
+}
+
+function clearedSettings() {
+  const clearedSettingOtherAsset =
+    ActionPrefs.clearedSettingsOtherAsset == undefined
+      ? 'uncleared'
+      : ActionPrefs.clearedSettingsOtherAsset;
+  const clearedSettingOtherAssetNew =
+    clearedSettingOtherAsset == 'uncleared' ? 'cleared' : 'uncleared';
+
+  const clearedSettingCash =
+    ActionPrefs.clearedSettingsCash == undefined
+      ? 'cleared'
+      : ActionPrefs.clearedSettingsCash;
+  const clearedSettingCashNew =
+    clearedSettingCash == 'uncleared' ? 'cleared' : 'uncleared';
+
+  const clearedSettingChecking =
+    ActionPrefs.clearedSettingsChecking == undefined
+      ? 'uncleared'
+      : ActionPrefs.clearedSettingsChecking;
+  const clearedSettingCheckingNew =
+    clearedSettingChecking == 'uncleared' ? 'cleared' : 'uncleared';
+
+  result = [
+    {
+      title: `Cash: ${clearedSettingCash}`,
+      icon: 'cashTemplate',
+      actionArgument: {
+        clearedSetting: clearedSettingCashNew,
+        accountType: 'cash',
+      },
+    },
+    {
+      title: `Checking: ${clearedSettingChecking}`,
+      icon: 'accountTemplate',
+      actionArgument: {
+        clearedSetting: clearedSettingCheckingNew,
+        accountType: 'checking',
+      },
+    },
+    {
+      title: `Other Asset: ${clearedSettingOtherAsset}`,
+      icon: 'trackingAccountTemplate',
+      actionArgument: {
+        clearedSetting: clearedSettingOtherAssetNew,
+        accountType: 'otherAsset',
+      },
+    },
+  ];
+
+  for (const item of result) {
+    item.subtitle = 'Hit return to change!';
+    item.badge = 'Cleared Setting';
+    item.action = 'setClearedSetting';
+    item.alwaysShowsSubtitle = true;
   }
   return result;
 }
-function setPin(pin) {
-  var fileLocation =
-    Action.supportPath + '/' + budgetID + '/pinnedCategory.json';
 
-  if (pin == 'unpin') {
-    File.writeJSON([], fileLocation);
-  } else {
-    var pinnedCategory = {
-      title: pin.pinTitle,
-      subtitle: pin.pinSubtitle,
-      icon: 'categoryTemplate',
-      badge: 'Pinned',
-      action: 'setCategoryAndContinue',
-      actionArgument: pin.pinID,
-      alwaysShowsSubtitle: true,
-    };
-    File.writeJSON(pinnedCategory, fileLocation);
+function setClearedSetting({ clearedSetting, accountType }) {
+  switch (accountType) {
+    case 'otherAsset':
+      ActionPrefs.clearedSettingsOtherAsset = clearedSetting;
+      break;
+    case 'cash':
+      ActionPrefs.clearedSettingsCash = clearedSetting;
+      break;
+    case 'checking':
+      ActionPrefs.clearedSettingsChecking = clearedSetting;
+      break;
   }
 
-  var output = pinCategory();
-  return output;
+  return clearedSettings();
+}
+
+function setPin({ unpin, categoryID }) {
+  if (unpin) {
+    pinnedCategories[budgetID] = undefined;
+  } else {
+    pinnedCategories[budgetID] = categoryID;
+  }
+  Action.preferences.pinnedCategories = pinnedCategories;
+  return showCategories({ isSetting: true });
 }
 
 function dataRefresh() {
-  // Preload data
   return [
     {
       title: 'Update payees for current budget',
       subtitle: 'Preserves info for smart suggestions of existing payees.',
       icon: 'refreshTemplate',
       action: 'updatePayees',
+      actionArgument: { isSetting: true },
       actionRunsInBackground: true,
       alwaysShowsSubtitle: true,
     },
@@ -1213,100 +864,79 @@ function dataRefresh() {
     },
   ];
 }
-function updatePayees() {
-  var pOnlineData = HTTP.getJSON(
-    'https://api.youneedabudget.com/v1/budgets/' +
-      budgetID +
-      '/payees?access_token=' +
-      token,
+
+function updatePayees({ isSetting }) {
+  const pOnlineData = HTTP.getJSON(
+    `${apiBaseURL}/budgets/${budgetID}/payees?access_token=${token}`,
     3
   );
 
   if (pOnlineData.error != undefined) {
     LaunchBar.alert(pOnlineData.error);
-  } else {
-    LaunchBar.hide();
-    var pLocalData = File.readJSON(
-      Action.supportPath + '/' + budgetID + '/payees.json'
-    );
-
-    // Add new payess
-    var localIds = pLocalData.data.payees.map((ch) => ch.id);
-    var newIds = pOnlineData.data.data.payees.filter(
-      (ch) => !localIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < newIds.length; i++) {
-      pLocalData.data.payees.push(newIds[i]);
-    }
-
-    // Remove old payess
-    var onlineIds = pOnlineData.data.data.payees.map((ch) => ch.id);
-    var oldIds = pLocalData.data.payees.filter(
-      (ch) => !onlineIds.includes(ch.id)
-    );
-
-    for (var i = 0; i < oldIds.length; i++) {
-      for (var j = 0; j < pLocalData.data.payees.length; j++) {
-        if (pLocalData.data.payees[j] == oldIds[i]) {
-          pLocalData.data.payees.splice(j, 1);
-        }
-      }
-    }
-
-    File.writeJSON(
-      pLocalData,
-      Action.supportPath + '/' + budgetID + '/payees.json'
-    );
-
-    var changes = newIds.length + oldIds.length;
-
-    LaunchBar.displayNotification({
-      title: 'YNAB Payees updated',
-      subtitle: changes + ' change(s)',
-    });
+    return;
   }
+
+  LaunchBar.hide();
+  const pLocalData = File.readJSON(`${budgetDataDir}/payees.json`);
+
+  let changes = 0;
+
+  // Add new payees
+  const localIds = pLocalData.data.payees.map((payee) => payee.id);
+  const newPayees = pOnlineData.data.data.payees.filter((payee) => {
+    if (!localIds.includes(payee.id)) {
+      changes++;
+
+      if (!isSetting) payee.last_used_category_id = ActionPrefs.recentCategory;
+
+      return true;
+    }
+    return false;
+  });
+
+  pLocalData.data.payees = [...pLocalData.data.payees, ...newPayees];
+
+  // Remove old payees
+  const onlineIds = pOnlineData.data.data.payees.map((payee) => payee.id);
+  pLocalData.data.payees = pLocalData.data.payees.filter((payee) => {
+    if (!onlineIds.includes(payee.id)) {
+      changes++;
+      return false;
+    }
+    return true;
+  });
+
+  File.writeJSON(pLocalData, `${budgetDataDir}/payees.json`);
+
+  LaunchBar.displayNotification({
+    title: 'YNAB Payees updated',
+    subtitle: `${changes} change(s)`,
+  });
 }
+
 function updateRest() {
-  var bSettingsData = HTTP.getJSON(
-    'https://api.youneedabudget.com/v1/budgets/' +
-      budgetID +
-      '/settings/?access_token=' +
-      token
+  const budgetSettingsData = HTTP.getJSON(
+    `${apiBaseURL}/budgets/${budgetID}/settings/?access_token=${token}`
   );
 
-  if (bSettingsData.error != undefined) {
-    LaunchBar.alert(bSettingsData.error);
+  if (budgetSettingsData.error != undefined) {
+    LaunchBar.alert(budgetSettingsData.error);
   } else {
     LaunchBar.hide();
-    var cData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        budgetID +
-        '/categories?access_token=' +
-        token,
-      3
+    const categoryData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/categories?access_token=${token}`
     );
-    var aData = HTTP.getJSON(
-      'https://api.youneedabudget.com/v1/budgets/' +
-        budgetID +
-        '/accounts?access_token=' +
-        token,
-      3
+    const accountData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/accounts?access_token=${token}`
     );
 
     File.writeJSON(
-      bSettingsData.data,
-      Action.supportPath + '/' + budgetID + '/budgetSettings.json'
+      budgetSettingsData.data,
+      `${budgetDataDir}/budgetSettings.json`
     );
 
-    File.writeJSON(
-      cData.data,
-      Action.supportPath + '/' + budgetID + '/categories.json'
-    );
-    File.writeJSON(
-      aData.data,
-      Action.supportPath + '/' + budgetID + '/accounts.json'
-    );
+    File.writeJSON(categoryData.data, `${budgetDataDir}/categories.json`);
+    File.writeJSON(accountData.data, `${budgetDataDir}/accounts.json`);
 
     LaunchBar.displayNotification({
       title: 'Success!',
@@ -1315,74 +945,60 @@ function updateRest() {
     });
   }
 }
+
 function resetData() {
-  var budgetData = HTTP.getJSON(
-    'https://api.youneedabudget.com/v1/budgets/' + '?access_token=' + token
-  );
+  var budgetData = HTTP.getJSON(`${apiBaseURL}/budgets/?access_token=${token}`);
 
   if (budgetData.error != undefined) {
     LaunchBar.alert(budgetData.error);
-  } else {
-    LaunchBar.hide();
-
-    budgetData = budgetData.data.data.budgets;
-    for (var i = 0; i < budgetData.length; i++) {
-      var bId = budgetData[i].id;
-
-      var bSettingsData = HTTP.getJSON(
-        'https://api.youneedabudget.com/v1/budgets/' +
-          bId +
-          '/settings/?access_token=' +
-          token
-      );
-
-      var pData = HTTP.getJSON(
-        'https://api.youneedabudget.com/v1/budgets/' +
-          bId +
-          '/payees?access_token=' +
-          token,
-        3
-      );
-      var cData = HTTP.getJSON(
-        'https://api.youneedabudget.com/v1/budgets/' +
-          bId +
-          '/categories?access_token=' +
-          token,
-        3
-      );
-      var aData = HTTP.getJSON(
-        'https://api.youneedabudget.com/v1/budgets/' +
-          bId +
-          '/accounts?access_token=' +
-          token,
-        3
-      );
-
-      File.createDirectory(Action.supportPath + '/' + bId);
-
-      File.writeJSON(
-        bSettingsData.data,
-        Action.supportPath + '/' + bId + '/budgetSettings.json'
-      );
-      File.writeJSON(
-        cData.data,
-        Action.supportPath + '/' + bId + '/categories.json'
-      );
-      File.writeJSON(
-        pData.data,
-        Action.supportPath + '/' + bId + '/payees.json'
-      );
-      File.writeJSON(
-        aData.data,
-        Action.supportPath + '/' + bId + '/accounts.json'
-      );
-    }
-
-    LaunchBar.displayNotification({
-      title: 'Success!',
-      subtitle: 'You have successfully reset all your YNAB data.',
-    });
-
-    return 'success';
+    return;
   }
+
+  LaunchBar.hide();
+
+  const budgets = budgetData.data.data.budgets;
+
+  for (const budget of budgets) {
+    const budgetID = budget.id;
+
+    const budgetSettingsData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/settings/?access_token=${token}`
+    );
+
+    const payeeData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/payees?access_token=${token}`
+    );
+    const categoryData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/categories?access_token=${token}`
+    );
+    const accountData = HTTP.getJSON(
+      `${apiBaseURL}/budgets/${budgetID}/accounts?access_token=${token}`
+    );
+
+    File.createDirectory(`${Action.supportPath}/${budgetID}`);
+
+    File.writeJSON(
+      budgetSettingsData.data,
+      `${Action.supportPath}/${budgetID}/budgetSettings.json`
+    );
+    File.writeJSON(
+      categoryData.data,
+      `${Action.supportPath}/${budgetID}/categories.json`
+    );
+    File.writeJSON(
+      payeeData.data,
+      `${Action.supportPath}/${budgetID}/payees.json`
+    );
+    File.writeJSON(
+      accountData.data,
+      `${Action.supportPath}/${budgetID}/accounts.json`
+    );
+  }
+
+  LaunchBar.displayNotification({
+    title: 'Success!',
+    subtitle: 'You have successfully reset all your YNAB data.',
+  });
+
+  return 'success';
 }
