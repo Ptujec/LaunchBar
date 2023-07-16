@@ -1,28 +1,20 @@
 // LaunchBar Action Script
 
 String.prototype.localizationTable = 'default';
+include('days.js');
 
 function runWithString(string) {
-  var lines = File.readText(
-    Action.path + '/Contents/Resources/suggestions.txt'
-  ).split('\n');
+  string = string.toLowerCase();
 
-  var suggestions = [];
-  lines.forEach(function (item) {
-    var title = item.localize();
-    var stringParts = title.replace(/\(/g, '').split(' ');
-
-    stringParts.forEach(function (item) {
-      if (item.toLowerCase().startsWith(string.toLowerCase())) {
-        if (!JSON.stringify(suggestions).includes(title)) {
-          suggestions.push({
-            title: title,
-            icon: 'CopyActionTemplate',
-          });
-        }
-      }
+  return daySuggestions
+    .filter((day) => {
+      const stringParts = day.split(' ');
+      return stringParts.some((part) => part.toLowerCase().startsWith(string));
+    })
+    .map((day) => {
+      return {
+        title: day,
+        icon: 'CopyActionTemplate',
+      };
     });
-  });
-
-  return suggestions;
 }

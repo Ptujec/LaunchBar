@@ -7,9 +7,9 @@
 "Sunday" = "Sonntag";
 "Yesterday" = "Gestern";
 "Tomorrow" = "Morgen";
-"First day of previous month (FDPM)" = "Erster Tag des vergangen Monats (ETVM)";
-"Last day of previous month (LDPM)" = "Letzter Tag des vergangen Monats (LTVM)";
-"First day of this month (FDTM)" = "Erster Tag des aktuellen Monats (ETAM)";
-"Last day of this month (LDTM)" = "Letzter Tag des aktuellen Monats (LTAM)";
-"First day of next month (FDNM)" = "Erster Tag des nächstag Monats (ETNM)";
-"Last day of next month (LDNM)" = "Letzter Tag des nächstag Monats (LTNM)";
+"First day of last month" = "Erster Tag des vergangenen Monats";
+"Last day of last month" = "Letzter Tag des vergangenen Monats";
+"First day of this month" = "Erster Tag des aktuellen Monats";
+"Last day of this month" = "Letzter Tag des aktuellen Monats";
+"First day of next month" = "Erster Tag des nächsten Monats";
+"Last day of next month" = "Letzter Tag des nächsten Monats";
