@@ -17,20 +17,21 @@ const apiKey = Action.preferences.apiKey;
 const w3wRegex = /(?:[a-züäöß]+\.){2}[a-züäöß]+/;
 
 function run(argument) {
-  argument = argument + ' ';
+  argument += ' ';
+  let saddr, daddr, url;
 
-  var parts = argument.split(/(?: |^)(?:to|nach|von|from) /);
-  var devider = argument.match(/(?: |^)(?:to|nach|von|from) /);
+  const parts = argument.split(/(?: |^)(?:to|nach|von|from) /);
+  const deviderMatch = argument.match(/(?: |^)(?:to|nach|von|from) /);
 
-  if (devider != undefined) {
-    devider = devider.join('').trim();
+  if (deviderMatch) {
+    const devider = deviderMatch[0].trim();
 
     if (devider == 'von' || devider == 'from') {
-      var saddr = parts[1]; // source address
-      var daddr = parts[0]; // destination add
+      saddr = parts[1]; // source address
+      daddr = parts[0]; // destination add
     } else {
-      var saddr = parts[0]; // source address
-      var daddr = parts[1]; // destination address
+      saddr = parts[0]; // source address
+      daddr = parts[1]; // destination address
     }
 
     if (w3wRegex.test(daddr)) {
@@ -42,25 +43,20 @@ function run(argument) {
     }
 
     if (saddr == '') {
-      var url = encodeURI('http://maps.apple.com/?daddr=' + daddr);
+      url = encodeURI(`http://maps.apple.com/?daddr=${daddr}`);
     } else {
-      var url = encodeURI(
-        'http://maps.apple.com/?saddr=' + saddr + '&daddr=' + daddr
-      );
+      url = encodeURI(`http://maps.apple.com/?saddr=${saddr}&daddr=${daddr}`);
     }
   } else {
     const what3words = argument.match(w3wRegex);
 
     if (what3words) {
-      var cooComp = getCooComp(what3words);
-      var url =
-        'http://maps.apple.com/?q=///' +
-        encodeURIComponent(what3words) +
-        '&ll=' +
-        cooComp +
-        '&z=10&t=s';
+      const cooComp = getCooComp(what3words);
+      url = `http://maps.apple.com/?q=///${encodeURIComponent(
+        what3words
+      )}&ll=${cooComp}&z=10&t=s`;
     } else {
-      var url = 'https://maps.apple.com/?q=' + encodeURI(argument);
+      url = `https://maps.apple.com/?q=${encodeURI(argument)}`;
     }
   }
 
@@ -68,40 +64,36 @@ function run(argument) {
 }
 
 function getCooComp(what3words) {
-  if (apiKey == undefined || LaunchBar.options.commandKey) {
+  if (!apiKey || LaunchBar.options.commandKey) {
     setApiKey();
     return;
   }
 
-  var requestURL =
-    'https://api.what3words.com/v3/convert-to-coordinates?words=' +
-    encodeURIComponent(what3words) +
-    '&key=' +
-    apiKey;
+  const requestURL = `https://api.what3words.com/v3/convert-to-coordinates?words=${encodeURIComponent(
+    what3words
+  )}&key=${apiKey}`;
 
-  var result = HTTP.getJSON(requestURL);
+  const result = HTTP.getJSON(requestURL);
 
   // ERROR HANDLING
-  if (result.response == undefined) {
+  if (!result.response) {
     LaunchBar.alert(result.error);
     return;
   }
 
   if (result.response.status != 200) {
     LaunchBar.alert(
-      result.response.status + ': ' + result.response.localizedStatus
+      `${result.response.status}: ${result.response.localizedStatus}`
     );
     return;
   }
 
-  var coo = result.data.coordinates;
-  var cooComp = coo.lat + ',' + coo.lng;
-
-  return cooComp;
+  const coo = result.data.coordinates;
+  return `${coo.lat},${coo.lng}`;
 }
 
 function setApiKey() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'API key required',
     '1) Press "Open Website" to create an API key.\n2) Press "Set API key"',
     'Open Website',
@@ -114,7 +106,7 @@ function setApiKey() {
       LaunchBar.hide();
       break;
     case 1:
-      var clipboardContent = LaunchBar.getClipboardString().trim();
+      const clipboardContent = LaunchBar.getClipboardString().trim();
 
       if (clipboardContent.length == 8) {
         // Write new API key in Action preferences
@@ -122,7 +114,7 @@ function setApiKey() {
 
         LaunchBar.alert(
           'Success!',
-          'API key set to: ' + Action.preferences.apiKey
+          `API key set to: ${Action.preferences.apiKey}`
         );
       } else {
         LaunchBar.alert(
