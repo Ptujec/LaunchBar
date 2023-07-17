@@ -27,30 +27,29 @@ function run(argument) {
 }
 
 function processArgument(argument, date) {
+  argument = argument.toLowerCase();
+
   const month = date.getMonth();
   const year = date.getFullYear();
-  let dateString;
 
   // First and last days of month
-  if ('First day of last month'.localize() == argument)
+  if ('First day of last month'.localize().toLowerCase() == argument)
     return new Date(year, month - 1, 1);
 
-  if ('Last day of last month'.localize() == argument)
+  if ('Last day of last month'.localize().toLowerCase() == argument)
     return new Date(year, month, 1, -1);
 
-  if ('First day of this month'.localize() == argument)
+  if ('First day of this month'.localize().toLowerCase() == argument)
     return new Date(year, month, 1);
 
-  if ('Last day of this month'.localize() == argument)
+  if ('Last day of this month'.localize().toLowerCase() == argument)
     return new Date(year, month + 1, 0);
 
-  if ('First day of next month'.localize() == argument)
+  if ('First day of next month'.localize().toLowerCase() == argument)
     return new Date(year, month + 1, 1);
 
-  if ('Last day of next month'.localize() == argument)
+  if ('Last day of next month'.localize().toLowerCase() == argument)
     return new Date(year, month + 2, 0);
-
-  argument = argument.toLowerCase();
 
   // Relativ days of the week (convert to offset number)
   if ('Tomorrow'.localize().toLowerCase().startsWith(argument)) {
