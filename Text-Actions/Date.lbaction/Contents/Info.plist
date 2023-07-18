@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>CopyActionTemplate</string>
+	<string>Template.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.Date</string>
 	<key>CFBundleName</key>
 	<string>Paste Date</string>
 	<key>CFBundleVersion</key>
-	<string>5.3.1</string>
+	<string>5.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,10 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⇧⏎ = Set default format, ⌥⏎ = Use alternate format
-This action does two things:
-1) Paste the current date in the frontmost window (yyyy-MM-dd format)
-2) On hitting space you can enter days from now (e.g. "-3") or an upcoming weekday ("Sunday", "sun") to get the date for that.</string>
+		<string>⇧⏎ = Set default format, ⌥⏎ = Use alternate format</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBUpdateURL</key>

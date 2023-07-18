@@ -1,7 +1,7 @@
 /* 
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-16
+2023-07-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -16,14 +16,14 @@ function run(argument) {
 
   if (!argument) {
     // Return current date
-    dateString = new Date();
+    dateString = date;
   } else {
     // Return parsed argument date
     dateString = processArgument(argument, date);
     if (dateString === 'No valid entry') return;
   }
 
-  formatAndPaste(dateString);
+  LaunchBar.paste(format(dateString));
 }
 
 function processArgument(argument, date) {
@@ -33,23 +33,36 @@ function processArgument(argument, date) {
   const year = date.getFullYear();
 
   // First and last days of month
-  if ('First day of last month'.localize().toLowerCase() == argument)
-    return new Date(year, month - 1, 1);
+  switch (argument) {
+    case 'First day of last month'.localize().toLowerCase():
+      return new Date(year, month - 1, 1);
+    case 'Last day of last month'.localize().toLowerCase():
+      return new Date(year, month, 0);
+    case 'First day of this month'.localize().toLowerCase():
+      return new Date(year, month, 1);
+    case 'Last day of this month'.localize().toLowerCase():
+      return new Date(year, month + 1, 0);
+    case 'First day of next month'.localize().toLowerCase():
+      return new Date(year, month + 1, 1);
+    case 'Last day of next month'.localize().toLowerCase():
+      return new Date(year, month + 2, 0);
+  }
 
-  if ('Last day of last month'.localize().toLowerCase() == argument)
-    return new Date(year, month, 1, -1);
+  // Upcoming day of the week offset
+  if (isNaN(parseInt(argument))) {
+    let dayOfWeek = weekdaysEN.findIndex((day) => day.startsWith(argument));
 
-  if ('First day of this month'.localize().toLowerCase() == argument)
-    return new Date(year, month, 1);
+    if (dayOfWeek === -1)
+      dayOfWeek = weekdaysDE.findIndex((day) => day.startsWith(argument));
 
-  if ('Last day of this month'.localize().toLowerCase() == argument)
-    return new Date(year, month + 1, 0);
-
-  if ('First day of next month'.localize().toLowerCase() == argument)
-    return new Date(year, month + 1, 1);
-
-  if ('Last day of next month'.localize().toLowerCase() == argument)
-    return new Date(year, month + 2, 0);
+    if (dayOfWeek !== -1) {
+      let dayOfWeekDate = new Date(date.getTime());
+      dayOfWeekDate.setDate(
+        date.getDate() + ((dayOfWeek - 1 - date.getDay() + 7) % 7) + 1
+      );
+      return new Date(dayOfWeekDate);
+    }
+  }
 
   // Relativ days of the week (convert to offset number)
   if ('Tomorrow'.localize().toLowerCase().startsWith(argument)) {
@@ -65,26 +78,11 @@ function processArgument(argument, date) {
     return new Date(date);
   }
 
-  // Upcoming day of the week offset
-  let dayOfWeek = weekdaysEN.findIndex((day) => day.startsWith(argument));
-
-  if (dayOfWeek === -1)
-    dayOfWeek = weekdaysDE.findIndex((day) => day.startsWith(argument));
-
-  if (dayOfWeek === -1) {
-    LaunchBar.alert('No valid entry');
-    return 'No valid entry';
-  }
-
-  let dayOfWeekDate = new Date(date.getTime());
-  dayOfWeekDate.setDate(
-    date.getDate() + ((dayOfWeek - 1 - date.getDay() + 7) % 7) + 1
-  );
-
-  return new Date(dayOfWeekDate);
+  LaunchBar.alert('No valid entry');
+  return 'No valid entry';
 }
 
-function formatAndPaste(dateString) {
+function format(dateString) {
   let dateFormat = Action.preferences.dateFormat ?? 'iso';
 
   if (LaunchBar.options.alternateKey) {
@@ -111,17 +109,22 @@ function formatAndPaste(dateString) {
     });
   }
 
-  LaunchBar.paste(dateString);
+  return dateString;
 }
 
 function defaultFormatToggle() {
+  const dateString = format(new Date());
   const dateFormat = Action.preferences.dateFormat ?? 'iso';
+
   return [
     {
-      title: dateFormat == 'iso' ? 'ISO Date Format' : 'Local Date Format',
+      title:
+        dateFormat == 'iso'
+          ? `ISO Format (${dateString})`
+          : `Local Format (${dateString})`,
       action: 'setDateFormat',
       actionArgument: dateFormat == 'iso' ? 'local' : 'iso',
-      icon: 'calTemplate',
+      icon: dateFormat == 'iso' ? 'isoTemplate' : 'localTemplate',
     },
   ];
 }
