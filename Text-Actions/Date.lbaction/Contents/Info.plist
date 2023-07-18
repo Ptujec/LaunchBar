@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Paste Date</string>
 	<key>CFBundleVersion</key>
-	<string>5.4</string>
+	<string>5.4.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -63,6 +63,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string>Enter days from now (e.g. "-3") or weekday ("Sunday", "sun") </string>
+	<string>Number or Name</string>
 </dict>
 </plist>
