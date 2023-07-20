@@ -1,9 +1,5 @@
 # LaunchBar Text Actions
 
-## Paste Date
-
-<img src="pasteDate.gif" width="600"/> 
-
 ## Markdown to RTF Link
 
 <img src="mdrtf.gif" width="600"/> 
@@ -12,10 +8,8 @@
 
 <img src="geturls.gif" width="600"/> 
 
-
 ## Full List
-
-- Paste Date (Paste current date or date plus/minus some days (e.g. "-3") in an active text field. You can also specify an upcoming day of the week (e.g. "Sunday") or its abbreviation (e.g. "sun")
+- ~~Paste Date~~ [moved to new directory](https://github.com/Ptujec/LaunchBar/tree/master/Paste-Date)
 - Get Markdown Link from Safari (and paste into active text field)
 - Get RTF Link from Safari (and paste into active text field)
 - Get URLs from text
