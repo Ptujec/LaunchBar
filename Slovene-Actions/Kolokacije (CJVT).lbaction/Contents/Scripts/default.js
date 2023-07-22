@@ -1,41 +1,37 @@
-// LaunchBar Action for Kolokacije, kolokacijski slovar sodobne slovenščine
+/* 
+Kolokacije Action for LaunchBar
+Kolokacije, kolokacijski slovar sodobne slovenščine
+
+by Christian Bender (@ptujec)
+2023-07-22
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
 function run(argument) {
-  if (argument != undefined) {
-    argument = argument.trim();
-    if (argument != '') {
-      var result = HTTP.getJSON(
-        'https://viri.cjvt.si/kolokacije/ajax_api/v1/slv/search/' +
-          encodeURIComponent(argument),
-        3
-      ).data;
+  argument = argument.trim();
+  if (argument == '') return;
 
-      if (result != undefined) {
-        var suggestions = [];
-        for (var i = 0; i < result.length; i++) {
-          var candidate = result[i].candidate;
-          var headwordId = result[i].headword_id;
+  const data = HTTP.getJSON(
+    'https://viri.cjvt.si/kolokacije/ajax_api/v1/slv/search/' +
+      encodeURIComponent(argument),
+    3
+  ).data;
 
-          suggestions.push({
-            title: candidate,
-            icon: 'kTemplate',
-            action: 'getRelatedWords',
-            actionArgument: headwordId.toString(),
-          });
-        }
-      }
-      return suggestions;
-    }
-  } else {
-    LaunchBar.hide();
-    LaunchBar.openURL('https://viri.cjvt.si/kolokacije/slv/');
-  }
+  if (!data) return;
+
+  return data.map((item) => ({
+    title: item.candidate,
+    icon: 'kTemplate',
+    action: 'getRelatedWords',
+    actionArgument: item.headword_id.toString(),
+  }));
 }
 
-function getRelatedWords(headwordId) {
-  var data = HTTP.loadRequest(
+function getRelatedWords(headwordID) {
+  let data = HTTP.loadRequest(
     'https://viri.cjvt.si/kolokacije/slv/subfragments/collocations/' +
-      headwordId,
+      headwordID,
     {
       timeout: 5.0,
       method: 'GET',
@@ -43,89 +39,50 @@ function getRelatedWords(headwordId) {
     }
   ).data;
 
-  data = JSON.parse(data);
-  var jData = JSON.parse(data.json);
+  const structures = JSON.parse(JSON.parse(data).json).structures;
 
-  var structures = jData.structures;
+  let result = [];
 
-  var resultWithoutPreposition = [];
-  var resultWithPreposition = [];
-  for (var i = 0; i < structures.length; i++) {
-    var category = structures[i].category;
-    var mappingId = structures[i].mapping_id;
-    var collocations = structures[i].collocations;
-    var preposition = structures[i].preposition;
+  for (const structure of structures) {
+    const category = structure.category;
+    const mappingId = structure.mapping_id;
+    const collocations = structure.collocations;
+    const preposition = structure.preposition;
 
-    if (preposition == null) {
-      for (var j = 0; j < collocations.length; j++) {
-        var form = collocations[j].form.replace(/<(\/)?.>/g, '');
-        var formId = collocations[j].id;
+    for (const collocation of collocations) {
+      var form = collocation.form.replace(/<(\/)?.>/g, '');
+      var formId = collocation.id;
 
-        resultWithoutPreposition.push({
-          title: form,
-          badge: category,
-          icon: 'connectionTemplate',
-          action: 'showExamples',
-          actionArgument: {
-            title: form,
-            formId: formId.toString(),
-            url:
-              'https://viri.cjvt.si/kolokacije/slv/headword/' +
-              headwordId +
-              '/structure/' +
-              mappingId +
-              '?example=' +
-              formId +
-              '#',
-          },
-          frequency: collocations[j].frequency,
-        });
-      }
-    } else {
-      for (var j = 0; j < collocations.length; j++) {
-        var form = collocations[j].form.replace(/<(\/)?.>/g, '');
-        var formId = collocations[j].id;
-        resultWithPreposition.push({
-          title: form,
-          badge: category + ' + ' + preposition,
-          icon: 'connectionTemplate',
-          action: 'showExamples',
-          actionArgument: {
-            formId: formId.toString(),
-            url:
-              'https://viri.cjvt.si/kolokacije/slv/headword/' +
-              headwordId +
-              '/structure/' +
-              mappingId +
-              '?example=' +
-              formId +
-              '#',
-          },
-          frequency: collocations[j].frequency,
-          preposition: preposition,
-        });
-      }
+      const pushData = {
+        title: form,
+        badge: preposition ? `${category} + ${preposition}` : category,
+        icon: 'connectionTemplate',
+        action: 'showExamples',
+        actionArgument: {
+          formId: formId.toString(),
+          url: `https://viri.cjvt.si/kolokacije/slv/headword/${headwordID}/structure/${mappingId}?example=${formId}#`,
+        },
+        frequency: collocation.frequency,
+        preposition: preposition ? preposition : '',
+      };
+
+      result.push(pushData);
     }
   }
 
-  resultWithPreposition.sort(function (a, b) {
-    return (
-      a.preposition.localeCompare(b.preposition) || b.frequency - a.frequency
-    );
-  });
-
-  resultWithoutPreposition.sort(function (a, b) {
-    return a.badge.localeCompare(b.badge) || b.frequency - a.frequency;
-  });
-
-  var result = resultWithoutPreposition.concat(resultWithPreposition);
-
-  return result;
+  return result.sort(
+    (a, b) => a.badge.localeCompare(b.badge) || b.frequency - a.frequency
+  );
 }
 
-function showExamples(dict) {
-  var data = HTTP.loadRequest(
-    'https://viri.cjvt.si/kolokacije/slv/subfragments/examples/' + dict.formId,
+function showExamples({ formId, url }) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.openURL(url);
+    return;
+  }
+
+  let data = HTTP.loadRequest(
+    `https://viri.cjvt.si/kolokacije/slv/subfragments/examples/${formId}`,
     {
       timeout: 5.0,
       method: 'GET',
@@ -133,48 +90,26 @@ function showExamples(dict) {
     }
   ).data;
 
-  data = JSON.parse(data);
-  var jData = JSON.parse(data.json);
+  const examples = JSON.parse(JSON.parse(data).json).examples;
 
-  var examples = jData.examples;
+  let result = [];
 
-  var result = [];
-  for (var i = 0; i < examples.length; i++) {
-    var source = jData.examples[i].source;
-    var year = jData.examples[i].year;
+  for (const example of examples) {
+    const source = example.source;
+    const year = example.year;
+    const form = example.form;
 
-    var form = jData.examples[i].form.replace(/<(\/)?.>/g, '');
-
-    if (form.length > 80) {
-      var words = form.split(' ');
-
-      var full = words.length;
-      var half = words.length / 2;
-
-      var title = [];
-      var subtitle = [];
-
-      for (var j = 0; j < half; j++) {
-        title.push(words[j]);
-      }
-
-      for (var j = full; j > half; j--) {
-        subtitle.push(words[j]);
-      }
-
-      title = title.join(' ');
-      subtitle =
-        subtitle.reverse().join(' ') + ' (' + source + ', ' + year + ')';
-    } else {
-      var title = form;
-      var subtitle = source + ', ' + year;
-    }
+    const shortForm = form.match(/<.*>/)[0].replace(/<(\/)?.>/g, '');
+    const fullForm = form.replace(/<.>(.*?)<\/.>/g, (_, match) =>
+      match.toUpperCase()
+    );
 
     result.push({
-      title: title,
-      subtitle: subtitle,
+      title: shortForm,
+      subtitle: `${fullForm} (${source}, ${year})`,
+      alwaysShowsSubtitle: true,
       icon: 'resultTemplate',
-      url: dict.url,
+      children: [{ title: fullForm }],
     });
   }
   return result;
