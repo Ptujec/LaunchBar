@@ -20,6 +20,8 @@ The following actions are a LaunchBar interface to tools from CJVT (Center za je
 
 <img src="gigafida.png" width="600"/>
 
+Note: This action includes a swift script which you can [compile with this action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action). In this case you also need to uncomment line 68 and comment out line 66 in `default.js`. Please ask if you need help with that.
+
 CJVT tools are provided under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license [(CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/). 
 
 ## Slovar slovenskega knjižnega jezika (SSKJ²)
