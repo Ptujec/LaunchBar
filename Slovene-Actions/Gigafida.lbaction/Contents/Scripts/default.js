@@ -116,7 +116,7 @@ function run(argument) {
   for (var i = 0; i < rightText.length; i++) {
     let left = leftText[i].replace(/(<([^>]+)>)/g, '');
 
-    left = left.split(' ').slice(-4).join(' ');
+    left = left.split(/\s+/).slice(-4).join(' ');
 
     let right = rightText[i]; //.replace(/(<([^>]+)>)/g, '');
 
@@ -127,13 +127,13 @@ function run(argument) {
     right = right
       .replace(/<div class="pure-u-1-2 text right">.*<\/span>/, '')
       .replace(/(<([^>]+)>)/g, '')
-      .split(' ')
-      .slice(-4)
+      .split(/\s+/)
+      .slice(0, 4)
       .join(' ');
 
     result.push({
       title: center,
-      subtitle: `${left + center.toUpperCase()} ${right}`,
+      subtitle: `${left + center.toUpperCase()}${right}`,
       icon: 'resultTemplate',
       action: 'openURL',
       actionArgument: mainURL,
