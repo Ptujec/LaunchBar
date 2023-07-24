@@ -83,7 +83,6 @@ function processArgument(argument, date) {
     date.setDate(date.getDate() + parseInt(argument));
     return new Date(date);
   }
-
   LaunchBar.alert('No valid entry');
   return 'No valid entry';
 }

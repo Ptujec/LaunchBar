@@ -15,7 +15,8 @@ function runWithString(string) {
   string = string.toLowerCase();
 
   if (!isNaN(parseInt(string))) {
-    const subtitle = format(date, 'full');
+    const dateString = processArgument(string, date);
+    const subtitle = format(dateString, 'full');
     return {
       title: string,
       subtitle,
