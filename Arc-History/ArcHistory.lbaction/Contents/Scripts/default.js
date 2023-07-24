@@ -6,15 +6,20 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-function run(argument) {
-  var json = LaunchBar.execute('/bin/sh', './default.sh');
-
+function run() {
+  let json = LaunchBar.execute('/bin/sh', './default.sh');
   json = JSON.parse(json);
 
-  for (const item of json) {
-    item.subtitle = item.url;
-    item.alwaysShowsSubtitle = true;
-  }
+  return json.map((item) => ({
+    title: item.title,
+    subtitle: item.url,
+    action: 'open',
+    actionArgument: item.url,
+    alwaysShowsSubtitle: true,
+    icon: 'URLTemplate',
+  }));
+}
 
-  return json;
+function open(url) {
+  LaunchBar.openURL(url, 'Arc');
 }

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Arc History</string>
 	<key>CFBundleVersion</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>company.thebrowser.Browser</string>
 	<key>LBDescription</key>
