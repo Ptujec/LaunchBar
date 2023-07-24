@@ -13,6 +13,7 @@ function run() {
   return json.map((item) => ({
     title: item.title,
     subtitle: item.url,
+    url: item.url,
     action: 'open',
     actionArgument: item.url,
     alwaysShowsSubtitle: true,
