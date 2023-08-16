@@ -9,18 +9,18 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 const finbarCLI = '/Applications/Finbar.app/Contents/MacOS/finbar-cli';
 
 function run() {
-  const list = JSON.parse(LaunchBar.execute(finbarCLI, 'list'));
+  const list = JSON.parse(LaunchBar.execute(finbarCLI, 'list', '--v2')).items;
 
   const recentItems = Action.preferences.recentItems;
 
   const recentUIDs = recentItems
-    ? recentItems.map((item) => item.bundleID + '.' + item.indices.join('.'))
+    ? recentItems.map((item) => `${item.bundle_id}.${item.indices.join('.')}`)
     : [];
 
   const processedList = list
     .map((item) => {
-      const uID = item.bundleID + '.' + item.indices.join('.');
-      const sub = item.path.join(' > ');
+      const uID = `${item.bundle_id}.${item.indices.join('.')}`;
+      const subtitle = item.path.join(' > ');
       const title = item.mark ? `${item.title} ${item.mark}` : item.title;
 
       if (
@@ -35,14 +35,10 @@ function run() {
         const pushData = {
           uID,
           title,
-          subtitle: sub,
-          icon: item.bundleID,
+          subtitle,
+          icon: item.bundle_id,
           action: 'click',
-          actionArgument: {
-            bundleID: item.bundleID,
-            indices: item.indices,
-            title: item.title,
-          },
+          actionArgument: item,
           actionRunsInBackground: true,
           alwaysShowsSubtitle: true,
         };
@@ -67,13 +63,13 @@ function run() {
 }
 
 function click(item) {
-  if (item.bundleID != 'at.obdev.LaunchBar') LaunchBar.hide();
+  // Hide LaunchBar Interface (if your not using it for LaunchBar itself)
+  if (item.bundle_id != 'at.obdev.LaunchBar') LaunchBar.hide();
 
-  /// Remember Used Menu Item (per App)
-  let recentItems = Action.preferences.recentItems || [];
-
-  recentItems = recentItems.filter((item2) => item2.bundleID !== item.bundleID);
-
+  // Remember Used Menu Item (per App)
+  const recentItems = (Action.preferences.recentItems || []).filter(
+    (existingItem) => existingItem.bundle_id !== item.bundle_id
+  );
   recentItems.push(item);
   Action.preferences.recentItems = recentItems;
 
