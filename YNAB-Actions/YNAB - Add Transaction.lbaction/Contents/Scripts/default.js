@@ -870,11 +870,11 @@ function updatePayees({ isSetting }) {
   const payeesPath = `${budgetDataDir}/payees.json`;
   const localPayeesExist = File.exists(payeesPath);
 
-  let payeeData = localPayeesExist
+  const payeeData = localPayeesExist
     ? File.readJSON(payeesPath)
     : { payees: [], server_knowledge: null };
 
-  let serverKnowledgePayees = payeeData.data.server_knowledge;
+  const serverKnowledgePayees = payeeData.data.server_knowledge;
 
   let newPayeeData = HTTP.getJSON(
     `${apiBaseURL}/budgets/${budgetID}/payees?access_token=${token}&last_knowledge_of_server=${serverKnowledgePayees}`
@@ -890,24 +890,34 @@ function updatePayees({ isSetting }) {
 
   payeeData.data.server_knowledge = newPayeeData.data.server_knowledge;
 
-  let localPayeeMap = payeeData.data.payees.reduce((map, payee) => {
+  let changes = 0;
+
+  const localPayeeIDs = payeeData.data.payees.reduce(
+    (acc, payee) => acc.add(payee.id),
+    new Set()
+  );
+
+  const localPayeeMap = payeeData.data.payees.reduce((map, payee) => {
     map[payee.id] = payee;
     return map;
   }, {});
 
-  let changes = 0;
-
   newPayeeData.data.payees.forEach((newPayee) => {
     if (newPayee.deleted) {
       delete localPayeeMap[newPayee.id];
-      changes++;
     } else {
-      if (!isSetting)
-        newPayee.last_used_category_id = ActionPrefs.recentCategory;
+      if (localPayeeIDs.has(newPayee.id)) {
+        localPayeeMap[newPayee.id].name = newPayee.name;
+        localPayeeMap[newPayee.id].transfer_account_id =
+          newPayee.transfer_account_id;
+      } else {
+        if (!isSetting)
+          newPayee.last_used_category_id = ActionPrefs.recentCategory;
 
-      localPayeeMap[newPayee.id] = newPayee;
-      changes++;
+        localPayeeMap[newPayee.id] = newPayee;
+      }
     }
+    changes++;
   });
 
   payeeData.data.payees = Object.values(localPayeeMap);
