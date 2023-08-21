@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>YNAB - Add Transaction</string>
 	<key>CFBundleVersion</key>
-	<string>2.4</string>
+	<string>2.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,10 +20,10 @@
 		<string>Press space to add a new transaction. Hit return to change settings.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/YNAB-Actions#ynab---add-transaction-</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/YNAB-Actions/YNAB%20-%20Add%20Transaction.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

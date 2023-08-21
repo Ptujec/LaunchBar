@@ -866,47 +866,53 @@ function dataRefresh() {
 }
 
 function updatePayees({ isSetting }) {
-  const pOnlineData = HTTP.getJSON(
-    `${apiBaseURL}/budgets/${budgetID}/payees?access_token=${token}`,
-    3
-  );
+  // Update Payee Data
+  const payeesPath = `${budgetDataDir}/payees.json`;
+  const localPayeesExist = File.exists(payeesPath);
 
-  if (pOnlineData.error != undefined) {
-    LaunchBar.alert(pOnlineData.error);
+  let payeeData = localPayeesExist
+    ? File.readJSON(payeesPath)
+    : { payees: [], server_knowledge: null };
+
+  let serverKnowledgePayees = payeeData.data.server_knowledge;
+
+  let newPayeeData = HTTP.getJSON(
+    `${apiBaseURL}/budgets/${budgetID}/payees?access_token=${token}&last_knowledge_of_server=${serverKnowledgePayees}`
+  ).data;
+
+  if (newPayeeData.error) {
+    const err = newPayeeData.error;
+    LaunchBar.alert(`${err.id}: ${err.name}`, err.details);
     return;
   }
 
   LaunchBar.hide();
-  const pLocalData = File.readJSON(`${budgetDataDir}/payees.json`);
+
+  payeeData.data.server_knowledge = newPayeeData.data.server_knowledge;
+
+  let localPayeeMap = payeeData.data.payees.reduce((map, payee) => {
+    map[payee.id] = payee;
+    return map;
+  }, {});
 
   let changes = 0;
 
-  // Add new payees
-  const localIds = pLocalData.data.payees.map((payee) => payee.id);
-  const newPayees = pOnlineData.data.data.payees.filter((payee) => {
-    if (!localIds.includes(payee.id)) {
+  newPayeeData.data.payees.forEach((newPayee) => {
+    if (newPayee.deleted) {
+      delete localPayeeMap[newPayee.id];
       changes++;
+    } else {
+      if (!isSetting)
+        newPayee.last_used_category_id = ActionPrefs.recentCategory;
 
-      if (!isSetting) payee.last_used_category_id = ActionPrefs.recentCategory;
-
-      return true;
+      localPayeeMap[newPayee.id] = newPayee;
+      changes++;
     }
-    return false;
   });
 
-  pLocalData.data.payees = [...pLocalData.data.payees, ...newPayees];
+  payeeData.data.payees = Object.values(localPayeeMap);
 
-  // Remove old payees
-  const onlineIds = pOnlineData.data.data.payees.map((payee) => payee.id);
-  pLocalData.data.payees = pLocalData.data.payees.filter((payee) => {
-    if (!onlineIds.includes(payee.id)) {
-      changes++;
-      return false;
-    }
-    return true;
-  });
-
-  File.writeJSON(pLocalData, `${budgetDataDir}/payees.json`);
+  File.writeJSON(payeeData, payeesPath);
 
   LaunchBar.displayNotification({
     title: 'YNAB Payees updated',
@@ -915,6 +921,7 @@ function updatePayees({ isSetting }) {
 }
 
 function updateRest() {
+  // TODO: Implement server_knowledge
   const budgetSettingsData = HTTP.getJSON(
     `${apiBaseURL}/budgets/${budgetID}/settings/?access_token=${token}`
   );
