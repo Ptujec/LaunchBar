@@ -12,15 +12,13 @@ Documentation:
 
 */
 String.prototype.localizationTable = 'default';
+const server = Action.preferences.server;
+const apiToken = Action.preferences.apiToken;
 
 function run(argument) {
-  var server = Action.preferences.server;
-  var apiToken = Action.preferences.apiToken;
-
   // Settings
   if (LaunchBar.options.shiftKey) {
-    var output = settings(server, apiToken);
-    return output;
+    return settings(server, apiToken);
   }
 
   // Set Mastodon Server/Instance
@@ -34,113 +32,100 @@ function run(argument) {
   }
 
   // Search
-  if (apiToken != undefined) {
+  let searchURL, searchData;
+  if (apiToken) {
     // Search Accounts & Hashtags with ␣ (space)
-    var searchURL =
-      'https://' +
-      server +
-      '/api/v2/search?q=' +
-      encodeURIComponent(argument) +
-      '&resolve=true';
+    searchURL = `https://${server}/api/v2/search?q=${encodeURIComponent(
+      argument
+    )}&resolve=true`;
 
-    var searchData = HTTP.getJSON(searchURL, {
+    searchData = HTTP.getJSON(searchURL, {
       headerFields: {
         Authorization: 'Bearer ' + apiToken,
       },
     });
   } else {
-    var searchURL =
-      'https://' + server + '/api/v2/search?q=' + encodeURIComponent(argument);
-    var searchData = HTTP.getJSON(searchURL);
+    searchURL = `https://${server}/api/v2/search?q=${encodeURIComponent(
+      argument
+    )}`;
+    searchData = HTTP.getJSON(searchURL);
   }
 
-  // File.writeJSON(searchData, Action.supportPath + '/test.json');
-  // return;
-
   //  Error Message
+  let e;
   if (searchData.response.status != 200) {
-    if (searchData.data.error != undefined) {
-      var e = searchData.data.error;
+    if (searchData.data.error) {
+      e = searchData.data.error;
     } else {
-      var e = '';
+      e = '';
     }
 
     LaunchBar.alert(
-      'Error ' +
-        searchData.response.status +
-        ': ' +
-        searchData.response.localizedStatus,
+      `Error ${searchData.response.status}: ${searchData.response.localizedStatus}`,
       e
     );
     return;
   }
 
   //  Accounts
-  var accountResults = [];
-  var accounts = searchData.data.accounts;
+  let accountResults = [];
+  const accounts = searchData.data.accounts;
 
-  accounts.forEach(function (item) {
-    var account = item;
-    var bot = account.bot;
-    var followersCount = account.followers_count;
-    var followingCount = account.following_count;
+  for (const account of accounts) {
+    const bot = account.bot;
+    const followersCount = account.followers_count;
+    const followingCount = account.following_count;
 
     // if (bot == false && followersCount + followingCount > 0) {
     if (followersCount + followingCount > 0) {
-      var userId = account.id;
-      var userhandle = '@' + account.acct;
-      var displayName = account.display_name;
-      var url = account.url;
-      var follower = followersCount.toString() + ' follower(s)';
+      const userId = account.id;
+      const userhandle = '@' + account.acct;
+      const displayName = account.display_name;
+      const url = account.url;
+      const follower = followersCount.toString() + ' follower(s)';
 
+      let subtitle, icon;
       if (bot == true) {
-        var sub = userhandle + ' (bot)';
-        var icon = 'botTemplate';
+        subtitle = userhandle + ' (bot)';
+        icon = 'botTemplate';
       } else {
-        var sub = userhandle;
-        var icon = 'accountTemplate';
+        subtitle = userhandle;
+        icon = 'accountTemplate';
       }
 
       accountResults.push({
         title: displayName,
-        subtitle: sub,
+        subtitle,
+        alwaysShowsSubtitle: true,
         label: follower,
         action: 'actAccount',
-        actionArgument: {
-          url: url,
-          userhandle: userhandle,
-          server: server,
-          userId: userId,
-        },
-        icon: icon,
+        actionArgument: { url, userhandle, server, userId },
+        icon,
       });
     }
-  });
+  }
 
   // Hashtags
-  var hashtagResults = [];
-  var hashtags = searchData.data.hashtags;
+  let hashtagResults = [];
+  const hashtags = searchData.data.hashtags;
 
-  hashtags.forEach(function (item) {
-    var hashtag = item;
-    var hName = hashtag.name;
-    var title = hName.toLowerCase();
-    var url = hashtag.url;
+  for (const hashtag of hashtags) {
+    const hName = hashtag.name;
+    const title = hName.toLowerCase();
+    const url = hashtag.url;
 
     hashtagResults.push({
-      title: title,
+      title,
       action: 'actHashtag',
       actionArgument: {
         hashtag: hName,
-        url: url,
+        url,
       },
       icon: 'hashtagTemplate',
     });
-  });
+  }
 
-  var results = accountResults.concat(hashtagResults);
-
-  return results;
+  return [...accountResults, ...hashtagResults];
 }
 
 function actAccount(dict) {
@@ -148,43 +133,52 @@ function actAccount(dict) {
   if (LaunchBar.options.commandKey) {
     // Open page on the account's home server
     LaunchBar.openURL(dict.url);
-  } else if (LaunchBar.options.controlKey) {
+    return;
+  }
+
+  if (LaunchBar.options.controlKey) {
     // Copy userhandle
     LaunchBar.setClipboardString(dict.userhandle);
-  } else if (LaunchBar.options.alternateKey) {
-    followAccount(dict);
-  } else {
-    // Open in prefered client
-    if (Action.preferences.openIn != true) {
-      var urlscheme = 'https://';
-    } else {
-      var urlscheme = Action.preferences.openInURLScheme;
-    }
-
-    // Ivory
-    if (urlscheme == 'ivory://') {
-      LaunchBar.openURL(urlscheme + 'acct/openURL?url=' + dict.url);
-      return;
-    }
-
-    // Fix for Mammoth
-    if (urlscheme == 'mammoth://') {
-      LaunchBar.openURL(dict.url.replace('https://', urlscheme));
-      return;
-    }
-
-    LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
+    return;
   }
+
+  if (LaunchBar.options.alternateKey) {
+    followAccount(dict);
+    return;
+  }
+
+  // Open in prefered client
+  let urlscheme;
+  if (Action.preferences.openIn != true) {
+    urlscheme = 'https://';
+  } else {
+    urlscheme = Action.preferences.openInURLScheme;
+  }
+
+  // Ivory
+  if (urlscheme == 'ivory://') {
+    LaunchBar.openURL(urlscheme + 'acct/openURL?url=' + dict.url);
+    return;
+  }
+
+  // Fix for Mammoth
+  if (urlscheme == 'mammoth://') {
+    LaunchBar.openURL(dict.url.replace('https://', urlscheme));
+    return;
+  }
+
+  LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
 }
 
 function actHashtag(dict) {
   LaunchBar.hide();
+  let urlscheme;
   if (LaunchBar.options.commandKey) {
     // Open in prefered client
     if (Action.preferences.openIn != true) {
-      var urlscheme = 'https://';
+      urlscheme = 'https://';
     } else {
-      var urlscheme = Action.preferences.openInURLScheme;
+      urlscheme = Action.preferences.openInURLScheme;
     }
     // Ivory
     if (urlscheme == 'ivory://') {
@@ -193,115 +187,106 @@ function actHashtag(dict) {
     }
 
     LaunchBar.openURL(urlscheme + 'mastodon.social/tags/' + dict.hashtag);
-  } else if (LaunchBar.options.alternateKey) {
-    followHashtag(dict);
-  } else {
-    // Open on mastodon.social
-    LaunchBar.openURL('http://mastodon.social/tags/' + dict.hashtag);
+    return;
   }
+
+  if (LaunchBar.options.alternateKey) {
+    followHashtag(dict);
+    return;
+  }
+
+  // Open on mastodon.social
+  LaunchBar.openURL('http://mastodon.social/tags/' + dict.hashtag);
 }
 
 function followAccount(dict) {
-  var apiToken = Action.preferences.apiToken;
-  var server = Action.preferences.server;
-
   // Set API Token
-  if (apiToken == undefined) {
+  if (!apiToken) {
     setApiToken();
     return;
   }
 
   // Follow
-  var followURL =
-    'https://' + server + '/api/v1/accounts/' + dict.userId + '/follow';
+  const followURL = `https://${server}/api/v1/accounts/${dict.userId}/follow`;
 
-  var result = HTTP.postJSON(followURL, {
+  const result = HTTP.postJSON(followURL, {
     headerFields: {
       Authorization: 'Bearer ' + apiToken,
     },
   });
 
-  // File.writeJSON(result, Action.supportPath + '/test.json');
-
   //  Error Message
   if (result.response.status != 200) {
     LaunchBar.alert(
-      'Error: ' + result.response.status,
+      `Error: ${result.response.status}`,
       result.response.localizedStatus
     );
     return;
-  } else {
-    LaunchBar.hide();
-    LaunchBar.executeAppleScript(
-      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
-    ); // Play Sound
-
-    // Open … maybe will remove that … or make it a setting
-    if (Action.preferences.openIn != true) {
-      var urlscheme = 'https://';
-    } else {
-      var urlscheme = Action.preferences.openInURLScheme;
-    }
-    LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
   }
+
+  LaunchBar.hide();
+  LaunchBar.executeAppleScript(
+    'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
+  ); // Play Sound
+
+  // Open … maybe will remove that … or make it a setting
+  const urlscheme =
+    Action.preferences.openIn != true
+      ? 'https://'
+      : Action.preferences.openInURLScheme;
+
+  LaunchBar.openURL(urlscheme + dict.server + '/' + dict.userhandle);
 }
 
 function followHashtag(dict) {
-  var apiToken = Action.preferences.apiToken;
-  var server = Action.preferences.server;
-
   // Set API Token
-  if (apiToken == undefined) {
+  if (!apiToken) {
     setApiToken();
     return;
   }
 
   // Follow
-  var followURL =
-    'https://' + server + '/api/v1/tags/' + dict.hashtag + '/follow';
+  const followURL = `https://${server}/api/v1/tags/${dict.hashtag}/follow`;
 
-  var result = HTTP.postJSON(followURL, {
+  const result = HTTP.postJSON(followURL, {
     headerFields: {
       Authorization: 'Bearer ' + apiToken,
     },
   });
 
-  // File.writeJSON(result, Action.supportPath + '/test.json');
-
   //  Error Message
   if (result.response.status != 200) {
     LaunchBar.alert(
-      'Error: ' + result.response.status,
+      `Error: ${result.response.status}`,
       result.response.localizedStatus
     );
     return;
-  } else {
-    LaunchBar.hide();
-    LaunchBar.executeAppleScript(
-      'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
-    ); // Play Sound
-
-    // Open … maybe will remove that … or make it a setting
-    var url = dict.url;
-    if (Action.preferences.openIn == true) {
-      url = url.replace('https://', Action.preferences.openInURLScheme);
-    }
-    LaunchBar.openURL(url);
   }
+
+  LaunchBar.hide();
+  LaunchBar.executeAppleScript(
+    'do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/end_record.caf"'
+  ); // Play Sound
+
+  // Open … maybe will remove that … or make it a setting
+  const url = (Action.preferences.openIn = true
+    ? url.replace('https://', Action.preferences.openInURLScheme)
+    : dict.url);
+
+  LaunchBar.openURL(url);
 }
 
 function settings() {
-  var server = Action.preferences.server;
-
+  let openInLabel, openIcon;
   if (Action.preferences.openIn != true) {
-    var openInLabel = 'Open: Website'.localize();
-    var openIcon = 'safariTemplate';
+    openInLabel = 'Open: Website'.localize();
+    openIcon = 'safariTemplate';
   } else {
-    var openInLabel = 'Opens: '.localize() + Action.preferences.openInName;
-    var openIcon = Action.preferences.openInIcon;
+    openInLabel = 'Opens: '.localize() + Action.preferences.openInName;
+    openIcon = Action.preferences.openInIcon;
   }
 
-  options = [
+  return [
     {
       title: 'Open'.localize(),
       action: 'openSetting',
@@ -321,12 +306,10 @@ function settings() {
       icon: 'keyTemplate',
     },
   ];
-
-  return options;
 }
 
 function openSetting() {
-  options = [
+  return [
     {
       title: 'Open: Elk'.localize(),
       action: 'openIn',
@@ -388,8 +371,6 @@ function openSetting() {
       icon: 'safariTemplate',
     },
   ];
-
-  return options;
 }
 
 function openIn(dict) {
@@ -398,13 +379,11 @@ function openIn(dict) {
   Action.preferences.openInName = dict.name;
   Action.preferences.openInIcon = dict.icon;
 
-  var output = settings();
-  return output;
+  return settings();
 }
 
 function setApiToken() {
-  var server = Action.preferences.server;
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'API-Token required',
     '1) Read the instructions on how to create an API-Token.\n2) Press "Set API-Token"\n\nThe API-Token will be stored in the action preferences (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.MastodonHome/Preferences.plist)',
     'Open Instructions & Mastodon Settings',
@@ -425,10 +404,8 @@ function setApiToken() {
 
       if (clipboardContent.length == 43) {
         // Test API-Token
-        var statusData = HTTP.getJSON(
-          'https://' +
-            server +
-            '/api/v2/search?q=test&type=statuses&resolve=true',
+        const statusData = HTTP.getJSON(
+          `https://${server}/api/v2/search?q=test&type=statuses&resolve=true`,
           {
             headerFields: {
               Authorization: 'Bearer ' + clipboardContent,
@@ -439,19 +416,18 @@ function setApiToken() {
         //  Error Message
         if (statusData.response.status != 200) {
           LaunchBar.alert(
-            'Error: ' + statusData.response.status,
+            `Error: ${statusData.response.status}`,
             statusData.response.localizedStatus
           );
           return;
-        } else {
-          // Write new API-Token in Action preferences
-          Action.preferences.apiToken = clipboardContent;
-
-          LaunchBar.alert(
-            'Success!',
-            'API-Token set to: ' + Action.preferences.apiToken
-          );
         }
+        // Write new API-Token in Action preferences
+        Action.preferences.apiToken = clipboardContent;
+
+        LaunchBar.alert(
+          'Success!',
+          'API-Token set to: ' + Action.preferences.apiToken
+        );
       } else {
         LaunchBar.alert(
           'The length of the clipboard content does not match the length of a correct API-Token',
@@ -466,26 +442,16 @@ function setApiToken() {
 
 function setInstance(server) {
   LaunchBar.hide();
-  if (server == undefined || server == '') {
-    var defaultAnswer = 'mastodon.social';
-  } else {
-    var defaultAnswer = server;
-  }
+  const defaultAnswer = !server ? 'mastodon.social' : server;
 
-  var dialog =
+  const dialog =
     'Enter the name of the Mastodon instance or server where your account is hosted!'.localize();
-  var dialogTitle = 'Mastodon Instance'.localize();
+  const dialogTitle = 'Mastodon Instance'.localize();
 
-  var server = LaunchBar.executeAppleScript(
-    'set result to display dialog "' +
-      dialog +
-      '" with title "' +
-      dialogTitle +
-      '" default answer "' +
-      defaultAnswer +
-      '"',
+  Action.preferences.server = LaunchBar.executeAppleScript(
+    `set result to display dialog "${dialog}" with title "${dialogTitle}" default answer "${defaultAnswer}"`,
     'set result to text returned of result'
   ).trim();
-  Action.preferences.server = server;
+
   return;
 }
