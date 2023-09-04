@@ -11,7 +11,9 @@ After downloading and unzipping just double click the `.lbaction` packages you w
 
 ## Updates
 
-Actions and updates uploaded after 2022/1 integrate with Action Updates by [@prenagha](https://github.com/prenagha). You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+Stay uptodate with my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) action.
+
+Most of my actions also integrate with Action Updates by [@prenagha](https://github.com/prenagha). You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
 
 ## Support
 
