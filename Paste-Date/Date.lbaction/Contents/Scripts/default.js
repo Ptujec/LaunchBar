@@ -159,6 +159,7 @@ function styleOptions(mode, date, currentStyle, dateString) {
   if (mode == 'custom') {
     action = 'paste';
     icon = 'Template';
+    date = dateString;
   }
 
   return styles.map((style) => ({
