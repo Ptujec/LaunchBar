@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Paste Date</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +17,7 @@
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>⇧⏎ = Set default format, ⌥⏎ = Use alternate format</string>
+		<string>⇧⏎ = Set default formats, ⌥⏎ = Use alternate format, ⌘⏎ = Choose format</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBUpdateURL</key>

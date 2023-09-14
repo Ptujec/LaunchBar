@@ -25,9 +25,13 @@ function run(argument) {
     if (dateString === 'No valid entry') return;
   }
 
-  dateStyle = LaunchBar.options.alternateKey
-    ? Action.preferences.altDateStyle ?? 'iso'
-    : Action.preferences.dateStyle ?? 'short';
+  if (LaunchBar.options.alternateKey) {
+    dateStyle = Action.preferences.altDateStyle ?? 'iso';
+  } else if (LaunchBar.options.commandKey) {
+    return styleOptions('custom', date, undefined, dateString);
+  } else {
+    dateStyle = Action.preferences.dateStyle ?? 'short';
+  }
 
   LaunchBar.paste(format(dateString, dateStyle));
 }
@@ -94,9 +98,16 @@ function format(dateString, dateStyle) {
       dateString.getTime() - dateString.getTimezoneOffset() * 60000
     );
     dateString = dateString.toISOString().split('T')[0];
+  } else if (dateStyle == 'US Short') {
+    // I create this manually because it is not possible to get this format if you are otherwise on a different locale. You can set the locale in LaunchBar.formatDate but you can not change the format the system offers permamently. It will change back if you change the format for your locale.
+
+    const date = new Date(dateString);
+    const year = date.toLocaleString('default', { year: 'numeric' });
+    const month = date.toLocaleString('default', { month: '2-digit' });
+    const day = date.toLocaleString('default', { day: '2-digit' });
+    dateString = `${month}/${day}/${year}`;
   } else {
-    //
-    dateString = LaunchBar.formatDate(new Date(dateString), {
+    dateStyle = dateString = LaunchBar.formatDate(new Date(dateString), {
       timeStyle: 'none',
       dateStyle,
     });
@@ -137,33 +148,43 @@ function formatSettings() {
   ];
 }
 
-function styleOptions(mode, date, currentStyle) {
-  const styles = ['iso', 'short', 'medium', 'long', 'full'];
+function styleOptions(mode, date, currentStyle, dateString) {
+  const styles = ['iso', 'short', 'medium', 'long', 'full', 'US Short'];
 
-  return styles.map((style) => {
-    return {
-      title:
-        style == 'iso'
-          ? 'ISO 8601'
-          : style.localize().charAt(0).toUpperCase() +
-            style.localize().slice(1),
-      subtitle: format(date, style),
-      icon: mode == 'primary' ? '1Template' : '2Template',
-      action:
-        mode == 'primary' ? 'setPrimaryDateFormat' : 'setSecondaryDateFormat',
-      actionArgument: style,
-      alwaysShowsSubtitle: true,
-      label: style == currentStyle ? '✔' : undefined,
-    };
-  });
+  let action =
+    mode == 'primary' ? 'setPrimaryDateFormat' : 'setSecondaryDateFormat';
+
+  let icon = mode == 'primary' ? '1Template' : '2Template';
+
+  if (mode == 'custom') {
+    action = 'paste';
+    icon = 'Template';
+  }
+
+  return styles.map((style) => ({
+    title:
+      style == 'iso'
+        ? 'ISO 8601'
+        : style.localize().charAt(0).toUpperCase() + style.localize().slice(1),
+    subtitle: format(date, style),
+    icon,
+    action,
+    actionArgument: { style, dateString },
+    label: style == currentStyle ? '✔' : undefined,
+    alwaysShowsSubtitle: true,
+  }));
 }
 
-function setPrimaryDateFormat(dateStyle) {
-  Action.preferences.dateStyle = dateStyle;
+function setPrimaryDateFormat({ style }) {
+  Action.preferences.dateStyle = style;
   return formatSettings();
 }
 
-function setSecondaryDateFormat(dateStyle) {
-  Action.preferences.altDateStyle = dateStyle;
+function setSecondaryDateFormat({ style }) {
+  Action.preferences.altDateStyle = style;
   return formatSettings();
+}
+
+function paste({ style, dateString }) {
+  LaunchBar.paste(format(dateString, style));
 }

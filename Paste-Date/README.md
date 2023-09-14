@@ -22,7 +22,7 @@ In settings (`shift` + `enter`), you can set a default (primary) and an alternat
 
 You can choose from different local date format styles (short, medium, long, and full) as well as ISO 8601 (yyyy-MM-dd). 
 
-When you use the action, you can access the alternative format with `option` + `enter`.
+When you use the action, you can access the alternative format with `option` + `enter`. Or you can choose from all the available styles with `command` + `enter`.
 
 **Note:** Local date format styles are defined by the system. As of macOS Ventura, the only style you can modify seems to be "short" (`System Settings → Language & Region → Date format`). 
 You can try [tweaking the others in the Terminal](https://www.caseyliss.com/2022/11/14/ventura-date-formats). 
