@@ -9,13 +9,12 @@ Documentation:
 - https://documentation.soulver.app/documentation/command-line-tool-automator-and-services
 */
 
-const soulverClt = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
+const soulverCLI = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
 const prefs = Action.preferences;
 
 function run(argument) {
   if (LaunchBar.options.shiftKey) {
-    var output = showOptions();
-    return output;
+    return showOptions();
   }
 
   if (LaunchBar.options.commandKey) {
@@ -25,8 +24,8 @@ function run(argument) {
     return;
   }
 
-  if (!File.exists(soulverClt)) {
-    var response = LaunchBar.alert(
+  if (!File.exists(soulverCLI)) {
+    const response = LaunchBar.alert(
       'Missing Soulver Command Line Interface',
       'The Soulver Command Line Interface was not found in the expected location. Press "Help" and read what is written about the Alfred Workflow. This applies for the LaunchBar Action aswell.',
       'Help',
@@ -43,7 +42,7 @@ function run(argument) {
     return;
   }
 
-  let result = LaunchBar.execute(soulverClt, argument).trim();
+  let result = LaunchBar.execute(soulverCLI, argument).trim();
 
   if (prefs.copy != false) {
     LaunchBar.setClipboardString(result);
@@ -54,6 +53,7 @@ function run(argument) {
       {
         title: result,
         subtitle: argument,
+        alwaysShowsSubtitle: true,
         icon: 'app.soulver.mac',
       },
     ];
@@ -61,7 +61,7 @@ function run(argument) {
 }
 
 function showOptions() {
-  var copy = {
+  const copy = {
     title: 'Copy result to Clipboard',
     icon: 'circleTemplate',
     action: 'toggleCopy',
@@ -71,8 +71,7 @@ function showOptions() {
     copy.icon = 'checkedTemplate';
   }
 
-  var options = [copy];
-  return options;
+  return [copy];
 }
 
 function toggleCopy() {
@@ -81,6 +80,5 @@ function toggleCopy() {
   } else {
     prefs.copy = true;
   }
-  var output = showOptions();
-  return output;
+  return showOptions();
 }
