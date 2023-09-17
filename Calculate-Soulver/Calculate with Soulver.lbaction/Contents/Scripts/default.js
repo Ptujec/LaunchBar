@@ -10,13 +10,8 @@ Documentation:
 */
 
 const soulverCLI = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
-const prefs = Action.preferences;
 
 function run(argument) {
-  if (LaunchBar.options.shiftKey) {
-    return showOptions();
-  }
-
   if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(
       'x-soulver://x-callback-url/create?&expression=' + encodeURI(argument)
@@ -42,10 +37,11 @@ function run(argument) {
     return;
   }
 
-  let result = LaunchBar.execute(soulverCLI, argument).trim();
+  const result = LaunchBar.execute(soulverCLI, argument).trim();
 
-  if (prefs.copy != false) {
-    LaunchBar.setClipboardString(result);
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(result);
+    return; //
   }
 
   if (!result.startsWith('Error')) {
@@ -58,27 +54,4 @@ function run(argument) {
       },
     ];
   }
-}
-
-function showOptions() {
-  const copy = {
-    title: 'Copy result to Clipboard',
-    icon: 'circleTemplate',
-    action: 'toggleCopy',
-  };
-
-  if (prefs.copy != false) {
-    copy.icon = 'checkedTemplate';
-  }
-
-  return [copy];
-}
-
-function toggleCopy() {
-  if (prefs.copy != false) {
-    prefs.copy = false;
-  } else {
-    prefs.copy = true;
-  }
-  return showOptions();
 }

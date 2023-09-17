@@ -1,14 +1,12 @@
 // LaunchBar Action Script
-const soulverClt = '/Applications/Soulver 3.app/Contents/MacOS/CLI/soulver';
+include('default.js');
 
 function runWithString(string) {
-  if (string == '') {
-    return;
-  }
+  if (string == '') return;
 
-  var result = LaunchBar.execute(soulverClt, string).trim();
+  const result = LaunchBar.execute(soulverCLI, string).trim();
 
-  var dict = {
+  const dict = {
     title: result,
     label: '⌘↩ = Open Entry in Soulver',
     icon: 'equal',
