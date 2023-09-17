@@ -126,7 +126,6 @@ function main(argument) {
           label:
             'Rate: '.localize() +
             targetToBase.toLocaleString(cLocale, minMaxFractionRate),
-          // subtitle: subBaseResult,
           icon: 'result',
           badge: targetCurrency + ' → ' + base,
           action: 'showDetails',
@@ -194,10 +193,7 @@ function showDetails(dict) {
   if (localDataInfo != undefined) {
     if (localDataInfo[0] != undefined) {
       info.subtitle = 'Last update: '.localize() + localDataInfo[0];
-
-      // if (localDataInfo[1] != undefined) {
-      //   info.subtitle = info.subtitle + localDataInfo[1];
-      // }
+      info.alwaysShowsSubtitle = true;
     }
   }
   details.push(info);
@@ -257,6 +253,7 @@ function settings() {
 
   if (localDataInfo[0] != undefined) {
     info.subtitle = 'Last update: '.localize() + localDataInfo[0];
+    info.alwaysShowsSubtitle = true;
 
     if (localDataInfo[1] != undefined) {
       info.subtitle = info.subtitle + localDataInfo[1];
