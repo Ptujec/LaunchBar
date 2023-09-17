@@ -19,9 +19,7 @@ include('global.js');
 
 function run(argument) {
   // CHECK FOR VALID API ACCESS KEY
-  if (apiKey == undefined) {
-    setAppID();
-  }
+  if (!apiKey) setAppID();
 
   // SHOW SETTINGS
   if (LaunchBar.options.shiftKey) {
@@ -29,9 +27,7 @@ function run(argument) {
     return settings();
   }
 
-  if (argument == undefined) {
-    return;
-  }
+  if (!argument) return;
 
   // RUN MAIN ACTION
   return main(argument);
@@ -39,37 +35,30 @@ function run(argument) {
 
 function main(argument) {
   // CHECK FOR NUMBERS IN INPUT
-  if (/\d/.test(argument) == false) {
-    return;
-  }
+  if (/\d/.test(argument) == false) return;
 
   // CLEAN UP ARGUMENT
-  if (argument.startsWith(',')) {
-    argument = 0 + argument;
-  }
+  if (argument.startsWith(',')) argument = 0 + argument;
 
   argument = argument
     .match(/[\d,.]+/)[0] // Get amount numbers (commas, points and numbers in arbitrary order)
     .replace(/(?<=\d)(,|\.)(?=\d{3})/g, ''); // Strip group separators
 
-  if (argument.includes(',')) {
+  if (argument.includes(','))
     argument = parseFloat(argument.replace(/\,/g, '.'));
-  }
 
   // DO THE CONVERTING
-  var result = [];
-  var ratesData = getRatesData();
+  let result = [];
+  const ratesData = getRatesData();
 
-  if (ratesData == undefined) {
-    return;
-  }
+  if (!ratesData) return;
 
-  var rates = ratesData.data.rates;
+  const rates = ratesData.data.rates;
 
   // The base is calculated from how it relates to USD (which is the base in the API)
 
-  var baseToUSDRate = rates[base] / rates['USD']; //
-  var oneBaseUnitInUSD = 1 / baseToUSDRate;
+  const baseToUSDRate = rates[base] / rates['USD']; //
+  const oneBaseUnitInUSD = 1 / baseToUSDRate;
 
   if (targetCurrencies == '') {
     return [targetsSetting, baseSetting];
@@ -79,17 +68,18 @@ function main(argument) {
     return [baseSetting, targetsSetting];
   }
 
-  targetCurrencies.forEach(function (targetCurrency) {
-    if (targetCurrency != base) {
-      var targetToUSDRate = rates[targetCurrency];
-      var oneTargetUnitInUSD = 1 / targetToUSDRate;
+  targetCurrencies
+    .filter((targetCurrency) => targetCurrency != base)
+    .forEach((targetCurrency) => {
+      const targetToUSDRate = rates[targetCurrency];
+      const oneTargetUnitInUSD = 1 / targetToUSDRate;
 
-      var baseToTarget = oneBaseUnitInUSD * targetToUSDRate;
-      var targetToBase = oneTargetUnitInUSD * baseToUSDRate;
-      var targetResult = argument * baseToTarget;
-      var baseResult = argument * targetToBase;
+      const baseToTarget = oneBaseUnitInUSD * targetToUSDRate;
+      const targetToBase = oneTargetUnitInUSD * baseToUSDRate;
+      const targetResult = argument * baseToTarget;
+      const baseResult = argument * targetToBase;
 
-      var displayArgument = parseFloat(argument).toLocaleString(
+      const displayArgument = parseFloat(argument).toLocaleString(
         cLocale,
         minMaxFractionDefault
       );
@@ -142,8 +132,7 @@ function main(argument) {
           },
         }
       );
-    }
-  });
+    });
 
   return result;
 }
@@ -156,7 +145,7 @@ function showDetails(dict) {
   }
 
   // SHOW DETAILS
-  var details = [
+  const details = [
     {
       title: dict.result,
       badge: dict.target,
@@ -181,9 +170,9 @@ function showDetails(dict) {
     },
   ];
 
-  var localDataInfo = getLocalDataInfo(); // [dataDate, apiUsageStats]
+  const localDataInfo = getLocalDataInfo(); // [dataDate, apiUsageStats]
 
-  var info = {
+  const info = {
     title: 'Refresh'.localize(),
     icon: 'refreshTemplate',
     action: 'refreshAlert',
@@ -207,12 +196,7 @@ function rateAction(dict) {
     return;
   }
 
-  var url =
-    'https://www.google.com/finance/quote/' +
-    dict.base +
-    '-' +
-    dict.target +
-    '?window=1M';
+  const url = `https://www.google.com/finance/quote/${dict.base}-${dict.target}?window=1M`;
 
   LaunchBar.hide();
   LaunchBar.openURL(url);
@@ -221,30 +205,25 @@ function rateAction(dict) {
 // SETTING FUNCTIONS
 
 function settings() {
-  var base = Action.preferences.base;
+  const base = Action.preferences.base;
   baseSetting = {
     title: 'Choose base currency'.localize(),
     icon: 'settings',
-    badge: 'USD',
-    // children: baseCurrencyList(),
+    badge: base ? base : 'USD',
     action: 'baseCurrencyList',
   };
 
-  if (base != undefined) {
-    baseSetting.badge = base;
-  }
-
-  var setAPISetting = {
+  const setAPISetting = {
     title: 'Set App ID'.localize(),
     icon: 'keyTemplate',
     action: 'setAppID',
   };
 
-  var settingItems = [targetsSetting, baseSetting, setAPISetting];
+  const settingItems = [targetsSetting, baseSetting, setAPISetting];
 
-  var localDataInfo = getLocalDataInfo();
+  const localDataInfo = getLocalDataInfo();
 
-  var info = {
+  const info = {
     title: 'Manual data refresh'.localize(),
     icon: 'refreshTemplate',
     action: 'refreshAlert',
@@ -265,14 +244,13 @@ function settings() {
 }
 
 function baseCurrencyList() {
-  var base = Action.preferences.base ?? 'USD';
+  const base = Action.preferences.base ?? 'USD';
 
-  // PARSE RESULT
-  var other = [];
-  var currentBase = [];
+  let other = [];
+  let currentBase = [];
 
-  for (var i in currencyList) {
-    var pushData = {
+  for (const i in currencyList) {
+    const pushData = {
       title: currencyList[i],
       icon: 'circleTemplate',
       badge: i,
@@ -281,7 +259,7 @@ function baseCurrencyList() {
     };
 
     if (i == base) {
-      pushData.label = 'base currency';
+      pushData.label = 'base currency'.localize();
       pushData.icon = 'checkTemplate';
       currentBase.push(pushData);
     } else {
@@ -289,15 +267,15 @@ function baseCurrencyList() {
     }
   }
 
-  return currentBase.concat(other);
+  return [...currentBase, ...other];
 }
 
 function targetCurrencyList() {
-  var other = [];
-  var favs = [];
+  let other = [];
+  let favs = [];
 
-  for (var i in currencyList) {
-    var pushData = {
+  for (const i in currencyList) {
+    const pushData = {
       title: currencyList[i],
       icon: 'circleTemplate',
       badge: i,
@@ -306,7 +284,7 @@ function targetCurrencyList() {
     };
 
     if (targetCurrencies.includes(i)) {
-      pushData.label = 'target currency';
+      pushData.label = 'target currency'.localize();
       pushData.icon = 'checkTemplate';
       pushData.action = 'removeTarget';
       favs.push(pushData);
@@ -315,7 +293,7 @@ function targetCurrencyList() {
     }
   }
 
-  return favs.concat(other);
+  return [...favs, ...other];
 }
 
 function setBase(symbol) {
@@ -326,28 +304,25 @@ function setBase(symbol) {
 function setTarget(symbol) {
   targetCurrencies.push(symbol);
   Action.preferences.targetCurrencies = targetCurrencies;
-
   return targetCurrencyList();
 }
 
 function removeTarget(symbol) {
-  targetCurrencies.forEach(function (item, index) {
-    if (item == symbol) {
-      targetCurrencies.splice(index, 1);
-    }
-  });
+  targetCurrencies = targetCurrencies.filter((item) => item !== symbol);
+  Action.preferences.targetCurrencies = targetCurrencies;
   return targetCurrencyList();
 }
 
 function getLocalDataInfo() {
+  let ratesData, dataDate;
   if (File.exists(ratesDataPath)) {
-    var ratesData = File.readJSON(ratesDataPath);
+    ratesData = File.readJSON(ratesDataPath);
     if (ratesData == undefined || ratesData.response == undefined) {
       return;
     }
 
     if (ratesData.response.status == 200) {
-      var dataDate = LaunchBar.formatDate(
+      dataDate = LaunchBar.formatDate(
         new Date(ratesData.data.timestamp * 1000),
         {
           relativeDateFormatting: true,
@@ -355,24 +330,14 @@ function getLocalDataInfo() {
           dateStyle: 'short',
         }
       );
-
-      // var hFields = ratesData.response.headerFields;
-      // if (hFields['x-ratelimit-remaining-quota-month'] != undefined) {
-      //   var remaining = hFields['x-ratelimit-remaining-quota-month'];
-      //   var limit = hFields['x-ratelimit-limit-monthly-month'];
-      //   var used = limit - remaining;
-      //   var apiUsageStats =
-      //     ' (API Usage: '.localize() + used + '/' + limit + ')';
-      // }
     }
   }
-  // return [dataDate, apiUsageStats];
   return [dataDate];
 }
 
 function refreshAlert(arg) {
-  var alertTitle = 'Confirm to refresh!'.localize();
-  var difference = compareDates();
+  let alertTitle = 'Confirm to refresh!'.localize();
+  const difference = compareDates();
 
   // Check if a new API call is needed
   if (difference != undefined && difference < 3600) {
@@ -381,7 +346,7 @@ function refreshAlert(arg) {
       '\nYour local data has already been updated within the last hour.'.localize();
   }
 
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     alertTitle,
     'Every refresh counts against your API usage. Open exchange rates provides hourly updates and allows 1,000 requests per month on their free plan. Local currency rates are updated automatically if they have not been updated within the last 2 hours.'.localize(),
     'Ok',
@@ -406,40 +371,41 @@ function refreshAlert(arg) {
 }
 
 function getRatesData() {
-  var makeAPICall = true;
+  let makeAPICall = true;
+  let ratesData;
 
   // Check if a new API call is needed
-  var difference = compareDates();
-  if (difference != undefined && difference < 7200) {
+  const difference = compareDates();
+  if (difference && difference < 7200) {
     // If less than 2 hours have passed since the time the exchange rate information that is stored locally was collected don't make an API call.  You can change this number to make more or less calls.
     makeAPICall = false;
   }
 
   if (makeAPICall == true) {
-    var ratesData = APICall();
+    ratesData = APICall();
   } else {
     if (File.exists(ratesDataPath)) {
-      var localRatesData = File.readJSON(ratesDataPath);
-      var ratesData = localRatesData;
+      ratesData = File.readJSON(ratesDataPath);
     }
   }
   return ratesData;
 }
 
 function compareDates() {
+  let difference;
   if (File.exists(ratesDataPath)) {
-    var localRatesData = File.readJSON(ratesDataPath);
-    if (localRatesData.data != undefined) {
-      var localDataUnixTimestamp = localRatesData.data.timestamp;
-      var nowUnixTimestamp = Math.floor(new Date().getTime() / 1000);
-      var difference = nowUnixTimestamp - localDataUnixTimestamp;
+    const localRatesData = File.readJSON(ratesDataPath);
+    if (localRatesData.data) {
+      const localDataUnixTimestamp = localRatesData.data.timestamp;
+      const nowUnixTimestamp = Math.floor(new Date().getTime() / 1000);
+      difference = nowUnixTimestamp - localDataUnixTimestamp;
     }
   }
   return difference;
 }
 
 function APICall() {
-  var ratesData = HTTP.getJSON(
+  const ratesData = HTTP.getJSON(
     'https://openexchangerates.org/api/latest.json',
     {
       headerFields: {
@@ -448,11 +414,12 @@ function APICall() {
     }
   );
 
-  if (ratesData.response == undefined) {
+  if (!ratesData.response) {
     LaunchBar.alert(ratesData.error);
     return;
   }
 
+  let showAPIDialog;
   if (ratesData.response.status != 200) {
     if (ratesData.data != undefined) {
       if (ratesData.data.message != undefined) {
@@ -460,7 +427,7 @@ function APICall() {
           ratesData.data.message == 'invalid_app_id' ||
           ratesData.data.message == 'missing_app_id'
         ) {
-          var showAPIDialog = true;
+          showAPIDialog = true;
         }
       }
 
@@ -486,7 +453,7 @@ function APICall() {
 }
 
 function setAppID() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'App ID required'.localize(),
     'This actions requires an App ID from openexchangerates.org. Press "Open Website" to get yours.\nCopy the ID to your clipboard, run the action again and press "Set App ID"'.localize(),
     'Open Website'.localize(),

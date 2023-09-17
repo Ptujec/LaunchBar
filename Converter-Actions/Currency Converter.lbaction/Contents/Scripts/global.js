@@ -1,5 +1,5 @@
 const apiKey = Action.preferences.apiKey;
-const ratesDataPath = Action.cachePath + '/localRatesData.json';
+const ratesDataPath = `${Action.cachePath}/localRatesData.json`;
 const cLocale = LaunchBar.currentLocale;
 
 const minMaxFractionDefault = {
@@ -12,45 +12,33 @@ const minMaxFractionRate = {
 };
 
 const currencyListData = File.readJSON(
-  Action.path + '/Contents/Resources/currencyList.json'
+  `${Action.path}/Contents/Resources/currencyList.json`
 );
 
-if (LaunchBar.currentLocale == 'de') {
-  var currencyList = currencyListData.currencies_de;
-} else {
-  var currencyList = currencyListData.currencies;
-}
+const currencyList =
+  LaunchBar.currentLocale == 'de'
+    ? currencyListData.currencies_de
+    : currencyListData.currencies;
 
 // SETTING VARIABLES
-var base = Action.preferences.base;
+const base = Action.preferences.base ?? 'USD';
 
-if (base == undefined) {
-  base = 'USD';
-}
-
-var baseSetting = {
+let baseSetting = {
   title: 'Choose base currency'.localize(),
   icon: 'settings',
   badge: 'USD',
-  // children: baseCurrencyList(),
   action: 'baseCurrencyList',
 };
 
-if (base != undefined) {
-  baseSetting.badge = base;
-}
+if (base) baseSetting.badge = base;
 
-var targetsSetting = {
+const targetsSetting = {
   title: 'Choose target currencies'.localize(),
   icon: 'settings',
-  // children: targetCurrencyList(),
   action: 'targetCurrencyList',
 };
 
-var targetCurrencies = Action.preferences.targetCurrencies;
-if (targetCurrencies == undefined) {
-  targetCurrencies = [];
-}
+let targetCurrencies = Action.preferences.targetCurrencies ?? [];
 
 if (targetCurrencies != '') {
   targetsSetting.badge = targetCurrencies.join(', ');
