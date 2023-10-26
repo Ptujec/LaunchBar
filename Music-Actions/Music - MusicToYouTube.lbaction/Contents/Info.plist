@@ -9,19 +9,19 @@
 	<key>CFBundleName</key>
 	<string>Music - Search for Song on YouTube</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
-		<key>LBSummary</key>
-		<string>Looks on YouTube for the current playing song. Should also work with streams, if the stream includes the necessary metadata. </string>
 		<key>LBTwitter</key>
 		<string>ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Music-Actions</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Music-Actions/Music%20-%20MusicToYouTube.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

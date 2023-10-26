@@ -1,23 +1,10 @@
--- https://gist.github.com/275067/3acc381e6c830e059607f84aa9db31f4ed222290
--- by mfilej
---
--- changed to show rating 
--- better display for streams … espescially radio streaming  
--- by Ptujec
---
--- 2011-10-05
--- changed to convert image data to a tempory jpg file (due to changes of Music artwork image data)
--- with help of http://dougscripts.com/Music/scripts/ss.php?sp=savealbumartjpeg
+(* 
+Music - Search for Song on YouTube Action for LaunchBar
+by Christian Bender (@ptujec)
+2023-10-26
 
--- Display the track if Music is running
---
--- 2012-11-08
--- removed Growl and added Notification Center support (via LaunchBar)
--- removed image section since Notification Center only allows the application icon
--- 
--- 2021-12-19
--- Some clean up
-
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*)
 
 on run
 	if appIsRunning("Music") then
@@ -47,14 +34,6 @@ on run
 					if exists name of current track then
 						set aTrack to the current track
 						set aDescription to the name of aTrack
-						
-						-- rating 
-						if loved of aTrack is true then
-							set _loved to "
-♥ "
-						else
-							set _loved to ""
-						end if
 						
 						-- Stream
 						if artist of aTrack is "" then
