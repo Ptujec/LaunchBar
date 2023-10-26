@@ -1,4 +1,10 @@
--- Music - Like for LaunchBar by Christian Bender @ptujec
+(* 
+Music - Like Action for LaunchBar
+by Christian Bender (@ptujec)
+2023-10-26
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*)
 
 on run
 	-- check os version 
