@@ -1,13 +1,8 @@
 (* 
-Add to Playlist Action Script for LaunchBar
-by Christian Bender (@ptujec)
-2023-04-14
+Add to Playlist LaunchBar Action Script
 
-Important: Requires the following shortcut: https://www.icloud.com/shortcuts/6589a7ba4afd42ad9ffe49e8b08d3bb0
-
-Read/write plist: https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/WorkwithPropertyListFiles.html
-
-Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+Read/write plist:
+- https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/WorkwithPropertyListFiles.html
 *)
 
 on run
@@ -27,7 +22,7 @@ on run
 	end tell
 	
 	set output to {}
-	
+
 	# Get playlists from Music 
 	tell application "Music" to set _playlists to every user playlist whose smart is false
 	
@@ -47,56 +42,47 @@ end run
 
 on addToPlaylist(_name)
 	tell application "LaunchBar" to hide
-	
-	try
-		tell application "Shortcuts Events" to run shortcut "Add to Playlist" with input _name -- requires the following shortcut: https://www.icloud.com/shortcuts/6589a7ba4afd42ad9ffe49e8b08d3bb0
-	on error e
-		tell application "LaunchBar" to activate
-		display alert e
-	end try
-	
-	
 	tell application "System Events"
-		-- 	set _frontmost to item 1 of (get name of processes whose frontmost is true)
+		set _frontmost to item 1 of (get name of processes whose frontmost is true)
 		
 		# Localizations
 		set edit_lang to name of menu bar item 4 of menu bar 1 of application process "Music"
 		if edit_lang is "Edit" then -- en
-			-- set _window to "Window"
-			-- set _switch_to_miniplayer to "Switch to MiniPlayer"
-			-- set _add_to_playlist to "Add to Playlist"
-			-- set _song to "Song"
+			set _window to "Window"
+			set _switch_to_miniplayer to "Switch to MiniPlayer"
+			set _add_to_playlist to "Add to Playlist"
+			set _song to "Song"
 			set badge_name to "last used"
 		else if edit_lang is "Bearbeiten" then -- de
-			-- set _window to "Fenster"
-			-- set _switch_to_miniplayer to "Zum MiniPlayer wechseln"
-			-- set _add_to_playlist to "Zur Playlist hinzufŸgen"
-			-- set _song to "Titel"
+			set _window to "Fenster"
+			set _switch_to_miniplayer to "Zum MiniPlayer wechseln"
+			set _add_to_playlist to "Zur Playlist hinzufŸgen"
+			set _song to "Titel"
 			set badge_name to "zuletzt benutzt"
 		end if
 		
-		-- 	# Main action
-		-- 	try
-		-- 		click menu item _switch_to_miniplayer of menu _window of menu bar item _window of menu bar 1 of application process "Music" -- We need to change the view to be able to use the following menu items É otherwise they are greyed out 
-		-- 	end try
+		# Main action
+		try
+			click menu item _switch_to_miniplayer of menu _window of menu bar item _window of menu bar 1 of application process "Music" -- We need to change the view to be able to use the following menu items ð otherwise they are greyed out 
+		end try
 		
-		-- 	delay 0.2
+		delay 0.2
 		
-		-- 	click menu item _name of menu _add_to_playlist of menu item _add_to_playlist of menu _song of menu bar item _song of menu bar 1 of application process "Music"
+		click menu item _name of menu _add_to_playlist of menu item _add_to_playlist of menu _song of menu bar item _song of menu bar 1 of application process "Music"
 		
-		-- 	delay 0.2
+		delay 0.2
 		
-		-- 	click menu item "MiniPlayer" of menu _window of menu bar item _window of menu bar 1 of application process "Music" -- Change view back to original
+		click menu item "MiniPlayer" of menu _window of menu bar item _window of menu bar 1 of application process "Music" -- Change view back to original
 		
-		-- 	delay 0.2
+		delay 0.2
 		
-		-- 	-- try
-		-- 	-- 	tell application "Music" to set view of front browser window to user playlist _name
-		-- 	-- end try
+		try
+			tell application "Music" to set view of front browser window to user playlist _name
+		end try
 		
-		-- 	if _frontmost is not "Music" then
-		-- 		set visible of application process "Music" to false
-		-- 	end if
+		if _frontmost is not "Music" then
+			set visible of application process "Music" to false
+		end if
 		
 		# Write last used playlist to Preferences.plist
 		set theParentDictionary to make new property list item with properties {kind:record}

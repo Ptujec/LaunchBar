@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Music - Add to Playlist</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.1</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -38,6 +38,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>12.1</string>
+	<string>14.1</string>
 </dict>
 </plist>
