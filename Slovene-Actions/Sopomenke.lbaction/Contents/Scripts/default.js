@@ -13,7 +13,7 @@ function run(argument) {
   if (!argument) return;
 
   const data = HTTP.getJSON(
-    `https://viri.cjvt.si/sopomenke/ajax_api/v1/slv/sinonimni/search/${encodeURIComponent(
+    `https://viri.cjvt.si/sopomenke/ajax_api/v1/slv/search/${encodeURIComponent(
       argument
     )}`,
     3
@@ -22,54 +22,66 @@ function run(argument) {
   if (!data) return;
 
   return data.map((item) => {
-    const headword = item.headword;
+    const text = item.text;
     const id = item.id;
-    const mainURL = `https://viri.cjvt.si/sopomenke/slv/state?mw=${headword}&mid=${id}&source=main_page`;
+    const mainURL = `https://viri.cjvt.si/sopomenke/slv/state?mw=${text}&mid=${id}&source=main_page`;
     const dataURL = `https://viri.cjvt.si/sopomenke/ajax_api/v1/slv/synonym/download/${id}`;
-
+    const url = `https://viri.cjvt.si/sopomenke/slv/headword/${id}`;
     return {
-      title: headword,
+      title: text,
       icon: 'sTemplate',
-      action: 'getSynonyms',
-      actionArgument: {
-        headword,
-        mainURL,
-        dataURL,
-      },
+      url,
+
+      // action: 'getSynonyms',
+      // actionArgument: url,
+      // actionArgument: {
+      //   text,
+      //   mainURL,
+      //   dataURL,
+      // },
     };
   });
 }
-
-function getSynonyms({ headword, mainURL, dataURL }) {
-  const data = HTTP.loadRequest(dataURL, {
+function getSynonyms(url) {
+  const data = HTTP.loadRequest(url, {
     timeout: 5.0,
     method: 'GET',
     resultType: 'text',
-  }).data.split('\n');
+  }).data;
 
-  return data.slice(9, -1).map((row) => {
-    const columns = row.split('\t');
-
-    const synonym = columns[0];
-    const type = columns[1];
-    const frequency = columns[4];
-
-    const label =
-      frequency && frequency != '-' ? `${type} (${frequency})` : type;
-
-    return {
-      title: synonym,
-      label: type == 'uporabniški' ? '' : label,
-      badge: headword,
-      icon: type == 'uporabniški' ? 'synonymUserTemplate' : 'synonymTemplate',
-      action: 'openURL',
-      actionArgument: {
-        title: synonym,
-        url: mainURL,
-      },
-    };
-  });
+  File.writeText(data, Action.supportPath + '/test.html');
 }
+
+// function getSynonyms({ text, mainURL, dataURL }) {
+//   const data = HTTP.loadRequest(dataURL, {
+//     timeout: 5.0,
+//     method: 'GET',
+//     resultType: 'text',
+//   }).data.split('\n');
+
+//   return data.slice(9, -1).map((row) => {
+//     const columns = row.split('\t');
+
+//     const synonym = columns[0];
+//     const type = columns[1];
+//     const frequency = columns[4];
+
+//     const label =
+//       frequency && frequency != '-' ? `${type} (${frequency})` : type;
+
+//     return {
+//       title: synonym,
+//       label: type == 'uporabniški' ? '' : label,
+//       badge: text,
+//       icon: type == 'uporabniški' ? 'synonymUserTemplate' : 'synonymTemplate',
+//       action: 'openURL',
+//       actionArgument: {
+//         title: synonym,
+//         url: mainURL,
+//       },
+//     };
+//   });
+// }
 
 function openURL({ title, url }) {
   if (LaunchBar.options.shiftKey) {
