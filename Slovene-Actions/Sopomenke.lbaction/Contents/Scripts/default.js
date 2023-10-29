@@ -30,10 +30,14 @@ function run(argument) {
     return {
       title: text,
       icon: 'sTemplate',
-      url,
+      // url,
 
-      // action: 'getSynonyms',
-      // actionArgument: url,
+      action: 'getSynonyms',
+      actionArgument: {
+        url,
+        text,
+      },
+
       // actionArgument: {
       //   text,
       //   mainURL,
@@ -42,14 +46,35 @@ function run(argument) {
     };
   });
 }
-function getSynonyms(url) {
+function getSynonyms({ url, text }) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.openURL(url);
+    return;
+  }
+
   const data = HTTP.loadRequest(url, {
     timeout: 5.0,
     method: 'GET',
     resultType: 'text',
   }).data;
 
-  File.writeText(data, Action.supportPath + '/test.html');
+  const divs = data.match(/<div class="synonym" (.|\n)*?<div>/g);
+
+  return divs.map((div) => {
+    const title = div.match(/data-abc="(.*?)"/)[1];
+    const relevance = div.match(/data-relevance="(.*?)"/)[1];
+    const badge = text;
+    const icon =
+      relevance === 'user' ? 'synonymUserTemplate' : 'synonymTemplate';
+
+    return {
+      title,
+      badge,
+      icon,
+      action: 'openURL',
+      actionArgument: { title, url },
+    };
+  });
 }
 
 // function getSynonyms({ text, mainURL, dataURL }) {
