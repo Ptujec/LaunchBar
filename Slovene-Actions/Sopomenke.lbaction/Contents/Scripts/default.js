@@ -60,21 +60,31 @@ function getSynonyms({ url, text }) {
 
   const divs = data.match(/<div class="synonym" (.|\n)*?<div>/g);
 
-  return divs.map((div) => {
-    const title = div.match(/data-abc="(.*?)"/)[1];
-    const relevance = div.match(/data-relevance="(.*?)"/)[1];
-    const badge = text;
-    const icon =
-      relevance === 'user' ? 'synonymUserTemplate' : 'synonymTemplate';
+  let seen = {};
 
-    return {
-      title,
-      badge,
-      icon,
-      action: 'openURL',
-      actionArgument: { title, url },
-    };
-  });
+  return divs
+    .map((div) => {
+      const title = div.match(/data-abc="(.*?)"/)[1].replace(/&quot;/g, '"');
+      const relevance = div.match(/data-relevance="(.*?)"/)[1];
+      const badge = text;
+      const icon =
+        relevance === 'user' ? 'synonymUserTemplate' : 'synonymTemplate';
+
+      return {
+        title,
+        badge,
+        icon,
+        action: 'openURL',
+        actionArgument: { title, url },
+      };
+    })
+    .filter((item) => {
+      if (seen[item.title] || item.title == text) {
+        return false;
+      }
+      seen[item.title] = true;
+      return true;
+    });
 }
 
 // function getSynonyms({ text, mainURL, dataURL }) {
