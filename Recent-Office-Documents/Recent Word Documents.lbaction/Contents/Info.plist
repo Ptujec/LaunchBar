@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent Word Documents</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.microsoft.Word</string>
 	<key>LBDescription</key>
@@ -20,10 +20,10 @@
 		<string>ptujec@me.com</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-Office-Documents/Recent%20Word%20Documents.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-Office-Documents</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-Office-Documents/Recent%20Word%20Documents.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.microsoft.Word</string>

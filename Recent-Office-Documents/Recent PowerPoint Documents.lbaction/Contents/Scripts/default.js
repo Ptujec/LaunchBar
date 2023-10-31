@@ -1,31 +1,29 @@
-// Recent Powerpoint Documents
+/* 
+Recent PowerPoint Documents Action for LaunchBar
+by Christian Bender (@ptujec)
+2023-10-31
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
 function run() {
-  var plistPath =
+  const plistPath =
     '~/Library/Containers/com.microsoft.Powerpoint/Data/Library/Preferences/com.microsoft.Powerpoint.securebookmarks.plist';
 
-  var plist = File.readPlist(plistPath);
+  const plist = File.readPlist(plistPath);
 
-  var fileURLs = JSON.stringify(plist)
-    .replace(/":{/g, '\n":{')
-    .replace(/},"file/g, '},\n"file')
+  const fileURLs = JSON.stringify(plist)
+    .replace(/"/g, '\n"')
     .match(/file.*/g);
 
-  var result = [];
-  for (var i = 0; i < fileURLs.length; i++) {
-    var filePath = File.pathForFileURL(fileURLs[i]);
-    var lastUsedDate = plist[fileURLs[i]].kLastUsedDateKey.toString();
-
-    if (File.exists(filePath) && !File.isDirectory(filePath)) {
-      result.push({
-        path: filePath,
-        lastUsedDate: lastUsedDate,
-      });
-    }
-  }
-
-  result.sort(function (a, b) {
-    return new Date(b.lastUsedDate) - new Date(a.lastUsedDate);
-  });
-  return result;
+  return fileURLs
+    .map((fileURL) => {
+      const lastUsedDate = plist[fileURL].kLastUsedDateKey.toString();
+      const path = File.pathForFileURL(fileURL);
+      if (File.exists(path) && !File.isDirectory(path))
+        return { path, lastUsedDate };
+    })
+    .sort(function (a, b) {
+      return new Date(b.lastUsedDate) - new Date(a.lastUsedDate);
+    });
 }

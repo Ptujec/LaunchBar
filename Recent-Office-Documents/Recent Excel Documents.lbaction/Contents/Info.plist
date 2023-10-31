@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent Excel Documents</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.microsoft.Excel</string>
 	<key>LBDescription</key>
