@@ -91,10 +91,10 @@ function displayText(newArgument, argument, translation) {
   // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
   text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
 
-  // Split up text into lines
-  text = splitTextIntoLines(text).join('\n');
+  // Split up text into lines -- Uncommented as of LB 6.18.3
+  // text = splitTextIntoLines(text).join('\n');
 
-  // Uncomment if you are using this a lot in Fullscreen mode
+  // Uncomment the following line if you are using this a lot in Fullscreen mode
   // LaunchBar.executeAppleScript('tell application "Mission Control" to launch');
 
   // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
