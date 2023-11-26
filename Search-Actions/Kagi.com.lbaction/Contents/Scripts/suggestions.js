@@ -7,13 +7,11 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function runWithString(string) {
-  var apiToken = Action.preferences.apiToken;
+  const apiToken = Action.preferences.apiToken;
 
-  if (string == '' || apiToken == undefined) {
-    return;
-  }
+  if (string == '' || apiToken == undefined) return;
 
-  var data = HTTP.getJSON(
+  const data = HTTP.getJSON(
     'https://kagi.com/autosuggest?q=' + encodeURI(string),
     {
       headerFields: {
@@ -22,24 +20,10 @@ function runWithString(string) {
     }
   );
 
-  if (data.response.status != 200) {
-    return;
-  }
+  if (data.response.status != 200) return;
 
-  var suggestions = [];
-
-  data.data.forEach(function (item) {
-    var pushData = {
-      title: item.t,
-      icon: 'iconTemplate',
-    };
-
-    // if (item.txt != null) {
-    //   pushData.label = item.txt;
-    // }
-
-    suggestions.push(pushData);
-  });
-
-  return suggestions;
+  return data.data.map((item) => ({
+    title: item.t,
+    icon: 'iconTemplate',
+  }));
 }

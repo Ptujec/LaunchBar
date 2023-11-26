@@ -7,7 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run(argument) {
-  var apiToken = Action.preferences.apiToken;
+  const apiToken = Action.preferences.apiToken;
 
   // Set API Token
   if (apiToken == undefined || LaunchBar.options.shiftKey) {
@@ -25,7 +25,7 @@ function run(argument) {
 }
 
 function setApiToken() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'API-Token required',
     '1) Open Kagi Settings. Copy your Session Link.\n2) Press "Set API-Token".\nYour API-Token will be extracted from the link and stored in the Action preferences (~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.KagiCom/Preferences.plist).',
     'Open Kagi Settings',
@@ -38,15 +38,15 @@ function setApiToken() {
       LaunchBar.openURL('https://kagi.com/settings?p=user_details');
       break;
     case 1:
-      var clipboardContent = LaunchBar.getClipboardString().trim();
+      const clipboardContent = LaunchBar.getClipboardString().trim();
 
       if (!clipboardContent.startsWith('https://kagi.com/search?token')) {
         LaunchBar.alert('This clipboard item is no valid session link!');
         return;
       }
 
-      var apiToken = clipboardContent.match(
-        /https:\/\/kagi.com\/search\?token=(.+)&q=%s/
+      const apiToken = clipboardContent.match(
+        /https:\/\/kagi.com\/search\?token=(.+)/
       )[1];
 
       Action.preferences.apiToken = apiToken;
