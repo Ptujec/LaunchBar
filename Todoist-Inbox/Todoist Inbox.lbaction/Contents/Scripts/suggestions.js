@@ -140,9 +140,6 @@ function main(string) {
       order: 1,
     });
 
-    suggestions.sort(function (a, b) {
-      return a.order > b.order;
-    });
-    return suggestions;
+    return suggestions.sort((a, b) => a.order > b.order);
   }
 }

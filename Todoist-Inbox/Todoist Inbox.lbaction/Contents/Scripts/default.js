@@ -5,7 +5,7 @@ by Christian Bender (@ptujec)
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-Sources:
+Documentation:
 - https://developer.todoist.com/rest/v2/#create-a-new-task
 - https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
@@ -21,7 +21,7 @@ include('setKey.js');
 include('update.js');
 
 function run(argument) {
-  let prioMatch, prioValue, prioText, dueString, description, output;
+  let prioMatch, prioValue, prioText, dueString, description;
 
   if (!apiToken) {
     setApiKey();
@@ -292,17 +292,15 @@ function advancedOptions() {
     }
   }
 
-  resultPrioritized.sort(function (a, b) {
-    return b.matchCount - a.matchCount || b.usage - a.usage;
-  });
+  resultPrioritized.sort(
+    (a, b) => b.matchCount - a.matchCount || b.usage - a.usage
+  );
 
-  const all = resultProjects.concat(resultSections.concat(resultLabels));
+  const all = [...resultProjects, ...resultSections, ...resultLabels].sort(
+    (a, b) => b.usage - a.usage
+  );
 
-  all.sort(function (a, b) {
-    return b.usage - a.usage;
-  });
-
-  return resultPrioritized.concat(all);
+  return [...resultPrioritized, ...all];
 }
 
 function addProject({ labelName, labelIndex }) {
@@ -388,8 +386,7 @@ function addProject({ labelName, labelIndex }) {
       sectionItems.push(sectionPushData);
     }
   }
-
-  return pinnedItem.concat(projectItems.concat(sectionItems));
+  return [...pinnedItem, ...projectItems, ...sectionItems];
 }
 
 function postTask(advancedData) {
