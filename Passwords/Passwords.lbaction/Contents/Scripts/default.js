@@ -24,7 +24,9 @@ Raycast Extension:
 String.prototype.localizationTable = 'default';
 
 const localDataFile = `${Action.supportPath}/list`;
-const op = '/usr/local/bin/op';
+const op = File.exists('/opt/homebrew/bin/op')
+  ? '/opt/homebrew/bin/op'
+  : '/usr/local/bin/op';
 
 function run() {
   const accountID = Action.preferences.accountID;
