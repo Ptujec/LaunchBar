@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>SF-Symbols Browser</string>
 	<key>CFBundleVersion</key>
-	<string>1.6</string>
+	<string>1.7</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.SFSymbols</string>
 	<key>LBDescription</key>

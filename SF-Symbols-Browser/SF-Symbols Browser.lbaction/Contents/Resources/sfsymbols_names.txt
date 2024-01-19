@@ -2,6 +2,8 @@ square.and.arrow.up
 square.and.arrow.up.fill
 square.and.arrow.up.circle
 square.and.arrow.up.circle.fill
+square.and.arrow.up.badge.clock
+square.and.arrow.up.badge.clock.fill
 square.and.arrow.up.trianglebadge.exclamationmark
 square.and.arrow.down
 square.and.arrow.down.fill
@@ -411,6 +413,10 @@ person.crop.circle.dashed.circle
 person.crop.circle.dashed.circle.fill
 person.crop.square
 person.crop.square.fill
+person.crop.square.badge.camera
+person.crop.square.badge.camera.fill
+person.crop.square.badge.video
+person.crop.square.badge.video.fill
 person.crop.artframe
 photo.artframe
 photo.artframe.circle
@@ -4490,6 +4496,8 @@ chevron.compact.up
 chevron.compact.down
 chevron.compact.left
 chevron.compact.right
+chevron.compact.backward
+chevron.compact.forward
 arrow.left
 arrow.left.circle
 arrow.left.circle.fill
