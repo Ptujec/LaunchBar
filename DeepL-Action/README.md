@@ -4,7 +4,7 @@
 
 ## Setup and options
 
-You need an API key for this action, which you can copy from here after you create an account: [https://www.deepl.com/de/pro-account/summary](https://www.deepl.com/de/pro-account/summary). There is a free plan. You still need to enter your credit card information though.
+You need an API key for this action, which you can copy from here after you create an account: [https://www.deepl.com/account/summary](https://www.deepl.com/account/summary). There is a free plan. You still need to enter your credit card information though.
 
 You will be prompted to add your API key on the first run. You can set a new one with `⇧⏎` (shift + return).
 
@@ -15,7 +15,7 @@ Enter the phrase you want to translate with `␣` (space bar) or set the target 
 ## Supported Languages
 
 The action supports all available target languages listed here: 
-https://www.deepl.com/de/docs-api/translating-text/request/ 
+https://www.deepl.com/docs-api/translate-text/request 
 
 (Last update: 2023-01-28)
 
