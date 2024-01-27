@@ -337,8 +337,7 @@ function showEntries(itemIDs, data) {
       attachmentItemIDs[item.itemID] = true;
     }
     map[item.itemID] = {
-      url: 'zotero://select/items/' + item.libraryID + '_' + item.key,
-      // itemTypeID: item.itemTypeID,
+      url: `zotero://select/items/${item.libraryID}_${item.key}`,
       typeName: item.typeName,
     };
     return map;
@@ -1022,12 +1021,9 @@ function pasteCitation(dict) {
     }
   }
 
-  const citation =
-    '(' +
-    (creatorString || institution || title) +
-    ' ' +
-    (dict.date || 'n.d.') +
-    ')';
+  const citation = `(${creatorString || institution || title} ${
+    dict.date || 'n.d.'
+  })`;
 
   const citationFormat = Action.preferences.citationFormat;
 
@@ -1038,15 +1034,13 @@ function pasteCitation(dict) {
       dict.zoteroURL
     );
   } else if (citationFormat == 'markdown') {
-    LaunchBar.paste('[' + citation + '](' + dict.zoteroURL + ')');
+    LaunchBar.paste(`[${citation}](${dict.zoteroURL})`);
   } else {
     // LaunchBar.paste(citation);
     // LaunchBar.setClipboardString(dict.url);
     LaunchBar.executeAppleScript(
-      'set the clipboard to "' + dict.zoteroURL + '"',
-      'tell application "LaunchBar" to paste in frontmost application "' +
-        citation +
-        '"'
+      `set the clipboard to "${dict.zoteroURL}"`,
+      `tell application "LaunchBar" to paste in frontmost application "${citation}"`
     );
   }
 }
@@ -1079,8 +1073,7 @@ function openNote({ parentItemID, itemID }) {
 
   const foundItem = data.items.filter((item) => itemID === item.itemID)[0];
   if (foundItem) {
-    zoteroURL =
-      'zotero://select/items/' + foundItem.libraryID + '_' + foundItem.key;
+    zoteroURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
   }
 
   if (checkZoteroVersion()) {
