@@ -1,7 +1,7 @@
 /* 
 Wikipedia (DE) Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-02-25
+2024-02-04
 
 - https://en.wikipedia.org/api/rest_v1/#/Page%20content
 
@@ -14,55 +14,24 @@ function run(argument) {
       'http://de.wikipedia.org/wiki/' + encodeURIComponent(argument)
     );
   } else {
-    var extract = HTTP.getJSON(
+    const extract = HTTP.getJSON(
       'https://de.wikipedia.org/api/rest_v1/page/summary/' +
         encodeURIComponent(argument)
     );
 
-    var result = extract.data.extract;
+    if (extract.error) {
+      LaunchBar.alert(extract.error);
+      return;
+    }
 
-    if (result != undefined) {
-      result = result.replace(/\n/g, ' ');
-      display(result);
+    let result = extract.data.extract;
+
+    if (result) {
+      LaunchBar.displayInLargeType({ string: result });
     } else {
       LaunchBar.openURL(
         'http://de.wikipedia.org/wiki/' + encodeURIComponent(argument)
       );
     }
   }
-}
-
-const lineLength = 68;
-const max = 948;
-
-function display(argument) {
-  var argumentLength = argument.length;
-
-  if (argumentLength > max) {
-    argument = argument.substring(0, 949) + '…';
-  }
-
-  var lines = fold(argument, lineLength);
-
-  LaunchBar.displayInLargeType({
-    string: lines.join('\n').replace(/^\s/gm, ''),
-  });
-}
-
-function fold(s, n, a) {
-  a = a || [];
-  if (s.length <= n) {
-    a.push(s);
-    return a;
-  }
-  var line = s.substring(0, n);
-  var lastSpaceRgx = /\s(?!.*\s)/;
-  var idx = line.search(lastSpaceRgx);
-  var nextIdx = n;
-  if (idx > 0) {
-    line = line.substring(0, idx);
-    nextIdx = idx;
-  }
-  a.push(line);
-  return fold(s.substring(nextIdx), n, a);
 }
