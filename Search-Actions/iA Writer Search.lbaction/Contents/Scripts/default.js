@@ -11,36 +11,49 @@ function run(argument) {
     return;
   }
 
-  var folderPath = Action.preferences.folderLocation;
+  let folderPath, plist;
 
   if (LaunchBar.options.shiftKey) {
-    var folderPath = LaunchBar.executeAppleScript(
+    folderPath = LaunchBar.executeAppleScript(
       'set _home to path to home folder as string',
       'set _default to _home & "Library:Mobile Documents:" as alias',
       'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
       'set _folder to POSIX path of _folder'
     ).trim();
+
+    if (!folderPath) return;
     Action.preferences.folderLocation = folderPath;
-  } else if (folderPath == undefined || folderPath == '') {
+  }
+
+  folderPath = Action.preferences.folderLocation;
+
+  if (!folderPath) {
     try {
-      var plist = File.readPlist(
+      plist = File.readPlist(
         '~/Library/Containers/pro.writer.mac/Data/Library/Preferences/pro.writer.mac.plist'
       );
     } catch (exception) {
       LaunchBar.alert('Error while reading plist: ' + exception);
+      return;
     }
 
-    var folderPath = File.pathForFileURL(
-      File.fileURLForPath(plist.NSNavLastRootDirectory)
-    );
+    if (plist.NSNavLastRootDirectory) {
+      folderPath = File.pathForFileURL(
+        File.fileURLForPath(plist.NSNavLastRootDirectory)
+      );
+    }
 
-    if (folderPath == undefined) {
-      var folderPath = LaunchBar.executeAppleScript(
+    if (!folderPath) {
+      folderPath = LaunchBar.executeAppleScript(
         'set _home to path to home folder as string',
         'set _default to _home & "Library:Mobile Documents:" as alias',
         'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
         'set _folder to POSIX path of _folder'
       ).trim();
+      if (!folderPath) {
+        LaunchBar.alert('Could not set folder path!');
+        return;
+      }
       Action.preferences.folderLocation = folderPath;
     } else {
       Action.preferences.folderLocation = folderPath;
@@ -92,7 +105,8 @@ function run(argument) {
         },
       ];
     } else {
-      var results = [];
+      let results = [];
+      let subtitle;
       for (var i = 0; i < output.length; i++) {
         var result = output[i];
         if (result != '' && !File.isDirectory(result)) {
@@ -107,22 +121,20 @@ function run(argument) {
           } else {
             var regex = new RegExp('.*' + argument + '.*', 'gi');
             try {
-              var sub = File.readText(path).match(regex);
+              subtitle = File.readText(path).match(regex);
             } catch (error) {}
 
-            if (sub != null) {
-              sub = sub.toString().replace(/\n/g, ' ').trim();
+            if (subtitle != null) {
+              subtitle = subtitle.toString().replace(/\n/g, ' ').trim();
 
               results.push({
-                title: title,
-                subtitle: sub,
-                path: path,
+                title,
+                subtitle,
+                path,
+                alwaysShowsSubtitle: true,
               });
             } else {
-              results.push({
-                title: title,
-                path: path,
-              });
+              results.push({ title, path });
             }
           }
         }
