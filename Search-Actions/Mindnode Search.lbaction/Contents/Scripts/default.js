@@ -6,46 +6,57 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-var folderPath = Action.preferences.folderLocation;
-
 function run(argument) {
   if (argument == '') {
     return;
   }
+  let folderPath, plist;
 
-  if (folderPath == undefined || folderPath == '') {
-    try {
-      var plist = File.readPlist(
-        '~/Library/Containers/com.ideasoncanvas.mindnode.macos/Data/Library/Preferences/com.ideasoncanvas.mindnode.macos.plist'
-      );
-    } catch (exception) {
-      LaunchBar.alert('Error while reading plist: ' + exception);
-    }
-
-    var folderPath = File.pathForFileURL(
-      File.fileURLForPath(plist.NSNavLastRootDirectory)
-    );
-
-    if (folderPath == undefined) {
-      var folderPath = LaunchBar.executeAppleScript(
-        'set _home to path to home folder as string',
-        'set _default to _home & "Library:Mobile Documents:" as alias',
-        'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
-        'set _folder to POSIX path of _folder'
-      ).trim();
-      Action.preferences.folderLocation = folderPath;
-    } else {
-      Action.preferences.folderLocation = folderPath;
-    }
-  } else if (LaunchBar.options.shiftKey) {
-    var folderPath = LaunchBar.executeAppleScript(
+  if (LaunchBar.options.shiftKey) {
+    folderPath = LaunchBar.executeAppleScript(
       'set _home to path to home folder as string',
       'set _default to _home & "Library:Mobile Documents:" as alias',
       'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
       'set _folder to POSIX path of _folder'
     ).trim();
+
+    if (!folderPath) return;
     Action.preferences.folderLocation = folderPath;
-    return;
+  }
+
+  folderPath = Action.preferences.folderLocation;
+
+  if (!folderPath) {
+    try {
+      plist = File.readPlist(
+        '~/Library/Containers/com.ideasoncanvas.mindnode.macos/Data/Library/Preferences/com.ideasoncanvas.mindnode.macos.plist'
+      );
+    } catch (exception) {
+      LaunchBar.alert('Error while reading plist: ' + exception);
+      return;
+    }
+
+    if (plist.NSNavLastRootDirectory) {
+      folderPath = File.pathForFileURL(
+        File.fileURLForPath(plist.NSNavLastRootDirectory)
+      );
+    }
+
+    if (!folderPath) {
+      folderPath = LaunchBar.executeAppleScript(
+        'set _home to path to home folder as string',
+        'set _default to _home & "Library:Mobile Documents:" as alias',
+        'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
+        'set _folder to POSIX path of _folder'
+      ).trim();
+      if (!folderPath) {
+        LaunchBar.alert('Could not set folder path!');
+        return;
+      }
+      Action.preferences.folderLocation = folderPath;
+    } else {
+      Action.preferences.folderLocation = folderPath;
+    }
   }
 
   if (argument == undefined) {
@@ -114,24 +125,22 @@ function run(argument) {
                 'gi'
               );
 
-              var sub = content
+              var subtitle = content
                 .match(regex)
-                .toString()
+                .join(', ')
                 .replace(/</g, '')
                 .trim();
             } catch (error) {}
 
-            if (sub != null) {
+            if (subtitle != null) {
               results.push({
-                title: title,
-                subtitle: sub,
-                path: path,
+                title,
+                subtitle,
+                path,
+                alwaysShowsSubtitle: true,
               });
             } else {
-              results.push({
-                title: title,
-                path: path,
-              });
+              results.push({ title, path });
             }
           }
         }

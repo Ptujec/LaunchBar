@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Mindnode Search</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.3</string>
+	<string>1.3.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,10 +20,10 @@
 		<string>⇧⏎ = Choose folder</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions#readme</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Search-Actions/Mindnode%20Search.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions#readme</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.ideasoncanvas.mindnode.macos</string>
