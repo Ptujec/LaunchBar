@@ -6,9 +6,11 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
-- https://www.balldontlie.io/
+- https://www.balldontlie.io/#introduction
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 */
+
+const apiKey = Action.preferences.apiKey;
 
 function run(argument) {
   // Date
@@ -121,20 +123,30 @@ function run(argument) {
 }
 
 function showGames(startDateString, endDateString) {
+  if (!apiKey || LaunchBar.options.alternateKey) {
+    setAPIKey();
+    return;
+  }
+
   const ducky = 'https://duckduckgo.com/?q=!ducky+';
 
-  var scoreData = HTTP.getJSON(
-    'https://www.balldontlie.io/api/v1/games?start_date=' +
+  const scoreData = HTTP.getJSON(
+    'https://api.balldontlie.io/v1/games?start_date=' +
       startDateString +
       '&end_date=' +
-      endDateString
+      endDateString,
+    {
+      headerFields: {
+        Authorization: apiKey,
+      },
+    }
   );
 
   // File.writeJSON(scoreData, Action.supportPath + '/test.json');
   // return;
-  // var scoreData = File.readJSON(Action.supportPath + '/test.json');
+  // const scoreData = File.readJSON(Action.supportPath + '/test.json');
 
-  if (scoreData.response == undefined) {
+  if (scoreData.response == undefined || scoreData.error) {
     LaunchBar.alert(scoreData.error);
     return;
   }
@@ -302,7 +314,7 @@ function showGames(startDateString, endDateString) {
 
 function open(dict) {
   LaunchBar.hide();
-  if (LaunchBar.options.alternateKey) {
+  if (!LaunchBar.options.alternateKey) {
     if (dict.ytSearchURL != undefined) {
       LaunchBar.openURL(dict.ytSearchURL);
     } else if (dict.nbaComSearchURL != undefined) {
@@ -310,5 +322,40 @@ function open(dict) {
     }
   } else {
     LaunchBar.openURL(dict.espnSearchURL);
+  }
+}
+
+function setAPIKey() {
+  const response = LaunchBar.alert(
+    'API Key required',
+    'This actions requires an API Key from https://new.balldontlie.io. Press "Open Website" to get yours.\nCopy the API Key to your clipboard, run the action again and press "Set API Key"',
+    'Open Website',
+    'Set API Key',
+    'Cancel'
+  );
+  switch (response) {
+    case 0:
+      LaunchBar.hide();
+      LaunchBar.openURL('https://new.balldontlie.io');
+      break;
+    case 1:
+      // Check API Key
+      var clipboard = LaunchBar.getClipboardString().trim();
+
+      if (clipboard.length == 36) {
+        Action.preferences.apiKey = clipboard;
+
+        LaunchBar.alert(
+          'Success!',
+          'API Access Key set to: ' + Action.preferences.apiKey
+        );
+      } else {
+        LaunchBar.alert(
+          'Seems like an incorrect API-key. Make sure it is the most recent item of your clipboard history!'
+        );
+      }
+      break;
+    case 2:
+      break;
   }
 }
