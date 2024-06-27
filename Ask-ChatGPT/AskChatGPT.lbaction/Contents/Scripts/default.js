@@ -37,7 +37,7 @@ function run(argument) {
     try {
       let test = File.readJSON(userPresetsPath);
     } catch (e) {
-      var response = LaunchBar.alert(
+      const response = LaunchBar.alert(
         e,
         'You can either start fresh or try to fix your custom presets JSON code.',
         'Start fresh',
@@ -60,18 +60,16 @@ function run(argument) {
   }
 
   // CHECK/SET API KEY
-  if (apiKey == undefined) {
+  if (!apiKey) {
     setApiKey();
     return;
   }
 
   // SETTINGS
-  if (LaunchBar.options.alternateKey) {
-    return settings();
-  }
+  if (LaunchBar.options.alternateKey) return settings();
 
   // IF NO ARGUMENT IS PASSED
-  if (argument == undefined) {
+  if (!argument) {
     // CHECK FOR NEW PRESETS
     if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
       // Compare presets with user presets
@@ -300,7 +298,7 @@ function ask(dict) {
         title +
         ' - ' +
         currentURL
-          .replace(/[&~#@[\]{}\\\/%*$:;,.?><\|"“]+/g, '_')
+          .replace(/[&~#@[\]{}\\\/%*$:;,.\?><\|"“]+/g, '_')
           .replace(/https?|www/g, '')
           .replace(/^_+|_+$/g, '')
           .trim();
@@ -401,6 +399,8 @@ function processResult(
   }
 
   if (result.response.status != 200) {
+    // TODO: Offer to open https://chat.openai.com on 429
+
     if (result.data != undefined) {
       var data = JSON.parse(result.data);
       if (data.error != undefined) {
@@ -593,13 +593,20 @@ function models() {
   var model = Action.preferences.model;
   var v3 = 'gpt-3.5-turbo';
   var v4 = 'gpt-4';
+  var v4o = 'gpt-4o';
 
   if (model == v3 || model == undefined) {
     var icon3 = 'checkTemplate.png';
     var icon4 = 'circleTemplate.png';
+    var icon4o = 'circleTemplate.png';
   } else if (model == v4) {
     var icon3 = 'circleTemplate.png';
     var icon4 = 'checkTemplate.png';
+    var icon4o = 'circleTemplate.png';
+  } else if (model == v4o) {
+    var icon3 = 'circleTemplate.png';
+    var icon4 = 'circleTemplate.png';
+    var icon4o = 'checkTemplate.png';
   }
 
   return [
@@ -614,6 +621,12 @@ function models() {
       icon: icon4,
       action: 'setModel',
       actionArgument: v4,
+    },
+    {
+      title: v4o,
+      icon: icon4o,
+      action: 'setModel',
+      actionArgument: v4o,
     },
   ];
 }
@@ -738,7 +751,7 @@ function setApiKey() {
     case 1:
       var clipboardContent = LaunchBar.getClipboardString().trim();
 
-      if (clipboardContent.length == 51) {
+      if (clipboardContent.length == 56) {
         // TODO: Better API key test
 
         // Write new API key in Action preferences
