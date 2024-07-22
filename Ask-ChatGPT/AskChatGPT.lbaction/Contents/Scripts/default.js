@@ -594,19 +594,28 @@ function models() {
   var v3 = 'gpt-3.5-turbo';
   var v4 = 'gpt-4';
   var v4o = 'gpt-4o';
+  var v4oMini = 'gpt-4o-mini'; // 新增的模型
 
   if (model == v3 || model == undefined) {
     var icon3 = 'checkTemplate.png';
     var icon4 = 'circleTemplate.png';
     var icon4o = 'circleTemplate.png';
+    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
   } else if (model == v4) {
     var icon3 = 'circleTemplate.png';
     var icon4 = 'checkTemplate.png';
     var icon4o = 'circleTemplate.png';
+    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
   } else if (model == v4o) {
     var icon3 = 'circleTemplate.png';
     var icon4 = 'circleTemplate.png';
     var icon4o = 'checkTemplate.png';
+    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
+  } else if (model == v4oMini) {
+    var icon3 = 'circleTemplate.png';
+    var icon4 = 'circleTemplate.png';
+    var icon4o = 'circleTemplate.png';
+    var icon4oMini = 'checkTemplate.png'; // 新增的模型圖標
   }
 
   return [
@@ -627,6 +636,12 @@ function models() {
       icon: icon4o,
       action: 'setModel',
       actionArgument: v4o,
+    },
+    {
+      title: v4oMini, // 新增的模型選項
+      icon: icon4oMini,
+      action: 'setModel',
+      actionArgument: v4oMini,
     },
   ];
 }
