@@ -49,7 +49,7 @@ You can use quicklook, open the attachment, or even mail it to someone. There ar
 
 If there is a URL specified for the item, you can open it.
 
-#### 4) Open Item in Zotero
+#### 4) Select in Zotero
 
 This action also allows you to quickly look up items in the Zotero app. This way, you can quickly edit an item or perform other tasks that you cannot currently do within the action itself.
 

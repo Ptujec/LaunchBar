@@ -4,6 +4,9 @@ by Christian Bender (@ptujec)
 2023-05-17
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+TODO: 
+- Build citation according to a csl style sheet?
 */
 
 const zoteroDirectory = getZoteroDirectory();
@@ -337,7 +340,7 @@ function showEntries(itemIDs, data) {
       attachmentItemIDs[item.itemID] = true;
     }
     map[item.itemID] = {
-      url: `zotero://select/items/${item.libraryID}_${item.key}`,
+      zoteroSelectURL: `zotero://select/items/${item.libraryID}_${item.key}`,
       typeName: item.typeName,
     };
     return map;
@@ -445,7 +448,9 @@ function showEntries(itemIDs, data) {
         icon: icon,
         action: 'itemActions',
         actionArgument: {
-          zoteroURL: itemsMap[itemID] ? itemsMap[itemID].url : '',
+          zoteroSelectURL: itemsMap[itemID]
+            ? itemsMap[itemID].zoteroSelectURL
+            : '',
           itemID: itemID,
           creators: creators,
           date: date,
@@ -482,7 +487,7 @@ function initializeName(name) {
 
 function itemActions(dict) {
   if (LaunchBar.options.commandKey) {
-    openZoteroURL(dict);
+    selectInZotero(dict);
   } else if (LaunchBar.options.shiftKey) {
     pasteCitation(dict);
   } else {
@@ -502,7 +507,7 @@ function showItemDetails(dict) {
 
   const attachedUrlsItemIDs = [];
 
-  const paths = data.itemAttachments.reduce((acc, item) => {
+  const attachmentsWithPath = data.itemAttachments.reduce((acc, item) => {
     if (itemID == item.parentItemID) {
       if (item.path) {
         acc.push({
@@ -511,6 +516,7 @@ function showItemDetails(dict) {
             storageDirectory + item.key + '/'
           ),
           type: item.contentType,
+          key: item.key,
         });
       } else if (
         !item.path &&
@@ -789,9 +795,9 @@ function showItemDetails(dict) {
   details = [...details, ...notes, ...urls];
 
   // Add Storage paths
-  if (paths.length > 0) {
+  if (attachmentsWithPath.length > 0) {
     let found = false;
-    for (const item of paths) {
+    for (const item of attachmentsWithPath) {
       if (
         !found &&
         (item.type === 'application/pdf' ||
@@ -800,12 +806,20 @@ function showItemDetails(dict) {
         details[0].subtitle = '';
         details[0].path = item.path;
         details[0].actionArgument.path = item.path;
+        details[0].actionArgument.key = item.key;
         found = true;
       }
       const title = item.path.split('/').slice(-1)[0] || '';
+
       details.push({
         title: title,
         path: item.path,
+        action: 'itemDetailActions',
+        actionArgument: {
+          path: item.path,
+          key: item.key,
+          itemID,
+        },
         subtitle: '',
         icon: 'attachmentTemplate',
       });
@@ -820,10 +834,10 @@ function showItemDetails(dict) {
       actionArgument: dict,
     },
     {
-      title: 'Open in Zotero',
-      icon: 'openTemplate',
-      url: dict.zoteroURL,
-      action: 'openZoteroURL',
+      title: 'Select in Zotero',
+      icon: 'selectTemplate',
+      url: dict.zoteroSelectURL,
+      action: 'selectInZotero',
       actionArgument: dict,
     }
   );
@@ -834,7 +848,7 @@ function showItemDetails(dict) {
 function itemDetailActions(dict) {
   // Options
   if (LaunchBar.options.commandKey) {
-    return openZoteroURL(dict);
+    return selectInZotero(dict);
   }
 
   if (LaunchBar.options.shiftKey) {
@@ -845,11 +859,27 @@ function itemDetailActions(dict) {
   LaunchBar.hide();
   saveRecent(dict.itemID);
 
-  if (dict.path != undefined) {
+  // Open
+  if (Action.preferences.openOption == 'systemDefault' && dict.path) {
     LaunchBar.openURL(File.fileURLForPath(dict.path));
-  } else {
-    LaunchBar.openURL(dict.url || dict.zoteroURL);
+    return;
   }
+
+  if (dict.key) {
+    // dict.key is the attachment key
+    const data = File.readJSON(dataPath);
+    const foundItem = data.items.filter(
+      (item) => dict.itemID === item.itemID
+    )[0]; // the itemID is from the entry not the attachment … but should be the same library
+    if (foundItem) {
+      // does not work with epub files
+      zoteroOpenPDFURL = `zotero://open-pdf/${foundItem.libraryID}_${dict.key}`;
+      LaunchBar.openURL(zoteroOpenPDFURL);
+    }
+    return;
+  }
+
+  LaunchBar.openURL(dict.url || dict.zoteroSelectURL);
 }
 
 function showItemsByField(fieldID, value) {
@@ -1031,15 +1061,15 @@ function pasteCitation(dict) {
     LaunchBar.executeAppleScriptFile(
       './rt.applescript',
       citation,
-      dict.zoteroURL
+      dict.zoteroSelectURL
     );
   } else if (citationFormat == 'markdown') {
-    LaunchBar.paste(`[${citation}](${dict.zoteroURL})`);
+    LaunchBar.paste(`[${citation}](${dict.zoteroSelectURL})`);
   } else {
     // LaunchBar.paste(citation);
     // LaunchBar.setClipboardString(dict.url);
     LaunchBar.executeAppleScript(
-      `set the clipboard to "${dict.zoteroURL}"`,
+      `set the clipboard to "${dict.zoteroSelectURL}"`,
       `tell application "LaunchBar" to paste in frontmost application "${citation}"`
     );
   }
@@ -1051,17 +1081,17 @@ function openURL({ itemID, url }) {
   LaunchBar.openURL(url);
 }
 
-function openZoteroURL({ itemID, zoteroURL }) {
+function selectInZotero({ itemID, zoteroSelectURL }) {
   LaunchBar.hide();
   saveRecent(itemID);
 
-  if (checkZoteroVersion()) {
-    LaunchBar.executeAppleScript(
-      'tell application id "org.zotero.zotero" to launch'
-    );
-  }
+  // if (checkZoteroVersion()) {
+  //   LaunchBar.executeAppleScript(
+  //     'tell application id "org.zotero.zotero" to launch'
+  //   );
+  // }
 
-  LaunchBar.openURL(zoteroURL);
+  LaunchBar.openURL(zoteroSelectURL);
 }
 
 function openNote({ parentItemID, itemID }) {
@@ -1073,16 +1103,16 @@ function openNote({ parentItemID, itemID }) {
 
   const foundItem = data.items.filter((item) => itemID === item.itemID)[0];
   if (foundItem) {
-    zoteroURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
+    zoteroSelectURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
   }
 
-  if (checkZoteroVersion()) {
-    LaunchBar.executeAppleScript(
-      'tell application id "org.zotero.zotero" to launch'
-    );
-  }
+  // if (checkZoteroVersion()) {
+  //   LaunchBar.executeAppleScript(
+  //     'tell application id "org.zotero.zotero" to launch'
+  //   );
+  // }
 
-  LaunchBar.openURL(zoteroURL);
+  LaunchBar.openURL(zoteroSelectURL);
 }
 
 function saveRecent(itemID) {
@@ -1105,17 +1135,17 @@ function saveRecent(itemID) {
   Action.preferences.recentItems = recentItems;
 }
 
-function checkZoteroVersion() {
-  const contents = File.getDirectoryContents('/Applications/');
+// function checkZoteroVersion() {
+//   const contents = File.getDirectoryContents('/Applications/');
 
-  const zotero = contents.find((item) => item.startsWith('Zotero')) || '';
+//   const zotero = contents.find((item) => item.startsWith('Zotero')) || '';
 
-  const plist = File.readPlist(`/Applications/${zotero}/Contents/Info.plist`);
+//   const plist = File.readPlist(`/Applications/${zotero}/Contents/Info.plist`);
 
-  const version = parseInt(plist.CFBundleVersion.split('.')[0]);
+//   const version = parseInt(plist.CFBundleVersion.split('.')[0]);
 
-  return version < 7;
-}
+//   return version < 7;
+// }
 
 function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
   const lastUsedParts = lastUsedActionVersion.split('.');
@@ -1132,25 +1162,39 @@ function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
 // SETTINGS
 
 function settings() {
-  let formatIcon, badge;
+  let formatIcon, formatSelection;
 
   if (Action.preferences.citationFormat == 'richText') {
     formatIcon = 'rTemplate';
-    badge = 'Rich Text';
+    formatSelection = 'Rich Text';
   } else if (Action.preferences.citationFormat == 'markdown') {
     formatIcon = 'mTemplate';
-    badge = 'Markdown';
+    formatSelection = 'Markdown';
   } else {
     formatIcon = 'pasteTemplate';
-    badge = 'Plain';
+    formatSelection = 'Plain';
   }
 
   return [
     {
       title: 'Citation Format',
-      subtitle: badge,
+      subtitle: formatSelection,
+      alwaysShowsSubtitle: true,
       icon: formatIcon,
       children: listFormats(),
+    },
+    {
+      title: 'Open Attachments',
+      alwaysShowsSubtitle: true,
+      subtitle:
+        Action.preferences.openOption == 'systemDefault'
+          ? 'System Default'
+          : 'Respect Zotero Setting',
+      icon:
+        Action.preferences.openOption == 'systemDefault'
+          ? 'systemDefaultTemplate'
+          : 'zoteroSettingTemplate',
+      children: listOpenOptions(),
     },
   ];
 }
@@ -1160,6 +1204,7 @@ function listFormats() {
     {
       title: 'Paste citation only',
       subtitle: 'The link will be copied to the clipboard',
+      alwaysShowsSubtitle: true,
       // icon: 'plainTemplate',
       icon: 'pasteTemplate',
       action: 'setFormat',
@@ -1182,6 +1227,32 @@ function listFormats() {
 
 function setFormat(citationFormat) {
   Action.preferences.citationFormat = citationFormat;
+  return settings();
+}
+
+function listOpenOptions() {
+  return [
+    {
+      title: 'Respect Zotero Setting',
+      subtitle: 'Will respect the reader setting in Zotero (Gerneral/Reader).',
+      alwaysShowsSubtitle: true,
+      icon: 'zoteroSettingTemplate',
+      action: 'setOpenOption',
+      actionArgument: 'zoteroSetting',
+    },
+    {
+      title: 'System Default',
+      subtitle: 'Will use the default app without opening Zotero first.',
+      alwaysShowsSubtitle: true,
+      icon: 'systemDefaultTemplate',
+      action: 'setOpenOption',
+      actionArgument: 'systemDefault',
+    },
+  ];
+}
+
+function setOpenOption(openOption) {
+  Action.preferences.openOption = openOption;
   return settings();
 }
 
