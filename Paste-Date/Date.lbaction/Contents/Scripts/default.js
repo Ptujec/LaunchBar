@@ -98,6 +98,11 @@ function format(dateString, dateStyle) {
       dateString.getTime() - dateString.getTimezoneOffset() * 60000
     );
     dateString = dateString.toISOString().split('T')[0];
+  } else if (dateStyle == 'iso_long') {
+    dateString = new Date(
+      dateString.getTime() - dateString.getTimezoneOffset() * 60000
+    );
+    dateString = dateString.toISOString();
   } else if (dateStyle == 'US Short') {
     // I create this manually because it is not possible to get this format if you are otherwise on a different locale. You can set the locale in LaunchBar.formatDate but you can not change the format the system offers permamently. It will change back if you change the format for your locale.
 
@@ -149,7 +154,15 @@ function formatSettings() {
 }
 
 function styleOptions(mode, date, currentStyle, dateString) {
-  const styles = ['iso', 'short', 'medium', 'long', 'full', 'US Short'];
+  const styles = [
+    'iso',
+    'iso_long',
+    'short',
+    'medium',
+    'long',
+    'full',
+    'US Short',
+  ];
 
   let action =
     mode == 'primary' ? 'setPrimaryDateFormat' : 'setSecondaryDateFormat';
