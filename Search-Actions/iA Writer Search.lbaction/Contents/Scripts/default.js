@@ -68,7 +68,7 @@ function run(argument) {
     var result = [];
     for (var i = 0; i < contents.length; i++) {
       var path = folderPath + '/' + contents[i];
-      if (contents[i].includes('.txt')) {
+      if (contents[i].includes('.txt') || contents[i].includes('.md')) {
         result.push({
           title: contents[i],
           path: path,
