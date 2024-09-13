@@ -11,6 +11,7 @@ Documentation:
 The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
+String.prototype.localizationTable = 'default';
 
 const AccordancePrefs = eval(
   File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
@@ -175,7 +176,7 @@ function listTranslations(newArgument, argument) {
     const isDefault = translation === Action.preferences.translation;
 
     if (isLastUsed && isCommandKeyPressed) {
-      pushContent.badge = 'recent';
+      pushContent.badge = 'recent'.localize();
       lastUsedTranslation.push(pushContent);
     } else if (isDefault && !isCommandKeyPressed) {
       pushContent.icon = 'selectedBookTemplate';
