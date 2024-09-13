@@ -235,7 +235,7 @@ function listTranslations(newArgument, argument) {
 
     if (isLastUsed && isCommandKeyPressed) {
       pushContent.icon = 'bookTemplate';
-      pushContent.badge = 'recent';
+      pushContent.badge = 'recent'.localize();
       lastUsedTranslation.push(pushContent);
     } else if (isDefault && !isCommandKeyPressed) {
       pushContent.icon = 'selectedBookTemplate';
