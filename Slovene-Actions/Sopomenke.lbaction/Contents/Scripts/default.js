@@ -58,7 +58,13 @@ function getSynonyms({ url, text }) {
     resultType: 'text',
   }).data;
 
-  const divs = data.match(/<div class="synonym" (.|\n)*?<div>/g);
+  // const fileLocation = Action.supportPath + '/test.html';
+  // File.writeText(data, fileLocation);
+  // const data = File.readText(fileLocation);
+
+  const divs = data
+    .replace(/<div class=.*aria-level="2">Protipomenke<\/h6>(.|\n)*/, '') // filtering out protipomenke
+    .match(/<div class="synonym" (.|\n)*?<div>/g);
 
   let seen = {};
 
