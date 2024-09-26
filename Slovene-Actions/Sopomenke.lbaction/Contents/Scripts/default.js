@@ -21,15 +21,22 @@ function run(argument) {
 
   if (!data) return;
 
+  // const fileLocation = Action.supportPath + '/test.json';
+  // File.writeJSON(data, fileLocation);
+
   return data.map((item) => {
     const text = item.text;
     const id = item.id;
-    const mainURL = `https://viri.cjvt.si/sopomenke/slv/state?mw=${text}&mid=${id}&source=main_page`;
-    const dataURL = `https://viri.cjvt.si/sopomenke/ajax_api/v1/slv/synonym/download/${id}`;
     const url = `https://viri.cjvt.si/sopomenke/slv/headword/${id}`;
+    const badge = item.description || undefined;
+
+    // const mainURL = `https://viri.cjvt.si/sopomenke/slv/state?mw=${text}&mid=${id}&source=main_page`;
+    // const dataURL = `https://viri.cjvt.si/sopomenke/ajax_api/v1/slv/synonym/download/${id}`;
+
     return {
       title: text,
       icon: 'sTemplate',
+      badge,
       // url,
 
       action: 'getSynonyms',
