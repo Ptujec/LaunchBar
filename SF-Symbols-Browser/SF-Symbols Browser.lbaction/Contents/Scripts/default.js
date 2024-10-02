@@ -13,38 +13,39 @@ const recentSymbolsLocation = Action.supportPath + '/recentSymbols.json';
 const infoPlistLocation = Action.path + '/Contents/Info.plist';
 
 function run() {
-  var actionVersion = File.readPlist(infoPlistLocation).CFBundleVersion;
+  const actionVersion = File.readPlist(infoPlistLocation).CFBundleVersion;
+  let createJSON;
 
   // Check First Run
   if (Action.preferences.firstRun != false) {
     Action.preferences.firstRun = false;
-    var createJSON = true;
+    createJSON = true;
     Action.preferences.firstRunActionVersion = actionVersion;
   } else {
     // Check if Version Number is the same
     if (actionVersion == Action.preferences.firstRunActionVersion) {
-      var createJSON = false;
+      createJSON = false;
     } else {
-      var createJSON = true;
+      createJSON = true;
       Action.preferences.firstRunActionVersion = actionVersion;
     }
   }
 
   // Create JSON
   if (createJSON == true) {
-    var symbols = File.readText(
+    const symbols = File.readText(
       Action.path + '/Contents/Resources/sfsymbols.txt'
     ).split(/(?!$)/u);
 
-    var text = File.readText(
+    const text = File.readText(
       Action.path + '/Contents/Resources/sfsymbols_names.txt'
     ).split('\n');
 
-    var result = [];
-    for (var i = 0; i < text.length; i++) {
-      var title = text[i];
+    const result = [];
+    for (let i = 0; i < text.length; i++) {
+      const title = text[i];
 
-      var pushData = {
+      const pushData = {
         title: title,
         icon: 'character:' + symbols[i],
         index: i,
@@ -60,7 +61,7 @@ function run() {
     File.writeJSON(result, sfSymbolsLocation);
   }
 
-  var sfSymbols = File.readJSON(sfSymbolsLocation);
+  let sfSymbols = File.readJSON(sfSymbolsLocation);
 
   sfSymbols.sort(function (a, b) {
     // return a.usage < b.usage;
@@ -68,20 +69,20 @@ function run() {
   });
 
   if (File.exists(recentSymbolsLocation)) {
-    var recentSymbols = File.readJSON(recentSymbolsLocation);
+    const recentSymbols = File.readJSON(recentSymbolsLocation);
     sfSymbols = recentSymbols.reverse().concat(sfSymbols);
   }
   return sfSymbols;
 }
 
 function action(dict) {
+  let recentSymbols = [];
+
   if (File.exists(recentSymbolsLocation)) {
-    var recentSymbols = File.readJSON(recentSymbolsLocation);
-  } else {
-    var recentSymbols = [];
+    recentSymbols = File.readJSON(recentSymbolsLocation);
   }
 
-  var newRecentSymbols = [];
+  let newRecentSymbols = [];
 
   recentSymbols.forEach(function (item) {
     if (item.title != dict.title) {
