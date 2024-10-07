@@ -1,23 +1,27 @@
 (*  
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-12-09
+2024-10-04
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 *)
 
 on run
-	tell application "System Events"
-		set allApps to displayed name of (every process whose background only is false) as list
-	end tell
+	set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
 	
-	if "Mail" is in allApps then
+	set _results to {}
+	
+	if "Mail" is in _processes then
+		
 		tell application "Mail"
 			set _sel to get selection
-			set _mailMD to {}
+			
 			repeat with _msg in _sel
 				set _messageURL to "message://%3c" & _msg's message id & "%3e"
-				set _sub to _msg's subject
+				set _subject to _msg's subject
+				
+				set _subject to do shell script "echo " & quoted form of _subject & "| sed 's/\"//g'" -- replace quotes to avoid trouble with JSON parsing
+				
 				set _sender to _msg's sender
 				try
 					set _sender to extract name from _sender
@@ -27,30 +31,38 @@ on run
 						set _sender to first word of _sender
 					end if
 				end try
+				
 				set _date to _msg's date received
 				
-				set _md_link to "[" & _sub & "](" & _messageURL & ")"
-				set end of _mailMD to _md_link & "--" & _sender & " am " & _date & "
-"
+				set _year to year of _date
+				set _month to month of _date as number
+				if _month < 10 then
+					set _month to 0 & _month
+				end if
+				set _day to day of _date
+				if _day < 10 then
+					set _day to 0 & _day
+				end if
+				set _shortdate to _year & "-" & _month & "-" & _day & " " & time string of _date as string
+				
+				set _title to "[" & _subject & "](" & _messageURL & ")"
+				set _subtitle to _sender & " - " & _date
+				set end of _results to "{date: \"" & _shortdate & "\",title:\"" & _title & "\", subtitle:\"" & _subtitle & "\", icon:\"com.apple.mail\", badge: \"Mail\", alwaysShowsSubtitle:true}"
 			end repeat
 		end tell
-	else
-		set _mailMD to ""
 	end if
 	
-	if "Safari" is in allApps then
+	if "Safari" is in _processes then
 		try
 			tell application "Safari"
 				set _URL to URL of front document
 				set _title to name of front document
 			end tell
-			set _safariMD to "[" & _title & "]" & "(" & _URL & ")" as text
-		on error
-			set _safariMD to ""
+			set _title to "[" & _title & "]" & "(" & _URL & ")" as text
+			
+			set end of _results to "{date: \"\",title:\"" & _title & "\", icon:\"com.apple.safari\", badge: \"Safari\"}"
 		end try
-	else
-		set _safariMD to ""
 	end if
+	return _results
 	
-	return _mailMD & "_" & _safariMD as string
 end run

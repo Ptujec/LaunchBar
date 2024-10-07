@@ -1,12 +1,13 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-01
+2024-10-04
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
+String.prototype.localizationTable = 'default';
 
-include('constants.js');
+include('global.js');
 include('localization.js');
 include('setKey.js');
 
@@ -15,95 +16,144 @@ function runWithString(string) {
     setApiKey();
     return;
   }
-  if (string.startsWith('.')) {
-    return getMarkdownLinks();
-  }
+  if (string === '.') return getAppLinks();
+  if (string === ',') return getClipboard();
   return main(string);
 }
 
-function getMarkdownLinks() {
+function getAppLinks() {
   // Get Markdown Links from Mail and Safari
-  var output = LaunchBar.executeAppleScriptFile('./mdLinks.applescript').trim();
+  const output = LaunchBar.executeAppleScriptFile(
+    './mdLinks.applescript'
+  ).trim();
 
-  if (output != '_') {
-    const parts = output.split('_');
-    let suggestions = [];
-
-    if (parts[0]) {
-      const mail = parts[0].split('\n');
-
-      for (line of mail) {
-        if (line) {
-          let [title, subtitle] = line.split('--');
-          suggestions.push({
-            title: title.trim(),
-            subtitle: subtitle,
-            icon: 'com.apple.mail',
-          });
-        }
-      }
-    }
-
-    if (parts[1]) {
-      suggestions.push({
-        title: parts[1],
-        icon: 'com.apple.safari',
-      });
-    }
-
-    return suggestions;
+  if (output == '') {
+    return {
+      title: 'No links to emails or websites found!'.localize(),
+      icon: 'alert',
+    };
   }
+
+  return eval('[' + output + ']').sort((a, b) => a.date < b.date);
+}
+
+function getClipboard() {
+  let currentClipboard = LaunchBar.getClipboardString();
+
+  if (!currentClipboard) {
+    return {
+      title: 'No clipboard entry found!'.localize(),
+      icon: 'alert',
+    };
+  }
+
+  let newClipboard = currentClipboard;
+  let moveAS = '';
+  let clipboardAS = '';
+
+  if (!currentClipboard.startsWith('[')) {
+    if (currentClipboard.includes('://')) {
+      newClipboard = `[](${currentClipboard})`;
+
+      if (currentClipboard.includes('teams.microsoft')) {
+        newClipboard = `[](${currentClipboard.replace(/https?/, 'msteams')})`;
+      }
+
+      moveAS = 'key code 123 using command down\n' + 'key code 124\n';
+      clipboardAS = `set the clipboard to "${currentClipboard}"`;
+      LaunchBar.setClipboardString(newClipboard);
+    }
+  } else {
+    moveAS = 'key code 123 using command down\n' + 'key code 124\n';
+  }
+
+  LaunchBar.executeAppleScript(
+    'tell application "System Events"\n' +
+      'keystroke "a" using command down\n' +
+      'keystroke "v" using command down\n' +
+      moveAS +
+      'end tell\n' +
+      'delay 0.1\n' +
+      clipboardAS
+  );
 }
 
 function main(string) {
   // Main Action
   let suggestions = [];
-  let show, p, icon;
+  let show, dueExists, p, icon;
 
   // Priorities
-
-  if (/(p[1-3] )|( p[1-3])/.test(string)) {
+  if (rePrio.test(string)) {
     if (string.includes('p1')) {
-      p = p1;
+      p = 'Priority 1'.localize();
       icon = 'redFlag';
     } else if (string.includes('p2')) {
-      p = p2;
+      p = 'Priority 2'.localize();
       icon = 'orangeFlag';
     } else if (string.includes('p3')) {
-      p = p3;
+      p = 'Priority 3'.localize();
       icon = 'blueFlag';
     } else {
       p = undefined;
     }
-    string = string.replace(/(p[1-3] )|( p[1-3])/, '');
+    string = string.replace(rePrio, ' ');
   }
 
-  // Due/date String
-  // with @ (should work for most cenarios except for "@date <title>")
+  // Due String
+  // - with @ (should work for most cenarios except for "@date <title>")
+
   if (string.includes(' @')) {
     show = true;
-    const due = string.match(/ @(.*?)(p\d|((^| )#($| ))|$)/)[1];
+    dueExists = true;
     suggestions.push({
-      title: due,
-      icon: 'calTemplate',
+      title: string.match(reDueStringWithAt)[1],
+      icon: 'dueTemplate',
       order: 2,
     });
-    string = string.replace(/ @(.*?)(p\d|((^| )#($| ))|$)/, '$2');
+    string = string.replace(reDueStringWithAt, '$2');
   } else {
-    // dateStrings
-    for (dateString of dateStrings) {
-      const re = new RegExp('(^| )' + dateString + '($| )', 'i');
-      if (re.test(string)) {
-        show = true;
-        const dateTitle = string.match(re)[0].trim();
-        suggestions.push({
-          title: dateTitle,
-          icon: 'calTemplate',
-          order: 3,
-        });
-        string = string.replace(re, ' ');
+    let due = [];
+    for (dueStringOption of dueStringOptions) {
+      const reDueString = new RegExp(`(^| )${dueStringOption}(\$| )`, 'i');
+      if (reDueString.test(string)) {
+        due.push(string.match(reDueString)[0].trim());
+        string = string.replace(reDueString, ' ');
       }
     }
+    if (due.length > 0) {
+      show = true;
+      dueExists = true;
+
+      suggestions.push({
+        title: due.join(' '),
+        icon: 'dueTemplate',
+        order: 3,
+      });
+    }
+  }
+
+  // Duration (duration regex is defined in locations.js)
+
+  if (reDuration.test(string)) {
+    show = true;
+
+    if (!dueExists) {
+      suggestions.push({
+        title: 'Now'.localize(),
+        icon: 'dueTemplate',
+        order: 3,
+      });
+    }
+
+    const duration = string.match(reDuration)[0].trim();
+
+    suggestions.push({
+      title: duration,
+      icon: 'durationTemplate',
+      order: 4,
+    });
+    string = string.replace(reDuration, ' ');
   }
 
   // Description
@@ -111,10 +161,8 @@ function main(string) {
     show = true;
     let description = string.match(/(?:\: )(.*)/)[1];
 
-    description = description.charAt(0).toUpperCase() + description.slice(1);
-
     suggestions.push({
-      title: description,
+      title: capitalizeFirstLetter(description),
       icon: 'descriptionTemplate',
       order: 2,
     });
@@ -126,16 +174,13 @@ function main(string) {
     suggestions.push({
       title: p,
       icon: icon,
-      order: 4,
+      order: 5,
     });
   }
 
   if (show == true) {
-    string = string.trim();
-    string = string.charAt(0).toUpperCase() + string.slice(1);
-
     suggestions.push({
-      title: string,
+      title: capitalizeFirstLetter(string.trim()),
       icon: 'titleTemplate',
       order: 1,
     });

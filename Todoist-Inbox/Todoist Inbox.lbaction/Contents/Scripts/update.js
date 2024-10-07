@@ -1,7 +1,7 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-02
+2024-10-04
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -134,7 +134,7 @@ function update() {
   }
 
   // Labels
-  var labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
+  const labelsOnline = HTTP.getJSON('https://api.todoist.com/rest/v2/labels', {
     headerFields: {
       Authorization: 'Bearer ' + apiToken,
     },
@@ -151,7 +151,6 @@ function update() {
     const labelsLocal = File.readJSON(labelsPath);
 
     // Update label names
-
     labelsLocal.data = labelsLocal.data.map((localLabel) => {
       const onlineLabel = labelsOnline.data.find(
         (label) => label.id === localLabel.id
@@ -199,7 +198,7 @@ function update() {
     updatedProjectNameCount;
 
   LaunchBar.displayNotification({
-    title: updateNotificationTitle,
-    string: changes + updateNotificationString,
+    title: 'Projects, sections & labels updated.'.localize(),
+    string: changes + ' change(s)'.localize(),
   });
 }

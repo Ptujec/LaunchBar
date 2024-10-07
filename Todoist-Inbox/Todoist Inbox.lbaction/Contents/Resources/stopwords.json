@@ -6,6 +6,12 @@
     "instagram",
     "twitter"
   ],
+  "general": [
+    "",
+    "&",
+    "→",
+    "-"  
+  ],
   "de": [
     "a",
     "ab",
@@ -992,6 +998,7 @@
     "furthering",
     "furthermore",
     "furthers",
+    "fwd",
     "fx",
     "g",
     "ga",
@@ -1217,6 +1224,7 @@
     "likely",
     "likewise",
     "line",
+    "link",
     "little",
     "lk",
     "ll",
@@ -1759,6 +1767,7 @@
     "unlike",
     "unlikely",
     "until",
+    "untitled",
     "unto",
     "up",
     "upon",

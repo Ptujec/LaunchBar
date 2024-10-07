@@ -23,7 +23,7 @@ So I took another look at the [API](https://developer.todoist.com/rest/v1/#creat
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-<img src="01.jpg" width="764"/> 
+<img src="01.jpg" width="817"/> 
 
 However, as I enjoyed adding things to Todoist that way, I added a few more features: 
 
@@ -31,40 +31,55 @@ However, as I enjoyed adding things to Todoist that way, I added a few more feat
 
 Simply use a colon to add a description.
 
-<img src="02.jpg" width="764"/> 
+<img src="02.jpg" width="817"/> 
 
-### Due dates and times
+### Due dates and times 
 
 Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-and-times#some-example-date-formats-you-can-use) is the best I have seen in any app. Fortunately you can make use of it with the API.
 
 The action will detect a bunch of due strings like "today, next week, …" automatically (German or English depending on the current locale of your system). The action will provide feedback on how it parses your input. 
 
-<img src="03.jpg" width="764"/> 
+<img src="03.jpg" width="817"/> 
 
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
+
+### Time blocking
+
+The action also lets you enter a duration for your task. You can use multiple formats, such as "for 30 minutes" or simply "30m." If no duration is set, the timer will start from the current time.
+ 
+<img src="04.jpg" width="817"/> 
 
 ### Priorities
 
 Add priorities like you would in Todoists interface with p1-3.
 
-<img src="04.jpg" width="764"/> 
+<img src="05.jpg" width="817"/> 
 
 ### Projects, sections and labels
 
-If you press `⌘ ⏎` (command + return), you can select a project, section or label after hitting return. 
+If you complete your entry with `⌘ ⏎` (command + return), you can select a project, section or label for your task. 
 
-<img src="05.jpg" width="764"/> 
+<img src="06.jpg" width="817"/> 
 
-Select a project, section or label with arrow keys or by typing its name. If you select a label you will be also prompted to select a project/section after confirming with `‌↩`. (Due to interface restrictions you are limited to just one tag.)
+Select a project, section, or label using the arrow keys or by typing its name. Confirm your selection by pressing `↩`. To add labels, you need to select them before selecting a project or section. You can add multiple labels, one at a time.
 
 I also built some smart into it. Projects, sections and labels you use frequently will rank higher in the list. The same is true if a project, section or label name is part of your entered task. Additionally the action will store used words by project/section/label. If what you type matches one or more previously used words of a project/section/label, that project/section/label will also be ranked higher. 
+
 Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
 
-### Bonus: URLs from Safari or Mail
+### Bonus
 
-You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start with a "." 
+#### URLs from Safari or Mail
 
-<img src="md_links.gif" width="764"/> 
+You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start your entry with a period ".".
+
+<img src="md_links.gif" width="817"/> 
+
+#### Clipboard entry pull in
+
+Another nice bonus feature is the ability to pull in the current clipboard entry if you start your entry with a comma ",". Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
+
+<img src="07.jpg" width="817"/> 
 
 ### Setup & Settings
 
