@@ -3,27 +3,25 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>Template.png</string>
+	<string>actionTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.Showanddismissnotifications</string>
+	<string>ptujec.LaunchBar.action.NotificationActions</string>
 	<key>CFBundleName</key>
-	<string>Show/dismiss notifications</string>
+	<string>Notification actions</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
-		<string>Ptujec</string>
+		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
 		<key>LBSummary</key>
-		<string>This action will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few more options.</string>
+		<string>Let's you run actions of the most recent notification (group)</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Show%20dismiss%20notifications.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-showdismiss-notifications</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-notification-actions</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -40,6 +38,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>15</string>
+	<string>13</string>
 </dict>
 </plist>

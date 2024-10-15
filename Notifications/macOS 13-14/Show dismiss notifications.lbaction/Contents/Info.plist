@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Show/dismiss notifications</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,10 +20,10 @@
 		<string>This action will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few more options.</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Show%20dismiss%20notifications.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-showdismiss-notifications</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Show%20dismiss%20notifications.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -40,6 +40,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>15</string>
+	<string>13</string>
 </dict>
 </plist>

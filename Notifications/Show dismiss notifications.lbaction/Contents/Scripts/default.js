@@ -2,6 +2,8 @@
 Show/dismiss notifications
 by Christian Bender @ptujec
 
+requires macOS 15 
+
 Sources:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - https://apple.stackexchange.com/questions/408019/dismiss-macos-big-sur-notifications-with-keyboard 
@@ -11,182 +13,96 @@ Sources:
 - https://forum.keyboardmaestro.com/t/clear-notifications-in-big-sur/20327/6 
 */
 
+String.prototype.localizationTable = 'default';
+
 function run(argument) {
-    // Localize strings - English and German are supported
-    if (LaunchBar.currentLocale == 'de') {
-        var titleClose = 'Mitteilungen schließen'
-        var titleLess = 'Weniger anzeigen'
-        var titleMore = 'Mehr anzeigen'
-        var titleOpen = 'Aktuelle öffnen'
-        var titleActions = 'Weitere Aktionen anzeigen'
-    } else {
-        var titleClose = 'Dismiss notifications'
-        var titleLess = 'Show less'
-        var titleMore = 'Show more'
-        var titleOpen = 'Open most recent'
-        var titleActions = 'Show more actions'
-    }
+  const output = LaunchBar.executeAppleScriptFile('./show.applescript').trim();
 
-    var output = LaunchBar.executeAppleScriptFile('./show.applescript')
-        .trim()
+  if (output == 'success') return actionOptions();
 
-    if (output == 'success') {
-        return [
-            {
-                title: titleClose,
-                icon: "notiTemplate",
-                action: "closeAction",
-                actionRunsInBackground: true
-            }, {
-                title: titleMore,
-                icon: "moreTemplate",
-                action: "showMore"
-            }, {
-                title: titleLess,
-                icon: "lessTemplate",
-                action: "showLess"
-            }, {
-                title: titleOpen,
-                icon: "openTemplate",
-                action: "openAction",
-                actionRunsInBackground: true
-            }, {
-                title: titleActions,
-                icon: "actionsTemplate",
-                action: "getActions"
-            }
-        ]
-    } else {
-        LaunchBar.hide()
-        LaunchBar.executeAppleScriptFile('./close.applescript')
-    }
+  LaunchBar.hide();
+  LaunchBar.executeAppleScriptFile('./close.applescript');
+}
+
+function actionOptions() {
+  return [
+    {
+      title: 'Dismiss notifications'.localize(),
+      icon: 'notiTemplate',
+      action: 'closeAction',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Show more'.localize(),
+      icon: 'moreTemplate',
+      action: 'showMore',
+    },
+    {
+      title: 'Show less'.localize(),
+      icon: 'lessTemplate',
+      action: 'showLess',
+    },
+    {
+      title: 'Open most recent'.localize(),
+      icon: 'openTemplate',
+      action: 'openAction',
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Show more actions'.localize(),
+      icon: 'actionsTemplate',
+      action: 'getActions',
+    },
+  ];
 }
 
 function closeAction() {
-    LaunchBar.hide()
-    LaunchBar.executeAppleScriptFile('./close.applescript')
+  LaunchBar.hide();
+  LaunchBar.executeAppleScriptFile('./close.applescript');
 }
 
 function showLess() {
-    if (LaunchBar.currentLocale == 'de') {
-        var titleClose = 'Mitteilungen schließen'
-        var titleLess = 'Weniger anzeigen'
-        var titleMore = 'Mehr anzeigen'
-        var titleOpen = 'Aktuelle öffnen'
-        var titleActions = 'Weitere Aktionen anzeigen'
-    } else {
-        var titleClose = 'Dismiss notifications'
-        var titleLess = 'Show less'
-        var titleMore = 'Show more'
-        var titleOpen = 'Open most recent'
-        var titleActions = 'Show more actions'
-    }
-
-    LaunchBar.executeAppleScriptFile('./less.applescript')
-
-    return [
-        {
-            title: titleClose,
-            icon: "notiTemplate",
-            action: "closeAction",
-            actionRunsInBackground: true
-        }, {
-            title: titleMore,
-            icon: "moreTemplate",
-            action: "showMore"
-        }, {
-            title: titleLess,
-            icon: "lessTemplate",
-            action: "showLess"
-        }, {
-            title: titleOpen,
-            icon: "openTemplate",
-            action: "openAction",
-            actionRunsInBackground: true
-        }, {
-            title: titleActions,
-            icon: "actionsTemplate",
-            action: "getActions"
-        }
-    ]
+  LaunchBar.executeAppleScriptFile('./less.applescript');
+  return actionOptions();
 }
 
 function showMore() {
-    if (LaunchBar.currentLocale == 'de') {
-        var titleClose = 'Mitteilungen schließen'
-        var titleLess = 'Weniger anzeigen'
-        var titleMore = 'Mehr anzeigen'
-        var titleOpen = 'Aktuelle öffnen'
-        var titleActions = 'Weitere Aktionen anzeigen'
-    } else {
-        var titleClose = 'Dismiss notifications'
-        var titleLess = 'Show less'
-        var titleMore = 'Show more'
-        var titleOpen = 'Open most recent'
-        var titleActions = 'Show more actions'
-    }
+  const output = LaunchBar.executeAppleScriptFile('./show.applescript').trim();
 
-    var output = LaunchBar.executeAppleScriptFile('./show.applescript')
-        .trim()
-
-    if (output == 'success') {
-        return [
-            {
-                title: titleClose,
-                icon: "notiTemplate",
-                action: "closeAction",
-                actionRunsInBackground: true
-            }, {
-                title: titleMore,
-                icon: "moreTemplate",
-                action: "showMore"
-            }, {
-                title: titleLess,
-                icon: "lessTemplate",
-                action: "showLess"
-            }, {
-                title: titleOpen,
-                icon: "openTemplate",
-                action: "openAction",
-                actionRunsInBackground: true
-            }, {
-                title: titleActions,
-                icon: "actionsTemplate",
-                action: "getActions"
-            }
-        ]
-    }
+  if (output == 'success') return actionOptions();
 }
 
 function openAction() {
-    LaunchBar.hide()
-    LaunchBar.executeAppleScriptFile('./open.applescript')
+  LaunchBar.hide();
+  LaunchBar.executeAppleScriptFile('./open.applescript');
 }
 
 function getActions() {
-    var output = LaunchBar.executeAppleScriptFile('./getActions.applescript')
-        .trim()
-        .split(',')
+  const actions = LaunchBar.executeAppleScriptFile('./getActions.applescript')
+    .trim()
+    .split(',');
 
-    var actions = []
-    for (var i = 0; i < output.length; i++) {
-        var action = output[i].trim()
-
-        if (action != 'AXScrollToVisible' && action != 'drücken' && action != 'press') {
-            actions.push({
-                title: action,
-                icon: 'actionTemplate',
-                action: 'runAction',
-                actionArgument: action,
-                actionRunsInBackground: true
-            })
-        }
+  const result = [];
+  for (let action of actions) {
+    action = action.trim();
+    if (
+      action != 'AXScrollToVisible' &&
+      action != 'drücken' &&
+      action != 'press'
+    ) {
+      result.push({
+        title: action,
+        icon: 'actionTemplate',
+        action: 'runAction',
+        actionArgument: action,
+        actionRunsInBackground: true,
+      });
     }
-    return actions
-        .reverse()
+  }
+  return result.reverse();
 }
 
 function runAction(argument) {
-    // LaunchBar.hide()
-    LaunchBar.executeAppleScriptFile('./runAction.applescript', argument)
+  // LaunchBar.hide()
+  LaunchBar.executeAppleScriptFile('./runAction.applescript', argument);
 }

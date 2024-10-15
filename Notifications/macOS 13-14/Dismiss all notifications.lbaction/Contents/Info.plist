@@ -3,41 +3,39 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>actionTemplate.png</string>
+	<string>notiTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.NotificationActions</string>
+	<string>ptujec.LaunchBar.action.DismissAllNotifications</string>
 	<key>CFBundleName</key>
-	<string>Notification actions</string>
+	<string>Dismiss all notifications</string>
 	<key>CFBundleVersion</key>
-	<string>3</string>
+	<string>2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string>ptujec@me.com</string>
-		<key>LBSummary</key>
-		<string>Let's you run actions of the most recent notification (group)</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-notification-actions</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-dismiss-all-notifications</string>
+		<key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Dismiss%20all%20notifications.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
-			<key>LBKeepWindowActive</key>
-			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBReturnsResult</key>
+			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.js</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>15</string>
+	<string>13</string>
 </dict>
 </plist>

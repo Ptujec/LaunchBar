@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Dismiss all notifications</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -18,10 +18,10 @@
 		<string>ptujec@me.com</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Dismiss%20all%20notifications.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-dismiss-all-notifications</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Dismiss%20all%20notifications.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -36,6 +36,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>13</string>
+	<string>15</string>
 </dict>
 </plist>

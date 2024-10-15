@@ -1,14 +1,29 @@
+(* 
+Open Notification AppleScript Action for LaunchBar
+by Christian Bender (@ptujec)
+2024-10-15
+requires macOS 15 
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*)
+
+
 tell application "System Events"
-	set _group to group 1 of UI element 1 of scroll area 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
-	set _actions to actions of _group
 	try
+		set _button to last button of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole is "AXNotificationCenterAlert"
+		set _actions to actions of _button
+		
+		set _showActionExists to false
 		repeat with _action in _actions
 			if description of _action is in {"Anzeigen", "Show"} then
 				perform _action
+				set _showActionExists to true
 				exit repeat
-			else
-				click _group
 			end if
 		end repeat
+		
+		if _showActionExists is false then
+			perform action "AXPress" of _button
+		end if
 	end try
 end tell

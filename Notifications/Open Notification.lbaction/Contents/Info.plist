@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Open Notification</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,10 +20,10 @@
 		<string>Opens the most recent notification. </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Open%20Notification.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-open-notification</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Open%20Notification.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -38,6 +38,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>13</string>
+	<string>15</string>
 </dict>
 </plist>
