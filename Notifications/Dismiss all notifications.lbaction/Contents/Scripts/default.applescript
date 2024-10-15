@@ -17,6 +17,7 @@ use AppleScript version "2.4" -- Yosemite (10.10) or later
 use scripting additions
 use framework "Foundation"
 property NSArray : a reference to current application's NSArray
+property closeActionSet : {"Close", "Clear All", "Schließen", "Alle entfernen", "Cerrar", "Borrar todo", "关闭", "清除全部", "Fermer", "Tout effacer", "Закрыть", "Очистить все", "إغلاق", "مسح الكل", "Fechar", "Limpar tudo", "閉じる", "すべてクリア", "बंद करें", "सभी हटाएं", "Zamknij", "Wyczyść wszystko"}
 
 on run
 	try
@@ -39,7 +40,7 @@ on run
 			repeat with _button in _buttons
 				set _actions to actions of _button
 				repeat with _action in _actions
-					if description of _action is in {"Schließen", "Alle entfernen", "Close", "Clear All"} then
+					if description of _action is in closeActionSet then
 						perform _action
 					end if
 				end repeat
