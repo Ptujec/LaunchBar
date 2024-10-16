@@ -2,41 +2,27 @@
 Notification Actions Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-15
-
 requires macOS 15 
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function run() {
-  const actions = LaunchBar.executeAppleScriptFile('./getActions.applescript')
+  const output = LaunchBar.executeAppleScriptFile('./getActions.applescript')
     .trim()
     .split(',');
 
-  if (actions == '') {
-    LaunchBar.hide();
-    return;
-  }
+  if (output[0].startsWith('Error')) return { title: output[0], icon: 'alert' };
 
-  const result = [];
-
-  for (let action of actions) {
-    action = action.trim();
-    if (
-      action != 'AXScrollToVisible' &&
-      action != 'drücken' &&
-      action != 'press'
-    ) {
-      result.push({
-        title: action,
-        icon: 'actionTemplate',
-        action: 'runAction',
-        actionArgument: action,
-        actionRunsInBackground: true,
-      });
-    }
-  }
-  return result.reverse();
+  return output
+    .map((action) => ({
+      title: action.trim(),
+      icon: 'actionTemplate',
+      action: 'runAction',
+      actionArgument: action.trim(),
+      actionRunsInBackground: true,
+    }))
+    .reverse();
 }
 
 function runAction(argument) {

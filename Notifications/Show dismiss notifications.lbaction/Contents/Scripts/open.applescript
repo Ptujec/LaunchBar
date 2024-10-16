@@ -26,7 +26,8 @@ tell application "System Events"
 			perform action "AXPress" of _button
 		end if
 	
-	on error e		
-		display notification e with title "Error" sound name "Frog"
+	on error eStr number eNum
+		display notification eStr with title "Error " & eNum sound name "Frog"
 	end try
+
 end tell

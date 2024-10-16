@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Notification actions</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.1</string>
+	<string>3.0.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -20,6 +20,8 @@
 		<string>Let's you run actions of the most recent notification (group)</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Notification%20actions.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-notification-actions</string>
 	</dict>

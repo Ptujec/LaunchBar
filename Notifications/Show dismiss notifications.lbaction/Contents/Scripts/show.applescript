@@ -8,21 +8,18 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 *)
 
 tell application "System Events"
-	set _stack to first UI element of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole is "AXNotificationCenterAlertStack"
+	try
+		set _window to window "Notification Center" of application process "NotificationCenter" # no notifications showing
+	on error eStr number eNum
+		return "Error " & eNum & ": " & eStr
+	end try
 	
-	
-	if _stack is not "" then
+	try
+		set _stack to first UI element of UI element 1 of scroll area 1 of group 1 of group 1 of _window whose subrole is "AXNotificationCenterAlertStack"
 		perform action "AXPress" of _stack
-		set s to "success"
-	else
-		set s to "fail"
-	end if
-	
-	
-	if s is "success" then
-		tell application "LaunchBar" to activate
-	end if
-	
-	return s
+		return "success"
+	on error e
+		return "fail"
+	end try
 end tell
 

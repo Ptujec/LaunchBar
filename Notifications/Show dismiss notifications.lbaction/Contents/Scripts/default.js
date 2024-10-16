@@ -16,12 +16,7 @@ Sources:
 String.prototype.localizationTable = 'default';
 
 function run(argument) {
-  const output = LaunchBar.executeAppleScriptFile('./show.applescript').trim();
-
-  if (output == 'success') return actionOptions();
-
-  LaunchBar.hide();
-  LaunchBar.executeAppleScriptFile('./close.applescript');
+  return show();
 }
 
 function actionOptions() {
@@ -29,13 +24,13 @@ function actionOptions() {
     {
       title: 'Dismiss notifications'.localize(),
       icon: 'notiTemplate',
-      action: 'closeAction',
+      action: 'close',
       actionRunsInBackground: true,
     },
     {
       title: 'Show more'.localize(),
       icon: 'moreTemplate',
-      action: 'showMore',
+      action: 'show',
     },
     {
       title: 'Show less'.localize(),
@@ -56,7 +51,19 @@ function actionOptions() {
   ];
 }
 
-function closeAction() {
+function show() {
+  const output = LaunchBar.executeAppleScriptFile('./show.applescript').trim();
+
+  if (output == 'success') {
+    return actionOptions();
+  } else if (output == 'fail') {
+    close();
+  } else {
+    return { title: output, icon: 'alert' };
+  }
+}
+
+function close() {
   LaunchBar.hide();
   LaunchBar.executeAppleScriptFile('./close.applescript');
 }
@@ -66,43 +73,30 @@ function showLess() {
   return actionOptions();
 }
 
-function showMore() {
-  const output = LaunchBar.executeAppleScriptFile('./show.applescript').trim();
-
-  if (output == 'success') return actionOptions();
-}
-
 function openAction() {
   LaunchBar.hide();
   LaunchBar.executeAppleScriptFile('./open.applescript');
 }
 
 function getActions() {
-  const actions = LaunchBar.executeAppleScriptFile('./getActions.applescript')
+  const output = LaunchBar.executeAppleScriptFile('./getActions.applescript')
     .trim()
     .split(',');
 
-  const result = [];
-  for (let action of actions) {
-    action = action.trim();
-    if (
-      action != 'AXScrollToVisible' &&
-      action != 'drücken' &&
-      action != 'press'
-    ) {
-      result.push({
-        title: action,
-        icon: 'actionTemplate',
-        action: 'runAction',
-        actionArgument: action,
-        actionRunsInBackground: true,
-      });
-    }
-  }
-  return result.reverse();
+  if (output[0].startsWith('Error')) return { title: output[0], icon: 'alert' };
+
+  return output
+    .map((action) => ({
+      title: action.trim(),
+      icon: 'actionTemplate',
+      action: 'runAction',
+      actionArgument: action.trim(),
+      actionRunsInBackground: true,
+    }))
+    .reverse();
 }
 
 function runAction(argument) {
-  // LaunchBar.hide()
+  LaunchBar.hide();
   LaunchBar.executeAppleScriptFile('./runAction.applescript', argument);
 }

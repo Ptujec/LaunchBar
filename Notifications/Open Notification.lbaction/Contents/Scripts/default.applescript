@@ -25,7 +25,7 @@ tell application "System Events"
 		if _showActionExists is false then
 			perform action "AXPress" of _button1
 		end if
-	on error e		
-		display notification e with title "Error" sound name "Frog"
+	on error eStr number eNum
+		display notification eStr with title "Error " & eNum sound name "Frog"
 	end try
 end tell

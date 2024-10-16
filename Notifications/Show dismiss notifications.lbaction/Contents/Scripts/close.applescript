@@ -22,7 +22,6 @@ property closeActionSet : {"Close", "Clear All", "Schlie§en", "Alle entfernen", 
 on run
 	try
 		tell application "System Events"
-			-- set _elements to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" # just for info at the moment
 			set _headings to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose role is "AXHeading"
 			set _headingscount to count of _headings
 		end tell
@@ -36,7 +35,7 @@ on run
 		end repeat
 		
 		tell application "System Events"
-			set _buttons to buttons of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+			set _buttons to buttons of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" -- whose subrole is not missing value
 			repeat with _button in _buttons
 				set _actions to actions of _button
 				repeat with _action in _actions
@@ -45,9 +44,9 @@ on run
 					end if
 				end repeat
 			end repeat
-		end tell			
-	on error e		
-		display notification e with title "Error" sound name "Frog"
+		end tell
+	on error eStr number eNum
+		display notification eStr with title "Error " & eNum sound name "Frog"
 	end try
 end run
 
