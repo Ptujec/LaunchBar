@@ -9,11 +9,13 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 *)
 
 on run
-	tell application "System Events"
-		
-		set _button1 to first button of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole contains "AXNotificationCenterAlert"
-		
-		set _actions to description of actions of _button1
-	end tell
-	return _actions
+	try
+		tell application "System Events"
+			set _button1 to first button of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole contains "AXNotificationCenterAlert"
+			set _actions to description of actions of _button1
+		end tell
+		return _actions
+	on error e
+		display notification e with title "Error" sound name "Frog"
+	end try
 end run

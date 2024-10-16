@@ -45,7 +45,9 @@ on run
 					end if
 				end repeat
 			end repeat
-		end tell
+		end tell			
+	on error e		
+		display notification e with title "Error" sound name "Frog"
 	end try
 end run
 

@@ -23,6 +23,8 @@ on run
 	try
 		tell application "System Events"
 			-- set _elements to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" # just for info at the moment
+			
+			
 			set _headings to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose role is "AXHeading"
 			set _headingscount to count of _headings
 		end tell
@@ -46,6 +48,8 @@ on run
 				end repeat
 			end repeat
 		end tell
+	on error e		
+		display notification e with title "Error" sound name "Frog"
 	end try
 end run
 
