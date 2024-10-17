@@ -57,6 +57,7 @@ on run
 			tell application "Safari"
 				set _URL to URL of front document
 				set _title to name of front document
+				set _title to do shell script "echo " & quoted form of _title & "| sed 's/\"//g'" -- replace quotes to avoid trouble with JSON parsing
 			end tell
 			set _title to "[" & _title & "]" & "(" & _URL & ")" as text
 			
