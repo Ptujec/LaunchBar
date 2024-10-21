@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Paste Mail URL Scheme</string>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>4.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
