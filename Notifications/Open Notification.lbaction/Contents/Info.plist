@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Open Notification</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.2</string>
+	<string>3.0.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -38,6 +38,6 @@
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>15</string>
+	<string>15.1</string>
 </dict>
 </plist>

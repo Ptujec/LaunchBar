@@ -2,7 +2,7 @@
 Open Notification AppleScript Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-15
-requires macOS 15 
+requires macOS 15.1 
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 *)
@@ -10,8 +10,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 tell application "System Events"
 	try
-		set _button1 to first button of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole is "AXNotificationCenterAlert"
-		set _actions to actions of _button1
+		set _button to first button of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose subrole is "AXNotificationCenterAlert"
+		set _actions to actions of _button
 		
 		set _showActionExists to false
 		repeat with _action in _actions
@@ -23,7 +23,7 @@ tell application "System Events"
 		end repeat
 		
 		if _showActionExists is false then
-			perform action "AXPress" of _button1
+			perform action "AXPress" of _button
 		end if
 	on error eStr number eNum
 		display notification eStr with title "Error " & eNum sound name "Frog"

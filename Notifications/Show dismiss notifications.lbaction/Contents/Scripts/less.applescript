@@ -2,6 +2,7 @@
 Show less notifications Applescript Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-15
+requires macOS 15.1
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -18,21 +19,21 @@ property NSArray : a reference to current application's NSArray
 on run
 	tell application "System Events"
 		-- set _elements to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" # just for info at the moment
-		set _headings to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose role is "AXHeading"
+		set _headings to UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter" whose role is "AXHeading"
 		set _headingscount to count of _headings
 	end tell
-		
+	
 	repeat _headingscount times
-		tell application "System Events" to set _roles to role of UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+		tell application "System Events" to set _roles to role of UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter"
 		set _headingIndex to its getIndexOfItem:"AXHeading" inList:_roles
 		set _closeButtonIndex to _headingIndex + 1
-		tell application "System Events" to click item _closeButtonIndex of UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+		tell application "System Events" to click item _closeButtonIndex of UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter"
 		delay 0.4
 	end repeat
 	
 	tell application "LaunchBar" to activate
 end run
-		
+
 on getIndexOfItem:anItem inList:aList
 	set anArray to NSArray's arrayWithArray:aList
 	set ind to ((anArray's indexOfObject:anItem) as number) + 1

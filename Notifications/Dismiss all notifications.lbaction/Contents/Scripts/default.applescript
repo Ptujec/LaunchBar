@@ -3,7 +3,7 @@ Close notifications Applescript Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-15
 
-requires macOS 15 
+requires macOS 15.1 
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -23,22 +23,23 @@ on run
 	try
 		
 		tell application "System Events"
-			set _headings to UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" whose role is "AXHeading"
+			set _headings to UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter" whose role is "AXHeading"
 			set _headingscount to count of _headings
 		end tell
 		
 		repeat _headingscount times
-			tell application "System Events" to set _roles to role of UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+			tell application "System Events" to set _roles to role of UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter"
 			set _headingIndex to its getIndexOfItem:"AXHeading" inList:_roles
 			set _closeButtonIndex to _headingIndex + 1
-			tell application "System Events" to click item _closeButtonIndex of UI elements of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
+			tell application "System Events" to click item _closeButtonIndex of UI elements of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter"
 			delay 0.4
 		end repeat
 		
 		tell application "System Events"
-			set _buttons to buttons of UI element 1 of scroll area 1 of group 1 of group 1 of window "Notification Center" of application process "NotificationCenter" -- whose subrole is not missing value
+			set _buttons to buttons of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter" -- whose subrole is not missing value
+			
 			repeat with _button in _buttons
-				set _actions to actions of _button
+				set _actions to actions of first item of _buttons # always picking the first to avoid index error
 				repeat with _action in _actions
 					if description of _action is in closeActionSet then
 						perform _action
