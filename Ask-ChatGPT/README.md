@@ -42,7 +42,7 @@ This action works very well with [iA Writer](https://ia.net/writer) in preview m
 Access the settings with `option` + `enter`. Here you can:
 
 - Choose a default persona
-- Choose between `gpt-3.5-turbo` and `gpt-4` models
+- Choose between models
 - Choose an editor to display the resulting chats 
 - Set or reset your API key
 - Update, reset or customize prompts and personas
