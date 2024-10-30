@@ -603,7 +603,7 @@ function settings() {
     {
       title: 'Choose model',
       icon: 'gearTemplate',
-      badge: Action.preferences.model ?? 'gpt-3.5-turbo',
+      badge: Action.preferences.model ?? 'gpt-4o-mini',
       children: models(),
     },
     {
