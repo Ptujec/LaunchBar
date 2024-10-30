@@ -344,7 +344,7 @@ function ask(dict) {
   }
 
   // MODEL
-  var model = Action.preferences.model ?? 'gpt-3.5-turbo';
+  var model = Action.preferences.model ?? 'gpt-4o-mini';
 
   // PERSONA
   // GET DEFAULT
