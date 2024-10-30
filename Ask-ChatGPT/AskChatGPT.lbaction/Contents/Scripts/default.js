@@ -13,6 +13,8 @@ Documentation:
 Prompts: 
 - https://prompts.chat/
 
+TODO: 
+- Refactor (simplify code, use let and const)
 */
 
 String.prototype.localizationTable = 'default'; // For potential localization later
@@ -30,12 +32,13 @@ const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '2.0';
 
 function run(argument) {
   // ON FIRST RUN COPY PRESETS TO ACTION SUPPORT
+
   if (!File.exists(userPresetsPath)) {
     File.writeJSON(presets, userPresetsPath);
   } else {
     // CHECK IF LB CAN READ THE CUSTOM JSON
     try {
-      let test = File.readJSON(userPresetsPath);
+      const test = File.readJSON(userPresetsPath);
     } catch (e) {
       const response = LaunchBar.alert(
         e,
@@ -73,11 +76,11 @@ function run(argument) {
     // CHECK FOR NEW PRESETS
     if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
       // Compare presets with user presets
-      var newPresetsList = comparePresets();
+      const newPresetsList = comparePresets() || undefined;
 
       if (newPresetsList != undefined) {
         // Offer updating presets if they don't match
-        var response = LaunchBar.alert(
+        const response = LaunchBar.alert(
           'Update presets?',
           'The following presets are new or missing in your user presets:\n' +
             newPresetsList +
@@ -105,31 +108,27 @@ function run(argument) {
 
     // DISPLAY RECENT CHATS
     // GET CHATS
-    var chatsExist = false;
-    if (File.exists(chatsFolder)) {
-      var chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
-        .trim()
-        .split('\n');
+    if (!File.exists(chatsFolder)) {
+      return {
+        title: 'No folder with chats found!'.localize(),
+        icon: 'weasel_alert',
+      };
+    }
 
-      if (chatFiles != '') {
-        chatsExist = true;
-      }
+    const chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
+      .trim()
+      .split('\n');
+
+    if (chatFiles == '') {
+      return {
+        title: 'No chats found!'.localize(),
+        icon: 'weasel_alert',
+      };
     }
-    if (chatsExist == false) {
-      return;
-    }
-    var result = [];
-    chatFiles.forEach(function (item) {
-      var path = chatsFolder + item;
-      var title = File.displayName(path).replace(/\.md$/, ''),
-        pushData = {
-          title: title,
-          subtitle: '',
-          path: chatsFolder + item,
-        };
-      result.push(pushData);
-    });
-    return result;
+
+    return chatFiles.map((item) => ({
+      path: `${chatsFolder}${item}`,
+    }));
   }
 
   // IF ARGUMENT IS PASSED
@@ -142,7 +141,7 @@ function run(argument) {
   // OPTIONS
   // (e.g. continue with chat, add url, …)
   return options({
-    argument: argument,
+    argument,
   });
 }
 
@@ -150,17 +149,18 @@ function options(dict) {
   // LaunchBar.alert('Options:\n' + JSON.stringify(dict));
   // return;
 
-  var argument = dict.argument;
-  var defaultPersonaIcon = Action.preferences.defaultPersonaIcon ?? 'weasel';
+  const argument = dict.argument;
+  const defaultPersonaIcon = Action.preferences.defaultPersonaIcon ?? 'weasel';
 
   var result = [
     {
       title: 'New Chat',
       subtitle: 'Asks: ' + argument,
+      alwaysShowsSubtitle: true,
       icon: dict.icon ?? defaultPersonaIcon,
       action: 'ask',
       actionArgument: {
-        argument: argument,
+        argument,
         icon: dict.icon ?? defaultPersonaIcon,
       },
       actionRunsInBackground: true,
@@ -168,39 +168,43 @@ function options(dict) {
   ];
 
   // GET MOST RECENT CHAT
-  var recent = Action.preferences.recent;
+  const recentChat = Action.preferences.recentChat;
 
   if (
-    recent != undefined &&
-    recent.path != undefined &&
-    File.exists(recent.path)
+    recentChat != undefined &&
+    recentChat.path != undefined &&
+    File.exists(recentChat.path)
   ) {
-    var recentFileTitle = File.displayName(recent.path).replace(/\.md$/, '');
+    var recentFileTitle = File.displayName(recentChat.path).replace(
+      /\.md$/,
+      ''
+    );
 
     var pushData = {
       title: 'Continue: ' + recentFileTitle,
       subtitle: 'Asks: ' + argument,
-      icon: dict.icon ?? recent.icon ?? defaultPersonaIcon,
+      alwaysShowsSubtitle: true,
+      icon: dict.icon ?? recentChat.icon ?? defaultPersonaIcon,
       action: 'ask',
       actionArgument: {
-        argument: argument,
-        presetTitle: recent.presetTitle,
+        argument,
+        presetTitle: recentChat.presetTitle,
         addRecent: true,
-        icon: dict.icon ?? recent.icon ?? defaultPersonaIcon,
-        recentPath: recent.path,
+        icon: dict.icon ?? recentChat.icon ?? defaultPersonaIcon,
+        recentPath: recentChat.path,
         recentFileTitle: recentFileTitle,
-        persona: recent.persona ?? undefined,
-        isPrompt: recent.isPrompt,
+        persona: recentChat.persona ?? undefined,
+        isPrompt: recentChat.isPrompt,
       },
       actionRunsInBackground: true,
     };
 
-    var recentBadge = recent.presetTitle;
+    var recentBadge = recentChat.presetTitle;
     var defaultPersonaTitle =
       Action.preferences.defaultPersonaTitle ??
       File.readJSON(userPresetsPath).personas[0].title; // default
 
-    if (recentBadge != defaultPersonaTitle && recent.isPrompt != true) {
+    if (recentBadge != defaultPersonaTitle && recentChat.isPrompt != true) {
       pushData.badge = recentBadge;
     }
 
@@ -218,6 +222,7 @@ function options(dict) {
     {
       title: 'Add Website',
       subtitle: 'Asks: ' + argument,
+      alwaysShowsSubtitle: true,
       action: 'ask',
       icon: 'weasel_web',
       actionArgument: {
@@ -230,6 +235,7 @@ function options(dict) {
     {
       title: 'Add Clipboard',
       subtitle: 'Asks: ' + argument,
+      alwaysShowsSubtitle: true,
       action: 'ask',
       icon: 'weasel_clipboard',
       actionArgument: {
@@ -254,8 +260,9 @@ function options(dict) {
 
 function ask(dict) {
   // LaunchBar.alert('Ask:\n' + JSON.stringify(dict));
+  // return;
 
-  var argument = dict.argument.trim();
+  let argument = dict.argument.trim();
 
   if (dict.isPrompt) {
     var title = dict.presetTitle ?? argument; // for (new) file name
@@ -265,7 +272,7 @@ function ask(dict) {
 
   // ITEMS WITH CLIPBOARD CONTENT
   if (dict.addClipboard == true) {
-    var clipboard = LaunchBar.getClipboardString().trim();
+    const clipboard = LaunchBar.getClipboardString().trim();
 
     var displayClipboard = clipboard;
     if (displayClipboard.length > 500) {
@@ -377,10 +384,19 @@ function ask(dict) {
     File.readJSON(userPresetsPath).personas[0].title; // default
 
   var icon = dict.icon; // might need fallback(s) to default
+  const isPrompt = dict.isPrompt;
+  const useCompare = dict.useCompare;
 
-  var isPrompt = dict.isPrompt;
-
-  processResult(result, argument, title, persona, icon, presetTitle, isPrompt);
+  processResult(
+    result,
+    argument,
+    title,
+    persona,
+    icon,
+    presetTitle,
+    isPrompt,
+    useCompare
+  );
 }
 
 function processResult(
@@ -390,7 +406,8 @@ function processResult(
   persona,
   icon,
   presetTitle,
-  isPrompt
+  isPrompt,
+  useCompare
 ) {
   // ERROR HANDLING
   if (result.response == undefined) {
@@ -401,10 +418,11 @@ function processResult(
   if (result.response.status != 200) {
     // TODO: Offer to open https://chat.openai.com on 429
 
+    let details;
     if (result.data != undefined) {
-      var data = JSON.parse(result.data);
+      const data = JSON.parse(result.data);
       if (data.error != undefined) {
-        var details = data.error.message;
+        details = data.error.message;
       }
     }
 
@@ -414,56 +432,36 @@ function processResult(
     return;
   }
 
-  // PARSE RESULT JSON
-  var data = JSON.parse(result.data);
+  // PARSE RESULT
+  let data = JSON.parse(result.data);
+  const answer = data.choices[0].message.content.trim();
 
-  // COPY RESULT TO CLIPBOARD
-  LaunchBar.setClipboardString(data.choices[0].message.content.trim());
-
-  // CREATE TEXT FILE
-  var answer = data.choices[0].message.content;
-
-  var quotetArgument = [];
-  argument.split('\n').forEach(function (item) {
-    quotetArgument.push('> ' + item);
-  });
-
-  var text = quotetArgument.join('\n') + '\n\n' + answer;
-
-  if (!File.exists(chatsFolder)) {
-    File.createDirectory(chatsFolder);
-  }
-
-  const fileLocation = chatsFolder + title + '.md';
-
-  if (File.exists(fileLocation)) {
-    text = File.readText(fileLocation) + '\n\n' + text;
-  }
-
-  File.writeText(text, fileLocation);
-
-  // STORE TIMESTAMP
-  Action.preferences.recentTimeStamp = new Date().toISOString();
-
-  // STORE USED PERSONA PROPERTIES
-  // Preset prompts have an icon. They can also have a persona. The title is the prompt title not of the persona. But it does not really matter.
-
-  Action.preferences.recent = {
-    persona: persona,
-    presetTitle: presetTitle,
-    icon: icon,
-    path: fileLocation,
-    isPrompt: isPrompt,
-  };
-
-  // PLAY SOUND AND OPEN FILE
+  // PLAY CONFIRMATION SOUND
   LaunchBar.execute(
     '/usr/bin/afplay',
     '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
   );
 
-  var fileURL = File.fileURLForPath(fileLocation);
-  LaunchBar.openURL(fileURL, Action.preferences.EditorID);
+  // COPY RESULT TO CLIPBOARD
+  const originalClipboard = LaunchBar.getClipboardString();
+  LaunchBar.setClipboardString(answer);
+
+  // COMPARE INPUT TO ANSWER IN BBEDIT
+  if (useCompare) {
+    // Do compare stuff
+    return compareTexts(originalClipboard, answer); // end here don't create chat file
+  }
+
+  // CREATE/OPEN CHAT TEXT FILE
+  const fileLocation = chatsFolder + title + '.md';
+  const recentChatDict = {
+    persona,
+    presetTitle,
+    icon,
+    path: fileLocation,
+    isPrompt,
+  };
+  openChatTextFile(argument, fileLocation, answer, recentChatDict);
 }
 
 function prompts() {
@@ -472,26 +470,25 @@ function prompts() {
   }
 
   const prompts = File.readJSON(userPresetsPath).prompts;
-  var result = [];
-  prompts.forEach(function (item) {
-    result.push({
-      title: item.title,
-      subtitle: item.description,
+
+  return prompts.map((item) => ({
+    title: item.title,
+    subtitle: item.description,
+    alwaysShowsSubtitle: true,
+    icon: item.icon,
+    action: 'ask',
+    actionArgument: {
+      presetTitle: item.title,
+      argument: item.argument,
+      persona: item.persona,
       icon: item.icon,
-      action: 'ask',
-      actionArgument: {
-        presetTitle: item.title,
-        argument: item.argument,
-        persona: item.persona,
-        icon: item.icon,
-        addClipboard: item.addClipboard,
-        addURL: item.addURL,
-        isPrompt: true,
-      },
-      actionRunsInBackground: true,
-    });
-  });
-  return result;
+      addClipboard: item.addClipboard,
+      addURL: item.addURL,
+      useCompare: item.useCompare || false,
+      isPrompt: true,
+    },
+    actionRunsInBackground: true,
+  }));
 }
 
 function showPersonas(argument) {
@@ -506,6 +503,7 @@ function showPersonas(argument) {
     var pushData = {
       title: item.title,
       subtitle: item.description,
+      alwaysShowsSubtitle: true,
       icon: item.icon,
       action: 'setPersona',
       actionArgument: {
@@ -532,6 +530,62 @@ function alertWhenRunningInBackground(alertMessage) {
   LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
   LaunchBar.alert(alertMessage);
   LaunchBar.hide();
+}
+
+function openChatTextFile(argument, fileLocation, answer, recentChatDict) {
+  // CREATE TEXT FILE
+  let quotetArgument = [];
+  argument.split('\n').forEach(function (item) {
+    quotetArgument.push('> ' + item);
+  });
+
+  let text = quotetArgument.join('\n') + '\n\n' + answer;
+
+  if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
+
+  if (File.exists(fileLocation)) {
+    text = File.readText(fileLocation) + '\n\n' + text;
+  }
+
+  File.writeText(text, fileLocation);
+
+  // Open File
+  const fileURL = File.fileURLForPath(fileLocation);
+  LaunchBar.openURL(fileURL, Action.preferences.EditorID);
+
+  // STORE TIMESTAMP
+  Action.preferences.recentTimeStamp = new Date().toISOString();
+
+  // STORE USED PERSONA PROPERTIES
+  // Preset prompts have an icon. They can also have a persona. The title is the prompt title not of the persona. But it does not really matter.
+
+  Action.preferences.recentChat = recentChatDict;
+}
+
+function compareTexts(originalClipboard, answer) {
+  // Check if BBEdit is installed
+  if (!File.exists('/Applications/BBEdit.app')) {
+    return {
+      title: 'BBEdit is not installed',
+      icon: 'weasel_alert',
+    };
+  }
+
+  const timeStamp = new Date().toISOString().replace(/-|:|\./g, '');
+  const weaselDir = `/tmp/weasel_compare/${timeStamp}`;
+  const originalTextFile = `${weaselDir}/original.txt`;
+  const answerTextFile = `${weaselDir}/answer.txt`;
+
+  File.createDirectory(weaselDir);
+  File.writeText(originalClipboard, originalTextFile);
+  File.writeText(answer, answerTextFile);
+
+  LaunchBar.executeAppleScript(
+    'tell application "BBEdit"',
+    '	activate',
+    `	set theResult to compare file ("${originalTextFile}" as POSIX file) against file ("${answerTextFile}" as POSIX file)`,
+    'end tell'
+  );
 }
 
 // SETTING FUNCTIONS
@@ -590,64 +644,19 @@ function setPersona(dict) {
 }
 
 function models() {
-  var model = Action.preferences.model;
-  var v3 = 'gpt-3.5-turbo';
-  var v4 = 'gpt-4';
-  var v4o = 'gpt-4o';
-  var v4oMini = 'gpt-4o-mini'; // 新增的模型
+  const currentModel = Action.preferences.model || 'gpt-4o-mini';
+  const models = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gpt-4o-mini'];
 
-  if (model == v3 || model == undefined) {
-    var icon3 = 'checkTemplate.png';
-    var icon4 = 'circleTemplate.png';
-    var icon4o = 'circleTemplate.png';
-    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
-  } else if (model == v4) {
-    var icon3 = 'circleTemplate.png';
-    var icon4 = 'checkTemplate.png';
-    var icon4o = 'circleTemplate.png';
-    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
-  } else if (model == v4o) {
-    var icon3 = 'circleTemplate.png';
-    var icon4 = 'circleTemplate.png';
-    var icon4o = 'checkTemplate.png';
-    var icon4oMini = 'circleTemplate.png'; // 新增的模型圖標
-  } else if (model == v4oMini) {
-    var icon3 = 'circleTemplate.png';
-    var icon4 = 'circleTemplate.png';
-    var icon4o = 'circleTemplate.png';
-    var icon4oMini = 'checkTemplate.png'; // 新增的模型圖標
-  }
-
-  return [
-    {
-      title: v3,
-      icon: icon3,
-      action: 'setModel',
-      actionArgument: v3,
-    },
-    {
-      title: v4,
-      icon: icon4,
-      action: 'setModel',
-      actionArgument: v4,
-    },
-    {
-      title: v4o,
-      icon: icon4o,
-      action: 'setModel',
-      actionArgument: v4o,
-    },
-    {
-      title: v4oMini, // 新增的模型選項
-      icon: icon4oMini,
-      action: 'setModel',
-      actionArgument: v4oMini,
-    },
-  ];
+  return models.map((model) => ({
+    title: model,
+    icon: currentModel === model ? 'checkTemplate.png' : 'circleTemplate.png',
+    action: 'setModel',
+    actionArgument: model,
+  }));
 }
 
-function setModel(arg) {
-  Action.preferences.model = arg;
+function setModel(model) {
+  Action.preferences.model = model;
   return settings();
 }
 

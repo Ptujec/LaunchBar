@@ -33,9 +33,9 @@ This action works very well with [iA Writer](https://ia.net/writer) in preview m
 
 ### Additional Features
 
-- To view recent chats, select the action in LaunchBar and press `command` + `enter` \
-(BTW: You quick look or delete chats in this view or any of [the usual stuff](https://www.obdev.at/resources/launchbar/help/WorkingWithFiles.html#append-text) you can do with files in LaunchBar.)
+- To view recent chats, select the action in LaunchBar and press `command` + `enter` 
 - Use alternative personas with `command` + `enter` when you are done entering text. 
+- Optionally compare input and answer in [BBEdit](https://www.barebones.com/products/bbedit/) instead of creating a chat by setting `useCompare` to `true` in a custom prompt.
 
 ### Settings
 
@@ -46,6 +46,8 @@ Access the settings with `option` + `enter`. Here you can:
 - Choose an editor to display the resulting chats 
 - Set or reset your API key
 - Update, reset or customize prompts and personas
+
+### Customize prompts and personas
 
 You can customize and add as many prompts and personas as you want, and choose an emoji as the icon to identify them easily. 
 
@@ -59,7 +61,8 @@ You can customize and add as many prompts and personas as you want, and choose a
       "addURL": false,
       "addClipboard": true,
       "description": "A description to display as the subtitle",
-      "persona": "The persona for this task (optional)"
+      "persona": "The persona for this task (optional)",
+      "useCompare": true
     }
   ],
   "personas": [
