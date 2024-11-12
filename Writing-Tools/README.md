@@ -4,7 +4,7 @@
 
 <img src="01.jpg" width="848"/> 
 
-Writing Tools[^1] is an action that can help improve your writing, e.g. by checking your spelling, grammar, and punctuation. Tools are fully customizable (see below).[^2]
+Writing Tools[^1] is an action that can help improve your writing, e.g. by checking your spelling, grammar, and punctuation. Tools are fully customizable (see Edit tools).[^2]
 
 You can mark and send text to the action or have it mark all text automatically. The changed text will replace the selection.
 
