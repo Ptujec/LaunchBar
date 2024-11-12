@@ -4,7 +4,7 @@
 
 <img src="01.jpg" width="848"/> 
 
-Writing Tools[^1] is an action that helps you improve your writing, e.g. by checking your spelling, grammar, and punctuation. Tools are fully customizable (see below).
+Writing Tools[^1] is an action that can help improve your writing[^2], e.g. by checking your spelling, grammar, and punctuation. Tools are fully customizable (see below).
 
 You can mark and send text to the action or have it mark all text automatically. The changed text will replace the selection.
 
@@ -60,3 +60,4 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 This action integrates with Action Updates by @prenagha. Find the [latest version on his GitHub](https://github.com/prenagha/launchbar) and a signed version on his [website](https://renaghan.com/launchbar/action-updates/).
 
 [^1]: I have not had the chance to try Apple's AI Writing Tools, but so far, they do not sound too promising anyway. With this action, you can always benefit from the latest OpenAI models and refine the tools yourself.
+[^2]: Please consider privacy and the pitfalls of using LLMs in general as you use this. 
