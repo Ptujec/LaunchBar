@@ -8,6 +8,8 @@
 	<string>ptujec.LaunchBar.action.DayNightModeToggle</string>
 	<key>CFBundleName</key>
 	<string>Day Night Mode Toggle</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,7 +19,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/System-Actions</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Day%20Night%20Mode%20Toggle.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -28,7 +32,7 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.scpt</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
 </dict>
