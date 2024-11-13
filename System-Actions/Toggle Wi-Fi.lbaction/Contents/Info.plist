@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Toggle Wi-Fi</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.1</string>
+	<string>4.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -19,7 +19,9 @@
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/System-Actions#launchbar-system-actions</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Toggle%20Wi-Fi.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -32,7 +34,7 @@
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.js</string>
+			<string>default.sh</string>
 		</dict>
 	</dict>
 </dict>
