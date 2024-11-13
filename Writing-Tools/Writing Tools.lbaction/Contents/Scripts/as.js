@@ -48,7 +48,7 @@ const authorName = Action.preferences.iaAuthor;
 
 const pasteInWriterAS =
   'tell application "iA Writer" to activate\n' +
-  'delay 0.1\n' +
+  'delay 0.2\n' +
   'tell application "System Events"\n' +
   markAllAS +
   `click menu item "${authorName}" of ${pasteEditsFromMenu}\n` +
