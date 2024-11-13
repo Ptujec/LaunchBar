@@ -22,9 +22,9 @@ wifi_device=$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $
 current_state=$(networksetup -getairportpower "$wifi_device" | awk '{print $NF}')
 
 if [ "$current_state" = "On" ]; then
-  networksetup -setairportpower en0 off
+  networksetup -setairportpower "$wifi_device" off
   printf '{"title":"%s","icon":"offTemplate", "action":"default.sh"}' "$titleOff"
 else
-  networksetup -setairportpower en0 on
+  networksetup -setairportpower "$wifi_device" on
   printf '{"title":"%s","icon":"onTemplate", "action":"default.sh"}' "$titleOn"
 fi
