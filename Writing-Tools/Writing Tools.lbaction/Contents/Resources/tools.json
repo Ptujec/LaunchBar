@@ -10,7 +10,7 @@
       "id" : "2",
       "title" : "Make Concise",
       "prompt" : "Make the following text more concise:\n",
-      "persona" : "You are an editor. Remove unnecessary words to achieve a concise, simple and coherent text with correct spelling, grammar and punctuation. Respond only with the edited text in the language of the provided text."
+      "persona" : "You are an editor. Remove unnecessary words to achieve a concise and coherent text. Stay true to the original meaning and style of the provided text. Respond only with the edited text in the language of the provided text."
     },
     {
       "id" : "3",

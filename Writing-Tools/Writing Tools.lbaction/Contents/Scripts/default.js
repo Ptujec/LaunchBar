@@ -12,6 +12,7 @@ Documentation:
 - https://platform.openai.com/docs/guides/prompt-engineering
 
 TODO: 
+- make faster detect frontmost and get contents
 - code cleanup
 */
 
@@ -32,43 +33,40 @@ function run(argument) {
   // SHOW SETTINGS
   if (LaunchBar.options.alternateKey) return settings();
 
-  Action.preferences.frontmostAppID =
-    LaunchBar.executeAppleScript(getFrontmostAS).trim();
+  const frontmostAppID = LaunchBar.executeAppleScript(getFrontmostAS).trim(); // TODO: Faster method? … slow especially when no argument … and exAS is used twice … maybe combine?
 
   const contentAS =
-    Action.preferences.frontmostAppID === 'pro.writer.mac'
+    frontmostAppID === 'pro.writer.mac'
       ? getWriterContentAs
       : getStandardContentAs;
 
-  if (Action.preferences.frontmostAppID !== 'pro.writer.mac') LaunchBar.hide(); // necessary for UI scripting part of getStandardContentAs
+  if (frontmostAppID !== 'pro.writer.mac') LaunchBar.hide(); // necessary for UI scripting part of getStandardContentAs
 
-  Action.preferences.hasArgument = argument ? true : false; // For Writer AS (as.js)
+  const hasArgument = argument ? true : false; // For Writer AS
+
+  let content = argument;
 
   if (!argument) {
-    const output = LaunchBar.executeAppleScript(contentAS).trim();
+    content = LaunchBar.executeAppleScript(contentAS).trim();
 
-    if (output.startsWith('Error')) return { title: output, icon: 'alert' };
+    if (content.startsWith('Error')) return { title: content, icon: 'alert' };
 
-    if (output == '') return { title: 'No text!'.localize(), icon: 'alert' };
-
-    argument = output;
+    if (content == '') return { title: 'No text!'.localize(), icon: 'alert' };
   }
 
   // CHECK FOR AUTHOR (iA Writer)
-  if (
-    Action.preferences.frontmostAppID === 'pro.writer.mac' &&
-    !Action.preferences.iaAuthor
-  )
-    return showAuthors((isMain = true), argument);
+  if (frontmostAppID === 'pro.writer.mac' && !Action.preferences.iaAuthor)
+    return showAuthors({ isMain: true, content, hasArgument, frontmostAppID });
 
   // SHOW TOOL OPTIONS
-  if (LaunchBar.options.commandKey) return showTools(argument);
+  if (LaunchBar.options.commandKey)
+    return showTools({ content, hasArgument, frontmostAppID });
 
   // RUN MAIN ACTION USING THE DEFAULT TOOL
-  return mainAction({ argument });
+  return mainAction({ content, hasArgument, frontmostAppID });
 }
 
-function mainAction({ argument, tool }) {
+function mainAction({ content, hasArgument, frontmostAppID, tool }) {
   LaunchBar.hide();
 
   const model = Action.preferences.model || 'gpt-4o-mini';
@@ -85,15 +83,15 @@ function mainAction({ argument, tool }) {
       model: model,
       messages: [
         { role: 'system', content: tool.persona },
-        { role: 'user', content: `${tool.prompt}${argument}` },
+        { role: 'user', content: `${tool.prompt}${content}` },
       ],
     },
   });
 
-  processResult(result, argument);
+  processResult({ result, content, hasArgument, frontmostAppID });
 }
 
-function processResult(result, argument) {
+function processResult({ result, content, hasArgument, frontmostAppID }) {
   // ERROR HANDLING
   if (result.response == undefined) {
     return { title: result.error, icon: 'alert' };
@@ -120,42 +118,56 @@ function processResult(result, argument) {
   let data = JSON.parse(result.data);
   const answer = data.choices[0].message.content.trim();
 
-  if (argument === answer)
-    return {
-      title: 'No changes. Input and answer are identical.'.localize(),
-      icon: 'alert',
-    };
+  if (content === answer) {
+    return LaunchBar.alert(
+      'No changes. Input and answer are identical.'.localize()
+    );
+  }
 
   // COMPARE INPUT TO ANSWER IN BBEDIT Option (Settings)
   if (Action.preferences.useBBEditCompare) {
-    compareTexts(argument, answer);
+    compareTexts({ content, answer });
     playConfirmationSound();
     return;
   }
 
   // PASTE ANSWER IN IA WRITER
-  if (
-    Action.preferences.frontmostAppID === 'pro.writer.mac' &&
-    Action.preferences.iaAuthor
-  ) {
-    pasteAnswerInWriter(answer);
+  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iaAuthor) {
+    pasteAnswerInWriter({ answer, hasArgument });
     playConfirmationSound();
     return;
   }
 
   // PASTE ANSWER IN OTHER APP
+  // TODO: this is causing trouble sometimes
   LaunchBar.setClipboardString(answer);
-  LaunchBar.paste();
+  LaunchBar.hide();
+  LaunchBar.paste(answer);
+
   playConfirmationSound();
 }
 
-function pasteAnswerInWriter(answer) {
+function pasteAnswerInWriter({ answer, hasArgument }) {
   LaunchBar.setClipboardString(answer);
   LaunchBar.hide();
+
+  const markAllAS = !hasArgument
+    ? // ? 'delay 0.2\nkeystroke "a" using command down\n'
+      'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
+    : '';
+  const authorName = Action.preferences.iaAuthor;
+
+  const pasteInWriterAS =
+    'tell application "iA Writer" to activate\n' +
+    'tell application "System Events"\n' +
+    markAllAS +
+    `click menu item "${authorName}" of ${pasteEditsFromMenu}\n` +
+    'end tell\n';
+
   LaunchBar.executeAppleScript(pasteInWriterAS);
 }
 
-function compareTexts(argument, answer) {
+function compareTexts({ content, answer }) {
   // Check if BBEdit is installed
   if (!File.exists('/Applications/BBEdit.app')) {
     return {
@@ -171,7 +183,7 @@ function compareTexts(argument, answer) {
 
   File.createDirectory(tempDir);
   File.writeText(answer, answerTextFile);
-  File.writeText(argument, originalTextFile);
+  File.writeText(content, originalTextFile);
 
   LaunchBar.executeAppleScript(
     'tell application "BBEdit"',
@@ -195,7 +207,7 @@ function settings() {
       title: 'Choose Default Tool'.localize(),
       icon: 'toolTemplate',
       badge: defaultToolName.localize(),
-      children: showTools(),
+      children: showTools({}),
     },
     {
       title: 'Choose Model'.localize(),
@@ -251,33 +263,28 @@ function getUserToolsJSON() {
   }
 }
 
-function showTools(argument) {
+function showTools({ content, hasArgument, frontmostAppID }) {
   const tools = getUserToolsJSON();
   const defaultToolID = Action.preferences.defaultToolID || '1';
 
   return tools.map((tool) => ({
     title: `${tool.title}`.localize(),
-    icon: argument
+    icon: content
       ? 'toolTemplate'
       : tool.id === defaultToolID
       ? 'checkTemplate.png'
       : 'circleTemplate.png',
     badge:
-      argument && tool.id === defaultToolID ? 'Default'.localize() : undefined,
-    action: argument ? 'mainAction' : 'setDefaultTool',
-    actionArgument: { argument, tool },
-    actionRunsInBackground: argument ? true : false,
+      content && tool.id === defaultToolID ? 'Default'.localize() : undefined,
+    action: content ? 'mainAction' : 'setDefaultTool',
+    actionArgument: { content, hasArgument, frontmostAppID, tool },
+    actionRunsInBackground: content ? true : false,
   }));
 }
 
 function setDefaultTool({ tool }) {
   Action.preferences.defaultToolID = tool.id;
   return settings();
-}
-
-function setTool(tool) {
-  LaunchBar.alert(JSON.stringify(tool));
-  return tool;
 }
 
 function editTools() {
@@ -307,9 +314,7 @@ function setModel(model) {
   return settings();
 }
 
-function showAuthors(isMain, argument) {
-  // if (isMain === true) LaunchBar.alert(isMain);
-
+function showAuthors({ isMain, content, hasArgument, frontmostAppID }) {
   const authors = LaunchBar.executeAppleScript(showAuthorsAS).trim().split(',');
 
   return authors.map((item) => {
@@ -329,15 +334,18 @@ function showAuthors(isMain, argument) {
       actionArgument: {
         author,
         isMain,
-        argument,
+        content,
+        hasArgument,
+        frontmostAppID,
       },
     };
   });
 }
 
-function setAuthor({ author, isMain, argument }) {
+function setAuthor({ author, isMain, content, hasArgument, frontmostAppID }) {
   if (author) Action.preferences.iaAuthor = author;
-  if (isMain === true) return showTools(argument);
+  if (isMain === true)
+    return showTools({ content, hasArgument, frontmostAppID });
   return settings();
 }
 

@@ -1,6 +1,5 @@
 /*
-Applescripts for …
-Writing Tools Action for LaunchBar (using Chat GPT) 
+Applescripts for Writing Tools Action for LaunchBar (using Chat GPT) 
 by Christian Bender (@ptujec)
 2024-11-10
 */
@@ -40,16 +39,3 @@ const pasteEditsFromMenu =
 const showAuthorsAS =
   'tell application "iA Writer" to launch\n' +
   `tell application "System Events" to return name of menu items of ${pasteEditsFromMenu}`;
-
-const markAllAS = !Action.preferences.hasArgument
-  ? 'keystroke "a" using command down\n'
-  : '';
-const authorName = Action.preferences.iaAuthor;
-
-const pasteInWriterAS =
-  'tell application "iA Writer" to activate\n' +
-  'delay 0.2\n' +
-  'tell application "System Events"\n' +
-  markAllAS +
-  `click menu item "${authorName}" of ${pasteEditsFromMenu}\n` +
-  'end tell\n';
