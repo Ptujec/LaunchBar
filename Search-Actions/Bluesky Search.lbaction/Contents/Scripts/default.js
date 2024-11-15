@@ -10,7 +10,7 @@ function run(argument) {
   const result = HTTP.getJSON(
     `https://public.api.bsky.app/xrpc/app.bsky.actor.searchActorsTypeahead?q=${encodeURI(
       argument
-    )}&limit=8`
+    )}&limit=12`
   );
 
   if (result.error) return;
@@ -36,5 +36,13 @@ function run(argument) {
     url: `https://bsky.app/search?q=${encodeURI(argument)}`,
   };
 
-  return [searchQuery, ...actors];
+  const hashtag = argument.split(/\s+/).join('');
+
+  const hashtagItem = {
+    title: `#${hashtag}`,
+    icon: 'hashtagTemplate',
+    url: `https://bsky.app/hashtag/${hashtag}`,
+  };
+
+  return [searchQuery, hashtagItem, ...actors];
 }
