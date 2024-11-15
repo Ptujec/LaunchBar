@@ -22,4 +22,4 @@ You can also close the site in the browser you came from with `⌘↩` (cmd-retu
 - If you can, avoid using Chrome. [It's bad](https://chromeisbad.com). Brave seems like a good replacement.
 
 ## Download
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar Action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
