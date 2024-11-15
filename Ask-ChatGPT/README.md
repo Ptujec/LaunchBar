@@ -90,7 +90,7 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 
 ## Download
 
-[Download LaunchBar Action: Ask ChatGPT](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Ask-ChatGPT) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar Action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
 
 ## Updates
 

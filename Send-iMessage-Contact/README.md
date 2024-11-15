@@ -18,7 +18,7 @@ Now you have the compiled executable and you know it matches the source file, be
 **I know, that sounds like a lot. That is why I built [an action to make that process easier](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme).** 
 
 ## Download
-[Download LaunchBar Action: Send iMessage to Contact](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Send-iMessage-Contact) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar Action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
 
 ## Updates
 

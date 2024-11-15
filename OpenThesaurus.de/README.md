@@ -7,7 +7,7 @@ This action searches [OpenThesaurus.de](https://github.com/danielnaber/openthesa
 
 ## Download
 
-[Download LaunchBar Action: OpenThesaurus.de](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/OpenThesaurus.de) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar Action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
 
 ## Updates
 

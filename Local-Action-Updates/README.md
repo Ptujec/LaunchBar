@@ -16,4 +16,4 @@ If you use [my actions](https://ptujec.github.io/launchbar), I would recommend u
 
 ## Download
 
-[Download LaunchBar Action: Local Action Updates](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) (powered by [DownGit](https://github.com/MinhasKamal/DownGit))
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar Action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
