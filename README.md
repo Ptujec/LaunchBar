@@ -5,9 +5,9 @@
 [→ Go to my website to view a curated list of my actions.](https://ptujec.github.io/launchbar)
 
 ## Installation
-You can download the [whole repository](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) or any of the directories separately. **There are download links in the readme of each directory.**  
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this repository. This includes the entire content including screenshots. But it's not a large downtown.
 
-After downloading and unzipping just double click the `.lbaction` packages you want to use to install them.  
+After downloading or cloning and unzipping just double click the `.lbaction` packages you want to use to install them.  
 
 ## Updates
 
