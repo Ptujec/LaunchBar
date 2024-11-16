@@ -5,11 +5,13 @@
 [→ Go to my website to view a curated list of my actions.](https://ptujec.github.io/launchbar)
 
 ## Installation
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this repository. This includes the entire content including screenshots. But it's not a large download.
 
-You can also [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). It's the same as downloading it, but the GitHub way. [GitHub Desktop](https://desktop.github.com/download/) makes this fairly easy. This is also a good way to follow changes. 
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this repository. This includes the entire content, including screenshots, but it's not a large download.
 
-After downloading or cloning and unzipping just double click the `.lbaction` packages you want to use to install them.  
+**After downloading and unzipping, just double-click the `.lbaction` packages you want to use to install them.**  
+
+BTW: You can also [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). It's the same as downloading it, but the GitHub way. [GitHub Desktop](https://desktop.github.com/) makes this fairly easy. This is also a good way to follow changes.
+
 
 ## Updates
 
