@@ -8,6 +8,8 @@
 	<string>ptujec.LaunchBar.action.LocalActionUpdates</string>
 	<key>CFBundleName</key>
 	<string>Local Action Updates</string>
+	<key>CFBundleVersion</key>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -15,9 +17,11 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/Local-Action-Updates/Local%20Action%20Updates.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
-		<string>https://ptujec.github.io/</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

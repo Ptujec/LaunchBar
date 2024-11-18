@@ -61,11 +61,14 @@ function run(folderPath) {
         `${targetActionPath}/Contents/Info.plist`
       );
 
-      const inputActionVersion = inputActionPlist.CFBundleVersion ?? 'missing';
+      const inputActionVersion =
+        inputActionPlist.CFBundleVersion ?? 'new version';
       const targetActionVersion =
-        targetActionPlist.CFBundleVersion ?? 'missing';
+        targetActionPlist.CFBundleVersion ?? 'installed version';
 
-      if (inputActionVersion == targetActionVersion) continue;
+      // if (inputActionVersion === targetActionVersion) continue;
+      if (!isNewerVersion(targetActionVersion, inputActionVersion)) continue;
+
       newCount++;
       newActions.push({
         inputActionVersion,
@@ -123,7 +126,7 @@ function processMatches(folderName, matchCount, newCount, newActions) {
     const inputActionWebsite =
       inputActionPlist.LBDescription.LBWebsiteURL || '';
 
-    const actionInfos = `<p><b>${actionName}</b>:<br>\nPreviously installed version: ${targetActionVersion}.<br>\nUpdated version: ${inputActionVersion}.<br>\n<a href="${inputActionWebsite}">Website</a></p>`;
+    const actionInfos = `<p><b>${actionName}</b>:<br>\nPreviously installed version: ${targetActionVersion}<br>\nUpdated version: ${inputActionVersion}<br>\n<a href="${inputActionWebsite}">Website</a></p>`;
 
     if (individual) {
       const response = LaunchBar.alert(
@@ -195,4 +198,18 @@ function showReport(reportHtml) {
     File.fileURLForPath(fileLocation),
     Action.preferences.browser
   );
+}
+
+function isNewerVersion(targetActionVersion, inputActionVersion) {
+  const tParts = targetActionVersion.split('.');
+  const iParts = inputActionVersion.split('.');
+  const maxLength = Math.max(tParts.length, iParts.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const a = ~~iParts[i]; // parse int
+    const b = ~~tParts[i];
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }
