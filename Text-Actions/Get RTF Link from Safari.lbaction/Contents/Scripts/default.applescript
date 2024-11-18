@@ -17,26 +17,60 @@
 -- https://discourse.devontechnologies.com/t/return-links-back-links/54390
 -- Example: "<font size=\"5\" color=\"#8080BB\"><font face=\"Menlo\">'" & theList & "'</font></font>'"
 
-try
-	tell application "Safari"
-		set _url to URL of front document
-		set _name to name of front document
-	end tell
+on handle_string(s)
 	
-	-- You can tweak that to influence the font and font size. This example will result in Helvetica Neue 14pt. 
-	-- The space between "</a>" and "</font>" is important. Otherwise you will get some Times 12pt in there.
-	set _html to "<font size=\"4\"><font face=\"helvetica neue\"><a href=\"" & _url & "\">" & _name & "</a> </font></font>"
+	set _name to s
 	
-	do shell script "echo " & quoted form of _html & "|textutil -inputencoding UTF-8 -format html  -convert rtf -stdin -stdout|LC_CTYPE=UTF-8 pbcopy"
+	try
+		
+		tell application "Safari"
+			set _url to URL of front document
+		end tell
+		
+		
+		set _html to "<font size=\"4\"><font face=\"helvetica neue\"><a href=\"" & _url & "\">" & _name & "</a> </font></font>"
+		
+		do shell script "echo " & quoted form of _html & "|textutil -inputencoding UTF-8 -format html  -convert rtf -stdin -stdout|LC_CTYPE=UTF-8 pbcopy"
+		
+		
+		tell application "LaunchBar" to hide
+		
+		delay 0.1
+		tell application "System Events"
+			keystroke "v" using command down
+		end tell
+		
+	on error e
+		display dialog e
+	end try
 	
-	
-	tell application "LaunchBar" to hide
-	
-	delay 0.1
-	tell application "System Events"
-		keystroke "v" using command down
-	end tell
-	
-on error e
-	display dialog e
-end try
+end handle_string
+
+on run
+	try
+		tell application "Safari"
+			set _url to URL of front document
+			set _name to name of front document
+		end tell
+
+		-- https://stackoverflow.com/questions/38041852/does-applescript-have-a-replace-function
+		set _name to do shell script "sed 's|" & quoted form of "\\ -\\ YouTube" & "|" & quoted form of "" & "|g' <<< " & quoted form of _name
+
+		-- You can tweak that to influence the font and font size. This example will result in Helvetica Neue 14pt. 
+		-- The space between "</a>" and "</font>" is important. Otherwise you will get some Times 12pt in there.
+		set _html to "<font size=\"4\"><font face=\"helvetica neue\"><a href=\"" & _url & "\">" & _name & "</a> </font></font>"
+		
+		do shell script "echo " & quoted form of _html & "|textutil -inputencoding UTF-8 -format html  -convert rtf -stdin -stdout|LC_CTYPE=UTF-8 pbcopy"
+		
+		
+		tell application "LaunchBar" to hide
+		
+		delay 0.1
+		tell application "System Events"
+			keystroke "v" using command down
+		end tell
+		
+	on error e
+		display dialog e
+	end try
+end run

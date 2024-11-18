@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>StringTransformationTemplate</string>
+	<string>iconTemplate</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.RemoveDuplicateEmailAddresses</string>
 	<key>CFBundleName</key>
 	<string>Remove Duplicate Email Addresses</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar</string>
 	</dict>

@@ -22,6 +22,9 @@ on run
 		set longURL to URL of front document
 		set title to name of front document
 	end tell
+
+	-- https://stackoverflow.com/questions/38041852/does-applescript-have-a-replace-function
+	set title to do shell script "sed 's|" & quoted form of "\\ -\\ YouTube" & "|" & quoted form of "" & "|g' <<< " & quoted form of title
 	
 	set title_display to truncateString(title, 100)
 	-- set the clipboard to title_display & " " & "-" & " " & shortURL as text

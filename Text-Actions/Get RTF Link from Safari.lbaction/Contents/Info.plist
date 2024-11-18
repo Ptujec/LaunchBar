@@ -9,13 +9,13 @@
 	<key>CFBundleName</key>
 	<string>Get RTF Link from Safari</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1.1</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
 		<string>@Ptujec</string>
 		<key>LBWebsiteURL</key>
@@ -27,12 +27,16 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>

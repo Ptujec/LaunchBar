@@ -9,13 +9,13 @@
 	<key>CFBundleName</key>
 	<string>Get Markdown Link from Safari</string>
 	<key>CFBundleVersion</key>
-	<string>2021.2</string>
+	<string>2.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>1) On Run: [Title from Safari](URL from Safari) 2) With String: [String](URL from Safari)</string>
 		<key>LBTwitter</key>
@@ -33,10 +33,8 @@
 			</array>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
-			<true/>
 			<key>LBScriptName</key>
-			<string>Get Markdown Link.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>
