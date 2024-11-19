@@ -8,7 +8,7 @@ Updating LaunchBar Actions is an unsolved problem. [Padraic built an action to m
 
 This new action takes a different approach. It is not ideal either. But it might be helpful in some cases. **The idea is to download (or clone) a whole Github repo of actions. Then this action compares the actions in the folder with your installed actions. If the version numbers don't match, the installed action will be replaced with the downloaded version.**
  
-You can let the action replace all matching actions at once or decide individually.
+You can let the action replace all matching actions at once or *decide individually*.
 
 <img src="02.jpg" width="653"/>
 
