@@ -10,7 +10,7 @@ With another `space` you can even use quicklook to preview the selected document
 
 ## Limitations 
 
-Currently, this action can only sort files by last modified date, not last viewed date. 
+Currently, this action can only sort documents by last modified date, not last viewed date. 
 
 ## Download
 
