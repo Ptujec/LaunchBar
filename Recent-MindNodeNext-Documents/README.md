@@ -1,6 +1,6 @@
 # LaunchBar Actions: Recent MindNode Next Documents
 
-Do you miss seeing recent files when you select MindNode Next in LaunchBar and press `space`? 
+Do you miss seeing recent files when you select [MindNode Next](https://mindnode.com/next) in LaunchBar and press `space`? 
 
 <img src="01.jpg" width="958"/> 
 
