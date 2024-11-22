@@ -12,6 +12,8 @@ With another `space` you can even use quicklook to preview the selected document
 
 Currently, this action can only sort documents by last modified date, not last viewed date. 
 
+Also, as MindNode Next documents are not stored as files but in a database, there are some things you cannot do, e.g. renaming a selected document or revealing it in the Finder.
+
 ## Download
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
