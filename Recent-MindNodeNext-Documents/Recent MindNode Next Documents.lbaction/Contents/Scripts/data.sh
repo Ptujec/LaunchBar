@@ -1,4 +1,12 @@
 #!/bin/sh
+# 
+# Recent MindNode Next Documents Action for LaunchBar
+# by Christian Bender (@ptujec)
+# 2024-11-26
+# 
+# Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+# 
+
 documents=$(sqlite3 -json "$1" "
     SELECT 
         d.documentID,
@@ -23,6 +31,5 @@ if [ -z "${documents}" ]; then
     documents="[]"
 fi
 
-# assets=$(stat -f "%Sm %N" "$2"*)
-assets=$(ls -A "$2")
-echo "${documents}////${assets}"
+assets=$(ls "$2" | jq -R -s -c 'split("\n")[:-1]')
+echo "{\"documents\": $documents, \"assets\": $assets}"

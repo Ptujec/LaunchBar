@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent MindNode Next Documents</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.1</string>
+	<string>1.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.ideasoncanvas.mindnode</string>
 	<key>LBDescription</key>
@@ -23,7 +23,8 @@
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-MindNodeNext-Documents/Recent%20MindNode%20Next%20Documents.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-MindNodeNext-Documents</string>	</dict>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-MindNodeNext-Documents</string>
+	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.ideasoncanvas.mindnode</string>
 	<key>LBScripts</key>
@@ -40,5 +41,7 @@
 			<string>default.js</string>
 		</dict>
 	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>15</string>
 </dict>
 </plist>
