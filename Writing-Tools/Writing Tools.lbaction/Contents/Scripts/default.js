@@ -213,7 +213,7 @@ function settings() {
       title: 'Choose Model'.localize(),
       icon: 'gearTemplate',
       badge: Action.preferences.model || 'gpt-4o-mini',
-      children: showModels(),
+      action: 'showModels',
     },
     File.exists('/Applications/iA Writer.app')
       ? {
@@ -299,14 +299,33 @@ function resetTools() {
 
 function showModels() {
   const currentModel = Action.preferences.model || 'gpt-4o-mini';
-  const models = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gpt-4o-mini'];
 
-  return models.map((model) => ({
-    title: model,
-    icon: currentModel === model ? 'checkTemplate.png' : 'circleTemplate.png',
-    action: 'setModel',
-    actionArgument: model,
-  }));
+  const result = HTTP.getJSON('https://api.openai.com/v1/models', {
+    headerFields: {
+      Authorization: `Bearer ${Action.preferences.apiKey}`,
+    },
+  });
+
+  if (result.response.status !== 200) {
+    return LaunchBar.alert(
+      `Error ${result.response.status}`,
+      result.response.localizedStatus
+    );
+  }
+
+  const modelsData = result.data.data;
+
+  return modelsData
+    .filter((item) => item.id.startsWith('gpt') || item.id.startsWith('o1'))
+    .sort((a, b) => a.id > b.id)
+    .map((item) => ({
+      title: item.id,
+      icon:
+        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+      action: 'setModel',
+      actionArgument: item.id,
+      badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
+    }));
 }
 
 function setModel(model) {
@@ -384,26 +403,45 @@ function setApiKey() {
       break;
     case 1:
       const clipboardContent = LaunchBar.getClipboardString().trim();
+      const isValidAPIKey = checkAPIKey(clipboardContent);
 
-      if (clipboardContent.length == 56 || clipboardContent.length == 164) {
-        // TODO: Better API key test
+      if (!isValidAPIKey) return;
 
-        Action.preferences.apiKey = clipboardContent;
+      Action.preferences.apiKey = clipboardContent;
 
-        LaunchBar.alert(
-          'Success!'.localize(),
-          'API key set to: '.localize() + Action.preferences.apiKey
-        );
-      } else {
-        LaunchBar.alert(
-          'The length of the clipboard content does not match the length of a valid API key.',
-          'Make sure the API key is the most recent item in the clipboard!'
-        );
-      }
+      LaunchBar.alert(
+        'Success!'.localize(),
+        'API key set to: '.localize() + Action.preferences.apiKey
+      );
       break;
     case 2:
       break;
   }
+}
+
+function checkAPIKey(apiKey) {
+  if (!apiKey.startsWith('sk-')) {
+    LaunchBar.alert(
+      'Invalid API key format'.localize(),
+      'Make sure the API key is the most recent item in the clipboard!'.localize()
+    );
+    return false;
+  }
+
+  const result = HTTP.getJSON('https://api.openai.com/v1/models', {
+    headerFields: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (result.response.status === 200) return true;
+
+  LaunchBar.alert(
+    'Invalid OpenAI API key'.localize(),
+    `Error ${result.response.status}: ${result.response.localizedStatus}`
+  );
+
+  return false;
 }
 
 function playConfirmationSound() {

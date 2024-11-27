@@ -13,7 +13,7 @@
 "1) Press »Open OpenAI.com« to create an API key.\n2) Press »Set API Key«" = "1) Wählen Sie »OpenAI.com öffnen«, um einen API-Schlüssel zu erstellen.\n2) Drücken Sie »API-Schlüssel festlegen«.";
 "Open OpenAI.com" = "OpenAI.com öffnen";
 "Cancel" = "Abbrechen";
-"Success!" = "Fertig!";
+"Success!" = "Alles klar!";
 "API key set to: " = "API-Schlüssel: ";
 "No text!" = "Kein Text!";
 "Check Spelling" = "Rechtschreibung prüfen";
@@ -26,3 +26,7 @@
 "Enter the author name from the menu in iA Writer that you want to use!" = "Geben Sie den Verfassernamen aus dem Menü in iA Writer ein, den Sie verwenden möchten!";
 "No changes. Input and answer are identical." = "Keine Änderungen. Eingabe und Antwort sind identisch.";
 "Successfully imported API key from Ask ChatGPT Action." = "API-Schlüssel erfolgreich von Ask ChatGPT Action importiert.";
+"Invalid API key format" = "Ungültiges API-Schlüsselformat";
+"Make sure the API key is the most recent item in the clipboard!" = "Stellen Sie sicher, dass der API-Schlüssel der letzte Eintrag in der Zwischenablage ist!";
+"Invalid OpenAI API key" = "Ungültiger OpenAI API-Schlüssel";
+"Recommended" = "Empfohlen";
