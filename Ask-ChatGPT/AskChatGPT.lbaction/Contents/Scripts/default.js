@@ -465,9 +465,7 @@ function processResult(
 }
 
 function prompts() {
-  if (!File.exists(userPresetsPath)) {
-    return;
-  }
+  if (!File.exists(userPresetsPath)) return;
 
   const prompts = File.readJSON(userPresetsPath).prompts;
 
@@ -775,7 +773,7 @@ function setApiKey() {
     case 1:
       var clipboardContent = LaunchBar.getClipboardString().trim();
 
-      if (clipboardContent.length == 56) {
+      if (clipboardContent.length == 56 || clipboardContent.length == 164) {
         // TODO: Better API key test
 
         // Write new API key in Action preferences
