@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Writing Tools</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -19,7 +19,7 @@
 		<key>LBSummary</key>
 		<string>ChatGPT Writing Tools (⌥↩ = Settings)</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Writing-Tools/Writing%20Tools.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>

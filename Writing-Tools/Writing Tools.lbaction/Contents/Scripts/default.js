@@ -385,7 +385,7 @@ function setApiKey() {
     case 1:
       const clipboardContent = LaunchBar.getClipboardString().trim();
 
-      if (clipboardContent.length == 56) {
+      if (clipboardContent.length == 56 || clipboardContent.length == 164) {
         // TODO: Better API key test
 
         Action.preferences.apiKey = clipboardContent;
