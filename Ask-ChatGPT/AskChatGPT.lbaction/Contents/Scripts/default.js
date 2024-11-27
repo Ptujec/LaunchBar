@@ -15,6 +15,7 @@ Prompts:
 
 TODO: 
 - Refactor (simplify code, use let and const)
+- localization (German)
 */
 
 String.prototype.localizationTable = 'default'; // For potential localization later
@@ -42,10 +43,10 @@ function run(argument) {
     } catch (e) {
       const response = LaunchBar.alert(
         e,
-        'You can either start fresh or try to fix your custom presets JSON code.',
-        'Start fresh',
-        'Edit presets',
-        'Cancel'
+        'You can either start fresh or try to fix your custom presets JSON code.'.localize(),
+        'Start fresh'.localize(),
+        'Edit presets'.localize(),
+        'Cancel'.localize()
       );
       switch (response) {
         case 0:
@@ -63,10 +64,7 @@ function run(argument) {
   }
 
   // CHECK/SET API KEY
-  if (!apiKey) {
-    setApiKey();
-    return;
-  }
+  if (!apiKey) return setApiKey();
 
   // SETTINGS
   if (LaunchBar.options.alternateKey) return settings();
@@ -134,21 +132,14 @@ function run(argument) {
   // IF ARGUMENT IS PASSED
 
   // CHOOSE PERSONA
-  if (LaunchBar.options.commandKey) {
-    return showPersonas(argument);
-  }
+  if (LaunchBar.options.commandKey) return showPersonas(argument);
 
   // OPTIONS
   // (e.g. continue with chat, add url, …)
-  return options({
-    argument,
-  });
+  return options({ argument });
 }
 
 function options(dict) {
-  // LaunchBar.alert('Options:\n' + JSON.stringify(dict));
-  // return;
-
   const argument = dict.argument;
   const defaultPersonaIcon = Action.preferences.defaultPersonaIcon ?? 'weasel';
 
@@ -499,8 +490,8 @@ function showPersonas(argument) {
   var result = [];
   personas.forEach(function (item) {
     var pushData = {
-      title: item.title,
-      subtitle: item.description,
+      title: item.title.localize(),
+      subtitle: item.description.localize(),
       alwaysShowsSubtitle: true,
       icon: item.icon,
       action: 'setPersona',
@@ -591,7 +582,7 @@ function compareTexts(originalClipboard, answer) {
 function settings() {
   return [
     {
-      title: 'Choose default persona',
+      title: 'Choose default persona'.localize(),
       icon: Action.preferences.defaultPersonaIcon ?? 'weasel',
       badge:
         Action.preferences.defaultPersonaTitle ??
@@ -599,35 +590,35 @@ function settings() {
       children: showPersonas(),
     },
     {
-      title: 'Choose model',
-      icon: 'gearTemplate',
-      badge: Action.preferences.model ?? 'gpt-4o-mini',
-      children: models(),
-    },
-    {
-      title: 'Choose editor to display chats',
+      title: 'Choose editor to display chats'.localize(),
       icon: 'eyeTemplate',
       badge: Action.preferences.EditorName ?? 'default',
       // action: 'chooseEditor',
       children: chooseEditor(),
     },
     {
-      title: 'Set API key',
+      title: 'Choose model'.localize(),
+      icon: 'gearTemplate',
+      badge: Action.preferences.model ?? 'gpt-4o-mini',
+      action: 'showModels',
+    },
+    {
+      title: 'Set API Key'.localize(),
       icon: 'keyTemplate',
       action: 'setApiKey',
     },
     {
-      title: 'Customize personas & prompts',
+      title: 'Customize personas & prompts'.localize(),
       icon: 'codeTemplate',
       action: 'editPresets',
     },
     {
-      title: 'Update personas & prompts',
+      title: 'Update personas & prompts'.localize(),
       icon: 'updateTemplate',
       action: 'updatePresets',
     },
     {
-      title: 'Reset personas & prompts',
+      title: 'Reset personas & prompts'.localize(),
       icon: 'sparkleTemplate',
       action: 'resetPresets',
     },
@@ -641,16 +632,33 @@ function setPersona(dict) {
   return settings();
 }
 
-function models() {
+function showModels() {
   const currentModel = Action.preferences.model || 'gpt-4o-mini';
-  const models = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gpt-4o-mini'];
 
-  return models.map((model) => ({
-    title: model,
-    icon: currentModel === model ? 'checkTemplate.png' : 'circleTemplate.png',
-    action: 'setModel',
-    actionArgument: model,
-  }));
+  const result = HTTP.getJSON('https://api.openai.com/v1/models', {
+    headerFields: {
+      Authorization: `Bearer ${Action.preferences.apiKey}`,
+    },
+  });
+
+  if (result.response.status !== 200) {
+    return LaunchBar.alert(
+      `Error ${result.response.status}`,
+      result.response.localizedStatus
+    );
+  }
+
+  return result.data.data
+    .filter((item) => item.id.startsWith('gpt') || item.id.startsWith('o1'))
+    .sort((a, b) => a.id > b.id)
+    .map((item) => ({
+      title: item.id,
+      icon:
+        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+      action: 'setModel',
+      actionArgument: item.id,
+      badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
+    }));
 }
 
 function setModel(model) {
@@ -676,39 +684,23 @@ function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
 }
 
 function comparePresets() {
-  if (!File.exists(userPresetsPath)) {
-    return;
-  }
+  if (!File.exists(userPresetsPath)) return;
 
-  var userPresets = File.readJSON(userPresetsPath);
+  const userPresets = File.readJSON(userPresetsPath);
+  const allPresets = [...presets.prompts, ...presets.personas];
+  const userPresetTitles = [
+    ...userPresets.prompts,
+    ...userPresets.personas,
+  ].map((item) => item.title);
+  const newPresetTitles = allPresets.filter(
+    (item) => !userPresetTitles.includes(item.title)
+  );
 
-  var allUserPresets = userPresets.prompts.concat(userPresets.personas);
-
-  var allUserPresetTitles = [];
-
-  allUserPresets.forEach(function (item) {
-    allUserPresetTitles.push(item.title);
-  });
-
-  var allPresets = presets.prompts.concat(presets.personas);
-
-  var newPresetTitles = [];
-
-  allPresets.forEach(function (item) {
-    if (!allUserPresetTitles.includes(item.title)) {
-      newPresetTitles.push(item.title);
-    }
-  });
-
-  if (newPresetTitles.length > 0) {
-    return newPresetTitles.join('\n');
-  }
+  return newPresetTitles.length > 0 ? newPresetTitles.join('\n') : '';
 }
 
 function updatePresets() {
-  if (!File.exists(userPresetsPath)) {
-    return;
-  }
+  if (!File.exists(userPresetsPath)) return;
 
   var personaCount = 0;
   var promptCount = 0;
@@ -758,12 +750,13 @@ function resetPresets() {
 }
 
 function setApiKey() {
-  var response = LaunchBar.alert(
-    'API key required',
-    '1) Press »Open OpenAI.com« to create an API key.\n2) Press »Set API key«',
-    'Open OpenAI.com',
-    'Set API key',
-    'Cancel'
+  // API Key dialog
+  const response = LaunchBar.alert(
+    'API Key required'.localize(),
+    '1) Press »Open OpenAI.com« to create an API Key.\n2) Press »Set API Key«'.localize(),
+    'Open OpenAI.com'.localize(),
+    'Set API Key'.localize(),
+    'Cancel'.localize()
   );
   switch (response) {
     case 0:
@@ -771,26 +764,44 @@ function setApiKey() {
       LaunchBar.hide();
       break;
     case 1:
-      var clipboardContent = LaunchBar.getClipboardString().trim();
+      const clipboardContent = LaunchBar.getClipboardString().trim();
+      const isValidAPIKey = checkAPIKey(clipboardContent);
 
-      if (clipboardContent.length == 56 || clipboardContent.length == 164) {
-        // TODO: Better API key test
+      if (!isValidAPIKey) return;
 
-        // Write new API key in Action preferences
-        Action.preferences.apiKey = clipboardContent;
+      Action.preferences.apiKey = clipboardContent;
 
-        LaunchBar.alert(
-          'Success!',
-          'API key set to: ' + Action.preferences.apiKey
-        );
-      } else {
-        LaunchBar.alert(
-          'The length of the clipboard content does not match the length of a correct API key',
-          'Make sure the API key is the most recent item in the clipboard!'
-        );
-      }
+      LaunchBar.alert(
+        'Success!'.localize(),
+        'API Key set to: '.localize() + Action.preferences.apiKey
+      );
       break;
     case 2:
       break;
   }
+}
+
+function checkAPIKey(apiKey) {
+  if (!apiKey.startsWith('sk-')) {
+    LaunchBar.alert(
+      'Invalid API Key format'.localize(),
+      'Make sure the API Key is the most recent item in the clipboard!'.localize()
+    );
+    return false;
+  }
+
+  const result = HTTP.getJSON('https://api.openai.com/v1/models', {
+    headerFields: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (result.response.status === 200) return true;
+
+  LaunchBar.alert(
+    'Invalid OpenAI API Key'.localize(),
+    `Error ${result.response.status}: ${result.response.localizedStatus}`
+  );
+
+  return false;
 }
