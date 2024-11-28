@@ -8,8 +8,10 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
 - https://platform.openai.com/docs/api-reference/chat
+- https://platform.openai.com/docs/models#model-endpoint-compatibility
 - https://platform.openai.com/docs/guides/chat/introduction
 - https://platform.openai.com/docs/guides/prompt-engineering
+
 
 TODO: 
 - make faster detect frontmost and get contents
@@ -315,17 +317,23 @@ function showModels() {
 
   const modelsData = result.data.data;
 
-  return modelsData
-    .filter((item) => item.id.startsWith('gpt') || item.id.startsWith('o1'))
-    .sort((a, b) => a.id > b.id)
-    .map((item) => ({
-      title: item.id,
-      icon:
-        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
-      action: 'setModel',
-      actionArgument: item.id,
-      badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
-    }));
+  return (
+    modelsData
+      // Filter out versions that are not compatible with completions https://platform.openai.com/docs/models#model-endpoint-compatibility
+      .filter(
+        (item) =>
+          item.id.startsWith('gpt-') && !item.id.includes('realtime-preview')
+      )
+      // .sort((a, b) => a.id > b.id)
+      .map((item) => ({
+        title: item.id,
+        icon:
+          currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+        action: 'setModel',
+        actionArgument: item.id,
+        badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
+      }))
+  );
 }
 
 function setModel(model) {
