@@ -322,7 +322,9 @@ function showModels() {
       // Filter out versions that are not compatible with completions https://platform.openai.com/docs/models#model-endpoint-compatibility
       .filter(
         (item) =>
-          item.id.startsWith('gpt-') && !item.id.includes('realtime-preview')
+          item.id.startsWith('gpt-') &&
+          !item.id.includes('realtime-preview') &&
+          !item.id.includes('audio')
       )
       // .sort((a, b) => a.id > b.id)
       .map((item) => ({
