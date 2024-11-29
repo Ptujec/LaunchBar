@@ -5,21 +5,23 @@
 	<key>CFBundleIconFile</key>
 	<string>StringTransformationTemplate</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.MarkdownToRTFLink</string>
+	<string>ptujec.LaunchBar.action.MarkdownToRichTextFormat</string>
 	<key>CFBundleName</key>
-	<string>Markdown to RTF Link</string>
+	<string>Markdown to Rich Text Format</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>1.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Text-Actions#readme</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/Text-Actions/Markdown%20to%20Rich%20Text%20Format.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -29,8 +31,6 @@
 			<array>
 				<string>string</string>
 			</array>
-			<key>LBRequiresArgument</key>
-			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBRunInBackground</key>
