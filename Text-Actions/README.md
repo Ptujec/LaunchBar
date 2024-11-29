@@ -27,9 +27,3 @@
 
 
    
-
----
-Anmerkungen: 0,1012 SHA-256 18e8a084a534451762001c6406c4fdae  
-&ChatGPT: 614 653  
-@Christian: 624,7  
-...
