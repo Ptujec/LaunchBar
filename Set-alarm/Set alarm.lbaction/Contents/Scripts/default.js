@@ -6,16 +6,17 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-function run(argument) {
-  if (argument == undefined) {
-    LaunchBar.openURL('file:///System/Applications/Clock.app/');
-    return;
-  }
+String.prototype.localizationTable = 'default';
 
-  var list = LaunchBar.execute('/usr/bin/shortcuts', 'list').trim().split('\n');
+const noValidTime = [{ title: 'No valid time!'.localize(), icon: 'alert' }];
+
+function run(argument) {
+  const list = LaunchBar.execute('/usr/bin/shortcuts', 'list')
+    .trim()
+    .split('\n');
 
   if (!list.includes('Set alarm')) {
-    var response = LaunchBar.alert(
+    const response = LaunchBar.alert(
       'Shortcut missing!',
       'The action needs the shortcut named "Set alarm" to run properly. Do you want to install it now?',
       'Yes',
@@ -24,88 +25,76 @@ function run(argument) {
     switch (response) {
       case 0:
         LaunchBar.openURL(
-          'https://www.icloud.com/shortcuts/fdb0869ec1f04bab9390ba988d6e2eab'
+          'https://www.icloud.com/shortcuts/2c26f5f6e8ad4bcea0215ebf3b1c9b10'
         );
 
       case 1:
         break;
     }
-  } else {
-    if (argument != '') {
-      //
-      let pattern = /^\d+/;
+    return;
+  }
 
-      let result = pattern.test(argument);
+  if (argument == '') return;
 
-      if (result == true) {
-        var title = argument
-          .replace(/(^\d+:?(?:\d+)?)(?:(?:\s)(.*))?/gi, '$2')
-          .trim();
+  // GET TIME AND TITEL
+  const timeTitleRegex = /(^\d+:?(?:\d+)?)(?:(?:\s)(.*))?/gi;
 
-        // Capitalize title
-        title = title.charAt(0).toUpperCase() + title.slice(1);
+  let title = argument.replace(timeTitleRegex, '$2').trim();
+  title = title.charAt(0).toUpperCase() + title.slice(1);
 
-        var time = argument
-          .replace(/(^\d+:?(?:\d+)?)(?:(?:\s)(.*))?/gi, '$1')
-          .trim();
+  let time = argument.replace(timeTitleRegex, '$1').trim();
 
-        if (!time.includes(':')) {
-          if (time.length < 3) {
-            time = time + ':00';
-          } else if (time.length == 3) {
-            time = time.replace(/^(\d\d)/, '$1:') + '0';
-          } else if (time.length == 4) {
-            time = time.replace(/^(\d\d)/, '$1:');
-          }
+  // TIME CHECKS
+  if (/[^0-9:]/.test(time)) return noValidTime; // only numbers and ":"
+  const digits = time.match(/\d/g).join('');
+  const num = parseInt(digits);
+  if (digits.length > 4) return noValidTime;
+  if (num < 0 || num > 2359) return noValidTime;
 
-          return [
-            {
-              title: time + ' ' + title,
-              icon: 'com.apple.clock',
-              action: 'setTime',
-              actionArgument: time + ' ' + title,
-              actionRunsInBackground: true,
-            },
-          ];
-        } else {
-          if (time.length == 3) {
-            time = time + '0';
-          }
-          if (time.length == 2) {
-            time = time + '00';
-          }
-
-          return [
-            {
-              title: time + ' ' + title,
-              icon: 'com.apple.clock',
-              action: 'setTime',
-              actionArgument: time + ' ' + title,
-              actionRunsInBackground: true,
-            },
-          ];
-        }
-      } else {
-        return [
-          {
-            title: argument,
-            icon: 'com.apple.clock',
-            action: 'setTime',
-            actionArgument: argument,
-            actionRunsInBackground: true,
-          },
-        ];
-      }
+  // DEAL WITH HOUR MINUTES SEPARATOR
+  if (!time.includes(':')) {
+    if (time.length < 3) {
+      if (num > 23) return noValidTime;
+      time += ':00';
+    } else if (time.length == 3) {
+      time = time.replace(/^(\d\d)/, '$1:') + '0';
+    } else if (time.length == 4) {
+      time = time.replace(/^(\d\d)/, '$1:');
     }
   }
+
+  // ADD ZEROS FOR MINUTES
+  const minutes = time.split(':')[1];
+  if (minutes.length > 2) return noValidTime;
+  if (minutes > 59) return noValidTime;
+
+  if (minutes.length == 0) {
+    time = time + '00';
+  }
+  if (minutes.length == 1) {
+    if (minutes > 5) return noValidTime;
+    time = time + '0';
+  }
+
+  return [
+    {
+      title: time,
+      subtitle: title ? title : undefined,
+      alwaysShowsSubtitle: true,
+      icon: 'com.apple.clock',
+      action: 'setTime',
+      actionArgument: time + ' ' + title,
+      actionRunsInBackground: true,
+    },
+  ];
 }
 
 function setTime(time) {
   LaunchBar.hide();
   LaunchBar.executeAppleScript(
-    'tell application "Shortcuts Events" to run shortcut "Set alarm" with input "' +
-      time +
-      '"\n' +
-      'tell application "Clock" to activate'
+    `tell application "Shortcuts Events" to run shortcut "Set alarm" with input "${time}"` +
+      (LaunchBar.options.commandKey
+        ? '\ntell application "Clock" to activate'
+        : '')
   );
 }

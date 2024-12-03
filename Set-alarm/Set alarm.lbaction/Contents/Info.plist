@@ -9,19 +9,19 @@
 	<key>CFBundleName</key>
 	<string>Set alarm</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>2.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Set-alarm/Set%20alarm.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Set-alarm</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Set-alarm/Set%20alarm.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.apple.clock</string>
@@ -37,6 +37,8 @@
 			<true/>
 			<key>LBLiveFeedbackEnabled</key>
 			<true/>
+			<key>LBRequiresArgument</key>
+			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBReturnsResult</key>
@@ -47,6 +49,8 @@
 			<string>default.js</string>
 		</dict>
 	</dict>
+	<key>LBTextInputTitle</key>
+	<string>e.g. 12 Lunch</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13</string>
 </dict>
