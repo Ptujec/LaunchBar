@@ -5,6 +5,7 @@ by Christian Bender (@ptujec)
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
+
 String.prototype.localizationTable = 'default';
 
 include('global.js');
@@ -81,7 +82,28 @@ function getClipboard() {
 function main(string) {
   // Main Action
   let suggestions = [];
-  let show, dueExists, p, icon;
+  let quotedParts, show, dueExists, p, icon;
+
+  // Description
+  if (string.includes(': ')) {
+    show = true;
+    let description = string.match(reDescription)[1];
+
+    suggestions.push({
+      title: capitalizeFirstLetter(description),
+      icon: 'descriptionTemplate',
+      order: 2,
+    });
+    string = string.replace(reDescription, '');
+  }
+
+  // Exclude parts in quotation marks from being parsed
+  if (string.includes('"')) {
+    quotedParts = (string.match(reQuotedParts) || [])
+      .map((part) => part.slice(1, -1))
+      .join(' ');
+    string = string.replace(reQuotedParts, ' ');
+  }
 
   // Priorities
   if (rePrio.test(string)) {
@@ -98,6 +120,15 @@ function main(string) {
       p = undefined;
     }
     string = string.replace(rePrio, ' ');
+  }
+
+  if (p) {
+    show = true;
+    suggestions.push({
+      title: p,
+      icon: icon,
+      order: 5,
+    });
   }
 
   // Due String
@@ -134,7 +165,6 @@ function main(string) {
   }
 
   // Duration (duration regex is defined in locations.js)
-
   if (reDuration.test(string)) {
     show = true;
 
@@ -156,27 +186,8 @@ function main(string) {
     string = string.replace(reDuration, ' ');
   }
 
-  // Description
-  if (string.includes(': ')) {
-    show = true;
-    let description = string.match(/(?:\: )(.*)/)[1];
-
-    suggestions.push({
-      title: capitalizeFirstLetter(description),
-      icon: 'descriptionTemplate',
-      order: 2,
-    });
-    string = string.replace(/(?:\: )(.*)/, '');
-  }
-
-  if (p) {
-    show = true;
-    suggestions.push({
-      title: p,
-      icon: icon,
-      order: 5,
-    });
-  }
+  // Add quoted string parts
+  string = quotedParts ? quotedParts + string : string;
 
   if (show == true) {
     suggestions.push({

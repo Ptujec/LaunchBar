@@ -25,11 +25,11 @@ The basic idea is very simple. **You select the action in LaunchBar (or the app)
 
 <img src="01.jpg" width="817"/> 
 
-However, as I enjoyed adding things to Todoist that way, I added a few more features: 
+However, as I enjoyed adding things to Todoist that way, I added a few more features:
 
 ### Descriptions
 
-Simply use a colon to add a description.
+Simply use a colon to add a description. The description should be at the end of the input.
 
 <img src="02.jpg" width="817"/> 
 
@@ -80,6 +80,10 @@ You can even add markdown formatted links for the current website in Safari or a
 Another nice bonus feature is the ability to pull in the current clipboard entry if you start your entry with a comma ",". Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
 
 <img src="07.jpg" width="817"/> 
+
+### Exclude text from being parsed
+
+You can prevent text from being parsed by putting it in quotation marks. 
 
 ### Setup & Settings
 

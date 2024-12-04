@@ -30,7 +30,8 @@ function run(argument) {
     dueString,
     duration,
     durationUnit,
-    description;
+    description,
+    quotedParts;
 
   if (!apiToken) {
     setApiKey();
@@ -42,6 +43,22 @@ function run(argument) {
   }
 
   argument += ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
+
+  // Description
+  description = argument.includes(': ')
+    ? capitalizeFirstLetter(argument.match(reDescription)[1])
+    : null;
+  argument = argument.includes(': ')
+    ? argument.replace(reDescription, '')
+    : argument;
+
+  // Exclude parts in quotation marks from being parsed
+  if (argument.includes('"')) {
+    quotedParts = (argument.match(reQuotedParts) || [])
+      .map((part) => part.slice(1, -1))
+      .join(' ');
+    argument = argument.replace(reQuotedParts, ' ');
+  }
 
   // Priorities
   prioMatch = argument.match(rePrio);
@@ -116,16 +133,9 @@ function run(argument) {
     argument = argument.replace(reDuration, ' ');
   }
 
-  // Description
-  description = argument.includes(': ')
-    ? capitalizeFirstLetter(argument.match(/(?:\: )(.*)/)[1])
-    : null;
-  argument = argument.includes(': ')
-    ? argument.replace(/(?:\: )(.*)/, '')
-    : argument;
-
+  // Add quoted string parts & cleanup
+  argument = quotedParts ? quotedParts + argument : argument;
   argument = argument.replace(/\s+/g, ' ').trim();
-
   argument = capitalizeFirstLetter(argument);
 
   const taskDict = {
@@ -140,14 +150,14 @@ function run(argument) {
     advancedData: false,
   };
 
-  if (argument == '') {
-    LaunchBar.alert('This task has no name!'.localize());
-    return;
+  if (!argument) {
+    return LaunchBar.alert('This task has no content!'.localize());
   }
 
   if (LaunchBar.options.commandKey) {
     return advancedOptions(taskDict);
   }
+
   postTask(taskDict);
 }
 
@@ -544,12 +554,7 @@ function processPostResponse(result, sections, projects) {
     if (result.response.status != 200) {
       LaunchBar.displayNotification({
         title: 'Todoist Action Error',
-        string:
-          result.response.status +
-          ': ' +
-          result.response.localizedStatus +
-          ': ' +
-          result.data,
+        string: `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
       });
       if (result.response.status == 401) {
         Action.preferences.apiToken = undefined; // to promt API token entry dialog

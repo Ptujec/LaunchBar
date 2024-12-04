@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Todoist Inbox</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.3</string>
+	<string>3.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.todoist.mac.Todoist</string>
 	<key>LBDescription</key>
@@ -17,11 +17,11 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⇧⏎ = Settings</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Todoist-Inbox/Todoist%20Inbox.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>

@@ -22,7 +22,6 @@ on run
 			repeat with _msg in _sel
 				set _messageURL to "message://%3c" & _msg's message id & "%3e"
 				set _subject to _msg's subject
-				
 				set _subject to do shell script "echo " & quoted form of _subject & "| sed 's/[\",]/\\\\&/g'" -- fix quotes to avoid trouble with JSON parsing
 				
 				set _sender to _msg's sender

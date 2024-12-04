@@ -20,6 +20,8 @@ const labelsPath = Action.supportPath + '/labels.json';
 
 const rePrio = /( p[1-3]( |$))|((^| )p[1-3] )/i;
 const reDueStringWithAt = / @(.*?)(p\d|((^| )#($| ))|$)/i;
+const reDescription = /(?:\: )(.*)/;
+const reQuotedParts = /"(.*?)"/g;
 
 // Functions
 function capitalizeFirstLetter(string) {
