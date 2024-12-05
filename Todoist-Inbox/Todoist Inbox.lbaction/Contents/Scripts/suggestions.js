@@ -103,6 +103,10 @@ function main(string) {
       .map((part) => part.slice(1, -1))
       .join(' ');
     string = string.replace(reQuotedParts, ' ');
+
+    if (quotedParts) {
+      show = true;
+    }
   }
 
   // Priorities
