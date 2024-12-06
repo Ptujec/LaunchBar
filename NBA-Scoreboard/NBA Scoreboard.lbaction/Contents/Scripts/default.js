@@ -181,6 +181,12 @@ function showGames(startDateString, endDateString) {
       });
     }
 
+    // Fallback icon
+    const resources = File.getDirectoryContents(
+      `${Action.path}/Contents/Resources`
+    );
+    if (!resources.includes(`${icon}.png`)) icon = 'balldontlieTemplate';
+
     const pushData = {
       title,
       label,
