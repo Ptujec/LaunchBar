@@ -2,7 +2,7 @@
 
 This action is mostly for checking scores of NBA games that are completed and upcoming games. 
 
-<img src="01.jpg" width="656"/> 
+<img src="01.jpg" width="868"/> 
 
 
 ## Features
@@ -17,6 +17,8 @@ This action is mostly for checking scores of NBA games that are completed and up
 ## Settings
 
 If you hat `⌥ + ↩` on the top level, you can tweak how many days in the past and future are included. You can also (re)set your API key there. 
+
+<img src="02.jpg" width="868"/> 
 
 
 ## API Key required
