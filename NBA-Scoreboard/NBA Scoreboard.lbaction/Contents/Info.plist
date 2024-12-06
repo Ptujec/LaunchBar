@@ -9,19 +9,19 @@
 	<key>CFBundleName</key>
 	<string>NBA Scoreboard</string>
 	<key>CFBundleVersion</key>
-	<string>3.2</string>
+	<string>3.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/NBA-Scoreboard/NBA%20Scoreboard.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/NBA-Scoreboard</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/NBA-Scoreboard/NBA%20Scoreboard.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -42,6 +42,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string>Enter days from now (e.g. "-3") or weekday ("Sunday", "sun") </string>
+	<string>Enter days from now or a weekday</string>
 </dict>
 </plist>

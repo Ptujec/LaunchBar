@@ -14,13 +14,18 @@ This action is mostly for checking scores of NBA games that are completed and up
 - You can press enter `‌↩` to go to the summary of a selected game on espn.com. *(This uses DuckDuckGo and might not always be reliable)*
 - Hit `‌⌥ + ↩` to check Youtube for a game recap of the selected game when completed. If the game is not yet completed `⌥ + ↩` should lead you to NBA.com (e.g. to watch the game via league pass). *(This uses DuckDuckGo and might not always be reliable)*
 
+## Settings
+
+If you hat `⌥ + ↩` on the top level, you can tweak how many days in the past and future are included. You can also (re)set your API key there. 
+
+
 ## API Key required
 
 This action requires an API key. There is a free tier that should work fine for this action.
 
 Go to https://new.balldontlie.io to create your account and get your key.
 
-You will be prompted to set the API key automatically. You can also manually reset the API key with `‌⌥ + ↩` any time.
+You will be prompted to set the API key automatically. You can also manually reset the API key ‌in the settings `‌⌥ + ↩`.
 
 ## Download
 

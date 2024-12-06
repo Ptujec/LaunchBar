@@ -1,0 +1,17 @@
+" days." = " Tage.";
+" day(s)" = " Tag(e)";
+"Show games from the past " = "Zeige Ergebnisse der letzten ";
+"sunday" = "sonntag"; 
+"monday" = "montag"; 
+"tuesday" = "dienstag"; 
+"wednesday" = "mittwoch"; 
+"thursday" = "donnerstag"; 
+"friday" = "freitag"; 
+"saturday" = "samstag";
+"tomorrow" = "morgen";
+"yesterday" = "gestern";
+"Set Range Past" = "Zeitraum Vergangenheit";
+"Set Range Future" = "Zeitraum Zukunft";
+"How many past days should be included by default?" = "Wie viele vergangene Tage sollten standardmäßig berücksichtigt werden?";
+"How many future days should be included by default?" = "Wie viele zukünftige Tage sollten standardmäßig berücksichtigt werden?";
+"Set API Key" = "API-Schlüssel festlegen";
