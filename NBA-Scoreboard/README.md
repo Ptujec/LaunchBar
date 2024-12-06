@@ -1,6 +1,6 @@
-# LaunchBar Action: NBA Scoreboard
+# LaunchBar Action: NBA Scoreboard 
 
-This action is mostly for checking scores of NBA games that are completed and upcoming games. 
+This action is mostly for checking scores of NBA games that are completed and upcoming games. It is powered by https://www.balldontlie.io.
 
 <img src="01.jpg" width="868"/> 
 
@@ -25,7 +25,7 @@ If you hat `⌥ + ↩` on the top level, you can tweak how many days in the past
 
 This action requires an API key. There is a free tier that should work fine for this action.
 
-Go to https://new.balldontlie.io to create your account and get your key.
+Go to https://www.balldontlie.io to create your account and get your key.
 
 You will be prompted to set the API key automatically. You can also manually reset the API key ‌in the settings `‌⌥ + ↩`.
 
