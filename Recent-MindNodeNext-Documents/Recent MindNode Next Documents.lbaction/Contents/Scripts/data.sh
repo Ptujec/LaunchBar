@@ -31,5 +31,5 @@ if [ -z "${documents}" ]; then
     documents="[]"
 fi
 
-assets=$(ls "$2" | jq -R -s -c 'split("\n")[:-1]')
+assets=$(ls "$2" | jq -R -s -c 'split("\n")[:-1] | map(select(contains("_full_")))')
 echo "{\"documents\": $documents, \"assets\": $assets}"

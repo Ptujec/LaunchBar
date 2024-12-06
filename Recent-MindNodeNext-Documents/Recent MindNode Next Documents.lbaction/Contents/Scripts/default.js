@@ -30,7 +30,7 @@ function run() {
 
   return outputJson.documents.map((item) => {
     const previewImage = assets.find((asset) =>
-      asset.startsWith(`${item.documentID}_full_`)
+      asset.startsWith(item.documentID)
     );
 
     return {
@@ -38,7 +38,9 @@ function run() {
       icon: 'com.ideasoncanvas.mindnode',
       path: assetsDir + previewImage,
       action: 'open',
-      actionArgument: `https://mindnode.com/document/${item.documentID}#${item.title}`,
+      actionArgument: `https://mindnode.com/document/${
+        item.documentID
+      }#${encodeURI(item.title)}`,
       actionRunsInBackground: true,
     };
   });
@@ -46,6 +48,7 @@ function run() {
 
 function open(url) {
   LaunchBar.hide();
+  if (LaunchBar.options.shiftKey) return LaunchBar.paste(url);
   LaunchBar.openURL(url);
 }
 
