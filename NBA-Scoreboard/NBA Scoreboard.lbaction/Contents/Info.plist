@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>logo.png</string>
+	<string>logo</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.NBAScoreboard</string>
 	<key>CFBundleName</key>
 	<string>NBA Scoreboard</string>
 	<key>CFBundleVersion</key>
-	<string>3.3</string>
+	<string>3.3.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

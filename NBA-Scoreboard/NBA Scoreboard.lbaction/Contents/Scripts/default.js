@@ -11,13 +11,12 @@ Documentation:
 
 TODO: 
 - Would be nice to be able to not have to guess to show the games on youtube and such … but probably requires new API
-- German Localization? (Settings)
 */
 
 String.prototype.localizationTable = 'default';
 
-const defaultPast = '1';
-const defaultFuture = '0';
+const defaultRangePast = '1';
+const defaultRangeFuture = '0';
 
 function run(argument) {
   if (!Action.preferences.apiKey) return setAPIKey();
@@ -32,11 +31,11 @@ function run(argument) {
   if (!argument) {
     startDate.setDate(
       startDate.getDate() -
-        parseInt(Action.preferences.rangePast || defaultPast)
+        parseInt(Action.preferences.rangePast || defaultRangePast)
     );
     endDate.setDate(
       endDate.getDate() +
-        parseInt(Action.preferences.rangeFuture || defaultFuture)
+        parseInt(Action.preferences.rangeFuture || defaultRangeFuture)
     );
 
     return showGames(
@@ -101,7 +100,7 @@ function showGames(startDateString, endDateString) {
   // return;
   // const scoreData = File.readJSON(Action.supportPath + '/test.json');
 
-  if (scoreData.response == undefined || scoreData.error)
+  if (!scoreData.response && scoreData.error)
     return { title: scoreData.error, icon: 'alert' };
 
   if (scoreData.response.status != 200) {
@@ -142,26 +141,16 @@ function showGames(startDateString, endDateString) {
       timeStyle: 'none',
     });
 
-    // Test gameStatus for date
+    // Test if gameStatus is date
     const statusIsDate = new Date(gameStatus);
 
-    // Time difference from now to game start
-    // const difference = (new Date(gameStatus) - new Date()) / (1000 * 60 * 60);
-    // if (difference > 0) {
-
     if (statusIsDate != 'Invalid Date') {
-      // Date
       const relativeDate = LaunchBar.formatDate(new Date(gameStatus), {
         relativeDateFormatting: true,
       });
 
-      // Title
-      // title = `${vTeam} vs. ${hTeam} - ${relativeDate}`;
       title = `${vTeam} vs. ${hTeam}`;
-
       label = relativeDate;
-
-      // Icon
       icon = hTeam.toLowerCase();
 
       nbaComSearchURL = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(
@@ -179,10 +168,8 @@ function showGames(startDateString, endDateString) {
         `site:nba.com ${game.visitor_team.full_name} vs ${game.home_team.full_name} ${nbaComDate} Game Summary`
       )}`;
 
-      // Title
       title = `${hTeam} ${hTeamScore} : ${vTeam} ${vTeamScore}`;
 
-      // Icon
       icon =
         parseInt(vTeamScore) > parseInt(hTeamScore)
           ? vTeam.toLowerCase()
@@ -191,22 +178,16 @@ function showGames(startDateString, endDateString) {
       label = LaunchBar.formatDate(new Date(gameDate), {
         relativeDateFormatting: true,
         timeStyle: 'none',
-        // timeZone: 'GMT',
       });
     }
 
     const pushData = {
       title,
       label,
-      // alwaysShowsSubtitle: true,
       icon,
       action: 'open',
       id: game.id,
-      actionArgument: {
-        espnSearchURL,
-        ytSearchURL,
-        nbaComSearchURL,
-      },
+      actionArgument: { espnSearchURL, ytSearchURL, nbaComSearchURL },
       actionRunsInBackground: true,
     };
 
@@ -225,7 +206,21 @@ function showGames(startDateString, endDateString) {
   otherGames.sort((a, b) => a.id - b.id);
   scheduledGames.sort((a, b) => a.date - b.date);
 
-  return [...otherGames, ...scheduledGames];
+  const allGames = [...otherGames, ...scheduledGames];
+
+  if (allGames.length === 0) {
+    const fallBackURL = `https://www.espn.com/nba/schedule/_/date/${startDateString.replace(
+      /-/g,
+      ''
+    )}`;
+
+    return {
+      title: 'No games available'.localize(),
+      icon: 'logo',
+      url: fallBackURL,
+    };
+  }
+  return allGames;
 }
 
 function open({ espnSearchURL, ytSearchURL, nbaComSearchURL }) {
@@ -248,7 +243,8 @@ function settings() {
       subtitle: 'How many past days should be included by default?'.localize(),
       alwaysShowsSubtitle: true,
       badge:
-        (Action.preferences.rangePast || defaultPast) + ' day(s)'.localize(),
+        (Action.preferences.rangePast || defaultRangePast) +
+        ' day(s)'.localize(),
       icon: 'pastTemplate',
       children: showRangePast(),
     },
@@ -258,7 +254,7 @@ function settings() {
         'How many future days should be included by default?'.localize(),
       alwaysShowsSubtitle: true,
       badge:
-        (Action.preferences.rangeFuture || defaultFuture) +
+        (Action.preferences.rangeFuture || defaultRangeFuture) +
         ' day(s)'.localize(),
       icon: 'futureTemplate',
       children: showRangeFuture(),
@@ -273,7 +269,7 @@ function settings() {
 }
 
 function showRangePast() {
-  const rangePast = Action.preferences.rangePast || defaultPast;
+  const rangePast = Action.preferences.rangePast || defaultRangePast;
 
   return Array.from({ length: 5 }, (_, index) => ({
     title: 'Show games from the past '.localize() + index + ' days.'.localize(),
@@ -289,7 +285,7 @@ function setRangePast(rangePast) {
 }
 
 function showRangeFuture() {
-  const rangeFuture = Action.preferences.rangeFuture || defaultFuture;
+  const rangeFuture = Action.preferences.rangeFuture || defaultRangeFuture;
 
   return Array.from({ length: 5 }, (_, index) => ({
     title: 'Show games from the past '.localize() + index + ' days.'.localize(),
@@ -306,33 +302,22 @@ function setRangeFuture(rangeFuture) {
 
 function setAPIKey() {
   const response = LaunchBar.alert(
-    'API Key required',
-    'This actions requires an API Key from https://new.balldontlie.io. Press "Open Website" to get yours.\nCopy the API Key to your clipboard, run the action again and press "Set API Key"',
-    'Open Website',
-    'Set API Key',
-    'Cancel'
+    'API Key required'.localize(),
+    'This actions requires an API Key from https://balldontlie.io. Press "Open Website" to get yours. Copy the API Key to your clipboard, run the action again and press "Set API Key"'.localize(),
+    'Open Website'.localize(),
+    'Set API Key'.localize(),
+    'Cancel'.localize()
   );
   switch (response) {
     case 0:
       LaunchBar.hide();
-      LaunchBar.openURL('https://new.balldontlie.io');
+      LaunchBar.openURL('https://balldontlie.io');
       break;
     case 1:
       // Check API Key
       const clipboard = LaunchBar.getClipboardString().trim();
-
-      if (clipboard.length == 36) {
-        Action.preferences.apiKey = clipboard;
-
-        LaunchBar.alert(
-          'Success!',
-          'API Access Key set to: ' + Action.preferences.apiKey
-        );
-      } else {
-        LaunchBar.alert(
-          'Seems like an incorrect API-key. Make sure it is the most recent item of your clipboard history!'
-        );
-      }
+      Action.preferences.apiKey = clipboard;
+      LaunchBar.alert('API Key: ', Action.preferences.apiKey);
       break;
     case 2:
       break;
