@@ -193,7 +193,7 @@ function showGames(startDateString, endDateString) {
       icon,
       action: 'open',
       id: game.id,
-      actionArgument: { espnSearchURL, ytSearchURL, nbaComSearchURL },
+      actionArgument: { espnSearchURL, ytSearchURL, nbaComSearchURL, gameTime },
       actionRunsInBackground: true,
     };
 
@@ -229,15 +229,18 @@ function showGames(startDateString, endDateString) {
   return allGames;
 }
 
-function open({ espnSearchURL, ytSearchURL, nbaComSearchURL }) {
+function open({ espnSearchURL, ytSearchURL, nbaComSearchURL, gameTime }) {
   LaunchBar.hide();
-  LaunchBar.openURL(
-    LaunchBar.options.alternateKey
-      ? espnSearchURL
-      : LaunchBar.options.commandKey
-      ? nbaComSearchURL
-      : ytSearchURL
-  );
+
+  // 'Final' = game is finished; null = game has not started; else = running
+  const urlMap = {
+    null: [espnSearchURL, nbaComSearchURL],
+    Final: [ytSearchURL, espnSearchURL],
+  };
+
+  const [url, altURL] = urlMap[gameTime] || [nbaComSearchURL, espnSearchURL];
+
+  LaunchBar.openURL(LaunchBar.options.commandKey ? altURL : url);
 }
 
 // SETTINGS

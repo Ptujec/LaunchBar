@@ -12,11 +12,11 @@ This action is mainly for checking the scores of completed and upcoming NBA game
 - The icon displayed in LaunchBar is either the one from the winning team or the home team if the game has not started yet.
 - Dates and times for scheduled games are translated to your time zone.
 - You can press Enter `‌↩` to check YouTube for a game recap of the selected game when completed. If the game is still ongoing, it should lead you to NBA.com so you can watch it via League Pass. *(This uses DuckDuckGo and might not always be reliable.)*
-- Hold `⌥` and press enter `↩` to go to the summary of a selected game on espn.com. *(This uses DuckDuckGo and might not always be reliable)*
+- Hold `command` and press enter `↩` to go to the summary of a selected game on espn.com. *(This uses DuckDuckGo and might not always be reliable)*
 
 ## Settings
 
-If you hold `⌥` and press enter `↩` on the top level, you can tweak how many days in the past and future are included. You can also (re)set your API key there. 
+If you hold `option` and press enter `↩` on the top level, you can tweak how many days in the past and future are included. You can also (re)set your API key there. 
 
 <img src="02.jpg" width="868"/> 
 
@@ -27,7 +27,7 @@ This action requires an API key. There is a free tier that should work fine for 
 
 Go to https://www.balldontlie.io to create your account and get your key.
 
-You will be prompted to set the API key automatically. You can also manually reset the API key in the settings (`⌥` + `↩`).
+You will be prompted to set the API key automatically. You can also manually reset the API key in the settings (`option` + `↩`).
 
 ## Download
 
