@@ -1,6 +1,6 @@
 # LaunchBar Action: Add To PodQueue
 
-My beloved [huffduff-video](https://huffduff-video.snarfed.org) has been shut down. I now use PodQueue to add videos as audio to my podcast client.
+My beloved [huffduff-video](https://huffduff-video.snarfed.org) has been shut down. I now use [PodQueue](https://podqueue.fm) to add videos as audio to my podcast client.
 
 The action will try to get the URL from the frontmost app. If that is not successful, it will check your default browser. You can also manually send a URL to the action. 
 
