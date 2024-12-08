@@ -18,7 +18,6 @@ on run
 		
 		delay 0.1
 		set s to the clipboard
-		-- set s to " ¡Hola! Me llamo Mónica."
 		key code 125
 	end tell
 	main_action(s)
@@ -32,15 +31,15 @@ on main_action(s)
 					if player state is playing then
 						set currentvolume to the sound volume
 						set sound volume to 30
-						do shell script "say -v 'Marisol (Enhanced)' '" & s & "'"
+						do shell script "say -v 'Marisol (Enhanced)' " & quoted form of s
 						delay 0.5
 						set the sound volume to currentvolume
 					else
-						do shell script "say -v 'Marisol (Enhanced)' '" & s & "'"
+						do shell script "say -v 'Marisol (Enhanced)' " & quoted form of s
 					end if
 				end tell
 			else
-				do shell script "say -v 'Marisol (Enhanced)' '" & s & "'"
+				do shell script "say -v 'Marisol (Enhanced)' " & quoted form of s
 			end if
 		end tell
 	on error e
