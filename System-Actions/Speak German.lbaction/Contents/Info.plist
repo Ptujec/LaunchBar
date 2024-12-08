@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>LipsOpenTemplate.pdf</string>
+	<string>lipsTemplate.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.SpeakGerman</string>
 	<key>CFBundleName</key>
 	<string>Speak German</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2.1</string>
 	<key>LBAbbreviation</key>
 	<string>sprd</string>
 	<key>LBDescription</key>
@@ -17,13 +17,15 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
-		<string>Speak Text with German voice. (Reduce volume if Music is running. Pause Spotify if running) </string>
+		<string>Speak Text with German voice. (Reduce volume if Music is running) </string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/System-Actions</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Speak%20German.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
