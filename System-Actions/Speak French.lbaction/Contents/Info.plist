@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Speak French</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -21,7 +21,7 @@
 		<key>LBTwitter</key>
 		<string></string>
 		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Speak%20Spanish.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Speak%20French.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/System-Actions</string>
 	</dict>
