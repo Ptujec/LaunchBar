@@ -7,7 +7,8 @@
 - Day Night Toggle
 - Uptime
 - Wifi Toggle
-- Speech actions (German, English, Stop)
+- Speech actions (German, English, Spanish, French). If you don't send text to it, it will select all text automatically.
+- Stop speech 
 
 ## Download
 
