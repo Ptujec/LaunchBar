@@ -6,6 +6,10 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 *)
 
+on run()
+	return
+end run
+
 on handle_string(_name)	
 	tell application "Finder"
 		activate
