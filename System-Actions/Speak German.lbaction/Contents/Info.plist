@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Speak German</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>2.1.1</string>
 	<key>LBAbbreviation</key>
 	<string>sprd</string>
 	<key>LBDescription</key>
@@ -40,7 +40,7 @@
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>SpeakGerman.applescript</string>
+			<string>default.applescript</string>
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>

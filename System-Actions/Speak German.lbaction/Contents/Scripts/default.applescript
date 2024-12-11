@@ -1,6 +1,18 @@
+(* 
+Speek German Action for LaunchBar
+by Christian Bender (@ptujec)
+2024-12-11
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*)
+
 on handle_string(s)
 	main_action(s)
 end handle_string
+
+on handle_item(i)
+	main_action(title of i)
+end handle_item
 
 on run
 	tell application "System Events"
