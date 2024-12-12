@@ -1,6 +1,6 @@
 # LaunchBar Actions for Managing Notifications
 
-*Note: The lastest version require macOS 13.*
+*Note: Make sure to install the set of actions that is compatible with the macOS version you are currently using.*
 
 ## Action: Notification Actions
 
