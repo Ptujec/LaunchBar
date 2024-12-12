@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>Template.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.Showanddismissnotifications</string>
+	<key>CFBundleName</key>
+	<string>Show/dismiss notifications</string>
+	<key>CFBundleVersion</key>
+	<string>6</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Ptujec</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBSummary</key>
+		<string>This action will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few more options.</string>
+		<key>LBTwitter</key>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Notifications/Show%20dismiss%20notifications.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Notifications#action-showdismiss-notifications</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.js</string>
+		</dict>
+	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.2</string>
+</dict>
+</plist>
