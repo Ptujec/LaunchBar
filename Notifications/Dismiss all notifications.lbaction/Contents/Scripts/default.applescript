@@ -3,7 +3,7 @@ Close notifications Applescript Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-15
 
-requires macOS 15.1 
+requires macOS 15.2 
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -17,10 +17,10 @@ use AppleScript version "2.4" -- Yosemite (10.10) or later
 use scripting additions
 use framework "Foundation"
 property NSArray : a reference to current application's NSArray
+property alertAndBannerSet : {"AXNotificationCenterAlert", "AXNotificationCenterBanner"}
 property closeActionSet : {"Close", "Clear All", "Schließen", "Alle entfernen", "Cerrar", "Borrar todo", "关闭", "清除全部", "Fermer", "Tout effacer", "Закрыть", "Очистить все", "إغلاق", "مسح الكل", "Fechar", "Limpar tudo", "閉じる", "すべてクリア", "बंद करें", "सभी हटाएं", "Zamknij", "Wyczyść wszystko"}
 
 on run
-	
 	tell application "System Events"
 		try
 			set _main_group to group 1 of scroll area 1 of group 1 of group 1 of window 1 of application process "NotificationCenter"
