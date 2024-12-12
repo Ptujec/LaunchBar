@@ -1,9 +1,11 @@
 /* 
 Recent MindNode Next Documents Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-11-26
+2024-12-11
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+TODO: update readme (jetzt tatsächlich viewed nicht changed) … publish when out of beta
 */
 
 const supportDir = `${LaunchBar.homeDirectory}/Library/Containers/com.ideasoncanvas.mindnode/Data/Library/Application Support/MindNode Next`;
@@ -12,38 +14,25 @@ function run() {
   const version = getLatestVersion();
 
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
-  const dataBaseDir = `${cloudDocumentsDir}/Content.sqlite3`;
-  const assetsDir = `${cloudDocumentsDir}/Assets/`;
 
-  const output = LaunchBar.execute(
-    '/bin/sh',
-    './data.sh',
-    dataBaseDir,
-    assetsDir
-  );
+  const snapshotJson =
+    File.readJSON(
+      `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`
+    ) || [];
 
-  if (!output) return { title: 'Nothing found', icon: 'alert' };
-
-  const outputJson = JSON.parse(output);
-
-  const assets = outputJson.assets ? outputJson.assets : [];
-
-  return outputJson.documents.map((item) => {
-    const previewImage = assets.find((asset) =>
-      asset.startsWith(item.documentID)
-    );
-
-    return {
-      title: item.title,
+  return snapshotJson
+    .filter((obj) => !obj.isTrashed && obj.title)
+    .sort((a, b) => b.lastViewedDate - a.lastViewedDate)
+    .map((obj) => ({
+      title: obj.title,
       icon: 'com.ideasoncanvas.mindnode',
-      path: assetsDir + previewImage,
+      path: File.pathForFileURL(obj.previewImageFullsizeURL),
       action: 'open',
-      actionArgument: `https://mindnode.com/document/${
-        item.documentID
-      }#${encodeURI(item.title)}`,
+      actionArgument: `https://mindnode.com/document/${obj.id}#${encodeURI(
+        obj.title
+      )}`,
       actionRunsInBackground: true,
-    };
-  });
+    }));
 }
 
 function open(url) {
