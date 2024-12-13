@@ -39,10 +39,7 @@ function run(argument) {
 
   const result = LaunchBar.execute(soulverCLI, argument).trim();
 
-  if (LaunchBar.options.shiftKey) {
-    LaunchBar.paste(result);
-    return; //
-  }
+  if (LaunchBar.options.shiftKey) return LaunchBar.paste(result);
 
   if (!result.startsWith('Error')) {
     return [

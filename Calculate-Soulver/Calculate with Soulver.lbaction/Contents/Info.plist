@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Calculate with Soulver</string>
 	<key>CFBundleVersion</key>
-	<string>1.4</string>
+	<string>1.4.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>app.soulver.mac</string>
 	<key>LBDescription</key>
@@ -17,11 +17,11 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Calculate-Soulver/Calculate%20with%20Soulver.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
