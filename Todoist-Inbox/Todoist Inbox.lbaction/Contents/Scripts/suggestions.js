@@ -84,6 +84,18 @@ function main(string) {
   let suggestions = [];
   let quotedParts, show, dueExists, p, icon;
 
+  // Exclude parts in quotation marks from being parsed
+  if (string.includes('"')) {
+    quotedParts = (string.match(reQuotedParts) || [])
+      .map((part) => part.slice(1, -1))
+      .join(' ');
+    string = string.replace(reQuotedParts, ' ');
+
+    if (quotedParts) {
+      show = true;
+    }
+  }
+
   // Description
   if (string.includes(': ')) {
     show = true;
@@ -95,18 +107,6 @@ function main(string) {
       order: 2,
     });
     string = string.replace(reDescription, '');
-  }
-
-  // Exclude parts in quotation marks from being parsed
-  if (string.includes('"')) {
-    quotedParts = (string.match(reQuotedParts) || [])
-      .map((part) => part.slice(1, -1))
-      .join(' ');
-    string = string.replace(reQuotedParts, ' ');
-
-    if (quotedParts) {
-      show = true;
-    }
   }
 
   // Priorities

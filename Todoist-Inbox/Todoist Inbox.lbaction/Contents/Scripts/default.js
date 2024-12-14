@@ -44,14 +44,6 @@ function run(argument) {
 
   argument += ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
 
-  // Description
-  description = argument.includes(': ')
-    ? capitalizeFirstLetter(argument.match(reDescription)[1])
-    : null;
-  argument = argument.includes(': ')
-    ? argument.replace(reDescription, '')
-    : argument;
-
   // Exclude parts in quotation marks from being parsed
   if (argument.includes('"')) {
     quotedParts = (argument.match(reQuotedParts) || [])
@@ -59,6 +51,14 @@ function run(argument) {
       .join(' ');
     argument = argument.replace(reQuotedParts, ' ');
   }
+
+  // Description
+  description = argument.includes(': ')
+    ? capitalizeFirstLetter(argument.match(reDescription)[1])
+    : null;
+  argument = argument.includes(': ')
+    ? argument.replace(reDescription, '')
+    : argument;
 
   // Priorities
   prioMatch = argument.match(rePrio);
