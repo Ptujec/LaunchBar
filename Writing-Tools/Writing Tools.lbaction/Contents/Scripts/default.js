@@ -14,6 +14,7 @@ Documentation:
 
 
 TODO: 
+- savety check … maybe optional? … only with longer text?
 - make faster detect frontmost and get contents
 - code cleanup
 */
@@ -46,9 +47,30 @@ function run(argument) {
 
   const hasArgument = argument ? true : false; // For Writer AS
 
-  let content = argument;
+  let content = argument?.trim();
 
   if (!argument) {
+    // TODO: savety check … maybe optional … only with longer text
+    const response = LaunchBar.alert(
+      'Select all text?'.localize(),
+      '',
+      'Ok',
+      'Cancel'.localize()
+    );
+    switch (response) {
+      case 0:
+        // Continue
+        doIt = true;
+        break;
+      case 1:
+        doIt = false;
+        break;
+    }
+
+    LaunchBar.hide();
+
+    if (doIt === false) return;
+
     content = LaunchBar.executeAppleScript(contentAS).trim();
 
     if (content.startsWith('Error')) return { title: content, icon: 'alert' };

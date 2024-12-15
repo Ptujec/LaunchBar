@@ -30,3 +30,4 @@
 "Make sure the API key is the most recent item in the clipboard!" = "Stellen Sie sicher, dass der API-Schlüssel der letzte Eintrag in der Zwischenablage ist!";
 "Invalid OpenAI API key" = "Ungültiger OpenAI API-Schlüssel";
 "Recommended" = "Empfohlen";
+"Select all text?" = "Den gesamten Text auswählen?";
