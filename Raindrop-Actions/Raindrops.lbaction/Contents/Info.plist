@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>icon.tiff</string>
+	<string>icon</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.Raindrops</string>
 	<key>CFBundleName</key>
 	<string>Raindrops</string>
 	<key>CFBundleVersion</key>
-	<string>4.2.2</string>
+	<string>4.3.0</string>
 	<key>LBAssociatedApplication</key>
 	<string>io.raindrop.macapp</string>
 	<key>LBDescription</key>
@@ -17,11 +17,11 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⏎ = Browse recent items, Space = Search by tags (⇧⏎ = Search in URLs, ^⏎ = Search all text), ⌘⏎ = Open app</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions#action-raindrops-browse-and-search-raindropio</string>
 		<key>LBUpdateURL</key>
@@ -34,7 +34,7 @@
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBScriptName</key>
-			<string>actionURL.js</string>
+			<string>actionUrl.js</string>
 		</dict>
 		<key>LBDefaultScript</key>
 		<dict>

@@ -1,28 +1,43 @@
-// LaunchBar Action Script
+/* 
+Raindrops - Raindrop.io Action for LaunchBar
+by Christian Bender (@ptujec)
+2024-12-16
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+OAuth implementation by Manfred Linzner (@mlinzner)
+
+Note: I used Cursor to refactor the code.
+*/
+
+include('global.js');
 
 function runWithURL(URL, details) {
-  if (details.path === "/ptujec.LaunchBar.action.Raindrops/redirect") {
-    if (details.queryParameters.code !== undefined) {
-      var result = HTTP.postJSON("https://raindrop.io/oauth/access_token", {
+  if (details.path === '/ptujec.LaunchBar.action.SaveRaindrop/redirect') {
+    if (details.queryParameters.code) {
+      const result = HTTP.postJSON(RAINDROP_CONFIG.TOKEN_URL, {
         body: {
-          grant_type: "authorization_code",
+          grant_type: 'authorization_code',
           code: details.queryParameters.code,
-          client_id: "6116c7c7c1005a0f29f1d303",
-          client_secret: "85bf8ca2-1e85-491b-82ca-a344c65cd3eb",
-          redirect_uri:
-            "https://launchbar.link/action/ptujec.LaunchBar.action.Raindrops/redirect",
+          client_id: RAINDROP_CONFIG.CLIENT_ID,
+          client_secret: RAINDROP_CONFIG.CLIENT_SECRET,
+          redirect_uri: RAINDROP_CONFIG.REDIRECT_URI,
         },
       });
 
-      if (result.data !== undefined && typeof result.data === "string") {
-        const resultData = JSON.parse(result.data);
-        const now = new Date();
-        Action.preferences.access_token_expiry_date =
-          now.getTime() + resultData.expires_in * 1000;
-        Action.preferences.apiKey = resultData.access_token;
+      if (result.data) {
+        const resultData =
+          typeof result.data === 'string'
+            ? JSON.parse(result.data)
+            : result.data;
+
+        // Reuse the token storage function from global.js
+        updateStoredToken(resultData);
+
+        // Store refresh token (specific to initial auth)
         Action.preferences.refresh_token = resultData.refresh_token;
 
-        LaunchBar.alert("Successfully Authenticated");
+        LaunchBar.alert('Successfully Authenticated');
       }
     }
   }
