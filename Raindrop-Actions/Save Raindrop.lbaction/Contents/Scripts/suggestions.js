@@ -1,71 +1,65 @@
 /* 
-Save Raindrop - Raindrop.io Action for LaunchBar - Suggestions (Tags)
+Save Raindrop - Raindrop.io Action for LaunchBar
+by Christian Bender (@ptujec)
+2024-12-16
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+OAuth implementation by Manfred Linzner (@mlinzner)
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - https://developer.raindrop.io
+
+Note: I used Cursor to refactor the code.
 */
 
+include('global.js');
+
 function runWithString(string) {
-    var rData = HTTP.getJSON(
-        encodeURI(
-            "https://api.raindrop.io/rest/v1/tags/0?access_token=" +
-            Action.preferences.apiKey
-        )
+  const apiKey = getApiKey();
+  if (!apiKey) return initiateOAuthFlow();
+
+  const response = HTTP.getJSON(
+    encodeURI(`https://api.raindrop.io/rest/v1/tags/0?access_token=${apiKey}`)
+  );
+
+  const searchTerms = string.split(',');
+  const currentSearch = searchTerms[searchTerms.length - 1]
+    .trim()
+    .toLowerCase();
+  const previousTerms = searchTerms.slice(0, -1).join(',');
+
+  const createSuggestion = (suggestion, isMultiTag) => {
+    const title = isMultiTag ? `${previousTerms}, ${suggestion}` : suggestion;
+    const icon = isMultiTag ? 'tagsTemplate' : 'tagTemplate';
+    return { title, icon };
+  };
+
+  const matchingSuggestions = response.data.items
+    .map((item) => item._id)
+    .filter((suggestion) => suggestion.toLowerCase().includes(currentSearch))
+    .reduce(
+      (acc, suggestion) => {
+        const isMultiTag = searchTerms.length >= 2;
+        const suggestionObj = createSuggestion(suggestion, isMultiTag);
+
+        // Separate exact matches (starting with search term) from partial matches
+        if (suggestion.toLowerCase().startsWith(currentSearch)) {
+          acc.exact.push(suggestionObj);
+        } else {
+          acc.partial.push(suggestionObj);
+        }
+        return acc;
+      },
+      { exact: [], partial: [] }
     );
 
-    var first = [];
-    var second = [];
-    for (var iData = 0; iData < rData.data.items.length; iData++) {
-        var suggestion = rData.data.items[iData]._id
+  // Sort both arrays alphabetically
+  const sortByTitle = (a, b) => a.title.localeCompare(b.title);
 
-        testString = string
-            .split(',')
-
-        var t = testString[testString.length - 1]
-            .trim()
-
-        if (suggestion.toLowerCase().includes(t.toLowerCase())) {
-            if (suggestion.toLowerCase().startsWith(t.toLowerCase())) {
-                if (testString.length >= 2) {
-                    s = string.split(",")
-                    s.pop().toString()
-                    var title = s + ', ' + suggestion
-                    var icon = 'tagsTemplate'
-                } else {
-                    var title = suggestion
-                    var icon = 'tagTemplate'
-                }
-
-                first.push({
-                    'title': title,
-                    'icon': icon
-                });
-            } else {
-                if (testString.length >= 2) {
-                    s = string.split(",")
-                    s.pop().toString()
-                    var title = s + ', ' + suggestion
-                    var icon = 'tagsTemplate'
-                } else {
-                    var title = suggestion
-                    var icon = 'tagTemplate'
-                }
-
-                second.push({
-                    'title': title,
-                    'icon': icon
-                });
-            }
-        }
-    }
-    first.sort(function (a, b) {
-        return a.title > b.title;
-    });
-    second.sort(function (a, b) {
-        return a.title > b.title;
-    });
-    var suggestions = first.concat(second)
-
-    return suggestions;
+  return [
+    ...matchingSuggestions.exact.sort(sortByTitle),
+    ...matchingSuggestions.partial.sort(sortByTitle),
+  ];
 }

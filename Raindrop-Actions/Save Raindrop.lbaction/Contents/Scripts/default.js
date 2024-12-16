@@ -1,384 +1,241 @@
 /* 
-Save Raindrop - Raindrop.io Action for LaunchBar - Main Action
+Save Raindrop - Raindrop.io Action for LaunchBar
+by Christian Bender (@ptujec)
+2024-12-16
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+OAuth implementation by Manfred Linzner (@mlinzner)
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - https://developer.raindrop.io
 
 Other sources: 
-- https://apple.stackexchange.com/questions/219582/default-browser-plist-location
-- https://apple.stackexchange.com/questions/313454/applescript-find-the-users-set-default-browser
 - https://macscripter.net/viewtopic.php?id=22375 MacScripter / fastest way to get the name of the frontmost application?
 - https://github.com/raguay/MyLaunchBarActions/blob/92884fb2132e55c922232a80db9ddfb90b2471c4/NotePad%20-%20Set%20Note.lbaction/Contents/Scripts/default.js#L126 - PUT method
+
+Note: I used Cursor to refactor the code.
 */
 
-const getApiKey = () => {
-  if (Action.preferences.access_token_expiry_date !== undefined) {
-    const expiryDate = new Date(Action.preferences.access_token_expiry_date);
-    const now = new Date();
+include('global.js');
 
-    if (expiryDate <= now) {
-      if (Action.preferences.refresh_token === undefined) {
-        setAPIkey();
-      } else {
-        var result = HTTP.postJSON('https://raindrop.io/oauth/access_token', {
-          body: {
-            grant_type: 'refresh_token',
-            refresh_token: Action.preferences.refresh_token,
-            client_id: '610a5dff6eca444eb545bbab',
-            client_secret: '5a9a94aa-fe4e-4103-bfbf-366b5ca932e5',
-          },
-        });
-
-        if (result.data !== undefined && typeof result.data === 'string') {
-          const resultData = JSON.parse(result.data);
-          const now = new Date();
-          Action.preferences.access_token_expiry_date =
-            now.getTime() + resultData.expires_in * 1000;
-          Action.preferences.apiKey = resultData.access_token;
-        }
-      }
-    }
-  }
-  return Action.preferences.apiKey;
+const SUPPORTED_BROWSERS = {
+  'com.apple.safari': {
+    name: 'Safari',
+    getInfo: (id) =>
+      LaunchBar.executeAppleScript(
+        `tell application id "${id}"\n` +
+          `  set _title to name of front document\n` +
+          `  set _url to URL of front document\n` +
+          `  return _title & "\n" & _url\n` +
+          `end tell`
+      ),
+  },
+  'com.brave.browser': {
+    name: 'Brave',
+    getInfo: (id) =>
+      LaunchBar.executeAppleScript(
+        `tell application id "${id}"\n` +
+          `  set _title to title of active tab of front window\n` +
+          `  set _url to URL of active tab of front window\n` +
+          `  return _title & "\n" & _url\n` +
+          `end tell`
+      ),
+  },
+  'org.chromium.chromium': { name: 'Chromium', getInfo: 'chrome' },
+  'com.google.chrome': { name: 'Chrome', getInfo: 'chrome' },
+  'com.vivaldi.vivaldi': { name: 'Vivaldi', getInfo: 'chrome' },
+  'com.microsoft.edgemac': { name: 'Edge', getInfo: 'chrome' },
+  'company.thebrowser.Browser': { name: 'Browser', getInfo: 'chrome' },
+  'org.mozilla.firefox': { name: 'Firefox', unsupported: true },
 };
 
-function run(argument) {
-  // Get default browser
-  var browserId = 'com.apple.safari'; // if Safari is the only Browser installed or if another Browser is installed and has never had a default Browser set, then the entry in the plist is missing
-  var plist = File.readPlist(
+const getDefaultBrowser = () => {
+  const plist = File.readPlist(
     '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist'
   );
-  for (var i = 0; i < plist.LSHandlers.length; i++) {
-    var value = plist.LSHandlers[i].LSHandlerURLScheme;
-    if (value == 'http') {
-      browserId = plist.LSHandlers[i].LSHandlerRoleAll;
-    }
-  }
+  const handler = plist.LSHandlers.find(
+    (handler) => handler.LSHandlerURLScheme === 'http'
+  );
+  return handler?.LSHandlerRoleAll || 'com.apple.safari';
+};
 
-  // List of supported browsers and Firefox (because of the alert)
-  const browsers = [
-    'com.apple.safari',
-    'com.brave.browser',
-    'org.chromium.chromium',
-    'com.google.chrome',
-    'com.vivaldi.vivaldi',
-    'com.microsoft.edgemac',
-    'company.thebrowser.Browser',
-    'org.mozilla.firefox',
-  ];
-
-  // Check if frontmost app is one of the browsers listed above
-  var frontmost = LaunchBar.executeAppleScript(
-    'set appID to bundle identifier of (info for (POSIX path of (path to frontmost application as Unicode text)))'
+const getFrontmostBrowser = () => {
+  const frontmost = LaunchBar.executeAppleScript(
+    'set appID to bundle identifier of (info for (POSIX file (path to frontmost application as Unicode text)))'
   )
     .trim()
     .toLowerCase();
-  if (browsers.includes(frontmost)) {
-    browserId = frontmost;
-  }
+  return SUPPORTED_BROWSERS[frontmost] ? frontmost : null;
+};
 
-  // Get title and URL of links
-  if (browserId == 'com.apple.safari') {
-    var name = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to name of front document'
-    ).trim();
-    var link = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to URL of front document'
-    ).trim();
-  } else if (
-    browserId == 'com.brave.browser' ||
-    browserId == 'org.chromium.chromium' ||
-    browserId == 'company.thebrowser.browser' ||
-    browserId == 'com.vivaldi.vivaldi' ||
-    browserId == 'com.microsoft.edgemac' ||
-    browserId == 'com.google.chrome'
-  ) {
-    var name = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to the title of the active tab of the front window'
-    ).trim();
-    var link = LaunchBar.executeAppleScript(
-      'tell application id "' +
-        browserId +
-        '" to set _var to the URL of the active tab of the front window'
-    ).trim();
-  } else if (browserId == 'org.mozilla.firefox') {
-    var responseFirefox = LaunchBar.alert(
-      'Firefox is not supported',
-      'Due to the lack of decent automation options Firefox is not supported. I recommand to use a different browser or try the official Raindrop.io extension for this browser.',
-      'Install Firefox extension',
-      'Cancel'
-    );
-    switch (responseFirefox) {
-      case 0:
-        LaunchBar.openURL(
-          'https://addons.mozilla.org/de/firefox/addon/raindropio/',
-          'Firefox'
-        );
-        break;
-      case 1:
-        break;
-    }
-    LaunchBar.hide();
-    return;
-  }
-
-  // --------------------------------------------------------
-
-  if (link == '') {
-    // No Link found
-    LaunchBar.alert('No URL found');
-  } else {
-    // Link exists
-
-    // Get API key token
-    var apiKey = getApiKey();
-
-    if (apiKey === undefined) {
-      setAPIkey();
-    } else {
-      // Check if the URL has been saved before
-      var answerCheckURL = HTTP.postJSON(
-        'https://api.raindrop.io/rest/v1/import/url/exists?access_token=' +
-          apiKey,
-        {
-          body: {
-            urls: [link],
-          },
-        }
-      );
-
-      if (answerCheckURL.error == undefined) {
-        answerCheckURL = eval('[' + answerCheckURL.data + ']');
-        if (answerCheckURL[0].result == true) {
-          // Options for existing Raindrops
-
-          var responseCheckURL = LaunchBar.alert(
-            'You bookmarked this website before!',
-            'URL: ' +
-              link +
-              '\nDo you want to update the existing entry? WARNING: This will overwrite the existing title and tags!',
-            'Update',
-            'Open App',
-            'Cancel'
-          );
-          switch (responseCheckURL) {
-            case 0: // Update
-              var rID = answerCheckURL[0].ids;
-
-              // Add Tags (if argument exists)
-              if (argument != undefined) {
-                var tags = argument.split(', ');
-              } else {
-                var tags = [];
-              }
-
-              // PUT method
-              var putURL =
-                'https://api.raindrop.io/rest/v1/raindrop/' +
-                rID +
-                '/?access_token=' +
-                apiKey;
-              var req = HTTP.createRequest(putURL, {
-                method: 'PUT',
-                body: {
-                  title: name,
-                  link: link,
-                  tags: tags,
-                },
-                bodyType: 'json',
-              });
-              var answerUpdate = HTTP.loadRequest(req);
-
-              answerUpdate = eval('[' + answerUpdate.data + ']');
-
-              if (
-                answerUpdate[0] != undefined &&
-                answerUpdate[0].item != undefined
-              ) {
-                var title = answerUpdate[0].item.title;
-                var link = answerUpdate[0].item.link;
-                if (link.length > 30) {
-                  link = link.toString().replace(/^(.*\/\/[^\/?#]*).*$/, '$1');
-                }
-
-                if (File.exists('/Applications/Raindrop.io.app')) {
-                  var url = File.fileURLForPath(
-                    '/Applications/Raindrop.io.app'
-                  );
-                } else {
-                  var url = 'https://app.raindrop.io';
-                }
-
-                var tags = [];
-                for (var iT = 0; iT < answerUpdate[0].item.tags.length; iT++) {
-                  var tag = '#' + answerUpdate[0].item.tags[iT] + ' ';
-                  tags.push(tag);
-                }
-                tags = tags.join('');
-
-                return [
-                  {
-                    title: 'Updated: ' + title,
-                    subtitle: link + ' ' + tags,
-                    // label: link,
-                    icon: 'drop',
-                    url: url,
-                  },
-                ];
-              } else if (
-                answerUpdate[0] != undefined &&
-                answerUpdate[0].errorMessage != undefined
-              ) {
-                var e = answerUpdate[0].errorMessage;
-                if (e == 'Incorrect access_token') {
-                  setAPIkey();
-                } else {
-                  LaunchBar.alert(e);
-                }
-              } else if (answerUpdate[0] == undefined) {
-                // Check internet connection
-                var output = LaunchBar.execute(
-                  '/sbin/ping',
-                  '-o',
-                  'www.raindrop.io'
-                );
-                if (output == '') {
-                  LaunchBar.alert('You seem to have no internet connection!');
-                  return;
-                } else {
-                  setAPIkey();
-                }
-              }
-              break;
-
-            case 1: // Open App
-              if (File.exists('/Applications/Raindrop.io.app')) {
-                LaunchBar.openURL(
-                  File.fileURLForPath('/Applications/Raindrop.io.app')
-                );
-              } else {
-                LaunchBar.openURL('https://app.raindrop.io');
-              }
-              break;
-
-            case 2: // Cancel
-              break;
-          }
-        } else if (answerCheckURL[0].result == false) {
-          // Post new Raindrop
-
-          // Add Tags (if argument exists)
-          if (argument != undefined) {
-            var tags = argument.split(', ');
-          } else {
-            var tags = [];
-          }
-
-          // Post Raindrop
-          var answerPost = HTTP.postJSON(
-            'https://api.raindrop.io/rest/v1/raindrop?access_token=' + apiKey,
-            {
-              body: {
-                title: name,
-                link: link,
-                tags: tags,
-              },
-            }
-          );
-
-          answerPost = eval('[' + answerPost.data + ']');
-
-          if (answerPost[0] != undefined && answerPost[0].item != undefined) {
-            var title = answerPost[0].item.title;
-            var link = answerPost[0].item.link;
-            if (link.length > 30) {
-              link = link.toString().replace(/^(.*\/\/[^\/?#]*).*$/, '$1');
-            }
-
-            if (File.exists('/Applications/Raindrop.io.app')) {
-              var url = File.fileURLForPath('/Applications/Raindrop.io.app');
-            } else {
-              var url = 'https://app.raindrop.io';
-            }
-
-            var tags = [];
-            for (var iT = 0; iT < answerPost[0].item.tags.length; iT++) {
-              var tag = '#' + answerPost[0].item.tags[iT] + ' ';
-              tags.push(tag);
-            }
-            tags = tags.join('');
-
-            return [
-              {
-                title: 'Saved: ' + title,
-                subtitle: link + ' ' + tags,
-                // label: tags,
-                icon: 'drop',
-                url: url,
-              },
-            ];
-          } else if (
-            answerPost[0] != undefined &&
-            answerPost[0].errorMessage != undefined
-          ) {
-            var e = answerPost[0].errorMessage;
-            if (e == 'Incorrect access_token') {
-              setAPIkey();
-            } else {
-              LaunchBar.alert(e);
-            }
-          } else if (answerPost[0] == undefined) {
-            // Check internet connection
-            var output = LaunchBar.execute(
-              '/sbin/ping',
-              '-o',
-              'www.raindrop.io'
-            );
-            if (output == '') {
-              LaunchBar.alert('You seem to have no internet connection!');
-              return;
-            } else {
-              setAPIkey();
-            }
-          }
-        } else if (answerCheckURL[0].errorMessage != undefined) {
-          // Error handling
-          var e = answer[0].errorMessage;
-          if (e == 'Incorrect access_token') {
-            setAPIkey();
-          } else {
-            LaunchBar.alert(e);
-          }
-        }
-      } else {
-        LaunchBar.alert(answerCheckURL.error);
-      }
-    }
-  }
-}
-
-function setAPIkey() {
-  var response = LaunchBar.alert(
-    'Authentication Required',
-    'You will be redirected to Raindrop.io to connect your account.',
-    'Open Raindrop.io',
+const handleFirefox = () => {
+  const response = LaunchBar.alert(
+    'Firefox is not supported',
+    'Due to the lack of decent automation options Firefox is not supported. I recommend using a different browser or try the official Raindrop.io extension for this browser.',
+    'Install Firefox extension',
     'Cancel'
   );
-  switch (response) {
-    case 0:
-      LaunchBar.openURL(
-        'https://raindrop.io/oauth/authorize?redirect_uri=https://launchbar.link/action/ptujec.LaunchBar.action.SaveRaindrop/redirect&client_id=610a5dff6eca444eb545bbab'
-      );
-      LaunchBar.hide();
-      break;
-    case 2:
-      break;
+
+  if (response === 0) {
+    LaunchBar.openURL(
+      'https://addons.mozilla.org/de/firefox/addon/raindropio/',
+      'Firefox'
+    );
+  }
+  LaunchBar.hide();
+};
+
+const getBrowserInfo = (browserId) => {
+  if (browserId === 'org.mozilla.firefox') {
+    handleFirefox();
+    return null;
+  }
+
+  const browser = SUPPORTED_BROWSERS[browserId];
+  const getInfoFn =
+    typeof browser.getInfo === 'string'
+      ? SUPPORTED_BROWSERS['com.brave.browser'].getInfo
+      : browser.getInfo;
+
+  const [name, link] = getInfoFn(browserId).trim().split('\n');
+
+  return { name, link };
+};
+
+const getRaindropAppURL = () =>
+  File.exists('/Applications/Raindrop.io.app')
+    ? File.fileURLForPath('/Applications/Raindrop.io.app')
+    : 'https://app.raindrop.io';
+
+const formatTags = (tags) => tags.map((tag) => `#${tag}`).join(' ');
+
+const createResultItem = (type, item) => {
+  const link =
+    item.link.length > 30
+      ? item.link.replace(/^(.*\/\/[^\/?#]*).*$/, '$1')
+      : item.link;
+
+  return [
+    {
+      title: `${type}: ${item.title}`,
+      subtitle: `${link} ${formatTags(item.tags)}`,
+      icon: 'drop',
+      url: getRaindropAppURL(),
+    },
+  ];
+};
+
+const updateRaindrop = (rID, apiKey, name, link, tags) => {
+  const putURL = `https://api.raindrop.io/rest/v1/raindrop/${rID}/?access_token=${apiKey}`;
+  const req = HTTP.createRequest(putURL, {
+    method: 'PUT',
+    body: { title: name, link, tags },
+    bodyType: 'json',
+  });
+
+  const response = HTTP.loadRequest(req);
+  return eval('[' + response.data + ']')[0];
+};
+
+const createRaindrop = (apiKey, name, link, tags) => {
+  const response = HTTP.postJSON(
+    `https://api.raindrop.io/rest/v1/raindrop?access_token=${apiKey}`,
+    { body: { title: name, link, tags } }
+  );
+  return eval('[' + response.data + ']')[0];
+};
+
+const checkInternetConnection = () => {
+  const output = LaunchBar.execute('/sbin/ping', '-o', 'www.raindrop.io');
+  if (!output) {
+    LaunchBar.alert('You seem to have no internet connection!');
+    return false;
+  }
+  return true;
+};
+
+const handleAPIError = (error) => {
+  if (error === 'Incorrect access_token') {
+    setAPIkey();
+  } else {
+    LaunchBar.alert(error);
+  }
+};
+
+function run(argument) {
+  const browserId = getFrontmostBrowser() || getDefaultBrowser();
+  const browserInfo = getBrowserInfo(browserId);
+
+  if (!browserInfo) return;
+  if (!browserInfo.link) {
+    return LaunchBar.alert('No URL found');
+  }
+
+  const apiKey = getApiKey();
+  if (!apiKey) return initiateOAuthFlow();
+
+  const tags = argument ? argument.split(', ') : [];
+
+  // Check if URL exists
+  const checkURL = HTTP.postJSON(
+    `https://api.raindrop.io/rest/v1/import/url/exists?access_token=${apiKey}`,
+    { body: { urls: [browserInfo.link] } }
+  );
+
+  if (checkURL.error) return LaunchBar.alert(checkURL.error);
+
+  const urlExists = eval('[' + checkURL.data + ']')[0];
+
+  if (urlExists.duplicates.length > 0) {
+    const response = LaunchBar.alert(
+      'You bookmarked this website before!',
+      `URL: ${browserInfo.link}\nDo you want to update the existing entry? WARNING: This will overwrite the existing title and tags!`,
+      'Update',
+      'Open App',
+      'Cancel'
+    );
+
+    switch (response) {
+      case 0: {
+        const updated = updateRaindrop(
+          urlExists.ids,
+          apiKey,
+          browserInfo.name,
+          browserInfo.link,
+          tags
+        );
+        if (updated?.item) {
+          return createResultItem('Updated', updated.item);
+        }
+        if (updated?.errorMessage) {
+          handleAPIError(updated.errorMessage);
+        }
+        if (!updated && !checkInternetConnection()) {
+          setAPIkey();
+        }
+        break;
+      }
+      case 1:
+        LaunchBar.openURL(getRaindropAppURL());
+        break;
+    }
+  } else {
+    const created = createRaindrop(
+      apiKey,
+      browserInfo.name,
+      browserInfo.link,
+      tags
+    );
+    if (created?.item) {
+      return createResultItem('Saved', created.item);
+    }
+    if (created?.errorMessage) {
+      handleAPIError(created.errorMessage);
+    }
+    if (!created && !checkInternetConnection()) {
+      setAPIkey();
+    }
   }
 }

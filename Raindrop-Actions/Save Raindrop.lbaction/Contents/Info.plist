@@ -9,13 +9,13 @@
 	<key>CFBundleName</key>
 	<string>Save Raindrop</string>
 	<key>CFBundleVersion</key>
-	<string>5.2.3</string>
+	<string>5.3.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>Press space to add tags (comma separated)
 
@@ -23,11 +23,11 @@ This action lets you save the current website in your browser to Raindrop.io. Pr
 
 Supported browsers: Safari, Brave, Arc, Chromium, Chrome, Edge, Vivaldi</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Raindrop-Actions/Save%20Raindrop.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Raindrop-Actions#action-save-raindrop-save-current-website-to-raindropio</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Raindrop-Actions/Save%20Raindrop.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -36,7 +36,7 @@ Supported browsers: Safari, Brave, Arc, Chromium, Chrome, Edge, Vivaldi</string>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBScriptName</key>
-			<string>actionURL.js</string>
+			<string>actionUrl.js</string>
 		</dict>
 		<key>LBDefaultScript</key>
 		<dict>
