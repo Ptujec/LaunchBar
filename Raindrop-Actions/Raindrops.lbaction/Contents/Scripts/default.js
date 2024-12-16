@@ -48,7 +48,7 @@ function formatDropResult(item) {
   const tags = item.tags.map((tag) => `#${tag} `).join('');
   const label =
     item.link.length > 30
-      ? item.link.toString().replace(/^(https?:\/\/[^\/?#]*).*$/, '$1')
+      ? item.link.replace(/^(https?:\/\/[^\/?#]*).*$/, '$1')
       : item.link;
 
   return {

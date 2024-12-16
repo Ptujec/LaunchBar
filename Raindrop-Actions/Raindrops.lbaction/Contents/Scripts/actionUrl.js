@@ -13,7 +13,7 @@ Note: I used Cursor to refactor the code.
 include('global.js');
 
 function runWithURL(URL, details) {
-  if (details.path === '/ptujec.LaunchBar.action.SaveRaindrop/redirect') {
+  if (details.path === '/ptujec.LaunchBar.action.Raindrops/redirect') {
     if (details.queryParameters.code) {
       const result = HTTP.postJSON(RAINDROP_CONFIG.TOKEN_URL, {
         body: {
