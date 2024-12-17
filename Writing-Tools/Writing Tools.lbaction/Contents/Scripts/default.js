@@ -43,14 +43,13 @@ function run(argument) {
       ? getWriterContentAs
       : getStandardContentAs;
 
-  if (frontmostAppID !== 'pro.writer.mac') LaunchBar.hide(); // necessary for UI scripting part of getStandardContentAs
-
   const hasArgument = argument ? true : false; // For Writer AS
 
   let content = argument?.trim();
 
   if (!argument) {
     // TODO: savety check … maybe optional … only with longer text
+
     const response = LaunchBar.alert(
       'Select all text?'.localize(),
       '',
