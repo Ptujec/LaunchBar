@@ -18,11 +18,10 @@ If you prefer, you can also use the [BBEdit](https://www.barebones.com) comparis
 
 ## Tools
 
-By default, the action will use your default tool (see Settings). To select a different tool, press `Command` + `Enter`.
+By default, the action will use your default tool (see Settings). To select a different tool, press `Command` + `Enter`. Tools are fully customizable (see Edit tools).
 
 <img src="02.jpg" width="848"/> 
 
-Tools are fully customizable (see Edit tools).
 
 ## Settings
 
