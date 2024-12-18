@@ -119,11 +119,12 @@ function resetTools() {
 }
 
 function showModels() {
-  const currentModel = Action.preferences.model || 'gpt-4o-mini';
+  const prefs = Action.preferences;
+  const currentModel = prefs.model || 'gpt-4o-mini';
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
-      Authorization: `Bearer ${Action.preferences.apiKey}`,
+      Authorization: `Bearer ${prefs.apiKey}`,
     },
   });
 

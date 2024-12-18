@@ -12,8 +12,6 @@ Documentation:
 - https://platform.openai.com/docs/guides/chat/introduction
 - https://platform.openai.com/docs/guides/prompt-engineering
 
-ISSUES: 
-- If I select text where there is none text is still taken from the clipboard and pasted ... which is not what you want
 
 TODO: 
 - savety check only with longer text? Needs better way to select text (see issue above)
@@ -29,12 +27,14 @@ const toolsPath = File.readJSON(`${Action.path}/Contents/Resources/tools.json`);
 const userToolsPath = `${Action.supportPath}/userTools.json`;
 
 function run(argument) {
+  const prefs = Action.preferences;
+
   // COPY TOOLS SO THEY CAN BE CUSTOMIZED
   if (!File.exists(userToolsPath)) File.writeJSON(toolsPath, userToolsPath);
 
   // CHECK/SET API KEY
-  if (!Action.preferences.apiKey) importAPIKey();
-  if (!Action.preferences.apiKey) return setApiKey();
+  if (!prefs.apiKey) importAPIKey();
+  if (!prefs.apiKey) return setApiKey();
 
   // SHOW SETTINGS
   if (LaunchBar.options.alternateKey) return settings();
@@ -51,7 +51,7 @@ function run(argument) {
   let content = argument?.trim();
 
   if (!argument) {
-    if (!Action.preferences.excludedApps.includes(frontmostAppID)) {
+    if (!prefs.excludedApps.map((app) => app.appID).includes(frontmostAppID)) {
       if (confirmationDialog() === false) {
         // if user canceled
         LaunchBar.hide();
@@ -59,7 +59,10 @@ function run(argument) {
       }
     }
 
-    if (frontmostAppID !== 'pro.writer.mac') LaunchBar.hide(); // necessary for UI scripting part of getStandardContentAs
+    if (frontmostAppID !== 'pro.writer.mac') {
+      LaunchBar.clearClipboard(); // avoid pasting text from clipboard when no text can be selected
+      LaunchBar.hide(); // necessary for UI scripting part of getStandardContentAs
+    }
 
     content = LaunchBar.executeAppleScript(contentAS).trim();
 
@@ -77,7 +80,7 @@ function run(argument) {
   }
 
   // CHECK FOR AUTHOR (iA Writer)
-  if (frontmostAppID === 'pro.writer.mac' && !Action.preferences.iaAuthor)
+  if (frontmostAppID === 'pro.writer.mac' && !prefs.iaAuthor)
     return showAuthors({ isMain: true, content, hasArgument, frontmostAppID });
 
   // SHOW TOOL OPTIONS
@@ -91,15 +94,16 @@ function run(argument) {
 function mainAction({ content, hasArgument, frontmostAppID, tool }) {
   LaunchBar.hide();
 
-  const model = Action.preferences.model || 'gpt-4o-mini';
-  const defaultToolID = Action.preferences.defaultToolID || '1';
+  const prefs = Action.preferences;
+  const model = prefs.model || 'gpt-4o-mini';
+  const defaultToolID = prefs.defaultToolID || '1';
   const tools = getUserToolsJSON();
   tool = tool ? tool : tools.find((tool) => tool.id === defaultToolID);
 
   // API CALL
   const result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
     headerFields: {
-      Authorization: `Bearer ${Action.preferences.apiKey}`,
+      Authorization: `Bearer ${prefs.apiKey}`,
     },
     body: {
       model: model,
@@ -114,6 +118,8 @@ function mainAction({ content, hasArgument, frontmostAppID, tool }) {
 }
 
 function processResult({ result, content, hasArgument, frontmostAppID }) {
+  const prefs = Action.preferences;
+
   // ERROR HANDLING
   if (result.response == undefined) {
     return { title: result.error, icon: 'alert' };
@@ -141,20 +147,20 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
   const answer = data.choices[0].message.content.trim();
 
   if (content === answer) {
-    return LaunchBar.alert(
-      'No changes. Input and answer are identical.'.localize()
-    );
+    LaunchBar.alert('No changes. Input and answer are identical.'.localize());
+    LaunchBar.hide();
+    return;
   }
 
   // COMPARE INPUT TO ANSWER IN BBEDIT Option (Settings)
-  if (Action.preferences.useBBEditCompare) {
+  if (prefs.useBBEditCompare) {
     compareTexts({ content, answer });
     playConfirmationSound();
     return;
   }
 
   // PASTE ANSWER IN IA WRITER
-  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iaAuthor) {
+  if (frontmostAppID === 'pro.writer.mac' && prefs.iaAuthor) {
     pasteAnswerInWriter({ answer, hasArgument });
     playConfirmationSound();
     return;
@@ -170,6 +176,8 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
 }
 
 function pasteAnswerInWriter({ answer, hasArgument }) {
+  const prefs = Action.preferences;
+
   LaunchBar.setClipboardString(answer);
   LaunchBar.hide();
 
@@ -177,7 +185,7 @@ function pasteAnswerInWriter({ answer, hasArgument }) {
     ? // ? 'delay 0.2\nkeystroke "a" using command down\n'
       'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
     : '';
-  const authorName = Action.preferences.iaAuthor;
+  const authorName = prefs.iaAuthor;
 
   const pasteInWriterAS =
     'tell application "iA Writer" to activate\n' +
