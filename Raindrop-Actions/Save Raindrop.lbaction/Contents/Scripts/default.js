@@ -63,7 +63,7 @@ const getDefaultBrowser = () => {
 
 const getFrontmostBrowser = () => {
   const frontmost = LaunchBar.executeAppleScript(
-    'set appID to bundle identifier of (info for (POSIX file (path to frontmost application as Unicode text)))'
+    'tell application "System Events" to return bundle identifier of application processes whose frontmost is true as string'
   )
     .trim()
     .toLowerCase();
@@ -170,7 +170,14 @@ function run(argument) {
 
   if (!browserInfo) return;
   if (!browserInfo.link) {
-    return LaunchBar.alert('No URL found');
+    LaunchBar.alert('No URL found!');
+    LaunchBar.hide();
+    return;
+  }
+  if (!browserInfo.link.startsWith('http')) {
+    LaunchBar.alert(`${browserInfo.link} is not a supported URL!`);
+    LaunchBar.hide();
+    return;
   }
 
   const apiKey = getApiKey();
