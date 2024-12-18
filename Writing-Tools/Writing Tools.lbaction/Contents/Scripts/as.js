@@ -1,7 +1,7 @@
 /*
 Applescripts for Writing Tools Action for LaunchBar (using Chat GPT) 
 by Christian Bender (@ptujec)
-2024-11-10
+2024-12-18
 */
 
 const getFrontmostAS =

@@ -31,3 +31,7 @@
 "Invalid OpenAI API key" = "Ungültiger OpenAI API-Schlüssel";
 "Recommended" = "Empfohlen";
 "Select all text?" = "Den gesamten Text auswählen?";
+"Disable Alert for Apps" = "Bestätigung für Apps deaktivieren";
+"Disable alert before auto selecting text for certain apps" = "Bestätigung vor automatischer Textauswahl für bestimmte Apps deaktivieren";
+"No alert" = "Keine Bestätigung";
+"Disable alert for this app!" = "Keine Bestätigung für diese App anzeigen!";

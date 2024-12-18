@@ -4,19 +4,25 @@
 
 <img src="01.jpg" width="848"/> 
 
-Writing Tools[^1] is an action that can help improve your writing, e.g. by checking your spelling, grammar, and punctuation. Tools are fully customizable (see Edit tools).[^2]
+Writing Tools[^1] is an action that can help improve your writing, e.g. by checking your spelling, grammar, and punctuation.[^2] 
 
-You can mark and send text to the action or have it mark all text automatically. The changed text will replace the selection.
+You can select and **send text** to the action or have it **select all text automatically**.[^3]   
 
-By default, the action will use your default tool (see Settings). To select a different tool, press `Command` + `Enter`.
-
-<img src="02.jpg" width="848"/> 
+The changed text will replace the selection.
 
 The action works with any text field in any app. However, **it works best with iA Writer** and its [powerful feature to distinguish between authors](https://ia.net/writer/support/editor/authorship). This way, you can easily see all the changes made by ChatGPT.
 
 If you prefer, you can also use the [BBEdit](https://www.barebones.com) comparison feature instead.
 
 ***Note:** The iA Writer paste feature uses [GUI scripting](http://www.macosxautomation.com/applescript/uiscripting/) and may not work properly after an update of iA Writer. Please [report](https://github.com/Ptujec/LaunchBar/issues/new) any issues you encounter.* 
+
+## Tools
+
+By default, the action will use your default tool (see Settings). To select a different tool, press `Command` + `Enter`.
+
+<img src="02.jpg" width="848"/> 
+
+Tools are fully customizable (see Edit tools).
 
 ## Settings
 
@@ -61,3 +67,4 @@ This action integrates with Action Updates by @prenagha. Find the [latest versio
 
 [^1]: I have not had the chance to try Apple's AI Writing Tools, but so far, they do not sound too promising anyway. With this action, you can always benefit from the latest OpenAI models and refine the tools yourself.
 [^2]: Please consider privacy and the pitfalls of using LLMs in general as you use this. 
+[^3]: In the case of automatic text selection there is an alert to protect you from triggering this accidentally. You can disable that alert for a given app in settings (`Option` + `Enter`).
