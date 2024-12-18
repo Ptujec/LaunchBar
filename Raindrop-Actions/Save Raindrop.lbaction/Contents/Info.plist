@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>icon.tiff</string>
+	<string>icon</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.SaveRaindrop</string>
 	<key>CFBundleName</key>
 	<string>Save Raindrop</string>
 	<key>CFBundleVersion</key>
-	<string>5.3.0</string>
+	<string>5.3.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
