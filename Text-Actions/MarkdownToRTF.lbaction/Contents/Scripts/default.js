@@ -1,5 +1,5 @@
 /* 
-Markdown to RTF Action for LaunchBar
+Markdown Link to RTF Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-11-29
 

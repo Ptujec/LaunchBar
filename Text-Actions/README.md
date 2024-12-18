@@ -1,6 +1,6 @@
 # LaunchBar Text Actions
 
-## Markdown to Rich Text Format
+## Markdown Links to Rich Text Format
 
 <img src="mdrtf.gif" width="600"/> 
 
@@ -15,7 +15,7 @@
 - Get URLs from text
 - Lorem Ipsum (Generate placeholder text)
 - Lorem Slovensko (Slovene version)
-- Markdown to Rich Text Format (Convert text with Markdown links into proper Rich Text. If no argument is entered, it will convert the clipboard content.)
+- Markdown Links to Rich Text Format (Convert text with Markdown links into proper Rich Text. If no argument is entered, it will convert the clipboard content.)
 - Replace Commas with Linebreaks
 - Remove Duplicate Email Addresses
 
