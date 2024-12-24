@@ -2,17 +2,43 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)*
 
-<img src="01.jpg" width="653"/>
+<img src="01.jpg" width="750"/>
 
-Updating LaunchBar Actions is an unsolved problem. [Padraic built an action to make it a little easier](https://renaghan.com/launchbar/action-updates/). Most of my actions are compatible with his update action. But it can take quite some time if you have a lot of actions installed.
+## The Dilemma
 
-This new action takes a different approach. It is not ideal either. But it might be helpful in some cases. **The idea is to download (or clone) a whole GitHub repo of actions. This action then compares the actions in the folder with the actions you have installed. Installed actions that have a lower version number will be replaced with their matching downloaded versions.**
- 
-You can let the action replace all matching actions at once or **decide individually**.
+Updating LaunchBar Actions is an unsolved problem. [Padraic built an action to check for new versions of your installed actions online](https://renaghan.com/launchbar/action-updates/). Most of my actions are compatible with his update action. It works well if you just have a few actions installed, but it can take quite some time if you have a lot of actions installed.
 
-<img src="02.jpg" width="653"/>
+So I wrote an action with a slightly different approach. It is not the ideal solution one would wish for either, but it works quite well with actions that are managed like [mine](https://ptujec.github.io/launchbar). That is, a lot of actions are maintained in a single GitHub repository, which means it is easy to download or clone them all in one go.
 
-If you use [my actions](https://ptujec.github.io/launchbar), I would recommend using this action every once in a while since I am trying to regularly improve my actions.
+## How This Action Works
+
+The idea is to do the work locally after downloading (or cloning) a whole GitHub repo of actions … or even multiple repos. **This action searches all actions in a given directory for new versions of the actions you have installed and offers to update them.**
+
+The downside of this approach is that you need to do the downloading manually or through an app like GitHub Desktop (which is still a manual process).
+
+But there are also a couple of **advantages**: It is **faster**, especially if you have lots of actions installed. Installing new versions is very **simple**. The only requirement is that the new version has a [standard version number](https://en.wikipedia.org/wiki/Software_versioning#Semantic_versioning). Plus, this action also helps to **easily identify new actions** from the input source.
+
+## Features
+
+### 1) Batch or One-by-One
+
+You can install the new versions either all at once or **decide individually**.
+
+<img src="02.jpg" width="750"/>
+
+### 2) Automatic Unzip
+
+If you select a zipped download (e.g., after [downloading this repository](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip)), the action will automatically unzip it and pick the unzipped folder as the input source.
+
+### 3) Report
+
+When done, you will get a report that not only lists the updated actions but also the ones you have not installed. Every time after the first use, it will show a separate section with only the **new actions since you checked last**. This way, you can make sure you don't miss out on new actions you might be interested in.
+
+<img src="03.jpg" width="750"/>
+
+Right from the report, you can select the source or any of the Action Bundles you have not installed yet. This way, you can easily install new actions or browse their contents.
+
+<img src="04.jpg" width="750"/>
 
 ## Download
 

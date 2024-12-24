@@ -1,58 +1,129 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Action Update Report</title>
+    <meta charset="utf-8" />
+    <title><!-- title --></title>
     <style>
+      /* CSS Variables */
       :root {
-        --primary-color: #0080ec;
-        --text-color: #181818;
+        --primary-color: #06c;
+        --text-primary: #434343;
+        --text-secondary: #222;
         --background-color: #fff;
       }
 
       @media (prefers-color-scheme: dark) {
         :root {
-          --text-color: #eee;
-          --background-color: #2b2b2b;
+          --primary-color: #2997ff;
+          --text-primary: #eee;
+          --text-secondary: #fff;
+          --background-color: #1d1d1f;
         }
       }
 
+      /* Base Styles */
       body {
-        font-family: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial',
-          sans-serif;
-        color: var(--text-color);
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+          'Helvetica', 'Arial', sans-serif;
+        color: var(--text-primary);
         background-color: var(--background-color);
-        position: relative;
-        left: 15%;
+        margin: 0;
       }
+
+      /* Layout */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+
+      /* Background Images */
+      main {
+        background: url('<!-- bg_light -->');
+        background-size: auto auto;
+        background-repeat: no-repeat;
+        background-position: 2px 10px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        main {
+          background: url('<!-- bg_dark -->');
+          background-size: auto auto;
+          background-repeat: no-repeat;
+          background-position: 2px 10px;
+        }
+      }
+
+      /* Typography */
+      h1,
+      h2,
+      h3 {
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
       h1 {
         padding: 28px 0 0;
         font-size: 28px;
       }
-      h2 {
-        padding: 8px 0 0;
+
+      h2,
+      summary {
+        padding: 16px 0 0;
+        font-size: 20px;
+      }
+
+      h2 + h3 {
+        padding-top: 0;
+      }
+
+      h3 {
+        padding: 16px 0 0;
         font-size: 18px;
-        font-weight: bold;
       }
-      p {
-        padding: 12px 0 0;
+
+      h4 {
+        padding: 0;
         font-size: 14px;
+        font-weight: normal;
       }
+
+      p {
+        padding: 10px 20px 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
       a {
         color: var(--primary-color);
         text-decoration: none;
+      }
+
+      /* Utilities */
+      .metadata {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-primary);
+        margin: 0;
+        padding: 0;
       }
     </style>
   </head>
 
   <body>
-    <header>
-      <!-- header -->
-    </header>
-    <main>
-      <!-- report -->
-    </main>
-    <footer>
-      <!-- footer -->
-    </footer>
+    <div class="container">
+      <header>
+        <!-- header -->
+        <!-- metadata -->
+      </header>
+      <main>
+        <!-- updates -->
+        <!-- not-installed -->
+        <!-- installed -->
+      </main>
+      <footer>
+        <!-- footer -->
+      </footer>
+    </div>
   </body>
 </html>
