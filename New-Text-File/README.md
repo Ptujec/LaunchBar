@@ -20,4 +20,6 @@ That's it. Time will show how much I'll really use it. But I think it's pretty c
 
 ## Updates
 
-This action integrates with Action Updates by @prenagha. Find the [latest version on his GitHub](https://github.com/prenagha/launchbar) and a signed version on his [website](https://renaghan.com/launchbar/action-updates/).
+Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
+
+This action also supports [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.

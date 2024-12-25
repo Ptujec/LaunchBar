@@ -10,14 +10,14 @@
 
 **After downloading and unzipping, just double-click the `.lbaction` packages you want to use to install them.**  
 
-BTW: You can also [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). It's the same as downloading it, but the GitHub way. [GitHub Desktop](https://desktop.github.com/) makes this fairly easy. This is also a good way to follow changes.
+BTW: You can also [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). It's the same as downloading it, but the GitHub way. [GitHub Desktop](https://desktop.github.com/) makes this fairly easy. 
 
 
 ## Updates
 
-Stay uptodate with my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) action.
+Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
 
-Most of my actions also integrate with Action Updates by [@prenagha](https://github.com/prenagha). You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+Most of my actions also support [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.
 
 ## Support
 

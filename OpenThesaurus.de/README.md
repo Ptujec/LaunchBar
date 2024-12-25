@@ -11,4 +11,6 @@ This action searches [OpenThesaurus.de](https://github.com/danielnaber/openthesa
 
 ## Updates
 
-This action integrates with Action Updates by @prenagha. You can find the [latest version in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
+
+This action also supports [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.

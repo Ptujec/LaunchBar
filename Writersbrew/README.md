@@ -13,5 +13,7 @@ To use the action, just select the action or the app and press `space`.
 
 ## Updates
 
-LaunchBar Actions for Writers brew integrates with Action Updates by @prenagha. You can find the [latest version of Action Updates in his Github repository](https://github.com/prenagha/launchbar). For more information and a signed version of Action Updates [visit his website](https://renaghan.com/launchbar/action-updates/).
+Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
+
+This action also supports [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.
 
