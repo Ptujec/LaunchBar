@@ -30,4 +30,4 @@ This is a simple action associated with the [app](https://cleanshot.com/) to acc
 
 Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
 
-This action also supports [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.
+This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.

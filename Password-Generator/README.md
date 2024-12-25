@@ -31,7 +31,7 @@ You might want to use paste and remove from history `⌃⌥⌘V` to remove the p
 
 Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
 
-This action also supports [Action Updates](https://github.com/prenagha/launchbar) by Padraic Renaghan.
+This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
 
 ## Other password actions
 - Looking for something more memorable? [Try this one](https://github.com/prenagha/launchbar/tree/main/Generate%20Password.lbaction). (Requires [hsxkpasswd](https://github.com/bbusschots/hsxkpasswd))
