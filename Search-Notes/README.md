@@ -1,5 +1,7 @@
 # LaunchBar Action: Search Notes
 
+**Note:** I just realized that [Roey already made an Action for Notes](https://github.com/roeybiran/launchbar-actions/tree/main/notes-search.lbaction/Contents). It is really good. I think it outperforms mine. 
+
 A simple action to search Apple Notes and open them in the app. 
 
 <img src="01.png" width="604"/> 
