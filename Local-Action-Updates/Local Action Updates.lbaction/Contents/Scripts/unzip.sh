@@ -14,5 +14,14 @@ while [ -d "$target_dir" ]; do
     counter=$((counter + 1))
 done
 
-unzip -q "$zip_file" -d "$target_dir"
+# Create temporary directory for initial unzip
+temp_dir=$(mktemp -d)
+unzip -q "$zip_file" -d "$temp_dir"
+
+# Move contents from temp dir to target dir
+mkdir -p "$target_dir"
+mv "$temp_dir"/*/* "$target_dir" 2>/dev/null || mv "$temp_dir"/* "$target_dir"
+
+# Clean up temp directory
+rm -rf "$temp_dir"
 echo "$target_dir"
