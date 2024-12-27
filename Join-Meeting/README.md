@@ -10,9 +10,9 @@ Press `⏎` to join the selected meeting.
 
 Unfortunately, this is kind of a pain to set up. I'm sharing it anyway because I find it so beneficial. If you need help, let me know.
 
-If you don't have Apple's Command Line Tools installed, you will probably be prompted to do so.
+This action needs calendar access. You will hopefully be prompted to allow calendar access.
 
-They will surely be needed if you want to compile the script, which helps run it much faster. 
+If you don't have Apple's Command Line Tools installed, you will probably be prompted to do so. They will surely be needed if you want to compile the script, which helps run it much faster. 
 
 Unfortunately, I can't share the action with a compiled script. For security reasons, Apple adds a `com.apple.quarantine` attribute to every downloaded file. (You can check that in Terminal with `‌xattr` plus the path to the file.) 
 
