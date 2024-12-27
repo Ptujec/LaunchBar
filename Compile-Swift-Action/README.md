@@ -30,7 +30,7 @@ Swift scripts run more efficiently when compiled. However, actions with a compil
 
 This is not an issue until the action contains compiled code. When you attempt to run it, you will receive a malware alert. 
 
-If you have installed [Apple's Command Line Tools](https://www.maketecheasier.com/install-command-line-tools-without-xcode/), you can compile the Swift files yourself (with e.g., `swiftc -O default.swift`) and point the action to the compiled file in the Action Editor. However, the action still won't run due to the `com.apple.quarantine` attribute that Apple adds to every file of the downloaded action bundle. 
+If you have installed [Apple's Command Line Tools](https://www.maketecheasier.com/install-command-line-tools-without-xcode/)[^1], you can compile the Swift files yourself (with e.g., `swiftc -O default.swift`) and point the action to the compiled file in the Action Editor. However, the action still won't run due to the `com.apple.quarantine` attribute that Apple adds to every file of the downloaded action bundle. 
 
 Again, you could remove those with LaunchBar's built-in `Open Anyway` action. If you do, you should check the entire bundle before doing this, though.
 
@@ -45,3 +45,6 @@ Again, you could remove those with LaunchBar's built-in `Open Anyway` action. If
 Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
 
 This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+
+
+[^1]: There is currently a [bug when installing command line tools as described](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411). That's on Apple. But it doesn't matter. Try to install it as described in this linked thread.
