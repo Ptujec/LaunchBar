@@ -37,8 +37,3 @@ This action also supports [Action Updates](https://renaghan.com/launchbar/action
 
 
 [^1]: There is currently a [bug when installing command line tools as described](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411). That's on Apple. But it doesn't matter. Try to install it as described in the linked thread.
-
----
-Anmerkungen: 0,3217 SHA-256 bea81566c18f8e1a32450c50007351b6  
-&ChatGPT: 3181  
-...
