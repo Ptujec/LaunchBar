@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleAllowMixedLocalizations</key>
-	<true/>
 	<key>CFBundleIconFile</key>
 	<string>videoTemplate.png</string>
 	<key>CFBundleIdentifier</key>
@@ -11,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Join Meeting</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>2.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
