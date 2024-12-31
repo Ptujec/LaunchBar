@@ -8,8 +8,9 @@
 "No File. Try again!" = "Keine Datei. Versuchen Sie es erneut!";
 "Delete" = "Löschen";
 "Paste" = "Einfügen";
+"Scratchpad" = "Gedankensalat";
 "# Scratchpad" = "# Gedankensalat";
 "Scratchpad.txt" = "Gedankensalat.txt";
 "Select a folder to create the new file in:" = "Wählen Sie einen Ordner aus, in dem die neue Datei erstellt werden soll:";
 "Error while writing text to file: " = "Fehler beim Schreiben von Text in eine Datei:";
-"Scratchpad" = "Gedankensalat";
+"No entries" = "Keine Einträge";

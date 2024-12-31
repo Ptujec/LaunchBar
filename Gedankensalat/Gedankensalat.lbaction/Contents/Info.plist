@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Gedankensalat</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>2.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -17,13 +17,13 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBSummary</key>
-		<string>⇧⏎ = Setup (File Location)</string>
+		<string>⌥⏎ = Setup (File Location)</string>
 		<key>LBTwitter</key>
 		<string></string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Gedankensalat#launchbar-action-gedankensalat-scratchpad</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/Gedankensalat/Gedankensalat.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Gedankensalat#launchbar-action-gedankensalat-scratchpad</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
