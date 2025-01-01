@@ -17,131 +17,156 @@
  TODO:
  - Fix NSLocalizedString use / environment … ask Marco
  */
-
+import AppKit
 import EventKit
 import Foundation
 
-// // Get the bundle for the current script
-// let actionPath = ProcessInfo.processInfo.environment["LB_ACTION_PATH"] ?? ""
+// MARK: - Types & Protocols
 
-// // Safely unwrap the bundle
-// guard let bundle = Bundle(path: actionPath) else {
-//     NSLog("Failed to create bundle at path: \(actionPath)")
-//     exit(1)
-// }
+protocol MeetingProvider {
+    var name: String { get }
+    var icon: String { get }
+    func extractMeetingURL(from urlString: String) -> String?
+    func extractMeetingURLFromNotes(_ notes: String) -> String?
+}
 
-// Get the preferred language
-let lang = Locale.preferredLanguages[0].components(separatedBy: "-")[0]
+// MARK: - Shared Resources
 
-// MARK: - Constants
-struct Constants {
-    static let zoomPattern = #"https:\/\/us02web.zoom.us\/j\/(\d+)(?:(?:\?pwd=)(.*))?"#
-    static let teamsPattern =
-        #"(https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.*[\w@?^=%&/~+#-])"#
+/// Global event store instance used for calendar access throughout the application
+let eventStore = EKEventStore()
 
-    struct Messages {
-        static let noMeetings =
-            lang == "de" ? "Kein virtuelles Treffen geplant!" : "No virtual meeting scheduled!"
-        static let joinNow = lang == "de" ? "Jetzt teilnehmen" : "Join now"
+// MARK: - Localization
+
+struct LocalizedStrings {
+    private static let lang = Locale.preferredLanguages[0].components(separatedBy: "-")[0]
+    
+    static let noMeetings = lang == "de" 
+        ? "Kein virtuelles Treffen geplant!" 
+        : "No virtual meeting scheduled!"
+    static let joinNow = lang == "de" 
+        ? "Jetzt teilnehmen" 
+        : "Join now"
+    static let calendarAccessDenied =
+        lang == "de"
+        ? "Kalenderzugriff verweigert"
+        : "Calendar Access Denied"
+    static let calendarAccessDeniedSubtitle =
+        lang == "de"
+        ? "Bitte gewähren Sie den Zugriff in den Systemeinstellungen"
+        : "Please enable in System Settings to view your events"
+    static let calendarAccessRequired =
+        lang == "de"
+        ? "Kalenderzugriff erforderlich"
+        : "Calendar Access Required"
+    static let calendarAccessRequiredSubtitle =
+        lang == "de"
+        ? "Bitte gewähren Sie vollen Zugriff in Systemeinstellungen → Datenschutz & Sicherheit → Kalender"
+        : "Please grant full access in System Settings → Privacy & Security → Calendars"
+}
+
+// MARK: - Meeting Providers
+
+struct ZoomProvider: MeetingProvider {
+    let name = "Zoom"
+    let icon = "videoTemplate"
+    private let urlPattern = #"https:\/\/us02web.zoom.us\/j\/(\d+)(?:(?:\?pwd=)(.*))?"#
+    
+    func extractMeetingURL(from urlString: String) -> String? {
+        guard urlString.contains("zoom.us") else { return nil }
+        return urlString.replacingOccurrences(
+            of: urlPattern,
+            with: "zoommtg://zoom.us/join?confno=$1&pwd=$2",
+            options: .regularExpression
+        )
+    }
+    
+    func extractMeetingURLFromNotes(_ notes: String) -> String? {
+        guard notes.contains("zoom.us") else { return nil }
+        let matched = RegexHelper.matches(for: urlPattern, in: notes)
+        return matched.first?.replacingOccurrences(
+            of: urlPattern,
+            with: "zoommtg://zoom.us/join?confno=$1&pwd=$2",
+            options: .regularExpression
+        )
     }
 }
 
-// MARK: - Meeting URL Extractor
-struct MeetingURLExtractor {
-    static func extractMeetingURL(from event: EKEvent) -> (url: String, icon: String)? {
-        // Helper function for regex matching
-        func matches(for pattern: String, in text: String) -> [String] {
-            do {
-                let regex = try NSRegularExpression(pattern: pattern)
-                let results = regex.matches(in: text,
-                                         range: NSRange(text.startIndex..., in: text))
-                return results.compactMap {
-                    Range($0.range, in: text).map { String(text[$0]) }
-                }
-            } catch let error {
-                print("invalid regex: \(error.localizedDescription)")
-                return []
-            }
-        }
+struct TeamsProvider: MeetingProvider {
+    let name = "Teams"
+    let icon = "teamsTemplate"
+    private let urlPattern = #"(https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.*[\w@?^=%&/~+#-])"#
+    
+    func extractMeetingURL(from urlString: String) -> String? {
+        guard urlString.contains("teams.microsoft") else { return nil }
+        return urlString.replacingOccurrences(of: "https", with: "msteams")
+    }
+    
+    func extractMeetingURLFromNotes(_ notes: String) -> String? {
+        guard notes.contains("teams.microsoft") else { return nil }
+        let matched = RegexHelper.matches(for: urlPattern, in: notes)
+        return matched.first?.replacingOccurrences(of: "https", with: "msteams")
+    }
+}
 
-        // First try the event URL
+// MARK: - Meeting URL Extraction
+
+struct MeetingExtractor {
+    private let providers: [MeetingProvider] = [
+        ZoomProvider(),
+        TeamsProvider()
+    ]
+    
+    func extractMeetingURL(from event: EKEvent) -> (url: String, icon: String)? {
+        // Check event URL first
         if let urlString = event.url?.absoluteString {
-            if urlString.contains("zoom.us") {
-                let url = urlString.replacingOccurrences(
-                    of: Constants.zoomPattern,
-                    with: "zoommtg://zoom.us/join?confno=$1&pwd=$2",
-                    options: .regularExpression
-                )
-                return (url, "videoTemplate")
-            } else if urlString.contains("teams.microsoft") {
-                let url = urlString.replacingOccurrences(
-                    of: "https",
-                    with: "msteams",
-                    options: []
-                )
-                return (url, "teamsTemplate")
+            for provider in providers {
+                if let url = provider.extractMeetingURL(from: urlString) {
+                    return (url, provider.icon)
+                }
             }
         }
-
-        // Then try the notes
+        
+        // Then check notes
         if let notes = event.notes {
-            if notes.contains("zoom.us") {
-                let matched = matches(for: Constants.zoomPattern, in: notes)
-                if let match = matched.first {
-                    let url = match.replacingOccurrences(
-                        of: Constants.zoomPattern,
-                        with: "zoommtg://zoom.us/join?confno=$1&pwd=$2",
-                        options: .regularExpression
-                    )
-                    return (url, "videoTemplate")
-                }
-            } else if notes.contains("teams.microsoft") {
-                let matched = matches(for: Constants.teamsPattern, in: notes)
-                if let match = matched.first {
-                    let url = match.replacingOccurrences(
-                        of: "https",
-                        with: "msteams",
-                        options: []
-                    )
-                    return (url, "teamsTemplate")
+            for provider in providers {
+                if let url = provider.extractMeetingURLFromNotes(notes) {
+                    return (url, provider.icon)
                 }
             }
         }
-
+        
         return nil
     }
 }
 
-// MARK: - Event Fetcher
-class EventFetcher {
-    private let store = EKEventStore()
+// MARK: - Helpers
 
-    func fetchEvents() async throws -> [[String: Any]] {
-        try await requestAccessIfNeeded()
-        return try await fetchUpcomingMeetings()
-    }
-
-    private func requestAccessIfNeeded() async throws {
-        let status = EKEventStore.authorizationStatus(for: .event)
-        guard status == .notDetermined else { return }
-
-        let granted = await withCheckedContinuation { continuation in
-            store.requestFullAccessToEvents { granted, _ in
-                continuation.resume(returning: granted)
+struct RegexHelper {
+    static func matches(for pattern: String, in text: String) -> [String] {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let results = regex.matches(in: text,
+                                     range: NSRange(text.startIndex..., in: text))
+            return results.compactMap {
+                Range($0.range, in: text).map { String(text[$0]) }
             }
+        } catch let error {
+            print("invalid regex: \(error.localizedDescription)")
+            return []
         }
+    }
+}
 
-        guard granted else {
-            throw NSError(
-                domain: "Calendar", code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Calendar access denied"])
-        }
+// MARK: - Calendar Management
+
+final class EventFetcher {
+    func fetchEvents() async throws -> [[String: Any]] {
+        return try await fetchUpcomingMeetings()
     }
 
     private func fetchUpcomingMeetings() async throws -> [[String: Any]] {
         var results = [[String: Any]]()
-        // Get all calendars
-        let calendars = store.calendars(for: .event)
+        let calendars = eventStore.calendars(for: .event)
         
         // Range calculations
         let calendar = Calendar.current
@@ -149,27 +174,38 @@ class EventFetcher {
         let rangeFuture = calendar.date(byAdding: .minute, value: 30, to: Date())!
 
         for calendar in calendars {
-            let predicate = store.predicateForEvents(
+            let predicate = eventStore.predicateForEvents(
                 withStart: rangePast,
                 end: rangeFuture,
                 calendars: [calendar]
             )
 
-            let events = store.events(matching: predicate)
+            let events = eventStore.events(matching: predicate)
             for event in events {
-                if let meetingInfo = processEvent(event) {
-                    results.append(meetingInfo)
+                if let eventInfo = processEvent(event) {
+                    results.append(eventInfo)
                 }
             }
         }
 
+        // MARK: - Handle single meeting
+        if results.count == 1, let urlString = results[0]["url"] as? String {
+            NSAppleScript(source: "tell application \"LaunchBar\" to hide")?.executeAndReturnError(nil)
+            if let url = URL(string: urlString) {
+                NSWorkspace.shared.open(url)
+                exit(0)
+            }
+        }
+
         return results.isEmpty
-            ? [["title": Constants.Messages.noMeetings, "icon": "alert"]] : results
+            ? [["title": LocalizedStrings.noMeetings, "icon": "alert"]] 
+            : results
     }
 
     private func processEvent(_ event: EKEvent) -> [String: Any]? {
         guard let endDate = event.endDate, endDate > Date() else { return nil }
-        guard let meetingInfo = MeetingURLExtractor.extractMeetingURL(from: event) else {
+        let extractor = MeetingExtractor()
+        guard let meetingInfo = extractor.extractMeetingURL(from: event) else {
             return nil
         }
 
@@ -180,32 +216,74 @@ class EventFetcher {
         return [
             "title": event.title!,
             "label": relativeDate,
-            "badge": Constants.Messages.joinNow,
+            "badge": LocalizedStrings.joinNow,
             "url": meetingInfo.url,
             "icon": meetingInfo.icon,
         ]
     }
 }
 
-// MARK: - Main execution
+// MARK: - Main Execution
+
+struct JoinMeetingAction {
+    static func main() async throws {
+        // MARK: - Authorization
+        let status = EKEventStore.authorizationStatus(for: .event)
+        if status == .notDetermined {
+            guard try await eventStore.requestFullAccessToEvents() else {
+                print(
+                    """
+                    [{  "title": "\(LocalizedStrings.calendarAccessDenied)",
+                        "subtitle": "\(LocalizedStrings.calendarAccessDeniedSubtitle)",
+                        "alwaysShowsSubtitle": true,
+                        "icon": "alert",
+                        "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"}]
+                    """)
+                return
+            }
+        }
+
+        // Recheck the status after potential authorization request
+        let currentStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        guard currentStatus == .fullAccess else {
+            print(
+                """
+                [{  "title": "\(LocalizedStrings.calendarAccessRequired)", 
+                    "subtitle": "\(LocalizedStrings.calendarAccessRequiredSubtitle)",
+                    "alwaysShowsSubtitle": true,
+                    "icon": "alert",
+                    "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"}]
+                """)
+            return
+        }
+
+        // Fetch and display meetings
+        let eventFetcher = EventFetcher()
+        let results = try await eventFetcher.fetchEvents()
+        
+        if let jsonString = String(
+            data: try JSONSerialization.data(withJSONObject: results),
+            encoding: .utf8
+        ) {
+            print(jsonString)
+        }
+    }
+}
+// MARK: - Script Execution
+
 var isComplete = false
 
 Task {
     do {
-        let eventFetcher = EventFetcher()
-        let results = try await eventFetcher.fetchEvents()
-
-        let jsonData = try JSONSerialization.data(withJSONObject: results)
-        if let jsonString = String(data: jsonData, encoding: .utf8) {
-            print(jsonString)
-        }
+        try await JoinMeetingAction.main()
     } catch {
         NSLog("Error: \(error.localizedDescription)")
     }
     isComplete = true
 }
 
-// Keep the script running until the task completes
+// MARK: - Run Loop
 while !isComplete {
     RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
 }
+
