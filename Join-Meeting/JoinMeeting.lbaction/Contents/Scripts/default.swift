@@ -48,20 +48,16 @@ struct LocalizedStrings {
         : "Join now"
     static let calendarAccessDenied =
         lang == "de"
-        ? "Kalenderzugriff verweigert"
-        : "Calendar Access Denied"
-    static let calendarAccessDeniedSubtitle =
-        lang == "de"
-        ? "Bitte gewähren Sie den Zugriff in den Systemeinstellungen"
-        : "Please enable in System Settings to view your events"
+        ? "Kalenderzugriff verweigert (⏎)"
+        : "Calendar Access Denied (⏎)"
     static let calendarAccessRequired =
         lang == "de"
-        ? "Kalenderzugriff erforderlich"
-        : "Calendar Access Required"
-    static let calendarAccessRequiredSubtitle =
+        ? "Kalenderzugriff erforderlich (⏎) "
+        : "Calendar Access Required (⏎)"
+    static let calendarAccessSubtitle =
         lang == "de"
-        ? "Bitte gewähren Sie vollen Zugriff in Systemeinstellungen → Datenschutz & Sicherheit → Kalender"
-        : "Please grant full access in System Settings → Privacy & Security → Calendars"
+        ? "Systemeinstellungen → Datenschutz & Sicherheit → Kalender"
+        : "System Settings → Privacy & Security → Calendars"
 }
 
 // MARK: - Meeting Providers
@@ -234,7 +230,7 @@ struct JoinMeetingAction {
                 print(
                     """
                     [{  "title": "\(LocalizedStrings.calendarAccessDenied)",
-                        "subtitle": "\(LocalizedStrings.calendarAccessDeniedSubtitle)",
+                        "subtitle": "\(LocalizedStrings.calendarAccessSubtitle)",
                         "alwaysShowsSubtitle": true,
                         "icon": "alert",
                         "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"}]
@@ -249,7 +245,7 @@ struct JoinMeetingAction {
             print(
                 """
                 [{  "title": "\(LocalizedStrings.calendarAccessRequired)", 
-                    "subtitle": "\(LocalizedStrings.calendarAccessRequiredSubtitle)",
+                    "subtitle": "\(LocalizedStrings.calendarAccessSubtitle)",
                     "alwaysShowsSubtitle": true,
                     "icon": "alert",
                     "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"}]
@@ -286,4 +282,3 @@ Task {
 while !isComplete {
     RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
 }
-
