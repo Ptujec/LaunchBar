@@ -10,6 +10,9 @@
  Sources:
  - https://developer.apple.com/documentation/contacts
  - https://stackoverflow.com/questions/37039103/how-to-fetch-only-mobile-numbers-in-swift-using-cncontacts
+
+ TODO: 
+ - error message when no contact info found 
  */
 
 import AppKit
@@ -133,7 +136,7 @@ struct MessageContactAction {
 
 // MARK: - Script Execution
 
-var isComplete = false
+let semaphore = DispatchSemaphore(value: 0)
 
 Task {
     do {
@@ -141,9 +144,8 @@ Task {
     } catch {
         NSLog("Error: \(error.localizedDescription)")
     }
-    isComplete = true
+     semaphore.signal()
+
 }
 
-while !isComplete {
-    RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
-}
+semaphore.wait()
