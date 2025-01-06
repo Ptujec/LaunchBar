@@ -266,8 +266,7 @@ struct JoinMeetingAction {
     }
 }
 // MARK: - Script Execution
-
-var isComplete = false
+let semaphore = DispatchSemaphore(value: 0)
 
 Task {
     do {
@@ -275,10 +274,7 @@ Task {
     } catch {
         NSLog("Error: \(error.localizedDescription)")
     }
-    isComplete = true
+    semaphore.signal()
 }
 
-// MARK: - Run Loop
-while !isComplete {
-    RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
-}
+semaphore.wait()
