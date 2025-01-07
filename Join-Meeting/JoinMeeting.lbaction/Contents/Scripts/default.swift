@@ -15,7 +15,9 @@
  - https://www.hackingwithswift.com/example-code/system/how-to-show-a-relative-date-and-time-using-relativedatetimeformatter
 
  TODO:
+ - check why launchbar is not hiding when command key is pressed
  - Fix NSLocalizedString use / environment … ask Marco
+
  */
 import AppKit
 import EventKit
@@ -34,6 +36,7 @@ protocol MeetingProvider {
 
 /// Global event store instance used for calendar access throughout the application
 let eventStore = EKEventStore()
+// let isCommandKeyPressed = ProcessInfo.processInfo.environment["LB_OPTION_COMMAND_KEY"] == "1"
 
 // MARK: - Localization
 
@@ -169,18 +172,18 @@ final class EventFetcher {
         let rangePast = calendar.date(byAdding: .hour, value: -2, to: Date())!
         let rangeFuture = calendar.date(byAdding: .minute, value: 30, to: Date())!
 
-        for calendar in calendars {
-            let predicate = eventStore.predicateForEvents(
-                withStart: rangePast,
-                end: rangeFuture,
-                calendars: [calendar]
-            )
+        // Create single predicate for all calendars
+        let predicate = eventStore.predicateForEvents(
+            withStart: rangePast,
+            end: rangeFuture,
+            calendars: calendars
+        )
 
-            let events = eventStore.events(matching: predicate)
-            for event in events {
-                if let eventInfo = processEvent(event) {
-                    results.append(eventInfo)
-                }
+        // Single query for all events
+        let events = eventStore.events(matching: predicate)
+        for event in events {
+            if let eventInfo = processEvent(event) {
+                results.append(eventInfo)
             }
         }
 
