@@ -23,6 +23,7 @@ function settings() {
       title: 'Choose Model'.localize(),
       icon: 'gearTemplate',
       badge: prefs.model || 'gpt-4o-mini',
+      actionReturnsItems: true,
       action: 'showModels',
     },
     File.exists('/Applications/iA Writer.app')
@@ -30,6 +31,7 @@ function settings() {
           title: 'Set Author (iA Writer)'.localize(),
           icon: 'iATemplate',
           action: 'showAuthors',
+          actionReturnsItems: true,
           badge: prefs.iaAuthor ? prefs.iaAuthor : undefined,
         }
       : {},
@@ -49,7 +51,7 @@ function settings() {
       alwaysShowsSubtitle: true,
       icon: 'appsTemplate',
       action: 'getApps',
-      // children: getApps(),
+      actionReturnsItems: true,
       badge:
         prefs.excludedApps?.length > 0
           ? prefs.excludedApps.length === 1
