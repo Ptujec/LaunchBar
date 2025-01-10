@@ -13,9 +13,18 @@ on run
 	set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
 	
 	set _results to {}
-	if "Mail" is in _processes then
-		tell application "Mail"
-			set _sel to get selection
+	if "Mail" is not in _processes then
+		return "Error: Mail is not running!"
+	end if
+	
+	tell application "Mail"
+		set _sel to get selection
+		
+		if _sel is {} then
+			return "Error: No message selected!"
+		end if
+		
+		try
 			set _results to {}
 			repeat with _msg in _sel
 				# Message URL (ID)
@@ -27,14 +36,7 @@ on run
 				
 				# Sender
 				set _sender to _msg's sender
-				try
-					set _sender to extract name from _sender
-					if "," is in _sender then
-						set _sender to last word of _sender
-					else
-						set _sender to first word of _sender
-					end if
-				end try
+				set _sender to extract name from _sender
 				
 				# Date
 				set _date to _msg's date received
@@ -53,11 +55,10 @@ on run
 				
 				set end of _results to "{shortdate: \"" & _shortdate & "\", date: \"" & _date & "\", sender: \"" & _sender & "\", subject:\"" & _subject & "\", url:\"" & _url & "\"}"
 			end repeat
-			
-		end tell
-	else
-		set _results to false
-	end if
+		on error e
+			return "Error: " & e
+		end try
+	end tell
 	
 	return _results
 end run

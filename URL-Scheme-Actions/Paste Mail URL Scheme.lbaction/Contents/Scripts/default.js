@@ -1,7 +1,7 @@
 /* 
 Paste Mail URL Scheme Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-10-18
+2025-01-10
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -24,8 +24,12 @@ function run(argument) {
     './getMailData.applescript'
   ).trim();
 
-  if (output == 'false')
-    return { title: 'Mail is not running!'.localize(), icon: 'alert' };
+  // LaunchBar.log('initial output', output);
+
+  if (output.startsWith('Error')) {
+    LaunchBar.log(output);
+    return { title: output.localize(), icon: 'alert' };
+  }
 
   const format = LaunchBar.options.shiftKey
     ? 'MD'
@@ -39,44 +43,48 @@ function run(argument) {
 
   if (json.length == 1) {
     const item = json[0];
-    return paste({
+    paste({
       title: argument || item.subject,
       url: item.url,
       format,
     });
+    return;
   }
 
-  return json.map((item) => ({
-    shortdate: item.shortdate,
-    title: item.sender + ' on '.localize() + item.date,
-    subtitle: argument || item.subject,
-    alwaysShowsSubtitle: true,
-    icon: 'threadTemplate',
-    badge: format,
-    action: 'paste',
-    argument: {
-      title: argument || item.subject,
-      url: item.url,
-      format,
-    },
-    actionRunsInBackground: true,
-  }));
+  return json.map((item) => {
+    const title = item.sender + ' on '.localize() + item.date;
+    const subtitle = argument || item.subject;
+    const url = item.url;
 
-  function paste({ title, url, format }) {
-    LaunchBar.hide();
+    return {
+      shortdate: item.shortdate,
+      title,
+      subtitle,
+      alwaysShowsSubtitle: true,
+      icon: 'threadTemplate',
+      badge: format,
+      action: 'paste',
+      actionArgument: {
+        title: subtitle,
+        url,
+        format,
+      },
+      actionRunsInBackground: true,
+    };
+  });
+}
 
-    // URL only
-    if (format === 'URL') {
-      LaunchBar.paste(url);
-    }
-    // Markdown
-    if (format === 'MD') {
-      LaunchBar.paste(`[${title}](${url})`);
-    }
-    // Richtext
-    if (format === 'RTF') {
-      const html = `<font size="4"><font face="helvetica neue"><a href="${url}">${title}</a> </font></font>`;
-      LaunchBar.executeAppleScriptFile('./convertRtf.applescript', html);
-    }
+function paste({ title, url, format }) {
+  LaunchBar.hide();
+
+  if (format === 'MD' || LaunchBar.options.shiftKey) {
+    LaunchBar.paste(`[${title}](${url})`);
+  } else if (format === 'RTF' || LaunchBar.options.commandKey) {
+    const html = `<font size="4"><font face="helvetica neue"><a href="${url}">${title}</a> </font></font>`;
+    LaunchBar.executeAppleScriptFile('./convertRtf.applescript', html);
+  } else if (format === 'URL') {
+    LaunchBar.paste(url);
   }
+
+  // LaunchBar.log('done', '\ntitle:', title, '\nurl:', url, '\nformat:', format);
 }

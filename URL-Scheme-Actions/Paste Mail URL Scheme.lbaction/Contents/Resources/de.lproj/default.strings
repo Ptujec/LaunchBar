@@ -1,2 +1,3 @@
-"Mail is not running!" = "Mail läuft nicht!";
+"Error: Mail is not running!" = "Fehler: Mail läuft nicht!";
+"Error: No message selected!" = "Fehler: Keine Nachricht ausgewählt!";
 " on " = " am ";

@@ -9,25 +9,25 @@
 	<key>CFBundleName</key>
 	<string>Paste Mail URL Scheme</string>
 	<key>CFBundleVersion</key>
-	<string>4.0.1</string>
+	<string>4.0.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⏎ = Paste URL only, ⇧⏎ = MD, ⌘⏎ = RTF 
 
-This action might be a little overkill in terms of options. But it's basic function is very simple. Just run the action to paste the URL of an open or selected email into the current text field.
+This action might be a little overkill in terms of options, but its basic function is very simple. Just run the action to paste the URL of an open or selected email into the current text field.
 
-You can use use ⌥ to get a Markdown link (or ⇧ for a RTF version) with the email subject as the title. If you hit space before running the action you can even enter a custom title for MD/RTF links. (In this case "enter" will also paste the MD link. Because why would you enter a title if you don't want to use it?)</string>
+Hold ⇧ for Markdown or ⌘ for Rich Text Format. By default, this will use the email subject as the title. If you hit space before running the action, you can even enter a custom title.</string>
 		<key>LBTwitter</key>
 		<string>@Ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/URL-Scheme-Actions</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/URL-Scheme-Actions/Paste%20Mail%20URL%20Scheme.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/URL-Scheme-Actions#mail</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.apple.mail</string>
