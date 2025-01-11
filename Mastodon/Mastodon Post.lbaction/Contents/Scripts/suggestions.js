@@ -1,41 +1,24 @@
-// LaunchBar Action Script
+/* 
+Mastodon Post (Toot) Action for LaunchBar
+by Christian Bender (@ptujec)
+2025-01-11
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
 function runWithString(string) {
   if (string.includes('..')) {
-    // Get Markdown Links from Mail and Safari
-    var output = LaunchBar.executeAppleScript(
+    const output = LaunchBar.executeAppleScript(
       'tell application "Safari" to set _URL to URL of front document'
     ).trim();
 
-    var newString =
+    const newString =
       string.trim().replace('..', ' ').replace(/\s\s+/g, '') + ' ' + output;
-
-    return [
-      {
-        title: newString,
-        icon: 'link2Template',
-      },
-    ];
+    return [{ title: newString, icon: 'link2Template' }];
   }
 
-  if (Action.preferences.count != 'always') {
-    if (string.length < 400) {
-      return;
-    }
-  }
+  if (Action.preferences.count !== 'always' && string.length < 400) return;
 
-  if (string.length > 500) {
-    var icon = 'countRed';
-  } else {
-    var icon = 'postTemplate';
-  }
-
-  var count = [
-    {
-      title: string.length + '/500',
-      icon: icon,
-    },
-  ];
-
-  return count;
+  const icon = string.length > 500 ? 'countRed' : 'postTemplate';
+  return [{ title: `${string.length}/500`, icon }];
 }

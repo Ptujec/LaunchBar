@@ -9,17 +9,17 @@
 	<key>CFBundleName</key>
 	<string>Mastodon Post (Toot)</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.4</string>
+	<string>1.2.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>Content Warning: ⌘↩, Settings: ⇧↩, Add Link: ..</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Mastodon</string>
 		<key>LBUpdateURL</key>
