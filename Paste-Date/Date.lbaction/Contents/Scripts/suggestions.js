@@ -6,39 +6,42 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-String.prototype.localizationTable = 'default';
-
-include('default.js');
+include('global.js');
 
 function runWithString(string) {
   const date = new Date();
   string = string.toLowerCase();
 
-  if (!isNaN(parseInt(string))) {
-    const dateString = processArgument(string, date);
+  // Get weekdays starting from tomorrow
+  const todayIndex = new Date().getDay();
+  const orderedWeekdays = [
+    ...getWeekdaySuggestions().slice(todayIndex),
+    ...getWeekdaySuggestions().slice(0, todayIndex),
+  ];
+
+  const orderedSuggestions = [
+    ...orderedWeekdays,
+    ...relativeDaySuggestions,
+    ...monthBoundarySuggestions,
+    ...generateNthWeekdaySuggestions(),
+  ];
+
+  const matches = string
+    ? orderedSuggestions.filter(
+        (suggestion) =>
+          findFirstMatch(string, [suggestion.toLowerCase()]) !== undefined
+      )
+    : orderedSuggestions;
+
+  return matches.map((suggestion) => {
+    const dateString = processArgument(suggestion, date);
     const subtitle = format(dateString, 'full');
+
     return {
-      title: string,
+      title: suggestion,
       subtitle,
       icon: 'Template',
       alwaysShowsSubtitle: true,
     };
-  }
-  return [...weekdaySuggestions, ...otherSuggestions]
-    .filter((day) => {
-      const stringParts = day.split(' ');
-      return stringParts.some((part) => part.toLowerCase().startsWith(string));
-    })
-    .map((day) => {
-      const dateString = processArgument(day, date);
-      const dateStyle = weekdaySuggestions.includes(day) ? 'long' : 'full';
-      const subtitle = format(dateString, dateStyle);
-
-      return {
-        title: day,
-        subtitle,
-        icon: 'Template',
-        alwaysShowsSubtitle: true,
-      };
-    });
+  });
 }

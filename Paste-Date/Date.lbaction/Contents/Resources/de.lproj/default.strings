@@ -19,5 +19,14 @@
 "medium" = "mittel";
 "long" = "lang";
 "full" = "vollständig";
-"US Short" = "US Kurz";
-"iso_long" = "ISO vollständig";
+"us_short" = "US Kurz";
+"iso_full" = "ISO vollständig";
+"First" = "Erster";
+"Second" = "Zweiter";
+"Third" = "Dritter";
+"Fourth" = "Vierter";
+"Last" = "Letzter";
+"day" = "Tag";
+"of this month" = "dieses Monats";
+"of next month" = "des nächsten Monats";
+"of last month" = "des vergangenen Monats";

@@ -9,17 +9,17 @@
 	<key>CFBundleName</key>
 	<string>Paste Date</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.2</string>
+	<string>1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⇧⏎ = Set default formats, ⌥⏎ = Use alternate format, ⌘⏎ = Choose format</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Paste-Date/Date.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
