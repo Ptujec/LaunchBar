@@ -35,7 +35,10 @@ function runWithString(string) {
 
   return matches.map((suggestion) => {
     const dateString = processArgument(suggestion, date);
-    const subtitle = format(dateString, 'full');
+    const isWeekday = weekdays.some((day) => day.localize() === suggestion);
+    const subtitle = isWeekday
+      ? format(dateString, 'long')
+      : format(dateString, 'full');
 
     return {
       title: suggestion,
