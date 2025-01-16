@@ -1,10 +1,8 @@
 # LaunchBar Action: Audio Devices
 
-This action allows you to switch between audio devices.
+This action allows you to switch between audio devices. Devices are intentionally sorted in a way that makes it easy to toggle between two output devices. 
 
 <img src="01.jpg" width="802"/>
-
-Devices are intentionally sorted in a way that makes it easy to toggle between two output devices. 
 
 ## Features
 
