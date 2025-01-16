@@ -6,9 +6,13 @@ This action allows you to switch between audio devices.
 
 Devices are intentionally sorted in a way that makes it easy to toggle between two output devices. 
 
-Exclude selected devices with `Control` + `Enter`. (You can show excluded devices with `Command` + `Enter`. Include a selected device again with `Control` + `Enter`.)
+## Features
 
-By default, sound effects (e.g., system alerts) will play on the new output device. You can prevent that by pressing `Option` + `Enter` on a selected output device.
+**Exclude selected devices** with `Control` + `Enter`. (You can show excluded devices with `Command` + `Enter`. Include a selected device again with `Control` + `Enter`.)
+
+By default, **sound effects** (e.g., system alerts) will play on the new output device. You can prevent that by pressing `Option` + `Enter` on a selected output device.
+
+If you hold `Command` when switching to a new output device, the list will be filtered by only input devices next, or vice versa.
 
 **NOTE**: AirPlay devices are not fully supported yet.   
 
