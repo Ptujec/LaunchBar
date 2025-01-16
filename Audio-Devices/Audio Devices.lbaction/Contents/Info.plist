@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>waveformTemplate.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.AudioDevices</string>
+	<key>CFBundleName</key>
+	<string>Audio Devices</string>
+	<key>CFBundleVersion</key>
+	<string>0.1</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBTwitter</key>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Audio-Devices/Audio%20Devices.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Audio-Devices#readme</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.swift</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
