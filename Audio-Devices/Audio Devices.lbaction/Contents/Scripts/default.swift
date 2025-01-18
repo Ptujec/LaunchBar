@@ -14,10 +14,14 @@ Documentation & Sources:
 - https://openairplay.github.io/airplay-spec/service_discovery.html
 
 TODO: 
-- AirPlay support
-- Localization
-- Cleanup
 
+- AirPlay support
+    - Applescript Hide System Settings
+    - UID in Preferences
+    - Fix display "AirPlay" with the actual device name 
+- Localization
+- Error handling, when the device is not found you want to switch to
+- Cleanup
 */
 
 // MARK: - Imports
@@ -30,19 +34,34 @@ struct Environment {
     static let isCommandKeyPressed = info["LB_OPTION_COMMAND_KEY"] == "1"
     static let isControlKeyPressed = info["LB_OPTION_CONTROL_KEY"] == "1"
     static let isAlternateKeyPressed = info["LB_OPTION_ALTERNATE_KEY"] == "1"
+    static let isShiftKeyPressed = info["LB_OPTION_SHIFT_KEY"] == "1"
     static let actionPath = info["LB_ACTION_PATH"] ?? ""
     static let supportPath = info["LB_SUPPORT_PATH"] ?? ""
     static let historyPlistPath = "\(supportPath)/device_history.plist"
     static let preferencesPlistPath = "\(supportPath)/preferences.plist"
 }
 
+struct AirPlayDevice: Codable, Hashable {
+    let name: String
+    var uid: String
+    
+    init(name: String) {
+        self.name = name
+        self.uid = "\(name.replacingOccurrences(of: " ", with: "_"))_AIRPLAY"
+    }
+}
+
 struct Preferences: Codable {
     var excludedDevices: Set<String>
     var noSoundEffectsSyncDevices: Set<String>
+    var airPlayDevices: Set<AirPlayDevice>
+    var lastAirPlayActivationAttempt: String?  // Store the temporary UID we tried to activate
 
     init() {
         excludedDevices = []
         noSoundEffectsSyncDevices = []
+        airPlayDevices = []
+        lastAirPlayActivationAttempt = nil
     }
 
     mutating func toggleExcludedDevice(_ deviceUID: String) {
@@ -85,7 +104,7 @@ struct CoreAudioUtils {
         return status == noErr ? (deviceTitle as String) : nil
     }
 
-    static func getDeviceList(type: String) -> [(title: String, id: UInt32, isActive: Bool)] {
+    static func getDeviceList(type: String) -> [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)] {
         var propertySize: UInt32 = 0
         var address = createPropertyAddress(selector: kAudioHardwarePropertyDevices)
 
@@ -102,7 +121,7 @@ struct CoreAudioUtils {
             &address, 0, nil, &propertySize, &deviceIDs)
         guard status == noErr else { return [] }
 
-        var deviceList: [(title: String, id: UInt32, isActive: Bool)] = []
+        var deviceList: [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)] = []
         for id in deviceIDs {
             let scope: AudioObjectPropertyScope =
                 (type == "input") ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput
@@ -116,6 +135,13 @@ struct CoreAudioUtils {
             if status != noErr || streamSize == 0 { continue }
 
             guard let deviceTitle = getDeviceTitle(deviceID: id) else { continue }
+
+            // Get transport type
+            var transportTypeSize = UInt32(MemoryLayout<UInt32>.size)
+            var transportType: UInt32 = 0
+            var transportAddress = createPropertyAddress(selector: kAudioDevicePropertyTransportType)
+            let transportStatus = AudioObjectGetPropertyData(id, &transportAddress, 0, nil, &transportTypeSize, &transportType)
+            let finalTransportType = transportStatus == noErr ? transportType : nil
 
             // Check if device is active
             var isActive = false
@@ -143,7 +169,7 @@ struct CoreAudioUtils {
                 }
             }
 
-            deviceList.append((title: deviceTitle, id: id, isActive: isActive))
+            deviceList.append((title: deviceTitle, id: id, isActive: isActive, transportType: finalTransportType))
         }
 
         return deviceList
@@ -222,6 +248,11 @@ struct CoreAudioUtils {
 
         return status == noErr ? (deviceUID as String) : nil
     }
+
+    static func hasActiveAirPlayDevice() -> Bool {
+        return getDeviceList(type: "output")
+            .first { $0.isActive && $0.transportType == kAudioDeviceTransportTypeAirPlay } != nil
+    }
 }
 
 struct DeviceHistory: Codable {
@@ -243,31 +274,42 @@ struct DeviceHistory: Codable {
         outputHistory = []
     }
 
-    func lastUsedDevice(type: String, excluding currentUID: String?) -> String? {
+    func lastUsedDevice(type: String, excluding currentUID: String?, preferences: Preferences) -> String? {
         let history = type == "input" ? inputHistory : outputHistory
         let devices = CoreAudioUtils.getDeviceList(type: type)
         let connectedUIDs = devices.compactMap { CoreAudioUtils.getDeviceUID(deviceID: $0.id) }
+        
+        // Add AirPlay device UIDs from preferences
+        let airPlayUIDs = preferences.airPlayDevices.map { $0.uid }
+        let allUIDs = connectedUIDs + airPlayUIDs
 
         return
             history
             .filter { currentUID == nil || $0.deviceUID != currentUID }
-            .filter { connectedUIDs.contains($0.deviceUID) }
+            .filter { allUIDs.contains($0.deviceUID) }
             .sorted { $0.lastUsedDate > $1.lastUsedDate }
             .first?.deviceUID
     }
 
     mutating func addUsage(deviceUID: String, type: String) {
         let usage = DeviceUsage(deviceUID: deviceUID, lastUsedDate: Date())
-        let history = type == "input" ? inputHistory : outputHistory
-
-        let updatedHistory = (history.filter { $0.deviceUID != deviceUID } + [usage])
-            .sorted { $0.lastUsedDate > $1.lastUsedDate }
-            .prefix(7)
-
+        
         if type == "input" {
-            inputHistory = Array(updatedHistory)
+            // Remove any existing entry for this UID
+            inputHistory.removeAll { $0.deviceUID == deviceUID }
+            // Add new entry and keep only the most recent entries
+            inputHistory.insert(usage, at: 0)
+            if inputHistory.count > 5 {
+                inputHistory = Array(inputHistory.prefix(7))
+            }
         } else {
-            outputHistory = Array(updatedHistory)
+            // Remove any existing entry for this UID
+            outputHistory.removeAll { $0.deviceUID == deviceUID }
+            // Add new entry and keep only the most recent 7 entries
+            outputHistory.insert(usage, at: 0)
+            if outputHistory.count > 5 {
+                outputHistory = Array(outputHistory.prefix(7))
+            }
         }
     }
 }
@@ -280,38 +322,191 @@ struct Utils {
 }
 
 struct AudioDevicesAction {
+    private static func getAirPlayDevicesAndActivate(deviceToActivate: String? = nil) -> [String] {
+        let script = """
+            tell application "LaunchBar" to hide
+            set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
+            open location "x-apple.systempreferences:com.apple.Sound-Settings.extension"
+            if "System Settings" is not in _processes then
+                delay 1
+            else
+                delay 0.5
+            end if
+            tell application "System Events"
+                set _rows to rows of outline 1 of scroll area 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1 of application process "System Settings"
+                
+                set _deviceNames to {}
+                repeat with _row in _rows
+                    set _deviceType to value of static text 1 of group 1 of UI element 2 of _row
+                    if _deviceType is "AirPlay" then
+                        set _deviceName to value of static text 1 of group 1 of UI element 1 of _row
+                        set end of _deviceNames to _deviceName
+                        
+                        if _deviceName is "\(deviceToActivate ?? "")" then
+                            select _row
+                            delay 0.2
+                        end if
+                    end if
+                end repeat
+            end tell
+            tell application "System Events"
+                if visible of application process "System Settings" is true then
+                    set visible of application process "System Settings" to false
+                end if
+            end tell
+            return _deviceNames
+        """
+        
+        let process = Process()
+        process.launchPath = "/usr/bin/osascript"
+        process.arguments = ["-e", script]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        
+        do {
+            try process.run()
+            process.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                return output.components(separatedBy: .newlines).filter { !$0.isEmpty }
+            }
+        } catch {
+            NSLog("Failed to execute AppleScript: \(error)")
+        }
+        
+        return []
+    }
+
+    private static func updateAirPlayDeviceUID(preferences: inout Preferences) {
+        guard let attemptedUID = preferences.lastAirPlayActivationAttempt else { return }
+        
+        // Look for active AirPlay device in CoreAudio
+        if let activeAirPlay = CoreAudioUtils.getDeviceList(type: "output")
+            .first(where: { $0.isActive && $0.transportType == kAudioDeviceTransportTypeAirPlay }),
+            let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: activeAirPlay.id)
+        {
+            // Update the UID in preferences
+            if var device = preferences.airPlayDevices.first(where: { $0.uid == attemptedUID }) {
+                preferences.airPlayDevices.remove(device)
+                device.uid = deviceUID
+                preferences.airPlayDevices.insert(device)
+            }
+        }
+        // Clear the attempt after trying to update
+        preferences.lastAirPlayActivationAttempt = nil
+    }
+
+    private static func updateAirPlayDevices() {
+        let deviceNames = getAirPlayDevicesAndActivate()
+        var preferences = loadPreferences()
+        preferences.airPlayDevices = Set(deviceNames.map { AirPlayDevice(name: $0) })
+        savePreferences(preferences)
+    }
+
     static func main() -> [[String: Any]] {
         let arguments = Array(CommandLine.arguments.dropFirst())
+        var preferences = loadPreferences()
+        
+        // Check for pending AirPlay activation
+        updateAirPlayDeviceUID(preferences: &preferences)
+        savePreferences(preferences)
+
+        // Update AirPlay devices list when shift is pressed
+        if Environment.isShiftKeyPressed {
+            updateAirPlayDevices()
+        }
 
         if let firstArg = arguments.first,
             let dict = try? JSONSerialization.jsonObject(with: firstArg.data(using: .utf8)!)
-                as? [String: String],
-            let deviceID = dict["deviceID"],
-            let deviceType = dict["deviceType"]
+                as? [String: String]
         {
-            if let deviceIDInt = UInt32(deviceID) {
+            if let deviceName = dict["airPlayName"] {
                 if Environment.isControlKeyPressed {
-                    if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
-                        var preferences = loadPreferences()
-                        preferences.toggleExcludedDevice(deviceUID)
-                        savePreferences(preferences)
-                    }
-                } else if Environment.isAlternateKeyPressed && deviceType == "output" {
-                    if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
-                        var preferences = loadPreferences()
-                        preferences.toggleNoSoundEffectsSync(deviceUID)
-                        savePreferences(preferences)
-                    }
+                    // Handle excluding AirPlay device
+                    let airPlayUID = AirPlayDevice(name: deviceName).uid
+                    preferences.toggleExcludedDevice(airPlayUID)
+                    savePreferences(preferences)
+                    return listDevices(filterType: nil)
                 } else {
-                    let preferences = loadPreferences()
-                    activateDevice(
-                        deviceID: deviceID, deviceType: deviceType, preferences: preferences)
-                    if Environment.isCommandKeyPressed {
-                        return listDevices(filterType: deviceType == "input" ? "output" : "input")
+                    // Save currently active device to history before switching
+                    if let activeDevice = CoreAudioUtils.getDeviceList(type: "output")
+                        .first(where: { $0.isActive }),
+                        let activeDeviceUID = CoreAudioUtils.getDeviceUID(deviceID: activeDevice.id)
+                    {
+                        var history = loadDeviceHistory()
+                        history.addUsage(deviceUID: activeDeviceUID, type: "output")
+                        saveDeviceHistory(history)
+                    }
+                    
+                    // Check if we have a real UID for this device
+                    if let device = preferences.airPlayDevices.first(where: { $0.name == deviceName }),
+                       let existingDevice = CoreAudioUtils.getDeviceList(type: "output")
+                           .first(where: { CoreAudioUtils.getDeviceUID(deviceID: $0.id) == device.uid })
+                    {
+                        // Device exists in CoreAudio, activate normally
+                        if CoreAudioUtils.activateDevice(type: "output", deviceID: existingDevice.id) {
+                            var history = loadDeviceHistory()
+                            history.addUsage(deviceUID: device.uid, type: "output")
+                            saveDeviceHistory(history)
+                        }
+                    } else {
+                        // Activate via AppleScript and store the attempt
+                        let deviceNames = getAirPlayDevicesAndActivate(deviceToActivate: deviceName)
+                        preferences.airPlayDevices = Set(deviceNames.map { AirPlayDevice(name: $0) })
+                        
+                        // Store the temporary UID for later matching
+                        let tempUID = AirPlayDevice(name: deviceName).uid
+                        preferences.lastAirPlayActivationAttempt = tempUID
+                        
+                        var history = loadDeviceHistory()
+                        history.addUsage(deviceUID: tempUID, type: "output")
+                        saveDeviceHistory(history)
+                    }
+                    savePreferences(preferences)
+
+                    // Return refresh message if no active AirPlay device
+                    if !CoreAudioUtils.hasActiveAirPlayDevice() {
+                        return [[
+                            "title": "Refresh when connected",
+                            "icon": "waveformTemplate",
+                            "action": Utils.isCompiledVersionAvailable(
+                                scriptName: "default",
+                                in: Environment.actionPath) ? "default" : "default.swift"
+                        ]]
                     }
                 }
+                
+                return listDevices(filterType: nil)
+            } else if let deviceID = dict["deviceID"],
+                let deviceType = dict["deviceType"]
+            {
+                if let deviceIDInt = UInt32(deviceID) {
+                    if Environment.isControlKeyPressed {
+                        if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
+                            var preferences = loadPreferences()
+                            preferences.toggleExcludedDevice(deviceUID)
+                            savePreferences(preferences)
+                        }
+                    } else if Environment.isAlternateKeyPressed && deviceType == "output" {
+                        if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
+                            var preferences = loadPreferences()
+                            preferences.toggleNoSoundEffectsSync(deviceUID)
+                            savePreferences(preferences)
+                        }
+                    } else {
+                        let preferences = loadPreferences()
+                        activateDevice(
+                            deviceID: deviceID, deviceType: deviceType, preferences: preferences)
+                        if Environment.isCommandKeyPressed {
+                            return listDevices(filterType: deviceType == "input" ? "output" : "input")
+                        }
+                    }
+                }
+                return listDevices(filterType: nil)
             }
-            return listDevices(filterType: nil)
         }
 
         return listDevices(filterType: nil)
@@ -330,43 +525,55 @@ struct AudioDevicesAction {
                 }
                 return true
             }
+            
+        // Get output devices and their UIDs for filtering AirPlay devices
         let outputDevices = CoreAudioUtils.getDeviceList(type: "output")
+        let outputDeviceUIDs = Set(outputDevices.compactMap { CoreAudioUtils.getDeviceUID(deviceID: $0.id) })
+        
+        let filteredOutputDevices = outputDevices
             .filter { device in
                 if let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) {
                     return showExcluded || !preferences.excludedDevices.contains(uid)
                 }
                 return true
             }
+            .map { device -> (title: String, id: UInt32, isActive: Bool, transportType: UInt32?) in
+                if let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id),
+                   device.transportType == kAudioDeviceTransportTypeAirPlay,
+                   let airPlayDevice = preferences.airPlayDevices.first(where: { $0.uid == uid }) {
+                    return (title: airPlayDevice.name, id: device.id, isActive: device.isActive, transportType: device.transportType)
+                }
+                return device
+            }
 
         // Find active devices once
         let activeInputUID = inputDevices.first { $0.isActive }.flatMap {
             CoreAudioUtils.getDeviceUID(deviceID: $0.id)
         }
-        let activeOutputUID = outputDevices.first { $0.isActive }.flatMap {
+        let activeOutputUID = filteredOutputDevices.first { $0.isActive }.flatMap {
             CoreAudioUtils.getDeviceUID(deviceID: $0.id)
         }
 
         // Find last used devices once
-        let lastUsedInputUID = history.lastUsedDevice(type: "input", excluding: activeInputUID)
-        let lastUsedOutputUID = history.lastUsedDevice(type: "output", excluding: activeOutputUID)
+        let lastUsedInputUID = history.lastUsedDevice(type: "input", excluding: activeInputUID, preferences: preferences)
+        let lastUsedOutputUID = history.lastUsedDevice(type: "output", excluding: activeOutputUID, preferences: preferences)
 
-        // Log device lists for debugging
-        NSLog("Input Devices:")
-        for device in inputDevices {
-            let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
-            NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive))")
-        }
+        // Log device lists for debugging TODO: remove when not needed anymore x
+        // NSLog("Input Devices:")
+        // for device in inputDevices {
+        //     let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
+        //     NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
+        // }
 
         NSLog("Output Devices:")
-        for device in outputDevices {
+        for device in filteredOutputDevices {
             let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
-            NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive))")
+            NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
         }
 
         // Process devices based on type filter
         let processDevices = {
-            (devices: [(title: String, id: UInt32, isActive: Bool)], type: String) -> [[String:
-                Any]] in
+            (devices: [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)], type: String) -> [[String: Any]] in
             devices.map { device -> [String: Any] in
                 let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: device.id)
                 let isLastUsed =
@@ -387,6 +594,7 @@ struct AudioDevicesAction {
                 if isLastUsed { labels.append("last used") }
                 if isExcluded { labels.append("excluded") }
                 if noSoundEffectsSync { labels.append("no sound effects sync") }
+                if device.transportType == kAudioDeviceTransportTypeAirPlay { labels.append("AirPlay") }
 
                 // Create sort priority
                 let sortPriority: Int
@@ -419,14 +627,45 @@ struct AudioDevicesAction {
             }
         }
 
+        // Add AirPlay devices to the output devices list (only those not already in CoreAudio)
+        let airPlayDevices: [[String: Any]] = preferences.airPlayDevices
+            .filter { device in
+                !outputDeviceUIDs.contains(device.uid) && // Filter out devices already in CoreAudio
+                (showExcluded || !preferences.excludedDevices.contains(device.uid))
+            }
+            .map { device -> [String: Any] in
+                let isExcluded = preferences.excludedDevices.contains(device.uid)
+                let isLastUsed = device.uid == lastUsedOutputUID
+                
+                var labels: [String] = []
+                if isLastUsed { labels.append("last used") }
+                if isExcluded { labels.append("excluded") }
+                labels.append("AirPlay")
+                
+                let sortPriority = isExcluded ? 4 : (isLastUsed ? 1 : 3)
+                
+                return [
+                    "title": device.name,
+                    "label": labels.joined(separator: " | "),
+                    "icon": "outputTemplate",
+                    "badge": "output",
+                    "sortPriority": sortPriority,
+                    "action": Utils.isCompiledVersionAvailable(
+                        scriptName: "default",
+                        in: Environment.actionPath) ? "default" : "default.swift",
+                    "actionArgument": [
+                        "airPlayName": device.name
+                    ],
+                ]
+            }
+
         let result: [[String: Any]]
         if let filterType = filterType {
-            result =
-                filterType == "input"
+            result = filterType == "input"
                 ? processDevices(inputDevices, "input")
-                : processDevices(outputDevices, "output")
+                : processDevices(filteredOutputDevices, "output") + airPlayDevices
         } else {
-            result = processDevices(outputDevices, "output") + processDevices(inputDevices, "input")
+            result = processDevices(filteredOutputDevices, "output") + airPlayDevices + processDevices(inputDevices, "input")
         }
 
         return result.sorted { item1, item2 in
@@ -451,6 +690,16 @@ struct AudioDevicesAction {
             return
         }
 
+        // Save currently active device before switching
+        let devices = CoreAudioUtils.getDeviceList(type: deviceType)
+        if let activeDevice = devices.first(where: { $0.isActive }),
+           let activeDeviceUID = CoreAudioUtils.getDeviceUID(deviceID: activeDevice.id)
+        {
+            var history = loadDeviceHistory()
+            history.addUsage(deviceUID: activeDeviceUID, type: deviceType)
+            saveDeviceHistory(history)
+        }
+
         if CoreAudioUtils.activateDevice(type: deviceType, deviceID: deviceIDInt) {
             if deviceType == "output" && !preferences.noSoundEffectsSyncDevices.contains(deviceUID)
             {
@@ -458,10 +707,6 @@ struct AudioDevicesAction {
                     NSLog("Failed to sync sound effects output")
                 }
             }
-
-            var history = loadDeviceHistory()
-            history.addUsage(deviceUID: deviceUID, type: deviceType)
-            saveDeviceHistory(history)
         } else {
             NSLog("Failed to set device as default")
         }

@@ -1,30 +1,33 @@
 # LaunchBar Action: Audio Devices
 
-This action allows you to switch between audio devices. Devices are intentionally sorted in a way that makes it easy to toggle between two output devices. 
+This action allows you to switch between audio devices. 
 
 <img src="01.jpg" width="802"/>
 
 ## Features
 
-**Exclude selected devices** with `Control` + `Enter`. (You can show excluded devices with `Command` + `Enter`. Include a selected device again with `Control` + `Enter`.)
+Devices are **intentionally sorted** in a way that makes it easy to toggle between two output devices. 
 
-By default, **sound effects** (e.g., system alerts) will play on the new output device. You can prevent that by pressing `Option` + `Enter` on a selected output device.
+**Exclude selected devices** with `Control` + `Enter`. 
+*(You can show excluded devices with `Command` + `Enter`. Include a selected device again with `Control` + `Enter`.)*
+
+By default, **sound effects** (e.g. system alerts) will play on the new output device. You can prevent that by pressing `Option` + `Enter` on a selected output device.
 
 If you hold `Command` when switching to a new output device, the list will be filtered by only input devices next, or vice versa.
 
-**NOTE**: AirPlay devices are not fully supported yet.   
+## Note About AirPlay Devices
 
-## Requirements
-
-If you don't have **Apple's Command Line Tools** installed[^1], you will probably be prompted to do so. You will surely need them if you want to compile the script, which helps run it much faster.
+AirPlay devices are not fully supported yet. CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `Shift`, but this is a workaround that involves GUI scripting, which is very fragile.
 
 ## Note About Swift Scripts
+
+First, if you don't have **Apple's Command Line Tools** installed[^1], you will probably be prompted to do so. You will surely need them if you want to compile the script.
 
 Swift scripts run faster when compiled. Unfortunately, I can't share the action with a compiled script. For security reasons, Apple adds a `com.apple.quarantine` attribute to every downloaded file. (You can check that in Terminal with `xattr` plus the path to the file.)
 
 Just the added attribute is not necessarily a problem yet. But you will surely run into an issue when the main script file is an executable (the compiled script). If you want to run that, you will get a malware alert.
 
-You can compile the `default.swift` file yourself with `swiftc -O default.swift`. You will need Command Line Tools for that. [But it's a fairly easy and small install](https://www.maketecheasier.com/install-command-line-tools-without-xcode/).[^1] Obviously, you also need to change the `LBScriptName` key in `info.plist`, pointing it to the executable.
+You can compile the `default.swift` file yourself with `swiftc -O default.swift`. You will need the above-mentioned Command Line Tools for that. Obviously, you also need to change the `LBScriptName` key in `info.plist`, pointing it to the executable.
 
 Now you have the compiled executable, and you know it matches the source file because you compiled it yourself. But the action still won't run. This is because of the attribute on every other file in the action bundle. You can remove the attribute with LaunchBar's built-in `Open Anyway` action. Just be aware that this will remove the attribute from all files in that bundle. Potentially, there could be other executables that the main script refers to. So check the whole bundle before you do this. And only do it if you trust the source.
 
@@ -33,8 +36,6 @@ Now you have the compiled executable, and you know it matches the source file be
 ## Miscellaneous
 
 Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende. 
-
-If you want to help implement AirPlay support, feel free to do so. ;)
 
 ## Download
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
