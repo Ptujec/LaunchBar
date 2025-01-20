@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Audio Devices</string>
 	<key>CFBundleVersion</key>
-	<string>0.3</string>
+	<string>0.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
