@@ -26,9 +26,11 @@ The action also supports [what3words](https://what3words.com/about) locations. A
 
 <img src="04.jpg" width="828"/> 
 
-## Performance
+## Installation (IMPORTANT!)
 
-The suggestion script of this action is written in Swift. Swift scripts perform better when compiled. [Therefore, if you want to show suggestions more quickly, you can compile the script using the Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).
+Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
+
+Let me know if you need help. 
 
 ## Download
 
