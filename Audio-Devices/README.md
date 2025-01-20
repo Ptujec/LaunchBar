@@ -18,13 +18,11 @@ If you hold `Command` when switching to a new output device, the list will be fi
 
 AirPlay devices are not fully supported yet. CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `Shift`, but this is a workaround that involves GUI scripting, which is very fragile.
 
-## Note About Swift Scripts
+## Installation (IMPORTANT!)
 
-Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [an action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme).
+Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
 
-## Miscellaneous
-
-Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende. 
+Let me know if you need help.  
 
 ## Download
 
@@ -35,3 +33,12 @@ Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar
 Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
 
 This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+
+## Miscellaneous
+
+Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende. 
+
+---
+Anmerkungen: 0,2353 SHA-256 0f40ec7fe1eb474be001b28cac6c71e8  
+@Christian: 1192,3 1234,7 1272,6 1280,3 1284,2 1317  
+...
