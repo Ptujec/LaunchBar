@@ -37,8 +37,3 @@ This action also supports [Action Updates](https://renaghan.com/launchbar/action
 ## Miscellaneous
 
 Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende. 
-
----
-Anmerkungen: 0,2353 SHA-256 0f40ec7fe1eb474be001b28cac6c71e8  
-@Christian: 1192,3 1234,7 1272,6 1280,3 1284,2 1317  
-...
