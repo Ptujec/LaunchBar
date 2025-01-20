@@ -4,6 +4,8 @@ This action compiles Swift scripts within a LaunchBar action and removes the qua
 
 **Be aware that this action should only be used for actions from trusted sources.**
 
+If you don't have **Apple's Command Line Tools** installed, you need to install them. It seems [best to do that manually at the moment](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411).
+
 If you have questions or need help, let me know.
 
 ## How To
@@ -26,15 +28,19 @@ Alternatively, you can:
 
 ## Background
 
-Swift scripts run more efficiently when compiled. However, actions with a compiled script can't be shared easily. For security purposes, Apple adds a `com.apple.quarantine` attribute to every file of the download, which you can confirm in Terminal with `xattr` and the file's path. 
+Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled.
 
-This is not an issue until the action contains compiled code. When you attempt to run it, you will receive a malware alert. 
+For security purposes, Apple adds a `com.apple.quarantine` attribute to every file of the download, which you can confirm in Terminal with `xattr` and the file's path.
 
-If you have installed [Apple's Command Line Tools](https://www.maketecheasier.com/install-command-line-tools-without-xcode/)[^1], you can compile the Swift files yourself (with e.g., `swiftc -O default.swift`) and point the action to the compiled file in the Action Editor. However, the action still won't run due to the `com.apple.quarantine` attribute that Apple adds to every file of the downloaded action bundle. 
+When you attempt to run the action with a compiled script (executable), you will receive a malware alert. Even if you don't compile it, it may cause issues.
 
-Again, you could remove those with LaunchBar's built-in `Open Anyway` action. If you do, you should check the entire bundle before doing this, though.
+The quarantine attribute can be removed when you open the action in Terminal and run the following command: `xattr -rd com.apple.quarantine .`.
 
-**To make this easier, I built this action so you don't have to do all that manually.** The action first removes the quarantine attribute from each file in the bundle and then compiles the raw Swift files and points `LBSuggestionsScript.LBScriptName`, `LBActionURLScript.LBScriptName`, or `LBDefaultScript.LBScriptName` to the compiled versions.
+The following command will compile a script: `swiftc -O path-to-script-file`. Obviously, the action needs to be pointed to the compiled file in the Action Editor.
+
+**I built this action so you don't have to do all that manually.**
+
+The action first removes the quarantine attribute from each file in the bundle and then compiles the raw Swift files and points `LBSuggestionsScript.LBScriptName`, `LBActionURLScript.LBScriptName`, or `LBDefaultScript.LBScriptName` to the compiled versions.
 
 ## Download
 
@@ -42,9 +48,6 @@ Again, you could remove those with LaunchBar's built-in `Open Anyway` action. If
 
 ## Updates
 
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
+Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time.
 
 This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
-
-
-[^1]: There is currently a [bug when installing command line tools as described](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411). That's on Apple. But it doesn't matter. Try to install it as described in this linked thread.

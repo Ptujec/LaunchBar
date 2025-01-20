@@ -1,7 +1,7 @@
 /* 
 Compile Swift Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-05-26
+2025-01-20
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -10,69 +10,49 @@ function run(actionPath) {
   // Make sure the path is a LaunchBar action bundle
   if (!actionPath.toString().endsWith('.lbaction')) {
     LaunchBar.alert(
-      'This action is meant for LaunchBar action bundles.',
-      '(LaunchBar action bundles have an .lbaction extension)'
+      'Make sure you select the action bundle of the action you want to compile.',
+      ' Use option-right-arrow to select the bundle of a selected action. (LaunchBar action bundles have an .lbaction extension)'
     );
     return;
   }
 
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'Compile Swift Code ',
-    'Swift code runs faster when compiled.\nThis action will compile swift files inside the action bundle. It will also remove the quarantine attribute from each file in the bundle!\nUse at your own risk with actions from developers you trust.\nGo to the action website to learn more.',
+    'Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. \nThis action will compile swift files inside the action bundle. It will also remove the quarantine attribute from each file in the bundle.\nUse only with actions from developers you trust or code you have verified yourself.\nGo to the action website to learn more.',
     'Ok',
     'Learn more',
     'Cancel'
   );
 
   switch (response) {
-    case 0:
-      const scriptsDir = actionPath + '/Contents/Scripts';
-      const swiftScripts = getScripts(scriptsDir);
+    case 0: {
+      LaunchBar.execute('/bin/sh', 'unquarantine.sh', actionPath);
 
-      var successCount = 0;
+      const swiftScripts = getSwiftScripts(actionPath);
 
-      if (swiftScripts.length > 0) {
-        swiftScripts.forEach(function (item) {
-          var success = main(item, actionPath);
-
-          if (success) {
-            successCount++;
-          }
-        });
-
-        LaunchBar.execute('./unquarantine.sh', actionPath);
-        LaunchBar.alert(
-          'Done!',
-          successCount + ' swift script(s) were compiled'
-        );
-      } else {
+      if (swiftScripts.length === 0) {
         LaunchBar.alert('No uncompiled swift scripts found in this action!');
+        return;
       }
 
+      const successCount = swiftScripts.reduce(
+        (count, script) => count + (main(script, actionPath) ? 1 : 0),
+        0
+      );
+
+      LaunchBar.alert('Done!', `${successCount} swift script(s) compiled.`);
       break;
+    }
 
     case 1:
       LaunchBar.openURL(
-        'https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action'
+        'https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#background'
       );
       break;
 
     case 2:
       break;
   }
-}
-
-function getScripts(scriptsDir) {
-  var dirContent = LaunchBar.execute('/usr/bin/find', scriptsDir).split('\n');
-
-  var swiftScripts = [];
-  dirContent.forEach(function (item) {
-    if (item.endsWith('.swift')) {
-      swiftScripts.push(item);
-    }
-  });
-
-  return swiftScripts;
 }
 
 function main(swiftScriptPath, actionPath) {
@@ -84,7 +64,7 @@ function main(swiftScriptPath, actionPath) {
     );
     return;
   }
-  var swiftCompiledScriptPath = swiftScriptPath.replace('.swift', '');
+  const swiftCompiledScriptPath = swiftScriptPath.replace('.swift', '');
 
   // Compile swift file with command line tools
   LaunchBar.execute(
@@ -96,7 +76,6 @@ function main(swiftScriptPath, actionPath) {
   );
 
   // Check if File was compiled
-
   if (!File.exists(swiftCompiledScriptPath)) {
     LaunchBar.alert(
       'Something went wrong.',
@@ -109,49 +88,33 @@ function main(swiftScriptPath, actionPath) {
   const swiftScriptName = File.displayName(swiftScriptPath);
   const swiftCompiledScriptName = File.displayName(swiftCompiledScriptPath);
 
-  const infoPlistPath = actionPath + '/Contents/Info.plist';
+  const infoPlistPath = `${actionPath}/Contents/Info.plist`;
   const infoPlist = File.readPlist(infoPlistPath);
 
-  var defaultScriptName = infoPlist.LBScripts.LBDefaultScript.LBScriptName;
+  // Update script references in Info.plist
+  const scriptTypes = {
+    LBDefaultScript: infoPlist.LBScripts.LBDefaultScript,
+    LBSuggestionsScript: infoPlist.LBScripts.LBSuggestionsScript,
+    LBActionURLScript: infoPlist.LBScripts.LBActionURLScript,
+  };
 
-  if (defaultScriptName.endsWith('swift')) {
-    if (defaultScriptName == swiftScriptName) {
-      // Make the compiled file the default script in infoPlist
-      infoPlist.LBScripts.LBDefaultScript.LBScriptName =
-        swiftCompiledScriptName;
+  Object.entries(scriptTypes).forEach(([type, script]) => {
+    if (!script) return;
+
+    const scriptName = script.LBScriptName;
+    if (scriptName?.endsWith('swift') && scriptName === swiftScriptName) {
+      infoPlist.LBScripts[type].LBScriptName = swiftCompiledScriptName;
       File.writePlist(infoPlist, infoPlistPath);
     }
-  }
-
-  var LBSuggestionsScript = infoPlist.LBScripts.LBSuggestionsScript;
-
-  if (LBSuggestionsScript != undefined) {
-    var suggestionScriptName = LBSuggestionsScript.LBScriptName;
-
-    if (suggestionScriptName.endsWith('swift')) {
-      if (suggestionScriptName == swiftScriptName) {
-        // Make the compiled file the suggestion script in infoPlist
-        infoPlist.LBScripts.LBSuggestionsScript.LBScriptName =
-          swiftCompiledScriptName;
-        File.writePlist(infoPlist, infoPlistPath);
-      }
-    }
-  }
-
-  var LBActionURLScript = infoPlist.LBScripts.LBActionURLScript;
-
-  if (LBActionURLScript != undefined) {
-    var actionURLScriptName = LBActionURLScript.LBScriptName;
-
-    if (actionURLScriptName.endsWith('swift')) {
-      if (actionURLScriptName == swiftScriptName) {
-        // Make the compiled file the suggestion script in infoPlist
-        infoPlist.LBScripts.LBActionURLScript.LBScriptName =
-          swiftCompiledScriptName;
-        File.writePlist(infoPlist, infoPlistPath);
-      }
-    }
-  }
+  });
 
   return 'success';
+}
+
+function getSwiftScripts(actionPath) {
+  const scriptsDir = `${actionPath}/Contents/Scripts`;
+  const contents = File.getDirectoryContents(scriptsDir);
+  return contents
+    .filter((item) => item.endsWith('.swift'))
+    .map((item) => `${scriptsDir}/${item}`);
 }
