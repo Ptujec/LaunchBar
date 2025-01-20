@@ -9,15 +9,13 @@
 	<key>CFBundleName</key>
 	<string>Compile Swift Action</string>
 	<key>CFBundleVersion</key>
-	<string>1.2</string>
+	<string>1.2.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
-		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
-		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<key>LBSummary</key>
+		<string>Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I built this action so you don't have to do all that manually.</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Compile-Swift-Action/Compile%20Swift%20Action.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
