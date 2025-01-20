@@ -15,10 +15,6 @@ Documentation & Sources:
 
 TODO: 
 
-- AirPlay support
-    - Applescript Hide System Settings
-    - UID in Preferences
-    - Fix display "AirPlay" with the actual device name 
 - Localization
 - Error handling, when the device is not found you want to switch to
 - Cleanup
@@ -92,19 +88,19 @@ struct CoreAudioUtils {
         )
     }
 
-    static func getDeviceTitle(deviceID: UInt32) -> String? {
-        var titleSize = UInt32(MemoryLayout<CFString>.size)
-        var deviceTitle: CFString = "" as CFString
+    static func getDeviceName(deviceID: UInt32) -> String? {
+        var nameSize = UInt32(MemoryLayout<CFString>.size)
+        var deviceName: CFString = "" as CFString
         var address = createPropertyAddress(selector: kAudioDevicePropertyDeviceNameCFString)
 
-        let status = withUnsafeMutablePointer(to: &deviceTitle) { ptr in
-            AudioObjectGetPropertyData(deviceID, &address, 0, nil, &titleSize, ptr)
+        let status = withUnsafeMutablePointer(to: &deviceName) { ptr in
+            AudioObjectGetPropertyData(deviceID, &address, 0, nil, &nameSize, ptr)
         }
 
-        return status == noErr ? (deviceTitle as String) : nil
+        return status == noErr ? (deviceName as String) : nil
     }
 
-    static func getDeviceList(type: String) -> [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)] {
+    static func getDeviceList(type: String) -> [(name: String, id: UInt32, isActive: Bool, transportType: UInt32?)] {
         var propertySize: UInt32 = 0
         var address = createPropertyAddress(selector: kAudioHardwarePropertyDevices)
 
@@ -121,7 +117,7 @@ struct CoreAudioUtils {
             &address, 0, nil, &propertySize, &deviceIDs)
         guard status == noErr else { return [] }
 
-        var deviceList: [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)] = []
+        var deviceList: [(name: String, id: UInt32, isActive: Bool, transportType: UInt32?)] = []
         for id in deviceIDs {
             let scope: AudioObjectPropertyScope =
                 (type == "input") ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput
@@ -134,7 +130,7 @@ struct CoreAudioUtils {
             status = AudioObjectGetPropertyDataSize(id, &streamAddress, 0, nil, &streamSize)
             if status != noErr || streamSize == 0 { continue }
 
-            guard let deviceTitle = getDeviceTitle(deviceID: id) else { continue }
+            guard let deviceName = getDeviceName(deviceID: id) else { continue }
 
             // Get transport type
             var transportTypeSize = UInt32(MemoryLayout<UInt32>.size)
@@ -169,7 +165,7 @@ struct CoreAudioUtils {
                 }
             }
 
-            deviceList.append((title: deviceTitle, id: id, isActive: isActive, transportType: finalTransportType))
+            deviceList.append((name: deviceName, id: id, isActive: isActive, transportType: finalTransportType))
         }
 
         return deviceList
@@ -315,9 +311,11 @@ struct DeviceHistory: Codable {
 }
 
 struct Utils {
-    static func isCompiledVersionAvailable(scriptName: String, in actionPath: String) -> Bool {
+    static func getActionScriptName(scriptName: String = "default") -> String {
         return FileManager.default.fileExists(
-            atPath: "\(actionPath)/Contents/Scripts/\(scriptName)")
+            atPath: "\(Environment.actionPath)/Contents/Scripts/\(scriptName)") 
+            ? scriptName 
+            : "\(scriptName).swift"
     }
 }
 
@@ -470,11 +468,9 @@ struct AudioDevicesAction {
                     // Return refresh message if no active AirPlay device
                     if !CoreAudioUtils.hasActiveAirPlayDevice() {
                         return [[
-                            "title": "Refresh when connected",
+                            "title": "Refresh when connected to link name & UID",
                             "icon": "waveformTemplate",
-                            "action": Utils.isCompiledVersionAvailable(
-                                scriptName: "default",
-                                in: Environment.actionPath) ? "default" : "default.swift"
+                            "action": Utils.getActionScriptName()
                         ]]
                     }
                 }
@@ -537,11 +533,11 @@ struct AudioDevicesAction {
                 }
                 return true
             }
-            .map { device -> (title: String, id: UInt32, isActive: Bool, transportType: UInt32?) in
+            .map { device -> (name: String, id: UInt32, isActive: Bool, transportType: UInt32?) in
                 if let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id),
                    device.transportType == kAudioDeviceTransportTypeAirPlay,
                    let airPlayDevice = preferences.airPlayDevices.first(where: { $0.uid == uid }) {
-                    return (title: airPlayDevice.name, id: device.id, isActive: device.isActive, transportType: device.transportType)
+                    return (name: airPlayDevice.name, id: device.id, isActive: device.isActive, transportType: device.transportType)
                 }
                 return device
             }
@@ -562,18 +558,18 @@ struct AudioDevicesAction {
         // NSLog("Input Devices:")
         // for device in inputDevices {
         //     let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
-        //     NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
+        //     NSLog("- \(device.name) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
         // }
 
         NSLog("Output Devices:")
         for device in filteredOutputDevices {
             let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
-            NSLog("- \(device.title) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
+            NSLog("- \(device.name) (ID: \(device.id), UID: \(uid), Active: \(device.isActive), Transport: \(device.transportType ?? 0))")
         }
 
         // Process devices based on type filter
         let processDevices = {
-            (devices: [(title: String, id: UInt32, isActive: Bool, transportType: UInt32?)], type: String) -> [[String: Any]] in
+            (devices: [(name: String, id: UInt32, isActive: Bool, transportType: UInt32?)], type: String) -> [[String: Any]] in
             devices.map { device -> [String: Any] in
                 let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: device.id)
                 let isLastUsed =
@@ -609,16 +605,14 @@ struct AudioDevicesAction {
                 }
 
                 return [
-                    "title": device.title,
+                    "title": device.name,
                     "label": labels.isEmpty ? "" : labels.joined(separator: " | "),
                     "icon": type == "input"
                         ? (device.isActive ? "inputActiveTemplate" : "inputTemplate")
                         : (device.isActive ? "outputActiveTemplate" : "outputTemplate"),
                     "badge": type,
                     "sortPriority": sortPriority,
-                    "action": Utils.isCompiledVersionAvailable(
-                        scriptName: "default",
-                        in: Environment.actionPath) ? "default" : "default.swift",
+                    "action": Utils.getActionScriptName(),
                     "actionArgument": [
                         "deviceID": String(device.id),
                         "deviceType": type,
@@ -650,9 +644,7 @@ struct AudioDevicesAction {
                     "icon": "outputTemplate",
                     "badge": "output",
                     "sortPriority": sortPriority,
-                    "action": Utils.isCompiledVersionAvailable(
-                        scriptName: "default",
-                        in: Environment.actionPath) ? "default" : "default.swift",
+                    "action": Utils.getActionScriptName(),
                     "actionArgument": [
                         "airPlayName": device.name
                     ],
