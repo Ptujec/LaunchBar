@@ -322,37 +322,66 @@ struct Utils {
 struct AudioDevicesAction {
     private static func getAirPlayDevicesAndActivate(deviceToActivate: String? = nil) -> [String] {
         let script = """
-                tell application "LaunchBar" to hide
-                set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
-                open location "x-apple.systempreferences:com.apple.Sound-Settings.extension"
-                if "System Settings" is not in _processes then
-                    delay 1
-                else
-                    delay 0.5
-                end if
-                tell application "System Events"
-                    set _rows to rows of outline 1 of scroll area 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1 of application process "System Settings"
-                    set _deviceNames to {}
-                    repeat with _row in _rows
-                        set _deviceType to value of static text 1 of group 1 of UI element 2 of _row
-                        if _deviceType is "AirPlay" then
-                            set _deviceName to value of static text 1 of group 1 of UI element 1 of _row
-                            copy _deviceName to end of _deviceNames
-                            if _deviceName is "\(deviceToActivate ?? "")" then
-                                select _row
-                                delay 0.2
+                property soundNameSet : {"Sound", "Tone"}
+                on run
+                    tell application "LaunchBar" to hide
+                    open location "x-apple.systempreferences:com.apple.Sound-Settings.extension"
+                    tell application "System Events"
+                        set startTime to current date
+                        set timeoutSeconds to 10
+                        
+                        repeat until (exists window 1 of application process "System Settings")
+                            if (current date) - startTime ≥ timeoutSeconds then
+                                exit repeat
                             end if
+                            delay 0.1
+                        end repeat
+                        
+                        set _window to window 1 of application process "System Settings"
+                        
+                        if name of _window is not in soundNameSet then
+                            delay 0.2
+                            set _window to window 1 of application process "System Settings"
                         end if
-                    end repeat
-                    repeat with _name in _deviceNames
-                        log _name
-                    end repeat
-                end tell
-                tell application "System Events"
-                    if visible of application process "System Settings" is true then
-                        set visible of application process "System Settings" to false
-                    end if
-                end tell
+                        
+                        delay 0.2 -- delay to give time to show conntected airplay devices
+                        set _deviceNames to my getAirPlayDevices(_window)
+                        
+                        if _deviceNames is {} then
+                            delay 1 -- a longer delay to give more time to show conntected airplay devices
+                            set _deviceNames to my getAirPlayDevices(_window)
+                        end if
+                        
+                        repeat with _name in _deviceNames
+                            log _name
+                        end repeat
+                    end tell
+                    
+                    tell application "System Events"
+                        if visible of application process "System Settings" is true then
+                            set visible of application process "System Settings" to false
+                        end if
+                    end tell
+                end run
+
+                on getAirPlayDevices(_window)
+                    tell application "System Events"
+                        set _rows to rows of outline 1 of scroll area 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of _window
+                        set _deviceNames to {}
+                        repeat with _row in _rows
+                            set _deviceType to value of static text 1 of group 1 of UI element 2 of _row
+                            if _deviceType is "AirPlay" then
+                                set _deviceName to value of static text 1 of group 1 of UI element 1 of _row
+                                copy _deviceName to end of _deviceNames
+                                if _deviceName is "\(deviceToActivate ?? "")" then
+                                    select _row
+                                    delay 0.2
+                                end if
+                            end if
+                        end repeat
+                    end tell
+                    return _deviceNames
+                end getAirPlayDevices
             """
 
         let process = Process()
