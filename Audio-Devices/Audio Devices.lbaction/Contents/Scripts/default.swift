@@ -45,6 +45,8 @@ struct AirPlayDevice: Codable, Hashable {
         self.name = name
         self.uid = "\(name.replacingOccurrences(of: " ", with: "_"))_AIRPLAY"
     }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.uid == rhs.uid }
 }
 
 struct Preferences: Codable {
@@ -408,8 +410,8 @@ struct AudioDevicesAction {
         return []
     }
 
-    private static func updateAirPlayDeviceUID(preferences: inout Preferences) {
-        guard let attemptedUID = preferences.lastAirPlayActivationAttempt else { return }
+    private static func updateAirPlayDeviceUID(preferences: inout Preferences) -> Bool {
+        guard let attemptedUID = preferences.lastAirPlayActivationAttempt else { return false }
 
         // Look for active AirPlay device in CoreAudio
         if let activeAirPlay = CoreAudioUtils.getDeviceList(type: "output")
@@ -421,29 +423,51 @@ struct AudioDevicesAction {
                 preferences.airPlayDevices.remove(device)
                 device.uid = deviceUID
                 preferences.airPlayDevices.insert(device)
+                preferences.lastAirPlayActivationAttempt = nil
+                return true
             }
         }
         // Clear the attempt after trying to update
-        preferences.lastAirPlayActivationAttempt = nil
+        if preferences.lastAirPlayActivationAttempt != nil {
+            preferences.lastAirPlayActivationAttempt = nil
+            return true
+        }
+        return false
     }
 
-    private static func updateAirPlayDevices() {
-        let deviceNames = getAirPlayDevicesAndActivate()
-        var preferences = loadPreferences()
-        preferences.airPlayDevices = Set(deviceNames.map { AirPlayDevice(name: $0) })
-        savePreferences(preferences)
+    private static func updateAirPlayDevices(preferences: inout Preferences, activateDevice deviceToActivate: String? = nil) -> Bool {
+        let deviceNames = getAirPlayDevicesAndActivate(deviceToActivate: deviceToActivate)
+        let outputDeviceUIDs = Set(CoreAudioUtils.getDeviceList(type: "output")
+            .compactMap { CoreAudioUtils.getDeviceUID(deviceID: $0.id) })
+        
+        let existingDevices = preferences.airPlayDevices.filter { outputDeviceUIDs.contains($0.uid) }
+        let updatedAirPlayDevices = existingDevices.union(
+            deviceNames
+                .filter { !existingDevices.map(\.name).contains($0) }
+                .map(AirPlayDevice.init))
+        
+        let hasChanged = updatedAirPlayDevices != preferences.airPlayDevices
+        preferences.airPlayDevices = updatedAirPlayDevices
+        return hasChanged
     }
 
     static func main() -> [[String: Any]] {
         let arguments = Array(CommandLine.arguments.dropFirst())
         var preferences = loadPreferences()
+        var preferencesChanged = false
 
-        // Check for pending AirPlay activation
-        updateAirPlayDeviceUID(preferences: &preferences)
-        savePreferences(preferences)
+        if updateAirPlayDeviceUID(preferences: &preferences) {
+            preferencesChanged = true
+        }
 
         if Environment.isShiftKeyPressed {
-            updateAirPlayDevices()
+            if updateAirPlayDevices(preferences: &preferences) {
+                preferencesChanged = true
+            }
+        }
+
+        if preferencesChanged {
+            savePreferences(preferences)
         }
 
         if let firstArg = arguments.first,
@@ -487,19 +511,19 @@ struct AudioDevicesAction {
                         }
                     } else {
                         // Activate via AppleScript and store the attempt
-                        let deviceNames = getAirPlayDevicesAndActivate(deviceToActivate: deviceName)
-                        preferences.airPlayDevices = Set(
-                            deviceNames.map { AirPlayDevice(name: $0) })
-
+                        if updateAirPlayDevices(preferences: &preferences, activateDevice: deviceName) {
+                            savePreferences(preferences)
+                        }
+                        
                         // Store the temporary UID for later matching
                         let tempUID = AirPlayDevice(name: deviceName).uid
                         preferences.lastAirPlayActivationAttempt = tempUID
-
+                        savePreferences(preferences)
+                        
                         var history = loadDeviceHistory()
                         history.addUsage(deviceUID: tempUID, type: "output")
                         saveDeviceHistory(history)
                     }
-                    savePreferences(preferences)
 
                     // Return refresh message if no active AirPlay device
                     if !CoreAudioUtils.hasActiveAirPlayDevice() {
@@ -520,24 +544,25 @@ struct AudioDevicesAction {
                 if let deviceIDInt = UInt32(deviceID) {
                     if Environment.isControlKeyPressed {
                         if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
-                            var preferences = loadPreferences()
                             preferences.toggleExcludedDevice(deviceUID)
-                            savePreferences(preferences)
+                            preferencesChanged = true
                         }
                     } else if Environment.isAlternateKeyPressed && deviceType == "output" {
                         if let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: deviceIDInt) {
-                            var preferences = loadPreferences()
                             preferences.toggleNoSoundEffectsSync(deviceUID)
-                            savePreferences(preferences)
+                            preferencesChanged = true
                         }
                     } else {
-                        let preferences = loadPreferences()
                         activateDevice(
                             deviceID: deviceID, deviceType: deviceType, preferences: preferences)
                         if Environment.isCommandKeyPressed {
                             return listDevices(
                                 filterType: deviceType == "input" ? "output" : "input")
                         }
+                    }
+                    
+                    if preferencesChanged {
+                        savePreferences(preferences)
                     }
                 }
                 return listDevices(filterType: nil)
