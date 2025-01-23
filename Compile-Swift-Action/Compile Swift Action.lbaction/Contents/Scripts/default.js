@@ -64,7 +64,17 @@ function main(swiftScriptPath, actionPath) {
     );
     return;
   }
-  const swiftCompiledScriptPath = swiftScriptPath.replace('.swift', '');
+
+  const swiftCompiledScriptPath = swiftScriptPath.slice(
+    0,
+    swiftScriptPath.lastIndexOf('.swift')
+  );
+
+  LaunchBar.displayNotification({
+    title: 'Compiling Swift Script',
+    string: swiftScriptPath,
+    url: File.fileURLForPath(`${actionPath}/Contents/Scripts`),
+  });
 
   // Compile swift file with command line tools
   LaunchBar.execute(
