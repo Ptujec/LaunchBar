@@ -24,6 +24,7 @@ TODO:
 
 import CoreAudio
 import Foundation
+import AppKit
 
 struct Environment {
   static let info = ProcessInfo.processInfo.environment
@@ -321,6 +322,8 @@ struct Utils {
   }
 }
 
+// MARK: - AppleScript Part
+
 struct AudioDevicesAction {
   private static func getAirPlayDevicesAndActivate(deviceToActivate: String? = nil) -> [String] {
     let script = """
@@ -362,15 +365,14 @@ struct AudioDevicesAction {
             set _deviceNames to my getAirPlayDevices(_window)
           end if
           
-          repeat with _name in _deviceNames
-            log _name
-          end repeat
-        end tell
-        
-        tell application "System Events"
-          if visible of application process "System Settings" is true then
-            set visible of application process "System Settings" to false
-          end if
+          
+          tell application "System Events"
+            if visible of application process "System Settings" is true then
+              set visible of application process "System Settings" to false
+            end if
+          end tell
+          
+          return _deviceNames
         end tell
       end run
 
@@ -389,33 +391,34 @@ struct AudioDevicesAction {
               end if
             end if
           end repeat
+          return _deviceNames
         end tell
-        return _deviceNames
       end getAirPlayDevices
     """
 
-    let process = Process()
-    process.launchPath = "/usr/bin/osascript"
-    process.arguments = ["-e", script]
-
-    let pipe = Pipe()
-    process.standardOutput = pipe
-    process.standardError = pipe
-
-    do {
-      try process.run()
-      process.waitUntilExit()
-
-      let data = pipe.fileHandleForReading.readDataToEndOfFile()
-      if let output = String(data: data, encoding: .utf8) {
-        // Split by newlines and filter out empty lines and any lines starting with "LOG:"
-        return output.components(separatedBy: .newlines)
-          .filter { !$0.isEmpty && !$0.hasPrefix("LOG:") }
-      }
-    } catch {
-      NSLog("Failed to execute AppleScript: \(error)")
+    guard let appleScript = NSAppleScript(source: script) else {
+      NSLog("Failed to create NSAppleScript")
+      return []
     }
-    return []
+
+    var error: NSDictionary?
+    let result = appleScript.executeAndReturnError(&error)
+    if let error = error {
+      NSLog("Failed to execute AppleScript: \(error)")
+      return []
+    }
+
+    if result.descriptorType == typeAEList {
+      let numberOfItems = result.numberOfItems
+      if numberOfItems == 0 {
+        return []
+      }
+      return (1...numberOfItems)
+        .compactMap { result.atIndex($0)?.stringValue }
+    } else {
+      NSLog("Unexpected result type: \(result.descriptorType)")
+      return []
+    }
   }
 
   private static func updateAirPlayDeviceUID(preferences: inout Preferences) -> Bool {

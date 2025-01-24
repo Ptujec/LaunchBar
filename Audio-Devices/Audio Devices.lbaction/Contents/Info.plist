@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Audio Devices</string>
 	<key>CFBundleVersion</key>
-	<string>0.7</string>
+	<string>0.8</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -43,5 +43,7 @@ More shortcuts for a selected device:
 			<string>default.swift</string>
 		</dict>
 	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.2</string>
 </dict>
 </plist>
