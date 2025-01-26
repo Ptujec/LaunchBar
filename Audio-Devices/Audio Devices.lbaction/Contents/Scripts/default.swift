@@ -54,13 +54,11 @@ struct Preferences: Codable {
   var excludedDevices: Set<String>
   var noSoundEffectsSyncDevices: Set<String>
   var airPlayDevices: Set<AirPlayDevice>
-  var lastAirPlayActivationAttempt: String?
 
   init() {
     excludedDevices = []
     noSoundEffectsSyncDevices = []
     airPlayDevices = []
-    lastAirPlayActivationAttempt = nil
   }
 
   mutating func toggleExcludedDevice(_ deviceUID: String) {
@@ -421,31 +419,6 @@ struct AudioDevicesAction {
     }
   }
 
-  private static func updateAirPlayDeviceUID(preferences: inout Preferences) -> Bool {
-    guard let attemptedUID = preferences.lastAirPlayActivationAttempt else { return false }
-
-    // Look for active AirPlay device in CoreAudio
-    if let activeAirPlay = CoreAudioUtils.getDeviceList(type: "output")
-      .first(where: { $0.isActive && $0.transportType == kAudioDeviceTransportTypeAirPlay }),
-      let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: activeAirPlay.id)
-    {
-      // Update the UID in preferences
-      if var device = preferences.airPlayDevices.first(where: { $0.uid == attemptedUID }) {
-        preferences.airPlayDevices.remove(device)
-        device.uid = deviceUID
-        preferences.airPlayDevices.insert(device)
-        preferences.lastAirPlayActivationAttempt = nil
-        return true
-      }
-    }
-    // Clear the attempt after trying to update
-    if preferences.lastAirPlayActivationAttempt != nil {
-      preferences.lastAirPlayActivationAttempt = nil
-      return true
-    }
-    return false
-  }
-
   private static func updateAirPlayDevices(
     preferences: inout Preferences, activateDevice deviceToActivate: String? = nil
   ) -> Bool {
@@ -469,10 +442,6 @@ struct AudioDevicesAction {
     let arguments = Array(CommandLine.arguments.dropFirst())
     var preferences = loadPreferences()
     var preferencesChanged = false
-
-    if updateAirPlayDeviceUID(preferences: &preferences) {
-      preferencesChanged = true
-    }
 
     if Environment.isShiftKeyPressed {
       if updateAirPlayDevices(preferences: &preferences) {
@@ -531,23 +500,45 @@ struct AudioDevicesAction {
 
             // Store the temporary UID for later matching
             let tempUID = AirPlayDevice(name: deviceName).uid
-            preferences.lastAirPlayActivationAttempt = tempUID
-            savePreferences(preferences)
+
+            // Check for new AirPlay device after activation
+            let startTime = Date()
+            let timeoutSeconds: TimeInterval = 10
+            var success = false
+            
+            while Date().timeIntervalSince(startTime) < timeoutSeconds {
+              if let activeAirPlay = CoreAudioUtils.getDeviceList(type: "output")
+                .first(where: { $0.isActive && $0.transportType == kAudioDeviceTransportTypeAirPlay }),
+                let deviceUID = CoreAudioUtils.getDeviceUID(deviceID: activeAirPlay.id)
+              {
+                // Check if this is a new device (not already in preferences)
+                if !preferences.airPlayDevices.contains(where: { $0.uid == deviceUID }) {
+                  // Update the device in preferences with the real UID
+                  preferences.airPlayDevices.remove(AirPlayDevice(name: deviceName))
+                  var updatedDevice = AirPlayDevice(name: deviceName)
+                  updatedDevice.uid = deviceUID
+                  preferences.airPlayDevices.insert(updatedDevice)
+                  savePreferences(preferences)
+                  
+                  var history = loadDeviceHistory()
+                  history.addUsage(deviceUID: deviceUID, type: "output")
+                  saveDeviceHistory(history)
+                  
+                  success = true
+                  NSLog("Successfully linked AirPlay device '\(deviceName)' to CoreAudio UID: \(deviceUID)")
+                  break
+                }
+              }
+              Thread.sleep(forTimeInterval: 2)
+            }
+            
+            if !success {
+              NSLog("Failed to link AirPlay device '\(deviceName)' to a CoreAudio device within \(timeoutSeconds) seconds")
+            }
 
             var history = loadDeviceHistory()
             history.addUsage(deviceUID: tempUID, type: "output")
             saveDeviceHistory(history)
-
-            // Return refresh message if no active AirPlay device and AirPlay devices in preferences
-            if !CoreAudioUtils.hasActiveAirPlayDevice() && !preferences.airPlayDevices.isEmpty {
-              return [
-                [
-                  "title": "Refresh when connected to link name & UID",
-                  "icon": "waveformTemplate",
-                  "action": Utils.getActionScriptName(),
-                ]
-              ]
-            }
           }
         }
 
@@ -731,6 +722,7 @@ struct AudioDevicesAction {
           "actionArgument": [
             "airPlayName": device.name
           ],
+          "actionRunsInBackground": true,
         ]
       }
 

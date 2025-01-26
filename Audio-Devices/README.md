@@ -16,7 +16,11 @@ If you hold `Command` when switching to a new output device, the list will be fi
 
 ## Note About AirPlay Devices
 
-AirPlay devices are not fully supported yet. CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `Shift`, but this is a workaround that involves GUI scripting, which is very fragile.
+AirPlay support is not ideal yet. This is because CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `Shift`. This is a compromise to keep the action as responsive as possible while allowing AirPlay devices to be included. **Listing and activating AirPlay devices usually involves GUI scripting. This means the action will open System Preferences.**
+
+I tried to implement this as gracefully as possible, but there may be some hiccups, e.g., the device showing only a generic "AirPlay" name instead of its real name. This usually occurs if you activated an AirPlay device without using the action.
+
+Also, the list of devices won't be refreshed automatically after activation with the GUI workaround. This is to avoid blocking the LB interface while waiting.
 
 ## Installation (IMPORTANT!)
 
