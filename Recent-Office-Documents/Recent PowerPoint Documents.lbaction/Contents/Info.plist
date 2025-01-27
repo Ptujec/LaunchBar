@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent PowerPoint Documents</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.microsoft.Powerpoint</string>
 	<key>LBDescription</key>
@@ -17,9 +17,9 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-Office-Documents</string>
 		<key>LBUpdateURL</key>

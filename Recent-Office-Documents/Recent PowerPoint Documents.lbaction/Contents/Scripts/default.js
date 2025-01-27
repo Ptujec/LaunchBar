@@ -10,6 +10,8 @@ function run() {
   const plistPath =
     '~/Library/Containers/com.microsoft.Powerpoint/Data/Library/Preferences/com.microsoft.Powerpoint.securebookmarks.plist';
 
+  if (!File.exists(plistPath)) return [];
+
   const plist = File.readPlist(plistPath);
 
   const fileURLs = JSON.stringify(plist)
