@@ -11,8 +11,7 @@
  - https://developer.apple.com/documentation/coreaudio
  - https://github.com/karaggeorge/macos-audio-devices/
  - https://github.com/TobiasMende/alfred-audio-switcher
- - https://openairplay.github.io/airplay-spec/service_discovery.html
-
+ 
  TODO:
  - Localization
  - Error handling, when the device is not found you want to switch to
@@ -606,7 +605,9 @@ struct AudioDevicesAction {
         let inputDevices = CoreAudioUtils.getDeviceList(type: "input")
             .filter { device in
                 if let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) {
-                    return showExcluded || !preferences.excludedDevices.contains(uid)
+                    let isVirtual = device.transportType == kAudioDeviceTransportTypeVirtual
+                    return (showExcluded || !preferences.excludedDevices.contains(uid)) && 
+                           (!isVirtual || showExcluded)
                 }
                 return true
             }
@@ -620,7 +621,9 @@ struct AudioDevicesAction {
             outputDevices
                 .filter { device in
                     if let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) {
-                        return showExcluded || !preferences.excludedDevices.contains(uid)
+                        let isVirtual = device.transportType == kAudioDeviceTransportTypeVirtual
+                        return (showExcluded || !preferences.excludedDevices.contains(uid)) && 
+                               (!isVirtual || showExcluded)
                     }
                     return true
                 }

@@ -8,7 +8,7 @@ This action allows you to switch between audio devices.
 
 Devices are **intentionally sorted** in a way that makes it easy to toggle between two output devices. 
 
-**Exclude selected devices** with `Control` + `Enter`. You can show excluded devices with `Command` + `Enter`.
+**Exclude selected devices** with `Control` + `Enter`. Virtual devices (e.g. Microsoft Teams Audio) are excluded automatically. You can show all devices, including excluded devices, with `Command` + `Enter`.
 
 By default, **sound effects** (e.g. system alerts) will play on the new output device. You can prevent that by pressing `Option` + `Enter` on a selected output device.
 
@@ -40,4 +40,4 @@ This action also supports [Action Updates](https://renaghan.com/launchbar/action
 
 ## Miscellaneous
 
-Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende. 
+Padraic Renaghan has [a similar LaunchBar action](https://renaghan.com/launchbar/switch-audio/). Shout out also to George Karagkiaouris for his [macos-audio-devices](https://github.com/karaggeorge/macos-audio-devices) repo; this was very helpful. If you are using Alfred, have a look at [alfred-audio-switcher](https://github.com/TobiasMende/alfred-audio-switcher) by Tobias Mende.
