@@ -9,6 +9,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 function run() {
   const plistPath =
     '~/Library/Containers/com.microsoft.Excel/Data/Library/Preferences/com.microsoft.Excel.securebookmarks.plist';
+
+  if (!File.exists(plistPath)) return [];
+
   const plist = File.readPlist(plistPath);
 
   const fileURLs = JSON.stringify(plist)
