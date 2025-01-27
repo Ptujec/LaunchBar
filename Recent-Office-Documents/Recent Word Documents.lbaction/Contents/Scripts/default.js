@@ -10,6 +10,8 @@ function run() {
   const plistPath =
     '~/Library/Containers/com.microsoft.Word/Data/Library/Preferences/com.microsoft.Word.securebookmarks.plist';
 
+  if (!File.exists(plistPath)) return [];
+
   const plist = File.readPlist(plistPath);
 
   const fileURLs = JSON.stringify(plist)
