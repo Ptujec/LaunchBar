@@ -493,13 +493,10 @@ struct AudioDevicesAction {
               saveDeviceHistory(history)
             }
           } else {
-            // Activate via AppleScript and store the attempt
+            // Activate via AppleScript
             if updateAirPlayDevices(preferences: &preferences, activateDevice: deviceName) {
               savePreferences(preferences)
             }
-
-            // Store the temporary UID for later matching
-            let tempUID = AirPlayDevice(name: deviceName).uid
 
             // Check for new AirPlay device after activation
             let startTime = Date()
@@ -535,10 +532,6 @@ struct AudioDevicesAction {
             if !success {
               NSLog("Failed to link AirPlay device '\(deviceName)' to a CoreAudio device within \(timeoutSeconds) seconds")
             }
-
-            var history = loadDeviceHistory()
-            history.addUsage(deviceUID: tempUID, type: "output")
-            saveDeviceHistory(history)
           }
         }
 
