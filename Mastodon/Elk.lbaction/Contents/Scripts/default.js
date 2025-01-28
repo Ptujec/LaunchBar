@@ -19,7 +19,7 @@ function run(argument) {
   // Settings
   if (LaunchBar.options.shiftKey) return settings(server, apiToken);
 
-  if (!argument) {
+  if (argument == undefined) {
     LaunchBar.hide();
 
     if (!LaunchBar.options.commandKey) {
