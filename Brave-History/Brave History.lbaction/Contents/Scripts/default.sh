@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Brave History Action for LaunchBar
+# by Christian Bender (@ptujec)
+# 2024-03-19
+#
+# This action was created with help from Phind.com
+#
+# Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+#
+
+if [ "$1" ]; then
+    # If URL is provided, open it in Brave
+    open -a "Brave Browser" "$1"
+    exit 0
+fi
+
+history_path="${HOME}/Library/Application Support/BraveSoftware/Brave-Browser/Default/History"
+tmp_history="/tmp/brave_history_tmp"
+
+cp "${history_path}" "${tmp_history}"
+
+query="SELECT DISTINCT u.title, u.url, u.last_visit_time
+FROM urls u
+JOIN visits v ON u.id = v.url
+WHERE v.visit_duration > 0  -- Filter out immediate redirects
+  AND u.hidden = 0  -- Only show non-hidden URLs
+  AND u.url NOT LIKE '%/oauth2/authorize%'  -- Filter out common OAuth redirects
+  AND u.url NOT LIKE '%/auth?%'  -- Filter out common auth redirects
+  AND u.url NOT LIKE '%/login/oauth%'  -- Filter out more OAuth patterns
+GROUP BY u.id
+ORDER BY u.last_visit_time DESC
+LIMIT 1000;"
+
+sqlite3 -json "${tmp_history}" "${query}" | jq 'map({
+    title: (if .title == null or .title == "" then .url else .title end),
+    url: .url,
+    subtitle: .url,
+    alwaysShowsSubtitle: true,
+    action: "default.sh",
+    actionArgument: .url,
+    actionRunsInBackground: true,
+    icon: "URLTemplate"
+})'
+
+rm "${tmp_history}"
