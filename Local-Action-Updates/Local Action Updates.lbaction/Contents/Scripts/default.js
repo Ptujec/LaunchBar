@@ -38,12 +38,11 @@ function run(folderPath) {
 function scanForUpdates(folderPath) {
   const { inputPaths, targetIDMap } = getActionPaths(folderPath);
   const scanResults = processActionPaths(inputPaths, targetIDMap);
-  const { newIDs, oldIDs } = compareBundleIDs(scanResults.bundleIDs);
+  const { newIDs } = compareBundleIDs(scanResults.bundleIDs);
 
   return {
     ...scanResults,
     newIDs,
-    oldIDs,
     updatedActionsList: [],
   };
 }

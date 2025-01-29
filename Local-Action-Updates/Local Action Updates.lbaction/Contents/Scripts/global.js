@@ -26,66 +26,82 @@ function getActionPaths(folderPath) {
 }
 
 function processActionPaths(inputPaths, targetIDMap) {
-  return inputPaths
+  // First, group and filter actions by bundle ID
+  const inputActions = inputPaths
     .filter((inputPath) => File.exists(`${inputPath}/Contents/Info.plist`))
-    .reduce(
-      (results, inputPath) => {
-        const inputPlist = readPlistFromPath(
-          `${inputPath}/Contents/Info.plist`
-        );
-        const inputID = inputPlist.CFBundleIdentifier;
-        results.bundleIDs.push(inputID);
+    .reduce((groups, inputPath) => {
+      const inputPlist = readPlistFromPath(`${inputPath}/Contents/Info.plist`);
+      const inputID = inputPlist.CFBundleIdentifier;
 
-        // Handle non-installed actions
-        if (!targetIDMap.has(inputID)) {
-          results.notInstalledActions.set(inputID, {
-            inputPlist,
-            inputPath,
-          });
-          return results;
-        }
+      const actionInfo = {
+        inputPlist,
+        inputPath,
+        inputVersion: inputPlist.CFBundleVersion ?? 'unknown'.localize(),
+        minSystemVersion: inputPlist.LSMinimumSystemVersion || null,
+      };
 
-        // Process installed actions
-        const targetPath = targetIDMap.get(inputID);
-        const targetPlist = readPlistFromPath(
-          `${targetPath}/Contents/Info.plist`
-        );
-        const [inputVersion, targetVersion] = [
-          inputPlist.CFBundleVersion ?? 'unknown'.localize(),
-          targetPlist.CFBundleVersion ?? 'unknown'.localize(),
-        ];
-
-        results.matchCount++;
-        results.installedActions.set(inputID, {
-          targetPlist,
-          targetPath,
-          inputVersion,
-          targetVersion,
-        });
-
-        // Check for newer version
-        if (isNewerVersion(targetVersion, inputVersion)) {
-          results.newCount++;
-          results.newActions.push({
-            inputVersion,
-            inputPath,
-            inputPlist,
-            targetVersion,
-            targetPath,
-          });
-        }
-
-        return results;
-      },
-      {
-        matchCount: 0,
-        newCount: 0,
-        newActions: [],
-        bundleIDs: [],
-        notInstalledActions: new Map(),
-        installedActions: new Map(),
+      if (!groups.has(inputID)) {
+        groups.set(inputID, []);
       }
-    );
+      groups.get(inputID).push(actionInfo);
+      return groups;
+    }, new Map());
+
+  // Get best version for each bundle ID
+  const bestVersions = new Map(
+    Array.from(inputActions.entries()).map(([id, versions]) => [
+      id,
+      getBestVersion(versions),
+    ])
+  );
+
+  // Now compare with installed actions
+  return Array.from(bestVersions.entries()).reduce(
+    (results, [inputID, actionInfo]) => {
+      results.bundleIDs.push(inputID);
+
+      // Handle non-installed actions
+      if (!targetIDMap.has(inputID)) {
+        results.notInstalledActions.set(inputID, [actionInfo]);
+        return results;
+      }
+
+      // Process installed actions
+      const targetPath = targetIDMap.get(inputID);
+      const targetPlist = readPlistFromPath(
+        `${targetPath}/Contents/Info.plist`
+      );
+      const targetVersion = targetPlist.CFBundleVersion ?? 'unknown'.localize();
+
+      results.matchCount++;
+      results.installedActions.set(inputID, {
+        targetPlist,
+        targetPath,
+        inputVersion: actionInfo.inputVersion,
+        targetVersion,
+      });
+
+      // Check for newer version
+      if (isNewerVersion(targetVersion, actionInfo.inputVersion)) {
+        results.newCount++;
+        results.newActions.push({
+          ...actionInfo,
+          targetVersion,
+          targetPath,
+        });
+      }
+
+      return results;
+    },
+    {
+      matchCount: 0,
+      newCount: 0,
+      newActions: [],
+      bundleIDs: [],
+      notInstalledActions: new Map(),
+      installedActions: new Map(),
+    }
+  );
 }
 
 function isNewerVersion(targetVersion, inputVersion) {
@@ -160,13 +176,62 @@ function processUpdates(newActions, individual) {
   }, []);
 }
 
+function getBestVersion(versions) {
+  if (versions.length === 1) return versions[0];
+
+  // Sort by version, highest first
+  const sorted = versions.sort((a, b) => {
+    const aVersion = a.inputVersion.split('.').map(Number);
+    const bVersion = b.inputVersion.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+      const aNum = aVersion[i] || 0;
+      const bNum = bVersion[i] || 0;
+      if (aNum > bNum) return -1;
+      if (aNum < bNum) return 1;
+    }
+    return 0;
+  });
+
+  // Find highest compatible version or fallback to highest version
+  return (
+    sorted.find(
+      (v) => !v.minSystemVersion || isCompatibleWithSystem(v.minSystemVersion)
+    ) || sorted[0]
+  );
+}
+
+function isCompatibleWithSystem(minSystemVersion) {
+  if (!minSystemVersion) return true;
+
+  const current = 'LaunchBar.systemVersion'
+    .split('.')
+    .map((n) => parseInt(n, 10));
+  const required = minSystemVersion.split('.').map((n) => parseInt(n, 10));
+
+  // If required major version is higher, not compatible
+  if (required[0] > current[0]) return false;
+
+  // If current major version is higher, compatible
+  if (current[0] > required[0]) return true;
+
+  // Same major version, compare minor
+  if (required[1] > current[1]) return false;
+  if (current[1] > required[1]) return true;
+
+  // Same major and minor version, compare patch
+  // If required patch is not specified, consider it compatible
+  return required[2] === undefined || current[2] >= required[2];
+}
+
 function generateActionsList(actions, isInstalled = false) {
   return actions
-    .map(([_, action]) =>
+    .map(([_, data]) =>
       isInstalled
-        ? generateActionHtml(action, 'installed')
-        : generateActionHtml(action, 'notInstalled')
+        ? generateActionHtml(data, 'installed')
+        : generateActionHtml(data[0], 'notInstalled')
     )
+    .filter(Boolean)
     .join('\n\n');
 }
 
@@ -235,9 +300,10 @@ function generateActionHtml(action, type = 'updated') {
   const website = activePlist.LBDescription?.LBWebsiteURL || '';
 
   const localizedName = activePath ? getLocalizedName(activePath, name) : name;
+  const versionString = version === 'unknown' ? '' : version;
 
   const htmlParts = [
-    `<p><b>${localizedName}</b> ${version === 'unknown' ? '' : version}<br>`,
+    `<p><b>${localizedName}</b> ${versionString}<br>`,
     `${'Author'.localize()}: ${author}<br>`,
   ];
 
