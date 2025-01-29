@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>org.mozilla.firefox</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.FirefoxHistory</string>
+	<key>CFBundleName</key>
+	<string>Firefox History</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBAssociatedApplication</key>
+	<string>org.mozilla.firefox</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBTwitter</key>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Firefox-History/Firefox%20History.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Firefox-History</string>
+	</dict>
+	<key>LBRequiredApplication</key>
+	<string>org.mozilla.firefox</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.sh</string>
+		</dict>
+	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.2</string>
+</dict>
+</plist>
