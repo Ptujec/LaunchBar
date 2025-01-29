@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Arc History</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.1</string>
+	<string>1.4</string>
 	<key>LBAssociatedApplication</key>
 	<string>company.thebrowser.Browser</string>
 	<key>LBDescription</key>
@@ -19,7 +19,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Arc-History/ArcHistory.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
@@ -38,7 +38,7 @@
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.js</string>
+			<string>default.sh</string>
 		</dict>
 	</dict>
 </dict>
