@@ -10,8 +10,8 @@
 #
 
 if [ "$1" ]; then
-    # If URL is provided, open it in Brave
-    open -a "Brave Browser" "$1"
+    open -a "Brave Browser" "$1" &
+    osascript -e 'tell application "LaunchBar" to hide'
     exit 0
 fi
 
