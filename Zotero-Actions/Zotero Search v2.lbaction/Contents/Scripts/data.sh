@@ -130,4 +130,4 @@ if [ -z "${meta}" ]; then
   meta="[]"
 fi
 
-printf '{"itemTypes": %s, "fields": %s, "creatorTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s,  "meta": %s}' "${itemTypes}" "${fields}" "${creatorTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${meta}"
+printf '{"itemTypes": %s, "fields": %s, "creatorTypes": %s, "items": %s, "itemNotes": %s, "itemAttachments": %s, "tags": %s, "itemTags": %s, "creators": %s, "itemCreators": %s, "collections": %s, "collectionItems": %s, "meta": %s}' "${itemTypes}" "${fields}" "${creatorTypes}" "${items}" "${itemNotes}" "${itemAttachments}" "${tags}" "${itemTags}" "${creators}" "${itemCreators}" "${collections}" "${collectionItems}" "${meta}"

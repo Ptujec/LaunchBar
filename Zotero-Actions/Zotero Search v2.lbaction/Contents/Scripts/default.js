@@ -20,9 +20,7 @@ const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
 
 function run(argument) {
   // Show Settings
-  if (LaunchBar.options.alternateKey) {
-    return settings();
-  }
+  if (LaunchBar.options.alternateKey) return settings();
 
   // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
 
@@ -33,9 +31,7 @@ function run(argument) {
     Action.preferences.lastUsedActionVersion = Action.version;
   }
 
-  if (!File.exists(dataPath)) {
-    updateJSON = true;
-  }
+  if (!File.exists(dataPath)) updateJSON = true;
 
   const output = LaunchBar.execute(
     '/bin/sh',
@@ -44,9 +40,7 @@ function run(argument) {
     updateJSON
   );
 
-  if (output) {
-    File.writeText(output, dataPath);
-  }
+  if (output) File.writeText(output, dataPath);
 
   // Get data from JSON
   const data = File.readJSON(dataPath);
@@ -76,9 +70,8 @@ function run(argument) {
   }
 
   // Search or browse sql database
-  if (argument != undefined) {
-    return search(argument, data);
-  }
+  if (argument != undefined) return search(argument, data);
+
   // return browse(data);
   return browse(data);
 }
@@ -848,6 +841,15 @@ function showItemDetails(dict) {
 function itemDetailActions(dict) {
   // Options
   if (LaunchBar.options.commandKey) {
+    if (dict.path && !dict.title) {
+      // The title item also includes the path to the PDF file, but we want to open that in Zotero. For PDF items the title is automatically derived from the path…
+      const parentDir = dict.path.split('/').slice(0, -1).join('/');
+      saveRecent(dict.itemID);
+      LaunchBar.hide();
+      LaunchBar.openURL(File.fileURLForPath(parentDir));
+      return;
+    }
+
     return selectInZotero(dict);
   }
 
