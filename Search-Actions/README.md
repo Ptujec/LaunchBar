@@ -15,8 +15,7 @@
 - Bluesky
 - Unsplash
 - DuckDuckGo (with "Feeling ducky")
-- Kagi 
-- Neeva
+- Kagi
 - ~~Phind~~ ([Moved to it's own folder](https://github.com/Ptujec/LaunchBar/tree/master/Phind))
 - Wikipedia EN/DE/SL (Shows summary or website on ⌘↩)
 - MuseScore Sheetmusic
