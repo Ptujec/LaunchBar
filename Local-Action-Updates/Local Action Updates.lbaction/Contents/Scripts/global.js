@@ -167,17 +167,19 @@ function processUpdates(newActions, individual, installedActions) {
 
   if (!individual) return newActions.map(processAction);
 
-  return newActions.map((action) => {
+  const result = [];
+  for (const action of newActions) {
     const response = showIndividualUpdateAlert(
       action.inputPlist.CFBundleName,
       action.targetVersion,
       action.inputVersion
     );
 
-    if (response === 2) return []; // Cancel - return current report
-    if (response === 0) return processAction(action); // OK
+    if (response === 2) return result; // Cancel
+    if (response === 0) result.push(processAction(action)); // OK
     // Skip - continue to next action
-  });
+  }
+  return result;
 }
 
 function getBestVersion(versions) {
