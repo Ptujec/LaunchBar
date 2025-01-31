@@ -173,8 +173,9 @@ function processUpdates(newActions, individual, installedActions) {
       action.targetVersion,
       action.inputVersion
     );
-    if (response === 2) return report; // Cancel - return current report
-    if (response === 0) report.push(processAction(action)); // OK
+
+    if (response === 2) return []; // Cancel - return current report
+    if (response === 0) return processAction(action); // OK
     // Skip - continue to next action
   });
 }
