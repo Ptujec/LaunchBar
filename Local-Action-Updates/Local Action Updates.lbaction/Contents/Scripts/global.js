@@ -151,29 +151,32 @@ function showIndividualUpdateAlert(actionName, targetVersion, inputVersion) {
   );
 }
 
-function processUpdates(newActions, individual) {
-  if (!individual) {
-    return newActions.map((action) => {
-      replaceAction(action.targetPath, action.inputPath);
-      return generateActionHtml(action, 'updated');
-    });
-  }
+function processUpdates(newActions, individual, installedActions) {
+  const processAction = (action) => {
+    replaceAction(action.targetPath, action.inputPath);
+    // Update installed action version number
+    const id = action.inputPlist.CFBundleIdentifier;
+    if (installedActions.has(id)) {
+      installedActions.set(id, {
+        ...installedActions.get(id),
+        targetVersion: action.inputVersion,
+      });
+    }
+    return generateActionHtml(action, 'updated');
+  };
 
-  return newActions.reduce((report, action) => {
+  if (!individual) return newActions.map(processAction);
+
+  return newActions.map((action) => {
     const response = showIndividualUpdateAlert(
       action.inputPlist.CFBundleName,
       action.targetVersion,
       action.inputVersion
     );
-
-    if (response === 2) return report; // Cancel
-    if (response === 0) {
-      // OK
-      replaceAction(action.targetPath, action.inputPath);
-      report.push(generateActionHtml(action, 'updated'));
-    }
-    return report;
-  }, []);
+    if (response === 2) return report; // Cancel - return current report
+    if (response === 0) report.push(processAction(action)); // OK
+    // Skip - continue to next action
+  });
 }
 
 function getBestVersion(versions) {

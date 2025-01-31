@@ -47,8 +47,8 @@ function scanForUpdates(folderPath) {
   };
 }
 
-function handleUpdates({ matchCount, newCount, newActions }) {
+function handleUpdates({ matchCount, newCount, newActions, installedActions }) {
   const userChoice = showUpdateAlert(matchCount, newCount);
   if (userChoice === 2) return []; // User cancelled
-  return processUpdates(newActions, userChoice === 1);
+  return processUpdates(newActions, userChoice === 1, installedActions);
 }
