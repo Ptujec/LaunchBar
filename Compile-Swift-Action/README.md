@@ -1,6 +1,6 @@
 # LaunchBar Action: Compile Swift Action
 
-This action compiles Swift scripts within a LaunchBar action and removes the quarantine attribute from each file in the bundle. **Use only with actions from developers you trust or code you have verified yourself.**
+This action compiles Swift scripts within one or multiple  LaunchBar actions and removes the quarantine attribute from each file in the bundle. **Use only with actions from developers you trust or code you have verified yourself.**
 
 If you don't have **Apple's Command Line Tools** installed, you need to install them. It seems [best to do that manually at the moment](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411).
 
@@ -23,6 +23,8 @@ Alternatively, you can:
 3. Press `tab` (`⇥`).
 4. Select this action.
 5. Confirm by pressing `return` (`↩`).
+
+Since version 1.3 the action can also process multiple action bundles at once.
 
 ## Background
 

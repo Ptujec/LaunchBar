@@ -1,17 +1,31 @@
 /* 
 Compile Swift Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-01-20
+2025-02-01
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-function run(actionPath) {
-  // Make sure the path is a LaunchBar action bundle
-  if (!actionPath.toString().endsWith('.lbaction')) {
+run = (argument) => {
+  const inputPaths =
+    Array.isArray(argument) || typeof argument === 'object'
+      ? argument
+      : argument.split('\n').filter(Boolean);
+
+  // Check if all paths are LaunchBar action bundles
+  if (inputPaths.some((path) => !path.toString().endsWith('.lbaction'))) {
     LaunchBar.alert(
       'Make sure you select the action bundle of the action you want to compile.',
-      ' Use option-right-arrow to select the bundle of a selected action. (LaunchBar action bundles have an .lbaction extension)'
+      'Use option-right-arrow to select the bundle of a selected action. (LaunchBar action bundles have an .lbaction extension)'
+    );
+    return;
+  }
+
+  // Check if Command Line Tools are available
+  if (!File.exists('/Library/Developer/CommandLineTools')) {
+    LaunchBar.alert(
+      'Command Line Tools missing!',
+      'Open the Terminal.app and type "swift" to promt an install dialog.'
     );
     return;
   }
@@ -26,21 +40,27 @@ function run(actionPath) {
 
   switch (response) {
     case 0: {
-      LaunchBar.execute('/bin/sh', 'unquarantine.sh', actionPath);
+      const successCount = inputPaths.reduce((count, actionPath) => {
+        return count + main(actionPath);
+      }, 0);
 
-      const swiftScripts = getSwiftScripts(actionPath);
-
-      if (swiftScripts.length === 0) {
-        LaunchBar.alert('No uncompiled swift scripts found in this action!');
-        return;
+      if (successCount > 0) {
+        LaunchBar.alert(
+          'Done!',
+          `Compiled ${successCount} Swift script${
+            successCount > 1 ? 's' : ''
+          } in ${inputPaths.length} action bundle${
+            inputPaths.length > 1 ? 's' : ''
+          }.`
+        );
+      } else {
+        LaunchBar.alert(
+          'Nothing to compile!',
+          `No Swift scripts found in ${inputPaths.length} action${
+            inputPaths.length > 1 ? 's' : ''
+          }.`
+        );
       }
-
-      const successCount = swiftScripts.reduce(
-        (count, script) => count + (main(script, actionPath) ? 1 : 0),
-        0
-      );
-
-      LaunchBar.alert('Done!', `${successCount} swift script(s) compiled.`);
       break;
     }
 
@@ -53,18 +73,24 @@ function run(actionPath) {
     case 2:
       break;
   }
-}
+};
 
-function main(swiftScriptPath, actionPath) {
-  // Check if Command Line Tools are available
-  if (!File.exists('/Library/Developer/CommandLineTools')) {
-    LaunchBar.alert(
-      'Command Line Tools missing!',
-      'Open the Terminal.app and type "swift" to promt an install dialog.'
-    );
-    return;
-  }
+main = (actionPath) => {
+  LaunchBar.execute('/bin/sh', 'unquarantine.sh', actionPath);
 
+  const swiftScripts = getSwiftScripts(actionPath);
+
+  if (swiftScripts.length === 0) return 0;
+
+  const successCount = swiftScripts.reduce(
+    (count, script) => count + (compile(script, actionPath) ? 1 : 0),
+    0
+  );
+
+  return successCount;
+};
+
+compile = (swiftScriptPath, actionPath) => {
   const swiftCompiledScriptPath = swiftScriptPath.slice(
     0,
     swiftScriptPath.lastIndexOf('.swift')
@@ -119,12 +145,12 @@ function main(swiftScriptPath, actionPath) {
   });
 
   return 'success';
-}
+};
 
-function getSwiftScripts(actionPath) {
+getSwiftScripts = (actionPath) => {
   const scriptsDir = `${actionPath}/Contents/Scripts`;
   const contents = File.getDirectoryContents(scriptsDir);
   return contents
     .filter((item) => item.endsWith('.swift'))
     .map((item) => `${scriptsDir}/${item}`);
-}
+};
