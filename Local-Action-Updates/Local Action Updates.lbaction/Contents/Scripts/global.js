@@ -304,6 +304,8 @@ function generateActionHtml(action, type = 'updated') {
       : action.targetVersion || activePlist.CFBundleVersion || '';
   const author = activePlist.LBDescription?.LBAuthor || 'Unknown'.localize();
   const website = activePlist.LBDescription?.LBWebsiteURL || '';
+  const isSwiftAction =
+    activePlist.LBScripts?.LBDefaultScript?.LBScriptName?.endsWith('.swift');
 
   const localizedName = activePath ? getLocalizedName(activePath, name) : name;
   const versionString = version === 'unknown' ? '' : version;
@@ -321,10 +323,18 @@ function generateActionHtml(action, type = 'updated') {
           : action.targetVersion
       }<br>`
     );
+    if (isSwiftAction) {
+      const selectURL = `x-launchbar:select?file=${encodeURI(targetPath)}`;
+      htmlParts.push(
+        `<a href="${selectURL}">${'Click To Select Action Bundle'.localize()} (⇥ Compile Swift Action)</a><br>`
+      );
+    }
   } else if (type === 'notInstalled') {
     const selectURL = `x-launchbar:select?file=${encodeURI(activePath)}`;
     htmlParts.push(
-      `<a href="${selectURL}">${'Click To Select Action Bundle'.localize()}</a><br>`
+      `<a href="${selectURL}">${'Click To Select Action Bundle'.localize()} ${
+        isSwiftAction ? '(⇥ Compile Swift Action)' : ''
+      }</a><br>`
     );
   }
 

@@ -36,9 +36,11 @@ When done, you will get a report that not only lists the updated actions but als
 
 <img src="03.jpg" width="750"/>
 
-Right from the report, you can select the source or any of the Action Bundles you have not installed yet. This way, you can easily install new actions or browse their contents.
+Right from the report, you can select the source or any of the Action Bundles you have not installed yet. This way, you can easily install new actions or browse their contents. 
 
 <img src="04.jpg" width="750"/>
+
+This is also helpful for updated actions that are written in Swift. Select the bundle with a click, press `⇥`, and select "Compile Swift Action" to compile the updated action.
 
 ## Download
 
