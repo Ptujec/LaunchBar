@@ -9,21 +9,21 @@
 	<key>CFBundleName</key>
 	<string>DeepL Translator</string>
 	<key>CFBundleVersion</key>
-	<string>1.4.4</string>
+	<string>1.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
-		<string>Set default target language with ↩. Choose language for current entry with ⌘↩.</string>
+		<string>Set default target language: ↩. Choose language for current entry: ⌘↩.</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/DeepL-Action/DeepL%20Translator.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/DeepL-Action</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/DeepL-Action/DeepL%20Translator.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

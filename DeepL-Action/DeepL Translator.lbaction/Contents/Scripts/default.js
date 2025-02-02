@@ -1,134 +1,105 @@
-/* LaunchBar Action for DeepL
-- https://www.deepl.com/de/docs-api/translating-text/request/
+/* 
+DeepL Action for LaunchBar
+by Christian Bender (@ptujec)
+2025-02-02
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Documentation:
+- https://developers.deepl.com/docs/api-reference/translate
+- https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
 */
 
 String.prototype.localizationTable = 'default';
 
 const apiKey = Action.preferences.apiKey;
-var lang = Action.preferences.lang;
-
-if (lang == undefined) {
-  var lang = 'EN';
-}
 
 function run(argument) {
-  if (LaunchBar.options.shiftKey) {
-    setApiKey();
-  } else {
-    if (argument == undefined) {
-      Action.preferences.mode = 'setDefault';
-      var output = showLanguages();
-      return output;
-    } else {
-      if (apiKey == undefined) {
-        setApiKey();
-      } else {
-        if (LaunchBar.options.commandKey) {
-          Action.preferences.mode = 'translate';
-          Action.preferences.argument = argument;
-          var output = showLanguages();
-          return output;
-        } else {
-          Action.preferences.mode = 'setDefault';
-          Action.preferences.argument = argument;
-          var output = translate(lang);
-          return output;
-        }
-      }
-    }
-  }
-}
-function showLanguages() {
-  var lang = Action.preferences.lang;
+  if (LaunchBar.options.alternateKey || !apiKey) return setApiKey();
+  if (!argument) return showLanguages('setDefault');
+  if (LaunchBar.options.commandKey) return showLanguages('translate', argument);
 
-  var target_langs = File.readText(
+  const lang = Action.preferences.lang || 'EN';
+  return translate(argument, lang);
+}
+
+function showLanguages(mode, inputText) {
+  const lang = Action.preferences.lang || 'EN';
+
+  const target_langs = File.readText(
     Action.path + '/Contents/Resources/target_langs.txt'
   ).split('\n');
 
-  var all = [];
-  var selected = [];
-  target_langs.forEach(function (item) {
-    var langCode = item.split(',')[0];
-    if (LaunchBar.currentLocale == 'de') {
-      var langName = item.split(',')[2];
-    } else {
-      var langName = item.split(',')[1];
-    }
+  return target_langs
+    .reduce(
+      ([selected, others], item) => {
+        const [langCode, enName, deName] = item.split(',');
+        const isDefault = langCode === lang;
 
-    var pushData = {
-      title: langName,
-      icon: langCode.toLowerCase() + '_Template',
-      action: 'setLanguage',
-      actionArgument: langCode,
-    };
+        const entry = {
+          title: LaunchBar.currentLocale === 'de' ? deName : enName,
+          subtitle:
+            mode === 'translate'
+              ? `${'Translate: '.localize()}"${inputText}"`
+              : undefined,
+          icon: `${langCode.toLowerCase()}_Template`,
+          badge: isDefault ? 'default'.localize() : undefined,
+          action: 'setLanguage',
+          actionArgument: { langCode, mode, inputText },
+        };
 
-    if (Action.preferences.mode == 'translate') {
-      pushData.subtitle =
-        'Translate: '.localize() + '"' + Action.preferences.argument + '"';
-    }
+        return [
+          isDefault ? [...selected, entry] : selected,
+          isDefault ? others : [...others, entry],
+        ];
+      },
+      [[], []]
+    )
+    .flat();
+}
 
-    if (langCode == lang) {
-      pushData.label = '✔︎';
-      selected.push(pushData);
-    } else {
-      all.push(pushData);
-    }
+function setLanguage({ langCode, mode, inputText }) {
+  if (mode === 'translate') return translate(inputText, langCode);
+
+  Action.preferences.lang = langCode;
+  return showLanguages('setDefault');
+}
+
+function translate(inputText, langCode) {
+  const result = HTTP.postJSON('https://api-free.deepl.com/v2/translate', {
+    headerFields: {
+      Authorization: 'DeepL-Auth-Key ' + apiKey,
+    },
+    body: {
+      text: [inputText],
+      target_lang: langCode,
+    },
   });
 
-  var result = selected.concat(all);
-
-  return result;
-}
-
-function setLanguage(lang) {
-  if (Action.preferences.mode == 'translate') {
-    var output = translate(lang);
-    return output;
-  } else {
-    // set default language
-    Action.preferences.lang = lang;
-    var output = showLanguages();
-    return output;
-  }
-}
-
-function translate(lang) {
-  var argument = Action.preferences.argument;
-
-  var result = HTTP.getJSON(
-    'https://api-free.deepl.com/v2/translate?auth_key=' +
-      apiKey +
-      '&text=' +
-      encodeURI(argument) +
-      '&target_lang=' +
-      lang
-  );
-
-  if (result.response == undefined) {
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
-    LaunchBar.alert(result.error);
+  if (!result || !result.response) {
+    LaunchBar.alert(result ? result.error : 'No response from API');
     return;
   }
 
-  if (result.response.status != 200) {
-    LaunchBar.executeAppleScript('tell application "LaunchBar" to activate');
+  if (result.response.status !== 200) {
     LaunchBar.alert(
       result.response.status + ': ' + result.response.localizedStatus
     );
     return;
   }
 
-  return [
-    {
-      title: result.data.translations[0].text,
-      subtitle: argument,
-      icon: 'iconTemplate',
-    },
-  ];
+  const json = JSON.parse(result.data);
+  const resultText = json.translations[0].text;
+
+  return {
+    title: resultText,
+    subtitle: inputText,
+    icon: 'iconTemplate',
+  };
 }
 
 function setApiKey() {
-  var response = LaunchBar.alert(
+  const response = LaunchBar.alert(
     'API Key required',
     'Set from Clipboard. You first need to create an account and retrieve your API key from https://www.deepl.com/de/pro-account/summary.',
     'Set API Key',
