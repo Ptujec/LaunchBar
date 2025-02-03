@@ -181,21 +181,25 @@ function browse(data) {
       title: 'Creators',
       icon: 'creatorTemplate',
       action: 'showCreators',
+      actionReturnsItems: true,
     },
     {
       title: 'Tags',
       icon: 'tagTemplate',
       action: 'showTags',
+      actionReturnsItems: true,
     },
     {
       title: 'Collections',
       icon: 'collectionTemplate',
       action: 'showCollections',
+      actionReturnsItems: true,
     },
     {
       title: 'All Items',
       icon: 'libraryTemplate',
       action: 'showAllItems',
+      actionReturnsItems: true,
     }
   );
 
@@ -211,6 +215,7 @@ function showTags() {
       ...item,
       icon: 'tagTemplate',
       action: 'showItemsWithTag',
+      actionReturnsItems: true,
       actionArgument: item.tagID.toString(),
     };
   });
@@ -240,6 +245,7 @@ function showCreators() {
           title,
           icon: 'creatorTemplate',
           action: 'showItemsWithCreator',
+          actionReturnsItems: true,
           actionArgument: creatorID.toString(),
         });
       }
@@ -280,6 +286,7 @@ function showCollections() {
       actionArgument: {
         collectionID: collectionID,
       },
+      actionReturnsItems: true,
     }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
@@ -450,6 +457,7 @@ function showEntries(itemIDs, data) {
           title: title,
           icon: icon,
         },
+        actionReturnsItems: true,
         alwaysShowsSubtitle: true,
       });
     }
@@ -708,6 +716,7 @@ function showItemDetails(dict) {
       actionArgument: {
         creatorsArr,
       },
+      actionReturnsItems: true,
     });
   }
 
@@ -722,6 +731,7 @@ function showItemDetails(dict) {
       icon: dict.icon + 'Template',
       action: 'showJournalArticles',
       actionArgument: journalTitle,
+      actionReturnsItems: true,
     });
   }
 
@@ -731,6 +741,7 @@ function showItemDetails(dict) {
       icon: 'bookTemplate',
       action: 'showBookSections',
       actionArgument: bookTitle,
+      actionReturnsItems: true,
     });
   }
 
@@ -740,6 +751,7 @@ function showItemDetails(dict) {
       icon: 'dictionaryTemplate',
       action: 'showDictionaryEntry',
       actionArgument: dictionaryTitle,
+      actionReturnsItems: true,
     });
   }
 
@@ -749,6 +761,7 @@ function showItemDetails(dict) {
       icon: 'encyclopediaTemplate',
       action: 'showEncyclopediaArticles',
       actionArgument: encyclopediaTitle,
+      actionReturnsItems: true,
     });
   }
 
@@ -758,6 +771,7 @@ function showItemDetails(dict) {
       icon: 'seriesTemplate',
       action: 'showSeriesItems',
       actionArgument: seriesTitle,
+      actionReturnsItems: true,
     });
   }
 
@@ -769,6 +783,7 @@ function showItemDetails(dict) {
       actionArgument: {
         collectionsArr,
       },
+      actionReturnsItems: true,
     });
   }
 
@@ -781,6 +796,7 @@ function showItemDetails(dict) {
       actionArgument: {
         tagsArr,
       },
+      actionReturnsItems: true,
     });
   }
 
@@ -948,6 +964,7 @@ function showItemCreatorIDs({ creatorsArr }) {
       icon: 'creatorTemplate',
       action: 'showItemsWithCreator',
       actionArgument: item.creatorID.toString(),
+      actionReturnsItems: true,
     };
   });
 
@@ -968,6 +985,7 @@ function showItemCollections({ collectionsArr }) {
     actionArgument: {
       collectionID: item.collectionID,
     },
+    actionReturnsItems: true,
   }));
 }
 
@@ -981,6 +999,7 @@ function showItemTags({ tagsArr }) {
     icon: 'tagTemplate',
     action: 'showItemsWithTag',
     actionArgument: item.tagID.toString(),
+    actionReturnsItems: true,
   }));
 }
 
