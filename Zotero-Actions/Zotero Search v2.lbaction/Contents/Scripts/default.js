@@ -466,10 +466,11 @@ function showEntries(itemIDs, data) {
   if (result.length === 0) {
     return [
       {
-        title: 'No results',
+        title: 'No results. Press enter to browse all items.',
         icon: 'greyTemplate',
         action: 'browse',
         actionArgument: data,
+        actionReturnsItems: true,
       },
     ];
   }
