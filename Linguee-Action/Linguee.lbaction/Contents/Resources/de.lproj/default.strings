@@ -5,7 +5,8 @@
 "French ↔ English" = "Französisch ↔ Englisch";
 "Spanish ↔ German" = "Spanisch ↔ Deutsch";
 "Spanish ↔ English" = "Spanisch ↔ Englisch";
-"Portuguese ↔ German" = "Portugiesisch ↔ Deutsch";
-"Portuguese ↔ English" = "Portugiesisch ↔ Englisch";
-"Russian ↔ English" = "Russisch ↔ Englisch";
+"German ↔ Portuguese" = "Deutsch ↔ Portugiesisch";
+"English ↔ Portuguese" = "Englisch ↔ Portugiesisch";
+"English ↔ Russian" = "Englisch ↔ Russisch";
 "Becaus of an issue only preview results are shown." = "Aufgrund eines Problems werden nur Vorschau Ergebnise gezeigt.";
+"No results found" = "Keine Ergebnisse gefunden";

@@ -9,21 +9,21 @@
 	<key>CFBundleName</key>
 	<string>Linguee</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.3</string>
+	<string>1.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>Hit return to select languages. Press space for running a search.</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Linguee-Action/Linguee.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Linguee-Action</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Linguee-Action/Linguee.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>

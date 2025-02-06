@@ -4,26 +4,25 @@
 
 This action lets you use linguee.com with LaunchBar. 
 
-Set your preferred language combination with `⏎`. Supported languages are German, English, French, Spanish, Portuguese and Russian. 
+Set your preferred language combination with `Enter`. Supported languages are German, English, French, Spanish, Portuguese, and Russian. 
 
 <img src="01.png" width="680"/> 
 
-Enter the word you want to translate with `␣` (space bar). You should see suggestions as you type, including some translation items for each suggestion.
+Enter the word you want to translate with `space`. You should see suggestions as you type, including some translation items for each suggestion in the subtitle.
 
 <img src="02.png" width="680"/> 
 
-Show all translation results with `⏎` … 
+Show all translation results with `Enter` … 
 
 <img src="03.png" width="680"/> 
 
-… or paste the selected word with `⇧⏎`. Pasting works for both  suggestions and results. 
+… or paste the selected word with `Shift` `Enter`. Pasting works for both suggestions and results. 
 
 ## Note
 
-Linguee may block your IP address for 24 hours if you use this a lot. In this case you should still be able to see the preview items. But instead of the usual full translation details you only see the same translation items from preview again, when you hit return. This is indicated by a generic blue bubble icon instead of the bubble icon of the translated language. 
-Should you see the generic blue bubble icon without being blocked please [create an issue here](https://github.com/Ptujec/LaunchBar/issues/new).
+Linguee may block your IP address for 24 hours if you use this a lot. You should, however, still be able to see the preview items.
 
-Website changes may break this action any time. 
+Website changes may break this action at any time. 
 
 Also, there are two more language actions in this repository (not counting the Slovene ones), **[DeepL](https://github.com/Ptujec/LaunchBar/tree/master/DeepL-Action#readme)** and **[Verbs](https://github.com/Ptujec/LaunchBar/tree/master/Verbs-Action#readme)**. 
 
