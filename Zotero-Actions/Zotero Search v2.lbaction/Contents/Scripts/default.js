@@ -1,22 +1,16 @@
 /* 
 Zotero Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-05-17
+2025-02-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO: 
-- Build citation according to a csl style sheet?
+- Build citation according to a csl style sheet? -> global.js (local API)
 */
 
-const zoteroDirectory = getZoteroDirectory();
-
-const storageDirectory = zoteroDirectory + 'storage/';
-
-const dataPath = Action.supportPath + '/data.json';
-
-const currentActionVersion = Action.version;
-const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
+include('global.js');
+include('citation.js');
 
 function run(argument) {
   // Show Settings
@@ -24,7 +18,7 @@ function run(argument) {
 
   // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
 
-  let updateJSON;
+  let updateJSON = false;
 
   if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
     updateJSON = true;
@@ -34,7 +28,7 @@ function run(argument) {
   if (!File.exists(dataPath)) updateJSON = true;
 
   const output = LaunchBar.execute(
-    '/bin/sh',
+    '/bin/bash',
     './data.sh',
     zoteroDirectory + 'zotero.sqlite',
     updateJSON
@@ -341,6 +335,7 @@ function showEntries(itemIDs, data) {
     }
     map[item.itemID] = {
       zoteroSelectURL: `zotero://select/items/${item.libraryID}_${item.key}`,
+      itemKey: item.key,
       typeName: item.typeName,
     };
     return map;
@@ -448,14 +443,13 @@ function showEntries(itemIDs, data) {
         icon: icon,
         action: 'itemActions',
         actionArgument: {
-          zoteroSelectURL: itemsMap[itemID]
-            ? itemsMap[itemID].zoteroSelectURL
-            : '',
-          itemID: itemID,
-          creators: creators,
-          date: date,
-          title: title,
-          icon: icon,
+          zoteroSelectURL: itemsMap[itemID]?.zoteroSelectURL,
+          itemID,
+          itemKey: itemsMap[itemID]?.itemKey,
+          creators,
+          date,
+          title,
+          icon,
         },
         actionReturnsItems: true,
         alwaysShowsSubtitle: true,
@@ -683,9 +677,9 @@ function showItemDetails(dict) {
 
   dict.url = urls[0] ? urls[0].url : '';
 
-  // Details Array Construction
+  // DETAILS ARRAY CONSTRUCTION
 
-  details = [
+  let details = [
     {
       title: dict.title,
       icon: dict.icon,
@@ -710,95 +704,122 @@ function showItemDetails(dict) {
             .join(', ')} & ${itemCreators[lastIndex].lastName}`
         : '';
 
-    details.push({
-      title: creatorString,
-      icon: 'creatorTemplate',
-      action: 'showItemCreatorIDs',
-      actionArgument: {
-        creatorsArr,
+    details = [
+      ...details,
+      {
+        title: creatorString,
+        icon: 'creatorTemplate',
+        action: 'showItemCreatorIDs',
+        actionArgument: {
+          creatorsArr,
+        },
+        actionReturnsItems: true,
       },
-      actionReturnsItems: true,
-    });
+    ];
   }
 
-  details.push({
-    title: dict.date,
-    icon: 'calTemplate',
-  });
+  details = [
+    ...details,
+    {
+      title: dict.date,
+      icon: 'calTemplate',
+    },
+  ];
 
   if (journalTitle) {
-    details.push({
-      title: journalTitle,
-      icon: dict.icon + 'Template',
-      action: 'showJournalArticles',
-      actionArgument: journalTitle,
-      actionReturnsItems: true,
-    });
+    details = [
+      ...details,
+      {
+        title: journalTitle,
+        icon: dict.icon + 'Template',
+        action: 'showJournalArticles',
+        actionArgument: journalTitle,
+        actionReturnsItems: true,
+      },
+    ];
   }
 
   if (bookTitle) {
-    details.push({
-      title: bookTitle,
-      icon: 'bookTemplate',
-      action: 'showBookSections',
-      actionArgument: bookTitle,
-      actionReturnsItems: true,
-    });
+    details = [
+      ...details,
+      {
+        title: bookTitle,
+        icon: 'bookTemplate',
+        action: 'showBookSections',
+        actionArgument: bookTitle,
+        actionReturnsItems: true,
+      },
+    ];
   }
 
   if (dictionaryTitle) {
-    details.push({
-      title: dictionaryTitle,
-      icon: 'dictionaryTemplate',
-      action: 'showDictionaryEntry',
-      actionArgument: dictionaryTitle,
-      actionReturnsItems: true,
-    });
+    details = [
+      ...details,
+      {
+        title: dictionaryTitle,
+        icon: 'dictionaryTemplate',
+        action: 'showDictionaryEntry',
+        actionArgument: dictionaryTitle,
+        actionReturnsItems: true,
+      },
+    ];
   }
 
   if (encyclopediaTitle) {
-    details.push({
-      title: encyclopediaTitle,
-      icon: 'encyclopediaTemplate',
-      action: 'showEncyclopediaArticles',
-      actionArgument: encyclopediaTitle,
-      actionReturnsItems: true,
-    });
+    details = [
+      ...details,
+      {
+        title: encyclopediaTitle,
+        icon: 'encyclopediaTemplate',
+        action: 'showEncyclopediaArticles',
+        actionArgument: encyclopediaTitle,
+        actionReturnsItems: true,
+      },
+    ];
   }
 
   if (seriesTitle) {
-    details.push({
-      title: seriesTitle,
-      icon: 'seriesTemplate',
-      action: 'showSeriesItems',
-      actionArgument: seriesTitle,
-      actionReturnsItems: true,
-    });
+    details = [
+      ...details,
+      {
+        title: seriesTitle,
+        icon: 'seriesTemplate',
+        action: 'showSeriesItems',
+        actionArgument: seriesTitle,
+        actionReturnsItems: true,
+      },
+    ];
   }
 
   if (collectionNames.length > 0) {
-    details.push({
-      title: collectionNames.join(', '),
-      icon: 'collectionTemplate',
-      action: 'showItemCollections',
-      actionArgument: {
-        collectionsArr,
+    details = [
+      ...details,
+      {
+        title: collectionNames.join(', '),
+        icon: 'collectionTemplate',
+        action: 'showItemCollections',
+        actionArgument: {
+          collectionsArr,
+        },
+        actionReturnsItems: true,
       },
-      actionReturnsItems: true,
-    });
+    ];
   }
 
   // Tags
   if (tagNames.length > 0) {
-    details.push({
-      title: tagNames.join(', '),
-      icon: 'tagTemplate',
-      action: 'showItemTags',
-      actionArgument: {
-        tagsArr,
+    details = [
+      ...details,
+      {
+        title: tagNames.join(', '),
+        icon: 'tagTemplate',
+        action: 'showItemTags',
+        actionArgument: {
+          tagsArr,
+        },
+        actionReturnsItems: true,
       },
-      actionReturnsItems: true,
-    });
+    ];
   }
 
   // Notes & URLs
@@ -836,12 +857,21 @@ function showItemDetails(dict) {
     }
   }
 
-  details.push(
+  details = [
+    ...details,
     {
-      title: 'Cite and Link',
+      title: 'Paste & Link Citation',
       icon: 'citeTemplate',
       action: 'pasteCitation',
       actionArgument: dict,
+      actionRunsInBackground: true,
+    },
+    {
+      title: 'Paste & Link Bibliography',
+      icon: 'citeTemplate',
+      action: 'pasteCitation',
+      actionArgument: { ...dict, isBibliography: true },
+      actionRunsInBackground: true,
     },
     {
       title: 'Select in Zotero',
@@ -849,8 +879,8 @@ function showItemDetails(dict) {
       url: dict.zoteroSelectURL,
       action: 'selectInZotero',
       actionArgument: dict,
-    }
-  );
+    },
+  ];
 
   return details;
 }
@@ -879,20 +909,32 @@ function itemDetailActions(dict) {
   saveRecent(dict.itemID);
 
   // Open
-  if (Action.preferences.openOption == 'systemDefault' && dict.path) {
-    LaunchBar.openURL(File.fileURLForPath(dict.path));
-    return;
-  }
-
   if (dict.key) {
     // dict.key is the attachment key
     const data = File.readJSON(dataPath);
     const foundItem = data.items.filter(
       (item) => dict.itemID === item.itemID
     )[0]; // the itemID is from the entry not the attachment … but should be the same library
+
     if (foundItem) {
-      // does not work with epub files
-      zoteroOpenPDFURL = `zotero://open-pdf/${foundItem.libraryID}_${dict.key}`;
+      // does not work with epub files yet
+      const zoteroFileHandlerPDFPref =
+        zoteroPrefs['extensions.zotero.fileHandler.pdf'];
+
+      if (zoteroFileHandlerPDFPref === 'system') {
+        LaunchBar.openURL(File.fileURLForPath(dict.path));
+        return;
+      }
+
+      if (zoteroFileHandlerPDFPref) {
+        LaunchBar.openURL(
+          File.fileURLForPath(dict.path),
+          zoteroFileHandlerPDFPref.split('/').pop()
+        );
+        return;
+      }
+
+      const zoteroOpenPDFURL = `zotero://open-pdf/${foundItem.libraryID}_${dict.key}`;
       LaunchBar.openURL(zoteroOpenPDFURL);
     }
     return;
@@ -1004,99 +1046,6 @@ function showItemTags({ tagsArr }) {
   }));
 }
 
-function pasteCitation(dict) {
-  // TODO: Build citation according to a csl style sheet?
-  const itemID = dict.itemID;
-  const itemCreators = dict.creators || [];
-
-  saveRecent(itemID);
-
-  const prefs = Action.preferences;
-  const creatorTypes = prefs.creatorTypes;
-  const fields = prefs.fields;
-
-  const creatorNames = itemCreators.reduce(
-    (acc, item) => {
-      if (item.creatorTypeID === creatorTypes.author) {
-        acc.authorNames.push(item.lastName);
-      } else if (item.creatorTypeID === creatorTypes.editor) {
-        acc.editorNames.push(item.lastName);
-      } else {
-        acc.otherNames.push(item.lastName);
-      }
-      return acc;
-    },
-    {
-      authorNames: [],
-      editorNames: [],
-      otherNames: [],
-    }
-  );
-
-  const creators =
-    creatorNames.authorNames.length > 0
-      ? creatorNames.authorNames
-      : creatorNames.editorNames.length > 0
-      ? creatorNames.editorNames
-      : creatorNames.otherNames;
-
-  // creators.sort();
-
-  const creatorString =
-    creators.length > 3
-      ? `${creators[0]} et al.`
-      : creators.length === 3
-      ? `${creators[0]}, ${creators[1]} & ${creators[2]}`
-      : creators.length > 0
-      ? creators.join(' & ')
-      : '';
-
-  let institution, title;
-
-  if (!creatorString) {
-    const data = File.readJSON(dataPath);
-    for (let item of data.meta) {
-      if (item.itemID === itemID) {
-        if (item.fieldID === fields.institution) {
-          institution = item.value;
-          break;
-        } else if (
-          item.fieldID === fields.title ||
-          item.fieldID === fields.caseName ||
-          item.fieldID === fields.nameOfAct ||
-          item.fieldID === fields.subject
-        ) {
-          title = item.value;
-          break;
-        }
-      }
-    }
-  }
-
-  const citation = `(${creatorString || institution || title} ${
-    dict.date || 'n.d.'
-  })`;
-
-  const citationFormat = Action.preferences.citationFormat;
-
-  if (citationFormat == 'richText') {
-    LaunchBar.executeAppleScriptFile(
-      './rt.applescript',
-      citation,
-      dict.zoteroSelectURL
-    );
-  } else if (citationFormat == 'markdown') {
-    LaunchBar.paste(`[${citation}](${dict.zoteroSelectURL})`);
-  } else {
-    // LaunchBar.paste(citation);
-    // LaunchBar.setClipboardString(dict.url);
-    LaunchBar.executeAppleScript(
-      `set the clipboard to "${dict.zoteroSelectURL}"`,
-      `tell application "LaunchBar" to paste in frontmost application "${citation}"`
-    );
-  }
-}
-
 function openURL({ itemID, url }) {
   LaunchBar.hide();
   saveRecent(itemID);
@@ -1106,13 +1055,6 @@ function openURL({ itemID, url }) {
 function selectInZotero({ itemID, zoteroSelectURL }) {
   LaunchBar.hide();
   saveRecent(itemID);
-
-  // if (checkZoteroVersion()) {
-  //   LaunchBar.executeAppleScript(
-  //     'tell application id "org.zotero.zotero" to launch'
-  //   );
-  // }
-
   LaunchBar.openURL(zoteroSelectURL);
 }
 
@@ -1127,12 +1069,6 @@ function openNote({ parentItemID, itemID }) {
   if (foundItem) {
     zoteroSelectURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
   }
-
-  // if (checkZoteroVersion()) {
-  //   LaunchBar.executeAppleScript(
-  //     'tell application id "org.zotero.zotero" to launch'
-  //   );
-  // }
 
   LaunchBar.openURL(zoteroSelectURL);
 }
@@ -1157,18 +1093,6 @@ function saveRecent(itemID) {
   Action.preferences.recentItems = recentItems;
 }
 
-// function checkZoteroVersion() {
-//   const contents = File.getDirectoryContents('/Applications/');
-
-//   const zotero = contents.find((item) => item.startsWith('Zotero')) || '';
-
-//   const plist = File.readPlist(`/Applications/${zotero}/Contents/Info.plist`);
-
-//   const version = parseInt(plist.CFBundleVersion.split('.')[0]);
-
-//   return version < 7;
-// }
-
 function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
   const lastUsedParts = lastUsedActionVersion.split('.');
   const currentParts = currentActionVersion.split('.');
@@ -1179,113 +1103,4 @@ function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
     if (a < b) return false;
   }
   return false;
-}
-
-// SETTINGS
-
-function settings() {
-  let formatIcon, formatSelection;
-
-  if (Action.preferences.citationFormat == 'richText') {
-    formatIcon = 'rTemplate';
-    formatSelection = 'Rich Text';
-  } else if (Action.preferences.citationFormat == 'markdown') {
-    formatIcon = 'mTemplate';
-    formatSelection = 'Markdown';
-  } else {
-    formatIcon = 'pasteTemplate';
-    formatSelection = 'Plain';
-  }
-
-  return [
-    {
-      title: 'Citation Format',
-      subtitle: formatSelection,
-      alwaysShowsSubtitle: true,
-      icon: formatIcon,
-      children: listFormats(),
-    },
-    {
-      title: 'Open Attachments',
-      alwaysShowsSubtitle: true,
-      subtitle:
-        Action.preferences.openOption == 'systemDefault'
-          ? 'System Default'
-          : 'Respect Zotero Setting',
-      icon:
-        Action.preferences.openOption == 'systemDefault'
-          ? 'systemDefaultTemplate'
-          : 'zoteroSettingTemplate',
-      children: listOpenOptions(),
-    },
-  ];
-}
-
-function listFormats() {
-  return [
-    {
-      title: 'Paste citation only',
-      subtitle: 'The link will be copied to the clipboard',
-      alwaysShowsSubtitle: true,
-      // icon: 'plainTemplate',
-      icon: 'pasteTemplate',
-      action: 'setFormat',
-      actionArgument: 'plain',
-    },
-    {
-      title: 'Paste citation with link as rich text',
-      icon: 'rTemplate',
-      action: 'setFormat',
-      actionArgument: 'richText',
-    },
-    {
-      title: 'Paste citation with link as markdown',
-      icon: 'mTemplate',
-      action: 'setFormat',
-      actionArgument: 'markdown',
-    },
-  ];
-}
-
-function setFormat(citationFormat) {
-  Action.preferences.citationFormat = citationFormat;
-  return settings();
-}
-
-function listOpenOptions() {
-  return [
-    {
-      title: 'Respect Zotero Setting',
-      subtitle: 'Will respect the reader setting in Zotero (Gerneral/Reader).',
-      alwaysShowsSubtitle: true,
-      icon: 'zoteroSettingTemplate',
-      action: 'setOpenOption',
-      actionArgument: 'zoteroSetting',
-    },
-    {
-      title: 'System Default',
-      subtitle: 'Will use the default app without opening Zotero first.',
-      alwaysShowsSubtitle: true,
-      icon: 'systemDefaultTemplate',
-      action: 'setOpenOption',
-      actionArgument: 'systemDefault',
-    },
-  ];
-}
-
-function setOpenOption(openOption) {
-  Action.preferences.openOption = openOption;
-  return settings();
-}
-
-function getZoteroDirectory() {
-  const profilesDir = '~/Library/Application Support/Zotero/Profiles';
-  const profile = File.getDirectoryContents(profilesDir)[0];
-  const prefsPathContent = File.readText(`${profilesDir}/${profile}/prefs.js`);
-
-  const match = prefsPathContent.match(
-    /user_pref\("extensions.zotero.dataDir",\s*"([^"]*)"\);/
-  );
-
-  return match ? `${match[1]}/` : `${LaunchBar.homeDirectory}/Zotero/`;
 }

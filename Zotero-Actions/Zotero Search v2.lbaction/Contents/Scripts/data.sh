@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Get the modification timestamps of both files
 file1_modified=$(stat -f "%m" "$1")

@@ -21,7 +21,7 @@ You can also directly search both the database and your local attachments with `
 
 <img src="02.jpg" width="806"/> 
 
-If you press `Enter` instead of `space`, you can browse your database by creators, tags, collections, or all items. 
+If you press `enter` instead of `space`, you can [browse your database](https://ptujec.github.io/the-unique-power-of-browsing-in-launchbar/) by creators, tags, collections, or all items. 
 
 Additionally, you have quick access to your three most recently used items.
 
@@ -29,7 +29,7 @@ Additionally, you have quick access to your three most recently used items.
 
 <img src="03.jpg" width="806"/> 
 
-If you hit `Enter` on a particular item, you can see more details such as tags, publications, links, or attachments. 
+If you hit `enter` on a particular item, you can see more details such as tags, publications, links, or attachments. 
 
 Many of the details also offer further functionality. For instance, you can quickly look inside an attached PDF.
 
@@ -37,13 +37,13 @@ Many of the details also offer further functionality. For instance, you can quic
 
 Here is a list of possible actions: 
 
-#### 1) Browse some more
+#### 1) More Browsing
 
-You can browse other items that are part of the same collection, publication, book, have the same tag, or are written by the same author.
+You can browse and display related items that are part of the same collection, publication, or book, have the same tag, or are written by the same author.
 
 #### 2) Interact with Attachments
 
-You can use quicklook, open the attachment, or even mail it to someone. There are plenty of possibilities. [(If you are new to LaunchBar, take a look at the "Joining Forces" video.)](https://www.obdev.at/products/launchbar/videos.html)
+You can use Quick Look, open the attachment, or even mail it to someone. There are plenty of possibilities. [(If you are new to LaunchBar, take a look at the "Joining Forces" video.)](https://www.obdev.at/products/launchbar/videos.html)
 
 #### 3) Open Links 
 
@@ -55,22 +55,29 @@ This action also allows you to quickly look up items in the Zotero app. This way
 
 **Note**: This will always open Zotero, but it may fail to select the item on the first attempt if Zotero is not running previously. This is a limitation of Zotero. In this case, use the action again once Zotero is running.
 
-#### 5) Cite and Link
+#### 5) Paste and Link Citation/Bibliography
 
-Cite and Link offers a short citation (e.g. `(Buckingham & Goodall, 2019)`) and a link to the item in Zotero. By default, the citation is pasted in the front document and the link is copied to the clipboard. You can also choose to paste a citation including the link as rich text or in markdown format by going to settings and selecting your preferred format. Select the action and then press `option` + `return`.
+You can paste citation and bibliography references for a selected item to your frontmost application, including a link to the item in Zotero.
 
-**Note**: This action's citation function might not yet be all you need to compose a paper, primarily because it does not yet support custom citation styles. Nevertheless, it should be a great help during research, especially when adding links back to the item in Zotero, which can help you locate the correct sources easily, regardless of where you store your research notes. 
+By default, the citation will be pasted, and the link is copied to the clipboard, so it is easy to add it. Other options are rich text, markdown, or HTML. Select the action, and then press `option` + `enter`. (The HTML option does not include the link to the Zotero item.)
+
+This feature will use the last used style from the Zotero preferences by default. However, you can choose a different one from your installed styles when you select the action and then press `option` + `enter`.
+
+**Note:** This feature is using a **local version** of the [web API](https://www.zotero.org/support/dev/web_api/v3/basics) (available in Zotero 7). You need to enable `Allow other applications on this computer to communicate with Zotero` in Zotero → Settings → Advanced. Additionally, Zotero needs to be running.
 
 #### 6) 🪄 The Magic Title Item
 
-As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has kind of "superpowers". If a PDF is attached, you can open the PDF right from that item using quick look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
+As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has kind of "superpowers". If a PDF is attached, you can open the PDF right from that item using Quick Look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
 
 ## Shortcuts
 
 There are also some shortcuts (modifier keys) that work with any selected Zotero item. 
 
-- Open a given item in Zotero with `command` + `return`
-- Paste a citation with `shift` + `return`   
+1) Open a given item in Zotero with `command` + `enter`. This will reveal a PDF attachment in the Finder if selected.
+
+2) Paste a citation reference with `shift` + `enter`. 
+
+3) Paste a bibliography reference with `shift` + `option` + `enter`.  
 
 Those even work on the top level. So you don't need to go into details to use them.
 

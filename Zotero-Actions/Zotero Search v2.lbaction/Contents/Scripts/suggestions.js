@@ -1,18 +1,18 @@
 /* 
 Zotero Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-05-17
+2025-02-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-include('default.js');
-const prefs = Action.preferences;
-const itemTypes = prefs.itemTypes;
-const fields = prefs.fields;
+include('global.js');
+
+const itemTypes = Action.preferences.itemTypes;
+const fields = Action.preferences.fields;
 
 function runWithString(string) {
-  if (!File.exists(dataPath)) return;
+  if (!File.exists(dataPath)) return; // Won't show suggestions if data.json doesn't exist
   if (string != undefined && string.trim().length == 0) return;
   string = string.toLowerCase();
 
