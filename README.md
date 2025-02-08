@@ -6,7 +6,7 @@
 
 ## Installation
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this repository. This includes the entire content, including screenshots, but it's not a large download.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this repository. This includes the entire content, including screenshots, but it's still not a large download.
 
 **After downloading and unzipping, just double-click the `.lbaction` packages you want to use to install them.**  
 
