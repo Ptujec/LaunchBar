@@ -9,7 +9,9 @@
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>1.7</string>
+	<string>1.7.1</string>
+	<key>LBAssociatedApplication</key>
+	<string>org.zotero.zotero</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -23,8 +25,6 @@
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Zotero-Actions</string>
 	</dict>
-	<key>LBRequiredApplication</key>
-	<string>org.zotero.zotero</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>

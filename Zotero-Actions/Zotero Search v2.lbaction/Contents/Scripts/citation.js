@@ -12,15 +12,6 @@ Documentation:
 - https://docs.citationstyles.org/en/stable/specification.html#info
 - https://www.zotero.org/support/dev/citation_styles/style_editing_step-by-step
 
-
-TODO: 
-- setting whether to use custom or localAPI
-- formatierung cleanup depending on citation or bib
-- support for multiple formats
-  - richText
-  - markdown
-  - plain
-  - html
 */
 
 function pasteCitation(dict) {
@@ -38,6 +29,7 @@ function pasteCitation(dict) {
   let text = isBibliography ? citationJson.bib : citationJson.citation;
 
   const citationFormat = Action.preferences.citationFormat;
+  const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
   if (citationFormat == 'html') {
     LaunchBar.paste(text);
@@ -45,7 +37,8 @@ function pasteCitation(dict) {
   }
 
   if (citationFormat == 'richText') {
-    // if (isBibliography) text = text.match(/<div class="csl-entry">(.*?)<\/div>/)[1];
+    if (isBibliography)
+      text = text.match(/<div class="csl-entry">(.*?)<\/div>/)[1];
 
     const pasteHelperInstalled = File.exists(
       '~/Library/Application Support/LaunchBar/Actions/Paste Helper.lbaction'
@@ -54,11 +47,16 @@ function pasteCitation(dict) {
     if (pasteHelperInstalled) {
       Action.preferences.pasteHelperContent = {
         text: text,
-        url: dict.zoteroSelectURL,
+        url: includeZoteroLink ? dict.zoteroSelectURL : '',
       };
-      LaunchBar.performAction('Paste Helper');
+      LaunchBar.performAction('Zotero Paste Helper');
     } else {
-      LaunchBar.execute('/bin/bash', 'rt.sh', text, dict.zoteroSelectURL);
+      LaunchBar.execute(
+        '/bin/bash',
+        'rt.sh',
+        text,
+        includeZoteroLink ? dict.zoteroSelectURL : ''
+      );
     }
     return;
   }
@@ -73,18 +71,23 @@ function pasteCitation(dict) {
   }
 
   if (citationFormat == 'markdown') {
-    LaunchBar.paste(`[${text}](${dict.zoteroSelectURL})`);
+    text = includeZoteroLink ? `[${text}](${dict.zoteroSelectURL})` : text;
+    LaunchBar.paste(text);
     return;
   }
 
-  // Default format handling (TODO: check if helper is installed and use it if so … when it is working reliably)
+  // Default format handling
   text = text.replace(/\*/g, '');
 
-  // LaunchBar.setClipboardString(dict.url) and LaunchBar.paste(text) do not work in this instance for some reason
-  LaunchBar.executeAppleScript(
-    `set the clipboard to "${dict.zoteroSelectURL}"`,
-    `tell application "LaunchBar" to paste in frontmost application "${text}"`
-  );
+  if (includeZoteroLink) {
+    // LaunchBar.setClipboardString(dict.url) and LaunchBar.paste(text) do not work in this instance for some reason
+    LaunchBar.executeAppleScript(
+      `set the clipboard to "${dict.zoteroSelectURL}"`,
+      `tell application "LaunchBar" to paste in frontmost application "${text}"`
+    );
+  } else {
+    LaunchBar.paste(text);
+  }
   return;
 }
 

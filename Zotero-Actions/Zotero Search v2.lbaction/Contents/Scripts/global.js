@@ -47,8 +47,20 @@ const fallbackStyle = lastUsedStyleInZotero || 'apa';
 function settings() {
   const citationFormat = Action.preferences.citationFormat || 'plain';
   const citationStyle = Action.preferences.citationStyle || fallbackStyle;
+  const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
   return [
+    {
+      title: 'Include Zotero Link',
+      subtitle: 'Include the Zotero link in the citation.',
+      alwaysShowsSubtitle: true,
+      badge: includeZoteroLink ? 'On' : 'Off',
+      icon: includeZoteroLink
+        ? 'zoteroLinkTemplate'
+        : 'zoteroLinkDisabledTemplate',
+      action: 'toggleZoteroLink',
+      actionArgument: { includeZoteroLink },
+    },
     {
       title: 'Paste Format',
       subtitle: formatDisplayName(citationFormat),
@@ -109,11 +121,14 @@ function listStyles() {
 
 function listFormats() {
   const currentFormat = Action.preferences.citationFormat || 'plain';
+
   const formats = [
     {
       id: 'plain',
       title: 'Plain Text',
-      subtitle: 'The link will be copied to the clipboard.',
+      subtitle: Action.preferences.includeZoteroLink
+        ? 'Link to the Zotero item will be copied to the clipboard.'
+        : undefined,
     },
     {
       id: 'richText',
@@ -126,6 +141,9 @@ function listFormats() {
     {
       id: 'html',
       title: 'HTML',
+      subtitle: Action.preferences.includeZoteroLink
+        ? 'Link to the Zotero item is NOT included.'
+        : undefined,
     },
   ];
 
@@ -158,5 +176,10 @@ function setFormat(citationFormat) {
 
 function setStyle(style) {
   Action.preferences.citationStyle = style;
+  return settings();
+}
+
+function toggleZoteroLink({ includeZoteroLink }) {
+  Action.preferences.includeZoteroLink = !includeZoteroLink;
   return settings();
 }

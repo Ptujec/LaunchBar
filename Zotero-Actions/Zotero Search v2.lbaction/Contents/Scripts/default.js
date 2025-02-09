@@ -4,9 +4,6 @@ by Christian Bender (@ptujec)
 2025-02-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: 
-- Build citation according to a csl style sheet? -> global.js (local API)
 */
 
 include('global.js');
