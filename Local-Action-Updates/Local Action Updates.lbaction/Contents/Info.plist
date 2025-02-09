@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Local Action Updates</string>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>2.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -29,6 +29,7 @@
 		<dict>
 			<key>LBAcceptedArgumentTypes</key>
 			<array>
+				<string>string</string>
 				<string>path</string>
 			</array>
 			<key>LBKeepWindowActive</key>
