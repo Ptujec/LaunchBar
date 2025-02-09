@@ -59,11 +59,15 @@ This action also allows you to quickly look up items in the Zotero app. This way
 
 You can paste citation and bibliography references for a selected item to your frontmost application, including a link to the item in Zotero.
 
-By default, the citation will be pasted, and the link is copied to the clipboard, so it is easy to add it. Other options are rich text, markdown, or HTML. Select the action, and then press `option` + `enter`. (The HTML option does not include the link to the Zotero item.)
+By default, the citation will be pasted, and the link is copied to the clipboard, so it is easy to add it. Other options are rich text*, markdown, or HTML. Select the action, and then press `option` + `enter`. 
+
+With the same shortcut, you can also access the setting to turn off linking to the Zotero item. (The HTML option does not include the link to the Zotero item, regardless of this setting.)
 
 This feature will use the last used style from the Zotero preferences by default. However, you can choose a different one from your installed styles when you select the action and then press `option` + `enter`.
 
 **Note:** This feature is using a **local version** of the [web API](https://www.zotero.org/support/dev/web_api/v3/basics) (available in Zotero 7). You need to enable `Allow other applications on this computer to communicate with Zotero` in Zotero → Settings → Advanced. Additionally, Zotero needs to be running.
+
+*"***Zotero Paste Helper**" is a companion action written in Swift that is **not required** but largely improves pasting rich text. If available the Zotero action will utilize it automatically. It includes a fallback to Markdown for apps that can't handle rich text.* *[It needs to be compiled to run properly](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).*
 
 #### 6) 🪄 The Magic Title Item
 
