@@ -28,7 +28,8 @@ function pasteCitation(dict) {
 
   let text = isBibliography ? citationJson.bib : citationJson.citation;
 
-  const citationFormat = Action.preferences.citationFormat;
+  const citationFormat = Action.preferences.citationFormat || fallbackFormat;
+
   const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
   if (citationFormat == 'html') {
@@ -39,10 +40,6 @@ function pasteCitation(dict) {
   if (citationFormat == 'richText') {
     if (isBibliography)
       text = text.match(/<div class="csl-entry">(.*?)<\/div>/)[1];
-
-    const pasteHelperInstalled = File.exists(
-      '~/Library/Application Support/LaunchBar/Actions/Paste Helper.lbaction'
-    );
 
     if (pasteHelperInstalled) {
       Action.preferences.pasteHelperContent = {

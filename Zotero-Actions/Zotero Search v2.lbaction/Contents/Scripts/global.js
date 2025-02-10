@@ -44,8 +44,13 @@ function getZoteroPrefs() {
 const lastUsedStyleInZotero = zoteroPrefs['extensions.zotero.export.lastStyle'];
 const fallbackStyle = lastUsedStyleInZotero || 'apa';
 
+const pasteHelperInstalled = File.exists(
+  '~/Library/Application Support/LaunchBar/Actions/Paste Helper.lbaction/Contents/Scripts/default' // checking for the executable to ensure the action is installed and compiled
+);
+const fallbackFormat = pasteHelperInstalled ? 'richText' : 'plain';
+
 function settings() {
-  const citationFormat = Action.preferences.citationFormat || 'plain';
+  const citationFormat = Action.preferences.citationFormat || fallbackFormat;
   const citationStyle = Action.preferences.citationStyle || fallbackStyle;
   const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
