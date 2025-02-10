@@ -33,7 +33,6 @@ function run(argument) {
 
   if (output) File.writeText(output, dataPath);
 
-  // Get data from JSON
   const data = File.readJSON(dataPath);
 
   // Create itemType, field and creatorType variables
@@ -60,10 +59,7 @@ function run(argument) {
     Action.preferences.creatorTypes = creatorTypes;
   }
 
-  // Search or browse sql database
   if (argument != undefined) return search(argument, data);
-
-  // return browse(data);
   return browse(data);
 }
 
@@ -134,7 +130,21 @@ function search(argument, data) {
   }
 
   // return showEntries(Array.from(allReversedItemIDs), data);
-  return showEntries(allReversedItemIDs, data);
+  const result = showEntries(allReversedItemIDs, data);
+
+  if (result.length === 0) {
+    return [
+      {
+        title: 'No results. Press enter to browse all items.',
+        icon: 'greyTemplate',
+        action: 'browse',
+        actionArgument: data,
+        actionReturnsItems: true,
+      },
+    ];
+  }
+
+  return result;
 }
 
 function searchInStorageDir(argument, data) {
@@ -164,8 +174,9 @@ function searchInStorageDir(argument, data) {
 
 // BROWSE
 function browse(data) {
-  const result =
-    showEntries(Action.preferences.recentItems || [], data).reverse() || [];
+  const result = Action.preferences.recentItems
+    ? showEntries(Action.preferences.recentItems || [], data).reverse()
+    : [];
 
   result.push(
     {
@@ -452,18 +463,6 @@ function showEntries(itemIDs, data) {
         alwaysShowsSubtitle: true,
       });
     }
-  }
-
-  if (result.length === 0) {
-    return [
-      {
-        title: 'No results. Press enter to browse all items.',
-        icon: 'greyTemplate',
-        action: 'browse',
-        actionArgument: data,
-        actionReturnsItems: true,
-      },
-    ];
   }
 
   return result;
