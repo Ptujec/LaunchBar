@@ -125,13 +125,14 @@ function listStyles() {
 }
 
 function listFormats() {
-  const currentFormat = Action.preferences.citationFormat || 'plain';
+  const currentFormat = Action.preferences.citationFormat || fallbackFormat;
+  const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
   const formats = [
     {
       id: 'plain',
       title: 'Plain Text',
-      subtitle: Action.preferences.includeZoteroLink
+      subtitle: includeZoteroLink
         ? 'Link to the Zotero item will be copied to the clipboard.'
         : undefined,
     },
@@ -146,7 +147,7 @@ function listFormats() {
     {
       id: 'html',
       title: 'HTML',
-      subtitle: Action.preferences.includeZoteroLink
+      subtitle: includeZoteroLink
         ? 'Link to the Zotero item is NOT included.'
         : undefined,
     },
