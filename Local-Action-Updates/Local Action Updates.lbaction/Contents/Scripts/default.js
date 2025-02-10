@@ -1,7 +1,7 @@
 /* 
 Local Action Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-12-22
+2025-02-10
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -15,6 +15,12 @@ include('global.js');
 include('fileUtils.js');
 
 function run(folderPath) {
+  
+  if (!File.exists(folderPath)) {
+    LaunchBar.alert('No valid path');
+    return;
+  }
+  
   try {
     if (folderPath.toString().endsWith('.zip')) {
       const result = LaunchBar.execute('/bin/sh', 'unzip.sh', folderPath);
