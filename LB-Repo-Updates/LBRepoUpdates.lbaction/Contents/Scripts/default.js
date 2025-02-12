@@ -7,28 +7,31 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
 - always perform local action updates setting ?
+- choose source dir for local action updates
 - Clean up the code
-- different icons for fork an normal repo types ?
-- play sound when done? … maybe a different one from the other action
 */
 
 include('settings.js');
 
 function run() {
-  if (!Action.preferences.localRoot) {
-    const defaultPathFirstTry = `${LaunchBar.homeDirectory}/GitHub/`;
-    const defaultPathSecondTry = `${LaunchBar.homeDirectory}/Developer/GitHub/`;
-    Action.preferences.localRoot = File.exists(defaultPathFirstTry)
-      ? defaultPathFirstTry
-      : File.exists(defaultPathSecondTry)
-      ? defaultPathSecondTry
-      : undefined;
+  if (!Action.preferences.collectionDirs) {
+    const defaultPaths = [
+      `${LaunchBar.homeDirectory}/GitHub/`,
+      `${LaunchBar.homeDirectory}/Developer/GitHub/`
+    ];
+    
+    Action.preferences.collectionDirs = defaultPaths.reduce((acc, path) => 
+      File.exists(path) ? [...acc, path] : acc, 
+    []);
   }
+  
+  const movedRepoLocations = checkRepositoryPaths(); 
 
   const repoCount = Object.keys(Action.preferences.repos || {}).length;
+  const collectionDirsCount = Action.preferences.collectionDirs?.length || 0;
 
   return [
-    repoCount > 0
+    (collectionDirsCount > 0 && repoCount > 0 && !movedRepoLocations)
       ? {
           title: 'Pull & Update',
           subtitle:
@@ -40,7 +43,7 @@ function run() {
           actionRunsInBackground: true,
         }
       : {},
-    Action.preferences.localRoot
+    collectionDirsCount > 0 
       ? {
           title: 'Choose Repositories',
           icon: 'repoTemplate',
@@ -50,20 +53,17 @@ function run() {
         }
       : {},
     {
-      title: 'Choose GitHub Root Directory',
-      subtitle: Action.preferences.localRoot || 'Not set',
+      title: 'Locate Directory Holding GitHub Repos',
+      subtitle: 'Ideally a single directory holding all relevant repos',
       alwaysShowsSubtitle: true,
-      action: 'setLocalRoot',
-      icon: 'ghTemplate',
+      badge: collectionDirsCount > 0 ? collectionDirsCount.toString() : undefined,
+      action: collectionDirsCount > 0 ? 'listCollectionDirs' : 'locateDirectory',
+      icon: 'folderTemplate',
+      actionReturnsItems: collectionDirsCount > 0 ? true : false,
     },
-    // repoCount > 0
-    //   ? {
-    //       title: 'Always Perform Local Action Updates',
-    //       icon: 'updateTemplate',
-    //       badge: Action.preferences.localUpdate ? 'On' : 'Off',
-    //       action: 'localUpdateToggle',
-    //     }
-    //   : {},
+    {
+      // TODO:  wennn meherer collectionDirs … set source dir für local action updates
+    }
   ];
 }
 
@@ -164,14 +164,11 @@ function checkForUpdates() {
     }
   }
 
-  const localRootURL = File.fileURLForPath(Action.preferences.localRoot);
-
-  // Ensure this notification is shown if no updates are available
   if (updatesAvailable == false) {
     LaunchBar.displayNotification({
       title: 'Repository Updates',
       string: 'All repositories are up to date',
-      url: localRootURL,
+      // TODO: add url? to source dir?
     });
   }
 
@@ -222,5 +219,21 @@ function pullUpdates(repoPath, repoName, repoFileURL) {
 }
 
 function performLocalActionUpdates() {
-  LaunchBar.performAction('Local Action Updates', Action.preferences.localRoot);
+/* TODO: 
+- setting to choose a dirctory if more than one collection dir or repo dir is configured
+*/
+
+  const sourceDir = Action.preferences.collectionDirs?.[0]  
+
+  if (!sourceDir) {
+    LaunchBar.displayNotification({
+      title: 'Repository Updates',
+      string: 'Could not run "Local Action Updates" because no source directory is configured',
+    });
+   return;
+  }
+
+  LaunchBar.performAction('Local Action Updates', sourceDir);
 }
+
+
