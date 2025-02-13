@@ -89,7 +89,7 @@ function checkForUpdates() {
 
   for (const repoUrl of Object.keys(repos)) {
     const repo = repos[repoUrl];
-    const repoFileURL = File.fileURLForPath(repo.localPath);
+    const repoCommitsURL = repoUrl.replace('.git', '/commits');
 
     try {
       const statusOutput = LaunchBar.execute(
@@ -115,7 +115,7 @@ function checkForUpdates() {
           title: 'Repository Check Error',
           subtitle: repo.name,
           string: status.error,
-          url: repoFileURL,
+          url: repoCommitsURL,
         });
         continue;
       }
@@ -125,7 +125,7 @@ function checkForUpdates() {
           title: 'Repository Warning',
           subtitle: repo.name,
           string: `Branch '${status.branch}' is not tracking a remote branch`,
-          url: repoFileURL,
+          url: repoCommitsURL,
         });
         continue;
       }
@@ -140,10 +140,10 @@ function checkForUpdates() {
         LaunchBar.displayNotification({
           title: repo.name,
           string: message,
-          url: repoFileURL,
+          url: repoCommitsURL,
         });
 
-        const pullResult = pullUpdates(repo.localPath, repo.name, repoFileURL);
+        const pullResult = pullUpdates(repo.localPath, repo.name, repoCommitsURL);
         if (pullResult.success) {
           successfulUpdates++;
           if (pullResult.hasActionUpdates) {
@@ -155,7 +155,7 @@ function checkForUpdates() {
           title: 'Repository Warning',
           subtitle: repo.name,
           string: `${status.aheadBy} local commits not pushed`,
-          url: repoFileURL,
+          url: repoCommitsURL,
         });
       }
     } catch (error) {
@@ -163,7 +163,7 @@ function checkForUpdates() {
         title: 'Repository Check Error',
         subtitle: repo.name,
         string: error.toString(),
-        url: repoFileURL,
+        url: repoCommitsURL,
       });
     }
   }
@@ -172,7 +172,6 @@ function checkForUpdates() {
     LaunchBar.displayNotification({
       title: 'Repository Updates',
       string: 'All repositories are up to date',
-      // TODO: add url? to source dir?
     });
   }
 
@@ -191,7 +190,7 @@ function checkForUpdates() {
   }
 }
 
-function pullUpdates(repoPath, repoName, repoFileURL) {
+function pullUpdates(repoPath, repoName, repoCommitsURL) {
   try {
     const pullOutput = LaunchBar.execute(
       '/bin/bash',
@@ -223,7 +222,7 @@ function pullUpdates(repoPath, repoName, repoFileURL) {
       title: 'Repository Update Error',
       subtitle: repoName,
       string: error.toString(),
-      url: repoFileURL,
+      url: repoCommitsURL,
     });
     LaunchBar.log(`Error pulling updates for ${repoName}: ${error.toString()}`);
     return { success: false, hasActionUpdates: false };
