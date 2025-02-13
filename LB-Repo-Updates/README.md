@@ -4,7 +4,7 @@
 
 I'm still testing this action but it should be pretty save. 
 
-The idea of the action is to check local repos for updates, pull them, and run my [Local Action Updates action](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates). 
+The idea of the action is to check local repos for updates, pull them, and run my [Local Action Updates action](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) if new or changed LaunchBar actions were detected.  
 
 This should make keeping up with updates for actions that are shared in GitHub repos a little easier. 
 
