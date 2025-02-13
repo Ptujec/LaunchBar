@@ -8,6 +8,10 @@ The idea of the action is to check local repos for updates, pull them, and run m
 
 This should make keeping up with updates for actions that are shared in GitHub repos a little easier. 
 
+## Testing
+
+Feel free to use my [Test Repo](https://github.com/Ptujec/LaunchBar-Test-Repo) to play with this.
+
 ## Download
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
