@@ -6,8 +6,8 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
-- always perform local action updates setting ?
 - choose source dir for local action updates
+- ignore readme updates
 - Clean up the code
 */
 
@@ -85,6 +85,7 @@ function checkForUpdates() {
   const repos = Action.preferences.repos;
   let updatesAvailable = false;
   let successfulUpdates = 0;
+  let hasAnyActionUpdates = false;
 
   for (const repoUrl of Object.keys(repos)) {
     const repo = repos[repoUrl];
@@ -137,14 +138,17 @@ function checkForUpdates() {
         }
 
         LaunchBar.displayNotification({
-          title: 'Updates Available',
-          subtitle: repo.name,
+          title: repo.name,
           string: message,
           url: repoFileURL,
         });
 
-        if (pullUpdates(repo.localPath, repo.name, repoFileURL)) {
+        const pullResult = pullUpdates(repo.localPath, repo.name, repoFileURL);
+        if (pullResult.success) {
           successfulUpdates++;
+          if (pullResult.hasActionUpdates) {
+            hasAnyActionUpdates = true;
+          }
         }
       } else if (status.aheadBy > 0) {
         LaunchBar.displayNotification({
@@ -177,8 +181,13 @@ function checkForUpdates() {
     '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
   );
 
-  if (successfulUpdates > 0) {
+  if (successfulUpdates > 0 && hasAnyActionUpdates) {
     performLocalActionUpdates();
+  } else if (successfulUpdates > 0) {
+    LaunchBar.displayNotification({
+      title: 'Repository Updates',
+      string: 'Updates pulled successfully, but no action changes detected.',
+    });
   }
 }
 
@@ -190,23 +199,25 @@ function pullUpdates(repoPath, repoName, repoFileURL) {
       repoPath,
       { workingDirectory: repoPath }
     );
-    if (pullOutput.trim() === 'Up to date') {
-      // LaunchBar.displayNotification({
-      //   title: 'Repository Update',
-      //   subtitle: repoName,
-      //   string: 'Repository is up to date',
-      //   url: repoFileURL,
-      // });
-      return false;
-    } else {
-      // LaunchBar.displayNotification({
-      //   title: 'Repository Update',
-      //   subtitle: repoName,
-      //   string: 'Updates pulled successfully',
-      //   url: repoFileURL,
-      // });
-      return true;
+
+    // Parse the JSON output from the shell script
+    const jsonMatch = pullOutput.match(/{[\s\S]*}/);
+    if (!jsonMatch) {
+      throw new Error('Could not find valid JSON in output');
     }
+
+    const result = JSON.parse(jsonMatch[0]);
+
+    if (result.status === 'error') {
+      throw new Error(result.message);
+    }
+
+    LaunchBar.log(`Pull result for ${repoName}: ${pullOutput}`);
+    return { 
+      success: true, 
+      hasActionUpdates: result.hasActionUpdates 
+    };
+
   } catch (error) {
     LaunchBar.displayNotification({
       title: 'Repository Update Error',
@@ -214,7 +225,8 @@ function pullUpdates(repoPath, repoName, repoFileURL) {
       string: error.toString(),
       url: repoFileURL,
     });
-    return false;
+    LaunchBar.log(`Error pulling updates for ${repoName}: ${error.toString()}`);
+    return { success: false, hasActionUpdates: false };
   }
 }
 

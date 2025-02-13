@@ -10,14 +10,24 @@ if ! git config --get remote.origin.url > /dev/null; then
   exit 1
 fi
 
+# Store the current commit hash
+before_pull=$(git rev-parse HEAD)
+
 # Stash any uncommitted changes
 git stash push --include-untracked --message "LaunchBar: Auto-stashed changes before pulling updates"
 
 # Pull updates from the remote repository
 if git pull; then
-  echo "Updates pulled successfully"
+  # Check for either new/modified .lbaction bundles or changes within Contents directories
+  action_changes=$(git diff --name-only $before_pull HEAD -- "*.lbaction/**" "*.lbaction/Contents/*")
+  
+  if [ -n "$action_changes" ]; then
+    echo "{ \"status\": \"success\", \"hasActionUpdates\": true, \"changes\": \"$action_changes\" }"
+  else
+    echo "{ \"status\": \"success\", \"hasActionUpdates\": false }"
+  fi
 else
-  echo "Error pulling updates"
+  echo "{ \"status\": \"error\", \"message\": \"Error pulling updates\" }"
   exit 1
 fi
 
