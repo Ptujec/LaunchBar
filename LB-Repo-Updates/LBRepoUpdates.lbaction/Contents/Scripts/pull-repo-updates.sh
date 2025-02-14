@@ -1,37 +1,39 @@
 #!/bin/bash
 
 repo_path="$1"
+support_path="$2"
+results_plist="$support_path/PullResults.plist"
 
-cd "$repo_path"
+# Function to write error and exit
+write_error() {
+    local error_msg="$1"
+    echo "{\"status\": \"error\", \"message\": \"$error_msg\"}" | plutil -convert xml1 -o "$results_plist" -
+    exit 1
+}
 
-# Check if the repository has a remote configured
-if ! git config --get remote.origin.url > /dev/null; then
-  echo "No remote repository configured"
-  exit 1
-fi
+# Create support directory and plist if they don't exist
+mkdir -p "$support_path"
+[ ! -f "$results_plist" ] && /usr/bin/plutil -create xml1 "$results_plist"
 
-# Store the current commit hash
+# Change to repo directory or exit with error
+cd "$repo_path" || write_error "Could not change to directory: $repo_path"
+
+# Store the current commit hash and stash changes
 before_pull=$(git rev-parse HEAD)
-
-# Stash any uncommitted changes
 git stash push --include-untracked --message "LaunchBar: Auto-stashed changes before pulling updates"
 
-# Pull updates from the remote repository
+# Pull updates and check for action changes
 if git pull; then
-  # Check for either new/modified .lbaction bundles or changes within Contents directories
-  action_changes=$(git diff --name-only $before_pull HEAD -- "*.lbaction/**" "*.lbaction/Contents/*")
-  
-  if [ -n "$action_changes" ]; then
-    echo "{ \"status\": \"success\", \"hasActionUpdates\": true, \"changes\": \"$action_changes\" }"
-  else
-    echo "{ \"status\": \"success\", \"hasActionUpdates\": false }"
-  fi
+    action_changes=$(git diff --name-only $before_pull HEAD -- "*.lbaction/**" "*.lbaction/Contents/*")
+    
+    echo "{
+        \"status\": \"success\",
+        \"hasActionUpdates\": ${action_changes:+true},
+        \"changes\": \"${action_changes:-}\"
+    }" | plutil -convert xml1 -o "$results_plist" -
 else
-  echo "{ \"status\": \"error\", \"message\": \"Error pulling updates\" }"
-  exit 1
+    write_error "Error pulling updates"
 fi
 
 # Reapply stashed changes if any
-if git stash list | grep -q "LaunchBar: Auto-stashed"; then
-  git stash pop
-fi 
+git stash list | grep -q "LaunchBar: Auto-stashed" && git stash pop 

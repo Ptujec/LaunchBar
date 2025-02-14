@@ -6,44 +6,36 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
-- choose source dir for local action updates
-- ignore readme updates
-- Clean up the code
+- try writing shell script results to plist file and read from there because execute() only returns the output as string `defaults` CLI
+- make sure a selected collection dir holds at least one repo
+- Clean up the code 
 */
 
 include('settings.js');
 
 function run() {
-  if (!Action.preferences.collectionDirs) {
-    const defaultPaths = [
-      `${LaunchBar.homeDirectory}/GitHub/`,
-      `${LaunchBar.homeDirectory}/Developer/GitHub/`
-    ];
-    
-    Action.preferences.collectionDirs = defaultPaths.reduce((acc, path) => 
-      File.exists(path) ? [...acc, path] : acc, 
-    []);
-  }
-  
-  const movedRepoLocations = checkRepositoryPaths(); 
+  validateCollectionDirs();
+  validateRepositoryPaths();
+  if (Action.preferences.sourceDir) validateSourceDir();
 
-  const repoCount = Object.keys(Action.preferences.repos || {}).length;
   const collectionDirsCount = Action.preferences.collectionDirs?.length || 0;
+  const repoCount = Object.keys(Action.preferences.repos || {}).length;
 
   return [
-    (collectionDirsCount > 0 && repoCount > 0 && !movedRepoLocations)
+    collectionDirsCount > 0 && repoCount > 0
       ? {
           title: 'Pull & Update',
           subtitle:
             'Pulls updates from selected repos and runs "Local Action Updates"',
           alwaysShowsSubtitle: true,
           // icon: 'downTemplate',
-          icon: File.readPlist(Action.path + '/Contents/info.plist')?.CFBundleIconFile,
+          icon: File.readPlist(Action.path + '/Contents/info.plist')
+            ?.CFBundleIconFile,
           action: 'checkForUpdates',
           actionRunsInBackground: true,
         }
       : {},
-    collectionDirsCount > 0 
+    collectionDirsCount > 0
       ? {
           title: 'Choose Repositories',
           icon: 'repoTemplate',
@@ -53,17 +45,32 @@ function run() {
         }
       : {},
     {
-      title: 'Locate Directory Holding GitHub Repos',
+      title:
+        collectionDirsCount > 0
+          ? 'Manage Directories Holding GitHub Repos'
+          : 'Locate Directory Holding GitHub Repos',
       subtitle: 'Ideally a single directory holding all relevant repos',
       alwaysShowsSubtitle: true,
-      badge: collectionDirsCount > 0 ? collectionDirsCount.toString() : undefined,
-      action: collectionDirsCount > 0 ? 'listCollectionDirs' : 'locateDirectory',
+      badge:
+        collectionDirsCount > 0 ? collectionDirsCount.toString() : undefined,
+      action:
+        collectionDirsCount > 0 ? 'listCollectionDirs' : 'locateDirectory',
       icon: 'folderTemplate',
       actionReturnsItems: collectionDirsCount > 0 ? true : false,
     },
-    {
-      // TODO:  wennn meherer collectionDirs … set source dir für local action updates
-    }
+    collectionDirsCount > 1
+      ? {
+          title: Action.preferences.sourceDir
+            ? 'Local Action Updates Source Directory'
+            : 'Set Source Directory',
+          subtitle: Action.preferences.sourceDir
+            ? Action.preferences.sourceDir
+            : '"Local Action Updates" action needs a single source',
+          alwaysShowsSubtitle: true,
+          icon: 'sourceTemplate',
+          action: 'setSourceDir',
+        }
+      : {},
   ];
 }
 
@@ -96,19 +103,16 @@ function checkForUpdates() {
         '/bin/bash',
         Action.path + '/Contents/Scripts/check-repo-status.sh',
         repo.localPath,
+        Action.supportPath,
         { workingDirectory: repo.localPath }
       );
 
-      if (!statusOutput || !statusOutput.trim()) {
+      // Read results from plist instead of parsing output
+      const status = readResultsPlist('status');
+
+      if (!status) {
         throw new Error('No output from status check script');
       }
-
-      const jsonMatch = statusOutput.match(/{[\s\S]*}/);
-      if (!jsonMatch) {
-        throw new Error('Could not find valid JSON in output');
-      }
-
-      const status = JSON.parse(jsonMatch[0]);
 
       if (status.error) {
         LaunchBar.displayNotification({
@@ -143,7 +147,11 @@ function checkForUpdates() {
           url: repoCommitsURL,
         });
 
-        const pullResult = pullUpdates(repo.localPath, repo.name, repoCommitsURL);
+        const pullResult = pullUpdates(
+          repo.localPath,
+          repo.name,
+          repoCommitsURL
+        );
         if (pullResult.success) {
           successfulUpdates++;
           if (pullResult.hasActionUpdates) {
@@ -192,31 +200,25 @@ function checkForUpdates() {
 
 function pullUpdates(repoPath, repoName, repoCommitsURL) {
   try {
-    const pullOutput = LaunchBar.execute(
+    LaunchBar.execute(
       '/bin/bash',
       Action.path + '/Contents/Scripts/pull-repo-updates.sh',
       repoPath,
+      Action.supportPath,
       { workingDirectory: repoPath }
     );
 
-    // Parse the JSON output from the shell script
-    const jsonMatch = pullOutput.match(/{[\s\S]*}/);
-    if (!jsonMatch) {
-      throw new Error('Could not find valid JSON in output');
+    const result = readResultsPlist('pull');
+
+    if (!result || result.status === 'error') {
+      throw new Error(result?.message || 'Unknown error occurred');
     }
 
-    const result = JSON.parse(jsonMatch[0]);
-
-    if (result.status === 'error') {
-      throw new Error(result.message);
-    }
-
-    LaunchBar.log(`Pull result for ${repoName}: ${pullOutput}`);
-    return { 
-      success: true, 
-      hasActionUpdates: result.hasActionUpdates 
+    LaunchBar.log(`Pull result for ${repoName}:`, JSON.stringify(result));
+    return {
+      success: true,
+      hasActionUpdates: result.hasActionUpdates,
     };
-
   } catch (error) {
     LaunchBar.displayNotification({
       title: 'Repository Update Error',
@@ -230,21 +232,26 @@ function pullUpdates(repoPath, repoName, repoCommitsURL) {
 }
 
 function performLocalActionUpdates() {
-/* TODO: 
-- setting to choose a dirctory if more than one collection dir or repo dir is configured
-*/
-
-  const sourceDir = Action.preferences.collectionDirs?.[0]  
+  const sourceDir =
+    Action.preferences.sourceDir || Action.preferences.collectionDirs?.[0];
 
   if (!sourceDir) {
     LaunchBar.displayNotification({
       title: 'Repository Updates',
-      string: 'Could not run "Local Action Updates" because no source directory is configured',
+      string:
+        'Could not run "Local Action Updates" because no source directory is configured',
     });
-   return;
+    return;
   }
 
   LaunchBar.performAction('Local Action Updates', sourceDir);
 }
 
+function readResultsPlist(type = 'status') {
+  const filename =
+    type === 'pull' ? 'PullResults.plist' : 'StatusResults.plist';
+  const plistPath = `${Action.supportPath}/${filename}`;
 
+  if (!File.exists(plistPath)) return null;
+  return File.readPlist(plistPath);
+}

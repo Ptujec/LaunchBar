@@ -1,63 +1,51 @@
 #!/bin/bash
 
-# Change to the directory passed as an argument
-if [ -n "$1" ]; then
-    cd "$1" || {
-        echo "{\"error\":\"Could not change to directory: $1\"}"
-        exit 0
-    }
-fi
+repo_path="$1"
+support_path="$2"
+results_plist="$support_path/StatusResults.plist"
 
-# Make sure we're in a git repository
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    echo "{\"error\":\"Not a git repository at: $(pwd)\"}"
+# Function to write error and exit
+write_error() {
+    local error_msg="$1"
+    echo "{\"error\": \"$error_msg\"}" | plutil -convert xml1 -o "$results_plist" -
+    echo "{\"error\": \"$error_msg\"}"
     exit 0
-fi
+}
 
-# Update all remotes (redirect stderr to stdout)
-git remote update 2>&1 > /dev/null
+# Create support directory and plist if they don't exist
+mkdir -p "$support_path"
+[ ! -f "$results_plist" ] && /usr/bin/plutil -create xml1 "$results_plist"
 
-# Get current branch
+# Change to repo directory or exit with error
+[ -n "$repo_path" ] && cd "$repo_path" || write_error "Could not change to directory: $repo_path"
+
+# Update all remotes silently
+git remote update &>/dev/null
+
+# Get current branch or exit with error
 branch=$(git symbolic-ref --short HEAD 2>/dev/null)
-if [ -z "$branch" ]; then
-    echo "{\"error\":\"Unable to determine current branch\"}"
-    exit 0
-fi
+[ -z "$branch" ] && write_error "Unable to determine current branch"
 
-# Check for tracking branch
+# Get tracking branch and build result
 tracking_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)" 2>/dev/null)
 
-# Build JSON object using jq
 if [ -n "$tracking_branch" ]; then
-    # Get ahead/behind counts (redirect stderr to stdout)
-    ahead_behind=$(git rev-list --left-right --count "$tracking_branch"...HEAD 2>/dev/null)
-    if [ $? -eq 0 ]; then
-        behind=$(echo "$ahead_behind" | cut -f1)
-        ahead=$(echo "$ahead_behind" | cut -f2)
-    else
-        behind=0
-        ahead=0
-    fi
+    # Get ahead/behind counts
+    read -r behind ahead <<< $(git rev-list --left-right --count "$tracking_branch"...HEAD 2>/dev/null || echo "0 0")
     
-    jq -n \
-        --arg branch "$branch" \
-        --arg tracking "$tracking_branch" \
-        --argjson behind "${behind:-0}" \
-        --argjson ahead "${ahead:-0}" \
-        '{
-            branch: $branch,
-            trackingBranch: $tracking,
-            hasUpstream: true,
-            behindBy: $behind,
-            aheadBy: $ahead
-        }'
+    # Write results
+    echo "{
+        \"branch\": \"$branch\",
+        \"trackingBranch\": \"$tracking_branch\",
+        \"hasUpstream\": true,
+        \"behindBy\": $behind,
+        \"aheadBy\": $ahead
+    }" | plutil -convert xml1 -o "$results_plist" -
 else
-    jq -n \
-        --arg branch "$branch" \
-        '{
-            branch: $branch,
-            hasUpstream: false,
-            behindBy: 0,
-            aheadBy: 0
-        }'
+    echo "{
+        \"branch\": \"$branch\",
+        \"hasUpstream\": false,
+        \"behindBy\": 0,
+        \"aheadBy\": 0
+    }" | plutil -convert xml1 -o "$results_plist" -
 fi 
