@@ -12,9 +12,9 @@ The following actions are great for what David Sparks calls [contextual computin
 
 <img src="mailURL.gif" width="600"/> 
 
-This action might be a little overkill in terms of options, but its basic function is very simple. Just run the action to paste the URL of an open or selected email into the current text field.
+This action creates a formatted link to an open or selected email. A rich text and Markdown version is saved and inserted by the system depending on the target. You can add a custom title by pressing `space`. Paste only the URL using `command` + `enter`.
 
-Hold `shift` for Markdown or `command` for Rich Text Format. By default, this will use the email subject as the title. If you hit `space` before running the action, you can even enter a custom title.
+**Note:** The action includes a Swift script that should be compiled for best performance. You can use my [Compile Swift Action](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action) for that.
 
 ## List
 
