@@ -1,10 +1,13 @@
 /* 
 LB Repo Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-08
+2025-02-14
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
+
+const MAX_REPO_DEPTH = '4';
+const FIND_REPOS_SCRIPT = `${Action.path}/Contents/Scripts/find-repos.sh`;
 
 function listRepositories() {
   cleanupCollectionDirs();
@@ -16,7 +19,8 @@ function listRepositories() {
 
   const repoPaths = LaunchBar.execute(
     '/bin/bash',
-    Action.path + '/Contents/Scripts/find-repos.sh',
+    FIND_REPOS_SCRIPT,
+    MAX_REPO_DEPTH,
     ...collectionDirs
   )
     .trim()
@@ -102,7 +106,17 @@ function validateRepositoryPaths() {
   return false;
 }
 
-// TODO: make sure a selected collection dir holds at least one repo
+function hasRepositoryInHierarchy(path) {
+  const result = LaunchBar.execute(
+    '/bin/bash',
+    FIND_REPOS_SCRIPT,
+    MAX_REPO_DEPTH,
+    path
+  ).trim();
+
+  return result.length > 0;
+}
+
 function locateDirectory() {
   LaunchBar.hide();
 
@@ -121,7 +135,7 @@ function locateDirectory() {
   if (!path) return run();
 
   // Validate path is a subdirectory of home
-  if (!path.startsWith(LaunchBar.homeDirectory + '/')) {
+  if (!path.startsWith(`${LaunchBar.homeDirectory}/`)) {
     LaunchBar.alert(
       'Invalid Directory',
       'Please select a directory inside your home directory.'
@@ -133,7 +147,7 @@ function locateDirectory() {
 
   if (File.exists(`${path}/.git`)) {
     collectionPath = path.split('/').slice(0, -1).join('/');
-    if (!collectionPath.startsWith(LaunchBar.homeDirectory + '/')) {
+    if (!collectionPath.startsWith(`${LaunchBar.homeDirectory}/`)) {
       LaunchBar.alert(
         'Invalid Repository Location',
         'The repository must be in a subdirectory of your home directory, not directly in home.'
@@ -159,15 +173,25 @@ function locateDirectory() {
   if (isSubdirOfExisting) {
     LaunchBar.alert(
       'Directory Already Included',
-      'This directory is already included as it is a subdirectory of an existing collection directory. You can decide which repos to include in the "Choose Repositories" section.'
+      'This directory is already included as it is a subdirectory of an existing directory. You can decide which repos to include in the "Choose Repositories" section.'
     );
-  } else {
-    // Remove any existing subdirectories and add the new path
-    Action.preferences.collectionDirs = [
-      ...currentDirs.filter((dir) => !existingSubdirs.includes(dir)),
-      collectionPath,
-    ];
+
+    return run();
   }
+
+  if (!hasRepositoryInHierarchy(collectionPath)) {
+    LaunchBar.alert(
+      'No Repositories Found',
+      `The selected directory does not contain any Git repositories within ${MAX_REPO_DEPTH} directory levels. Please choose a directory that contains GitHub repositories.`
+    );
+    return run();
+  }
+
+  // Remove any existing subdirectories and add the new path
+  Action.preferences.collectionDirs = [
+    ...currentDirs.filter((dir) => !existingSubdirs.includes(dir)),
+    collectionPath,
+  ];
 
   if (Action.preferences.collectionDirs.length > 1) {
     setSourceDir();
