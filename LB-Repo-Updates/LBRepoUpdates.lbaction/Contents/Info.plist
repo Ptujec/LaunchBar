@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>LaunchBar Repo Updates</string>
 	<key>CFBundleVersion</key>
-	<string>0.5</string>
+	<string>0.5.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>

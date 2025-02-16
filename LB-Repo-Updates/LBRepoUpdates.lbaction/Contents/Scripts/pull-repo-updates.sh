@@ -24,11 +24,13 @@ git stash push --include-untracked --message "LaunchBar: Auto-stashed changes be
 
 # Pull updates and check for action changes
 if git pull; then
-    action_changes=$(git diff --name-only $before_pull HEAD -- "*.lbaction/**" "*.lbaction/Contents/*")
+    action_changes=$(git diff --name-only $before_pull HEAD | grep -E '\.lbaction$|\.lbaction/')
+    
+    has_updates=$([ -n "$action_changes" ] && echo "true" || echo "false")
     
     echo "{
         \"status\": \"success\",
-        \"hasActionUpdates\": ${action_changes:+true},
+        \"hasActionUpdates\": $has_updates,
         \"changes\": \"${action_changes:-}\"
     }" | plutil -convert xml1 -o "$results_plist" -
 else

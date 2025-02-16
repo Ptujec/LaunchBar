@@ -183,7 +183,7 @@ function checkForUpdates() {
     performLocalActionUpdates();
   } else if (successfulUpdates > 0) {
     LaunchBar.displayNotification({
-      title: 'Repository Updates',
+      title: 'Pull Status',
       string: 'Updates pulled successfully, but no action changes detected.',
     });
   }
@@ -212,7 +212,7 @@ function pullUpdates(repoPath, repoName, repoCommitsURL) {
     };
   } catch (error) {
     LaunchBar.displayNotification({
-      title: 'Repository Updates',
+      title: 'Pull Status',
       subtitle: `Error for ${repoName}`,
       string: error.toString(),
       url: repoCommitsURL,
