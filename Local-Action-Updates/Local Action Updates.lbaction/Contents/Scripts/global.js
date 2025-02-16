@@ -275,6 +275,11 @@ function generateUpdatesSection(title, results) {
   }`;
 }
 
+function hasSwiftScripts(actionPath) {
+  const files = File.getDirectoryContents(`${actionPath}/Contents/Scripts`);
+  return files.some((file) => file.endsWith('.swift'));
+}
+
 function generateActionHtml(action, type = 'updated') {
   const { inputPlist, targetPlist, inputPath, targetPath } = action;
 
@@ -304,8 +309,7 @@ function generateActionHtml(action, type = 'updated') {
       : action.targetVersion || activePlist.CFBundleVersion || '';
   const author = activePlist.LBDescription?.LBAuthor || 'Unknown'.localize();
   const website = activePlist.LBDescription?.LBWebsiteURL || '';
-  const isSwiftAction =
-    activePlist.LBScripts?.LBDefaultScript?.LBScriptName?.endsWith('.swift');
+  const isSwiftAction = hasSwiftScripts(activePath);
 
   const localizedName = activePath ? getLocalizedName(activePath, name) : name;
   const versionString = version === 'unknown' ? '' : version;
