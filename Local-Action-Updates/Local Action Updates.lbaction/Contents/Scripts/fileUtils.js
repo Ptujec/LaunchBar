@@ -6,12 +6,27 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-function findActions(path, maxDepth = null) {
-  const args = ['/usr/bin/find', path, '-name', '*.lbaction', '-type', 'd'];
-  if (maxDepth) args.push('-maxdepth', maxDepth);
+function findActions(paths) {
+  const pathArray = Array.isArray(paths) ? paths : [paths];
+
+  let args = [
+    '/usr/bin/find',
+    ...pathArray,
+    '-name',
+    '*.lbaction',
+    '-type',
+    'd',
+  ];
+
   return LaunchBar.execute(...args)
     .trim()
     .split('\n');
+}
+
+function findTargetActions(path) {
+  return File.getDirectoryContents(path)
+    .filter((item) => item.includes('.lbaction'))
+    .map((item) => `${path}/${item}`);
 }
 
 function replaceAction(targetPath, inputPath) {

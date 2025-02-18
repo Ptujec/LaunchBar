@@ -11,7 +11,7 @@ const reportDir = `/private/tmp/`; // `${Action.supportPath}/reports/`;
 
 function getActionPaths(folderPath) {
   const inputPaths = findActions(folderPath);
-  const targetPaths = findActions(actionsDir, '1');
+  const targetPaths = findTargetActions(actionsDir); // because of performance
 
   const targetIDMap = new Map(
     targetPaths.map((targetPath) => {
@@ -396,10 +396,12 @@ function generateCollapsibleSection(title, content) {
 }
 
 function createReport(sections, folderPath) {
-  const folderPathURL = `x-launchbar:select?file=${encodeURI(folderPath)}`;
-  const folderPathLink = `<a href="${folderPathURL}">${folderPath
-    .toString()
-    .replace(LaunchBar.homeDirectory, '~')}</a>`;
+  const isRepoUpdates = folderPath === 'LaunchBar Repo Updates';
+  const sourceText = isRepoUpdates
+    ? folderPath
+    : `<a href="x-launchbar:select?file=${encodeURI(folderPath)}">${folderPath
+        .toString()
+        .replace(LaunchBar.homeDirectory, '~')}</a>`;
 
   const recentDate = Action.preferences.recentDate;
   const lastUpdateInfo = recentDate
@@ -426,7 +428,7 @@ function createReport(sections, folderPath) {
     header: `<h1>${'Action Update Report'.localize()}</h1>`,
     metadata: `
       <div class="metadata">
-        ${'Source: '.localize() + folderPathLink}<br>
+        ${'Source: '.localize() + sourceText}<br>
         ${'Generated: '.localize() + localeDate}
         ${lastUpdateInfo}
       </div>

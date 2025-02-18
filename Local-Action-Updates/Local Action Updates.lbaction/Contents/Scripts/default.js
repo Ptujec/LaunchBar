@@ -14,13 +14,43 @@ String.prototype.localizationTable = 'default';
 include('global.js');
 include('fileUtils.js');
 
-function run(folderPath) {
-  
-  if (!File.exists(folderPath)) {
+function run(input) {
+  if (typeof input === 'string' && !isNaN(new Date(parseInt(input)))) {
+    const lruPlistPath =
+      '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.LBRepoUpdates/Preferences.plist';
+
+    if (File.exists(lruPlistPath)) {
+      const lruPlist = File.readPlist(lruPlistPath);
+      if (lruPlist?.timestamp == input) return handlePlist(lruPlist);
+    }
+  }
+
+  if (!File.exists(input)) {
     LaunchBar.alert('No valid path');
     return;
   }
-  
+
+  handleInputPath(input);
+}
+
+function handlePlist(lruPlist) {
+  const localPaths = Object.values(lruPlist.repos)
+    .map((repo) => repo.localPath)
+    .filter(Boolean);
+
+  try {
+    const results = scanForUpdates(localPaths);
+    if (results.newCount > 0) {
+      results.updatedActionsList = handleUpdates(results);
+    }
+    createReport(generateReportHtml(results), 'LaunchBar Repo Updates');
+  } catch (error) {
+    LaunchBar.alert('Error'.localize(), error.message);
+    LaunchBar.log('Error in handlePlist:', error);
+  }
+}
+
+function handleInputPath(folderPath) {
   try {
     if (folderPath.toString().endsWith('.zip')) {
       const result = LaunchBar.execute('/bin/sh', 'unzip.sh', folderPath);
