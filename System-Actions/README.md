@@ -9,6 +9,7 @@
 - Wifi Toggle
 - Speech actions (German, English, Spanish, French). If you don't send text to it, it will select all text automatically.
 - Stop speech 
+- Print (send a file to the action and pick a printer)
 
 ## Download
 
