@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>ARD Mediathek</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -18,10 +18,10 @@
 		<string></string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Search-Actions/ARD%20Mediathek.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions#websites</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Search-Actions/ARD%20Mediathek.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
