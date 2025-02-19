@@ -14,12 +14,16 @@ function getActionPaths(folderPath) {
   const targetPaths = findTargetActions(actionsDir); // because of performance
 
   const targetIDMap = new Map(
-    targetPaths.map((targetPath) => {
-      const targetPlist = readPlistFromPath(
-        `${targetPath}/Contents/Info.plist`
-      );
-      return [targetPlist.CFBundleIdentifier, targetPath];
-    })
+    targetPaths
+      .map((targetPath) => {
+        const targetPlist = readPlistFromPath(
+          `${targetPath}/Contents/Info.plist`
+        );
+        return targetPlist
+          ? [targetPlist.CFBundleIdentifier, targetPath]
+          : null;
+      })
+      .filter(Boolean)
   );
 
   return { inputPaths, targetIDMap };

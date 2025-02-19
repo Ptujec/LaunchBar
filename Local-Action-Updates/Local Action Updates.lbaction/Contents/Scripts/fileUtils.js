@@ -25,7 +25,7 @@ function findActions(paths) {
 
 function findTargetActions(path) {
   return File.getDirectoryContents(path)
-    .filter((item) => item.includes('.lbaction'))
+    .filter((item) => item.endsWith('.lbaction'))
     .map((item) => `${path}/${item}`);
 }
 
