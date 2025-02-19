@@ -1,0 +1,1 @@
+SOFTWARE= LANG=C lpstat -lp
