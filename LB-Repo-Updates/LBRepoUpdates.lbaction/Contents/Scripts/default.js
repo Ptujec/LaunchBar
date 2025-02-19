@@ -6,11 +6,14 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
-- try writing shell script results to plist file and read from there because execute() only returns the output as string `defaults` CLI
+- LAU: information about changes even if the action is not installed ?
+- perfomance improvements ?
+  - using File.getDirectoryContents() ?
+  - combine repo checks and updates in one execution of the shell scripts? … what about notifications then ?
 - Clean up the code 
 */
 
-include('settings.js');
+include('global.js');
 
 // Add these constants at the top after the include
 const SCRIPTS_PATH = `${Action.path}/Contents/Scripts`;
@@ -20,9 +23,15 @@ const LOCAL_ACTION_UPDATES_PATH =
   '~/Library/Application Support/LaunchBar/Actions/Local Action Updates.lbaction';
 
 function run() {
+  // TODO: remove following after testing
+  // LaunchBar.hide();
+  // const timestamp = Date.now();
+  // Action.preferences.timestamp = timestamp;
+  // LaunchBar.performAction('Local Action Updates', timestamp);
+  // return;
+
   validateCollectionDirs();
   validateRepositoryPaths();
-  if (Action.preferences.sourceDir) validateSourceDir();
 
   const collectionDirsCount = Action.preferences.collectionDirs?.length || 0;
   const repoCount = Object.keys(Action.preferences.repos || {}).length;
@@ -55,8 +64,6 @@ function run() {
         collectionDirsCount > 0
           ? 'Manage Directories Holding GitHub Repos'
           : 'Locate Directory Holding GitHub Repos',
-      subtitle: 'Ideally a single directory holding all relevant repos',
-      alwaysShowsSubtitle: true,
       badge:
         collectionDirsCount > 0 ? collectionDirsCount.toString() : undefined,
       action:
@@ -64,19 +71,6 @@ function run() {
       icon: 'folderTemplate',
       actionReturnsItems: collectionDirsCount > 0 ? true : false,
     },
-    collectionDirsCount > 1
-      ? {
-          title: Action.preferences.sourceDir
-            ? 'Local Action Updates Source Directory'
-            : 'Set Source Directory',
-          subtitle: Action.preferences.sourceDir
-            ? Action.preferences.sourceDir
-            : '"Local Action Updates" action needs a single source',
-          alwaysShowsSubtitle: true,
-          icon: 'sourceTemplate',
-          action: 'setSourceDir',
-        }
-      : {},
   ];
 }
 
@@ -180,6 +174,8 @@ function checkForUpdates() {
   );
 
   if (successfulUpdates > 0 && hasAnyActionUpdates) {
+    LaunchBar.log('Performing local action updates');
+
     performLocalActionUpdates();
   } else if (successfulUpdates > 0) {
     LaunchBar.displayNotification({
@@ -222,15 +218,6 @@ function pullUpdates(repoPath, repoName, repoCommitsURL) {
   }
 }
 
-function readResultsPlist(type = 'status') {
-  const filename =
-    type === 'pull' ? 'PullResults.plist' : 'StatusResults.plist';
-  const plistPath = `${Action.supportPath}/${filename}`;
-
-  if (!File.exists(plistPath)) return null;
-  return File.readPlist(plistPath);
-}
-
 function performLocalActionUpdates() {
   if (!File.exists(LOCAL_ACTION_UPDATES_PATH)) {
     LaunchBar.displayNotification({
@@ -241,17 +228,8 @@ function performLocalActionUpdates() {
     return;
   }
 
-  const sourceDir =
-    Action.preferences.sourceDir || Action.preferences.collectionDirs?.[0];
-
-  if (!sourceDir) {
-    LaunchBar.displayNotification({
-      title: 'Local Action Updates',
-      string:
-        'Could not run "Local Action Updates" because no source directory is configured',
-    });
-    return;
-  }
-
-  LaunchBar.performAction('Local Action Updates', sourceDir);
+  // Sending timestamp for validation in Local Action Updates action
+  const timestamp = Date.now();
+  Action.preferences.timestamp = timestamp;
+  LaunchBar.performAction('Local Action Updates', timestamp);
 }

@@ -130,11 +130,8 @@ function locateDirectory() {
     `
   )?.trim();
 
-  LaunchBar.log(path);
-
   if (!path) return run();
 
-  // Validate path is a subdirectory of home
   if (!path.startsWith(`${LaunchBar.homeDirectory}/`)) {
     LaunchBar.alert(
       'Invalid Directory',
@@ -144,6 +141,7 @@ function locateDirectory() {
   }
 
   let collectionPath = path;
+  let autoIncludedRepo = null;
 
   if (File.exists(`${path}/.git`)) {
     collectionPath = path.split('/').slice(0, -1).join('/');
@@ -159,6 +157,7 @@ function locateDirectory() {
     if (match) {
       const [, owner, name] = match;
       addRepository({ name, owner, localPath: path, url: repoUrl });
+      autoIncludedRepo = name;
     }
   }
 
@@ -171,11 +170,11 @@ function locateDirectory() {
   );
 
   if (isSubdirOfExisting) {
-    LaunchBar.alert(
-      'Directory Already Included',
-      'This directory is already included as it is a subdirectory of an existing directory. You can decide which repos to include in the "Choose Repositories" section.'
-    );
+    const message = autoIncludedRepo
+      ? `The repository "${autoIncludedRepo}" has been included. You don't need to add repositories within an included directory individually though. You can manage them in the "Choose Repositories" section.`
+      : 'This directory is already included. You can manage repositories in the "Choose Repositories" section.';
 
+    LaunchBar.alert('Adding Repositories and Directories:', message);
     return run();
   }
 
@@ -187,15 +186,10 @@ function locateDirectory() {
     return run();
   }
 
-  // Remove any existing subdirectories and add the new path
   Action.preferences.collectionDirs = [
     ...currentDirs.filter((dir) => !existingSubdirs.includes(dir)),
     collectionPath,
   ];
-
-  if (Action.preferences.collectionDirs.length > 1) {
-    setSourceDir();
-  }
 
   return !Action.preferences.repos ||
     Object.keys(Action.preferences.repos).length === 0
@@ -237,9 +231,6 @@ function removeCollectionDir(dir) {
     );
   }
 
-  if (Action.preferences.collectionDirs.length < 2) {
-    delete Action.preferences.sourceDir;
-  }
   return run();
 }
 
@@ -247,16 +238,13 @@ function cleanupCollectionDirs() {
   let dirs = Action.preferences.collectionDirs || [];
   if (dirs.length <= 1) return;
 
-  // Sort by path length ascending so parent dirs come first
-  dirs = dirs
-    .sort((a, b) => a.length - b.length)
-    .reduce((acc, dir) => {
-      // Only keep this dir if it's not a subdirectory of any already accepted dir
-      if (!acc.some((d) => dir.startsWith(d))) {
-        acc.push(dir);
-      }
-      return acc;
-    }, []);
+  dirs = dirs.reduce((acc, dir) => {
+    // Only keep this dir if it's not a subdirectory of any already accepted dir
+    if (!acc.some((d) => dir.startsWith(d))) {
+      acc.push(dir);
+    }
+    return acc;
+  }, []);
 
   Action.preferences.collectionDirs = dirs;
 }
@@ -278,74 +266,13 @@ function validateCollectionDirs() {
   Action.preferences.collectionDirs = Action.preferences.collectionDirs.filter(
     (dir) => File.exists(dir)
   );
-
-  if (
-    !Action.preferences.collectionDirs ||
-    Action.preferences.collectionDirs.length < 2
-  ) {
-    delete Action.preferences.sourceDir;
-  }
 }
 
-function setSourceDir() {
-  const collectionDirs = Action.preferences.collectionDirs || [];
+function readResultsPlist(type = 'status') {
+  const filename =
+    type === 'pull' ? 'PullResults.plist' : 'StatusResults.plist';
+  const plistPath = `${Action.supportPath}/${filename}`;
 
-  if (collectionDirs.length === 0) return run();
-
-  if (collectionDirs.length === 1) {
-    Action.preferences.sourceDir = collectionDirs[0];
-    return run();
-  }
-
-  // Find common parent directory by comparing path segments
-  const pathSegments = collectionDirs.map((path) => path.split('/'));
-  const commonPath = pathSegments.reduce((common, segments) =>
-    common.filter((segment, i) => segment === segments[i])
-  );
-
-  const suggestedPath = commonPath.join('/');
-  const pathDepth = commonPath.filter(Boolean).length;
-
-  if (pathDepth >= 2) {
-    // That is at least a level deeper than the home directory
-    Action.preferences.sourceDir = suggestedPath;
-    return run();
-  }
-
-  LaunchBar.alert(
-    'Set Source Directory',
-    'Please set a single source directory for the "Local Action Updates" action.\nIt is not recommended to use your home directory but rather a directory inside your home directory (except the Library directory).'
-  );
-
-  LaunchBar.hide();
-  const selectedPath = LaunchBar.executeAppleScript(
-    `
-    tell application "System Events"
-    activate
-    set theFolder to choose folder with prompt "Choose source directory for Local Action Updates" default location "${suggestedPath}"
-    return POSIX path of theFolder
-    end tell
-    `
-  )?.trim();
-
-  if (!selectedPath) return run();
-  Action.preferences.sourceDir = selectedPath;
-  return run();
-}
-
-function validateSourceDir() {
-  const sourceDir = Action.preferences.sourceDir;
-  if (!sourceDir) return; // just safety, but currently not needed because we validate always on run()
-
-  const isValid =
-    File.exists(sourceDir) &&
-    sourceDir.startsWith(`${LaunchBar.homeDirectory}/`) &&
-    Action.preferences.collectionDirs?.every((dir) =>
-      dir.startsWith(sourceDir)
-    );
-
-  if (!isValid) {
-    delete Action.preferences.sourceDir;
-    setSourceDir();
-  }
+  if (!File.exists(plistPath)) return null;
+  return File.readPlist(plistPath);
 }
