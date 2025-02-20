@@ -26,29 +26,27 @@ A repository (short repo) is something like a folder. It lives on the web (usual
 
 ## Adding Repositories Locally
 
-If you are new to Git and GitHub, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally (cloning) easier.
+If you are new to Git, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally (cloning) easier.
 
-It is pretty straightforward. On the main repo page …
+It is pretty straightforward. For repos hosted on GitHub, go to the main repo page …
 
-1) Click the green `Code` button
+1) Click the green `Code` button.
 
-2) If not selected, click `GitHub CLI`
+2) If not selected, click `GitHub CLI`.
 
 3) Click `Open with GitHub Desktop` and follow the instructions.
 
 <img src="01.jpg" width="572"/>
 
-**Note:** Don't be surprised if you don't see any updates, because after the initial setup, everything should be already up to date. In this case, you can run **Local Action Updates** manually and select the newly created local repo.
+It is not complicated at all for other platforms (e.g. [Codeberg](https://codeberg.org/Ptujec/LaunchBar)) either. Just copy the Git URL. In GitHub Desktop, go to `File > Clone Repository…` and enter the URL.
+
+**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run **Local Action Updates** manually and select the newly created local repo.
 
 ## Required/Recommended
 
-1) [Git](https://dev.to/milu_franz/git-explained-the-basics-igc), which is part of **Apple's Command Line Tools**. If you don't have Apple's Command Line Tools installed, you need to install them. It seems [best to do that manually at the moment](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411).
+1) [Git](https://dev.to/milu_franz/git-explained-the-basics-igc). Installing GitHub Desktop will take care of this.
 
-2) [GitHub account](https://github.com/signup). This is actually not really required, but recommended since [most LaunchBar repositories exist on GitHub](https://github.com/topics/launchbar?o=desc&s=updated). This action also works with [Codeberg](https://codeberg.org/Ptujec/LaunchBar) … and probably GitLab. But I have not tested the latter.
-
-## Testing
-
-Testing is a bit tricky; usually, you are done after one go. For that purpose, I created a [Test Repo](https://github.com/Ptujec/LaunchBar-Test-Repo) to play with. Feel free to use it or create your own test repo.
+2) [GitHub account](https://github.com/signup). This is not required, but recommended since [most LaunchBar repositories exist on GitHub](https://github.com/topics/launchbar?o=desc&s=updated). This action also works with [Codeberg](https://codeberg.org/Ptujec/LaunchBar) … and probably GitLab. But I have not tested the latter.
 
 ## Download
 
