@@ -27,40 +27,40 @@ function listRepositories() {
     .split('\n')
     .filter(Boolean);
 
-  const repos = repoPaths
+  const allRepos = repoPaths
     .map((path) => {
       const repoUrl = getRepoUrlFromConfig(`${path}/.git/config`);
-      if (!repoUrl) return null;
-
-      const isIncluded = includedRepos[repoUrl];
-      const match = repoUrl.match(
-        /github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/
-      );
-      if (!match) return null;
-
-      const [, owner, name] = match;
-      const repoInfo = { name, owner, localPath: path, url: repoUrl };
-
-      return {
-        title: isIncluded ? includedRepos[repoUrl].name : repoInfo.name,
-        subtitle: `${repoInfo.owner}/${repoInfo.name}`,
-        badge: isIncluded ? 'included' : undefined,
-        icon: isIncluded ? 'checkTemplate' : 'circleTemplate',
-        alwaysShowsSubtitle: true,
-        action: isIncluded ? 'removeRepository' : 'addRepository',
-        actionArgument: isIncluded ? repoUrl : repoInfo,
-      };
+      return repoUrl ? { path, ...parseRepoUrl(repoUrl), url: repoUrl } : null;
     })
-    .filter(Boolean)
-    .sort((a, b) => {
-      if (a.badge && !b.badge) return -1;
-      if (!a.badge && b.badge) return 1;
-      if (a.title.toLowerCase().includes('launchbar')) return -1;
-      if (b.title.toLowerCase().includes('launchbar')) return 1;
-      return a.title.localeCompare(b.title);
-    });
+    .filter(Boolean);
 
-  return repos;
+  // Second pass to create UI items
+  const repos = allRepos.map((repo) => {
+    const isIncluded = includedRepos[repo.url];
+    const title = isIncluded ? includedRepos[repo.url].name : repo.name;
+    const hasDuplicate = allRepos.some(
+      (r) =>
+        r.path !== repo.path && r.name === repo.name && r.owner === repo.owner
+    );
+
+    return {
+      title: hasDuplicate ? `${title} [${repo.host}]` : title,
+      subtitle: `${repo.owner}/${repo.name}`,
+      badge: isIncluded ? 'included' : undefined,
+      icon: isIncluded ? 'checkTemplate' : 'circleTemplate',
+      alwaysShowsSubtitle: true,
+      action: isIncluded ? 'removeRepository' : 'addRepository',
+      actionArgument: isIncluded ? repo.url : { ...repo, localPath: repo.path },
+    };
+  });
+
+  return repos.sort((a, b) => {
+    if (a.badge && !b.badge) return -1;
+    if (!a.badge && b.badge) return 1;
+    if (a.title.toLowerCase().includes('launchbar')) return -1;
+    if (b.title.toLowerCase().includes('launchbar')) return 1;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 function addRepository(repoData) {
@@ -272,4 +272,18 @@ function readResultsPlist() {
   const plistPath = `${Action.supportPath}/RepoResults.plist`;
   if (!File.exists(plistPath)) return null;
   return File.readPlist(plistPath);
+}
+
+function parseRepoUrl(url) {
+  const match = url.match(
+    /(?:(github|codeberg|gitlab))\.(?:com|org)\/([^\/]+)\/([^\/]+?)(?:\.git)?$/
+  );
+  if (!match) return null;
+  const [, host, owner, name] = match;
+  const hostLabels = {
+    github: 'GitHub',
+    codeberg: 'Codeberg',
+    gitlab: 'GitLab',
+  };
+  return { name, owner, host: hostLabels[host] };
 }
