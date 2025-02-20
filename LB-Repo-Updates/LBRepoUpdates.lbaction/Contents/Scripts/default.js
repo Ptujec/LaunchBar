@@ -90,8 +90,9 @@ function checkForUpdates() {
   );
 
   const results = readResultsPlist();
-  if (!results) {
-    LaunchBar.alert('Error', 'Failed to process repositories');
+
+  if (!results || results.error) {
+    LaunchBar.alert('Error', results.error || 'Failed to parse results');
     return;
   }
 
@@ -161,7 +162,7 @@ function processResults(repos, results, repoCount) {
     title: title,
     subtitle: stats.hasAnyActionUpdates
       ? undefined
-      : 'No LaunchBar action changes!',
+      : 'No LaunchBar Action Changes!',
     string: summaryLines.join('\n'),
     url: File.fileURLForPath(results.logFile),
   });

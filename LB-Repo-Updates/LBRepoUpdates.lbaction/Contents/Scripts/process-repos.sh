@@ -9,6 +9,12 @@ shift  # Remaining args are repo paths
 mkdir -p "$support_path"
 [ ! -f "$results_plist" ] && /usr/bin/plutil -create xml1 "$results_plist"
 
+# Check if git is installed
+if ! command -v git >/dev/null 2>&1; then
+    echo "{\"error\": \"git is not installed\"}" | /usr/bin/plutil -convert xml1 -o "$results_plist" -
+    exit 1
+fi
+
 # Helper function to output repo status as JSON
 output_status() {
     local path=$1
