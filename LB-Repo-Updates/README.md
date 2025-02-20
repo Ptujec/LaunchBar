@@ -44,7 +44,7 @@ It is pretty straightforward. On the main repo page …
 
 1) [Git](https://dev.to/milu_franz/git-explained-the-basics-igc), which is part of **Apple's Command Line Tools**. If you don't have Apple's Command Line Tools installed, you need to install them. It seems [best to do that manually at the moment](https://github.com/orgs/Homebrew/discussions/5723#discussioncomment-11185411).
 
-2) [GitHub account](https://github.com/signup). This is actually not really required, but recommended since [most LaunchBar repositories exist on GitHub](https://github.com/topics/launchbar?o=desc&s=updated).
+2) [GitHub account](https://github.com/signup). This is actually not really required, but recommended since [most LaunchBar repositories exist on GitHub](https://github.com/topics/launchbar?o=desc&s=updated). This action also works with [Codeberg](https://codeberg.org/Ptujec/LaunchBar) … and probably GitLab. But I have not tested the latter.
 
 ## Testing
 
