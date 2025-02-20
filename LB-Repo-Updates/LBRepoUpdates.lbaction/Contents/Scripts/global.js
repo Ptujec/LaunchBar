@@ -268,11 +268,8 @@ function validateCollectionDirs() {
   );
 }
 
-function readResultsPlist(type = 'status') {
-  const filename =
-    type === 'pull' ? 'PullResults.plist' : 'StatusResults.plist';
-  const plistPath = `${Action.supportPath}/${filename}`;
-
+function readResultsPlist() {
+  const plistPath = `${Action.supportPath}/RepoResults.plist`;
   if (!File.exists(plistPath)) return null;
   return File.readPlist(plistPath);
 }

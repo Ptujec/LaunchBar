@@ -6,19 +6,13 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
-- LAU: information about changes even if the action is not installed ?
-- perfomance improvements ?
-  - using File.getDirectoryContents() ?
-  - combine repo checks and updates in one execution of the shell scripts? … what about notifications then ?
-- Clean up the code 
+- Maybe
+  - html report with links to local and remote repos
 */
 
 include('global.js');
 
-// Add these constants at the top after the include
-const SCRIPTS_PATH = `${Action.path}/Contents/Scripts`;
-const CHECK_REPO_STATUS_SCRIPT = `${SCRIPTS_PATH}/check-repo-status.sh`;
-const PULL_REPO_UPDATES_SCRIPT = `${SCRIPTS_PATH}/pull-repo-updates.sh`;
+const PROCESS_REPOS_SCRIPT = `${Action.path}/Contents/Scripts/process-repos.sh`;
 const LOCAL_ACTION_UPDATES_PATH =
   '~/Library/Application Support/LaunchBar/Actions/Local Action Updates.lbaction';
 
@@ -78,144 +72,99 @@ function checkForUpdates() {
   LaunchBar.hide();
 
   const repos = Action.preferences.repos;
-  let updatesAvailable = false;
-  let successfulUpdates = 0;
-  let hasAnyActionUpdates = false;
+  const repoCount = Object.keys(repos).length;
 
-  for (const repoUrl of Object.keys(repos)) {
-    const repo = repos[repoUrl];
-    const repoCommitsURL = repoUrl.replace('.git', '/commits');
-
-    try {
-      LaunchBar.execute(
-        '/bin/bash',
-        CHECK_REPO_STATUS_SCRIPT,
-        repo.localPath,
-        Action.supportPath,
-        { workingDirectory: repo.localPath }
-      );
-
-      const status = readResultsPlist('status');
-
-      if (!status) throw new Error('No output from status check script');
-
-      if (status.error) {
-        LaunchBar.displayNotification({
-          title: 'Repository Status',
-          subtitle: `Error for ${repo.name}`,
-          string: status.error,
-          url: repoCommitsURL,
-        });
-        continue;
-      }
-
-      if (!status.hasUpstream) {
-        LaunchBar.displayNotification({
-          title: 'Repository Status',
-          subtitle: `Warning for ${repo.name}`,
-          string: `Branch '${status.branch}' is not tracking a remote branch`,
-          url: repoCommitsURL,
-        });
-        continue;
-      }
-
-      if (status.behindBy > 0) {
-        updatesAvailable = true;
-        let message = `${status.behindBy} change(s) in ${repo.name}`;
-        if (status.aheadBy > 0) {
-          message += ` (Warning: Local repo is ${status.aheadBy} commit(s) ahead)`;
-        }
-
-        LaunchBar.displayNotification({
-          title: 'Repository Status',
-          string: message,
-          url: repoCommitsURL,
-        });
-
-        const pullResult = pullUpdates(
-          repo.localPath,
-          repo.name,
-          repoCommitsURL
-        );
-        if (pullResult.success) {
-          successfulUpdates++;
-          if (pullResult.hasActionUpdates) {
-            hasAnyActionUpdates = true;
-          }
-        }
-      } else if (status.aheadBy > 0) {
-        LaunchBar.displayNotification({
-          title: 'Repository Status',
-          subtitle: `Warning for ${repo.name}`,
-          string: `${status.aheadBy} local commit(s) not pushed`,
-          url: repoCommitsURL,
-        });
-      }
-    } catch (error) {
-      LaunchBar.displayNotification({
-        title: 'Repository Status',
-        subtitle: `Error for ${repo.name}`,
-        string: error.toString(),
-        url: repoCommitsURL,
-      });
-    }
-  }
-
-  if (updatesAvailable == false) {
-    LaunchBar.displayNotification({
-      title: 'Repository Status',
-      string: 'All repositories are up to date',
-    });
-  }
+  // Initial notification
+  LaunchBar.displayNotification({
+    title: 'Repository Updates',
+    string: `Checking ${repoCount} repositor${
+      repoCount === 1 ? 'y' : 'ies'
+    } in the background…`,
+  });
 
   LaunchBar.execute(
-    '/usr/bin/afplay',
-    '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
+    '/bin/bash',
+    PROCESS_REPOS_SCRIPT,
+    Action.supportPath,
+    ...Object.values(repos).map((repo) => repo.localPath)
   );
 
-  if (successfulUpdates > 0 && hasAnyActionUpdates) {
-    LaunchBar.log('Performing local action updates');
-
-    performLocalActionUpdates();
-  } else if (successfulUpdates > 0) {
-    LaunchBar.displayNotification({
-      title: 'Pull Status',
-      string: 'Updates pulled successfully, but no action changes detected.',
-    });
+  const results = readResultsPlist();
+  if (!results) {
+    LaunchBar.alert('Error', 'Failed to process repositories');
+    return;
   }
+
+  processResults(repos, results, repoCount);
 }
 
-function pullUpdates(repoPath, repoName, repoCommitsURL) {
-  try {
-    LaunchBar.execute(
-      '/bin/bash',
-      PULL_REPO_UPDATES_SCRIPT,
-      repoPath,
-      Action.supportPath,
-      { workingDirectory: repoPath }
-    );
+function processResults(repos, results, repoCount) {
+  // Statistics
+  const stats = Object.entries(repos).reduce(
+    (acc, [_, repo]) => {
+      const result = results[repo.localPath];
 
-    const result = readResultsPlist('pull');
+      if (result.behindBy > 0) {
+        acc.totalBehind += result.behindBy;
+        if (result.pullSuccess) {
+          acc.hasAnyActionUpdates ||= result.hasActionUpdates;
+          acc.hasStashedChanges ||= result.wasStashed;
+        } else {
+          acc.failedUpdates = [
+            ...acc.failedUpdates,
+            { name: repo.name, behindBy: result.behindBy },
+          ];
+        }
+      }
 
-    if (!result || result.status === 'error') {
-      throw new Error(result?.message || 'Unknown error occurred');
+      if (result.aheadBy > 0) {
+        acc.totalAhead += result.aheadBy;
+      }
+
+      return acc;
+    },
+    {
+      totalBehind: 0,
+      totalAhead: 0,
+      failedUpdates: [],
+      hasAnyActionUpdates: false,
+      hasStashedChanges: false,
     }
+  );
 
-    LaunchBar.log(`Pull result for ${repoName}:`, JSON.stringify(result));
-    return {
-      success: true,
-      hasActionUpdates: result.hasActionUpdates,
-    };
-  } catch (error) {
-    LaunchBar.displayNotification({
-      title: 'Pull Status',
-      subtitle: `Error for ${repoName}`,
-      string: error.toString(),
-      url: repoCommitsURL,
-    });
-    LaunchBar.log(`Error pulling updates for ${repoName}: ${error.toString()}`);
-    return { success: false, hasActionUpdates: false };
-  }
+  // Final Notification
+  const title =
+    stats.totalBehind === 0
+      ? 'All Up to Date!'
+      : stats.failedUpdates.length === 0
+      ? 'Updates Complete!'
+      : 'Partial Success!';
+
+  const summaryLines = [
+    `${repoCount} repo${repoCount === 1 ? '' : 's'}${
+      stats.totalBehind + stats.totalAhead > 0
+        ? `, ${stats.totalBehind + stats.totalAhead} change(s)`
+        : ''
+    }`,
+    ...(stats.failedUpdates.length > 0
+      ? [`"${stats.failedUpdates[0].name}" could not update`]
+      : []),
+    stats.hasStashedChanges
+      ? 'Local changes were stashed and restored'
+      : undefined,
+    'Click to view full log!',
+  ].filter(Boolean);
+
+  if (stats.hasAnyActionUpdates) performLocalActionUpdates();
+
+  LaunchBar.displayNotification({
+    title: title,
+    subtitle: stats.hasAnyActionUpdates
+      ? undefined
+      : 'No LaunchBar action changes!',
+    string: summaryLines.join('\n'),
+    url: File.fileURLForPath(results.logFile),
+  });
 }
 
 function performLocalActionUpdates() {
