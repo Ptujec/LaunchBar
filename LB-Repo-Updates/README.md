@@ -10,7 +10,7 @@ This action completes the idea behind my [Local Action Updates](https://github.c
 
 1) Checks and updates included repositories.
 
-2) If a repo has new or updated LaunchBar actions, it runs …
+2) If a repo has new or updated LaunchBar actions, it automatically runs …
 
 **Action 2: Local Action Updates**
 
