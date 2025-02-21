@@ -4,9 +4,13 @@
 
 <img src="menubar.jpg" width="637"/> 
 
-This action allows to trigger [menu bar items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) right from within LaunchBar. **It requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran**. 
+## Annoncement
 
-The action will list all menu bar items of the frontmost application. You can then type to narrow down results. 
+**I created a new action that does the same thing but without the dependency on Finbar. It's simply called ["Menus"](https://codeberg.org/Ptujec/LaunchBar/src/branch/main/Menus).**
+
+## Discription
+
+This action allows to trigger [menu bar items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) right from within LaunchBar. The action will list all menu bar items of the frontmost application. You can then type to narrow down results. 
 
 **The main benefit of this approach is that it utilizes the superpower of LaunchBar. You’ll find stuff more easily without knowing the exact name. And LaunchBar learns and remembers your preferences.**
 
@@ -14,9 +18,9 @@ Let's say you want to export a PDF in Pages. You type `P` to find `PDF …` more
 
 In addition to that the action remembers the last used item per application. So if you want to trigger the same menu bar item again it's right on top of the list. 
 
-**Note**: Version 1.0 excludes some menu bar items like e.g. "Apple", "Open recent" to avoid clutter. In an updated version the action will respect the rules you set up in Finbar.  
+## Requirements
 
-Lastly, I feel I should mention [Ed's action](https://github.com/ewlcheng/launchbar-actions#launchbar-menu-bar-search). It sparked my interest in the functionality. It is a little bit slower because of it's reliance on AppleScript, but doesn't have any dependencies. 
+This action requires [Finbar](https://www.roeybiran.com/apps/finbar), a wonderful application by Roey Biran.
 
 ## Download
 
