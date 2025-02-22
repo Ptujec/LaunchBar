@@ -1,6 +1,8 @@
 # LaunchBar Repo Updates Action
 
-<img src="https://raw.githubusercontent.com/Ptujec/LaunchBar/master/header.jpg" width="640"/>
+*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
+
+<img src="01.jpg" width="744"/>
 
 This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action.
 
@@ -24,32 +26,20 @@ This action completes the idea behind my [Local Action Updates](https://github.c
 
 A repository (short repo) is something like a folder. It lives on the web (usually on GitHub.com) and has a local representation on your Mac if you clone it.
 
-## Adding Repositories Locally
+## Adding Repositories Locally (Cloning)
 
 If you are new to Git, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally (cloning) easier.
 
-It is pretty straightforward. For repos hosted on GitHub, go to the main repo page …
+All platforms should offer a URL that ends on `.git` somewhere on the main repo page. On [GitHub](https://github.com/Ptujec/LaunchBar) click the green `Code` button. On [Codeberg](https://codeberg.org/Ptujec/LaunchBar) you can find it next to the blue `HTTP` button.
 
-1) Click the green `Code` button.
+In GitHub Desktop then go to `File > Clone Repository…` and enter the URL.
 
-2) If not selected, click `GitHub CLI`.
+**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run "Local Action Updates" manually and select the newly created local repo.
 
-3) Click `Open with GitHub Desktop` and follow the instructions.
+## Required
 
-<img src="01.jpg" width="572"/>
-
-It is not complicated at all for other platforms (e.g. [Codeberg](https://codeberg.org/Ptujec/LaunchBar)) either. Just copy the Git URL. In GitHub Desktop, go to `File > Clone Repository…` and enter the URL.
-
-**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run **Local Action Updates** manually and select the newly created local repo.
-
-## Required/Recommended
-
-1) [Git](https://dev.to/milu_franz/git-explained-the-basics-igc). Installing GitHub Desktop will take care of this.
-
-2) [GitHub account](https://github.com/signup). This is not required, but recommended since [most LaunchBar repositories exist on GitHub](https://github.com/topics/launchbar?o=desc&s=updated). This action also works with [Codeberg](https://codeberg.org/Ptujec/LaunchBar) … and probably GitLab. But I have not tested the latter.
+[Git](https://git-scm.com). Check if it is installed with the terminal command `git -v`. If not, an easy solution is to install GitHub Desktop, as this will also take care of it.
 
 ## Download
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
-
-*[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)*
