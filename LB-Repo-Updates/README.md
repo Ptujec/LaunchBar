@@ -43,14 +43,6 @@ The URL for this repo is:
 https://github.com/Ptujec/LaunchBar.git. 
 ```
 
-I also started a new repo on Codeberg: 
-
-```
-https://codeberg.org/Ptujec/LaunchBar.git. 
-```
-
-Still exploring but I might add new actions to the one on Codeberg going forward.
-
 **Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run "Local Action Updates" manually and select the newly created local repo.
 
 ## Requirements
