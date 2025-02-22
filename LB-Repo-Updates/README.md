@@ -6,7 +6,9 @@
 
 This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action.
 
-## Main Flow
+## How It Works
+
+Even though there are two actions involved, it is one simple and largely automatic flow:
 
 **Action 1: LaunchBar Repo Updates**
 
@@ -22,7 +24,7 @@ This action completes the idea behind my [Local Action Updates](https://github.c
 
 5) Sends a comprehensive report of updated, new, installed, and not installed actions.
 
-## What is a Repo?
+## What Is a Repo?
 
 A repository (short repo) is something like a folder. It lives on the web and has a local representation on your Mac if you clone it. 
 
