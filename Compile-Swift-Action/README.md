@@ -26,6 +26,8 @@ Alternatively, you can:
 
 Since version 1.3 the action can also process multiple action bundles at once.
 
+If you compile an installed action, give LB a second or two to catch the changes.
+
 ## Background
 
 Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled.
