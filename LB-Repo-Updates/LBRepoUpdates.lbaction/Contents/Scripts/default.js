@@ -1,13 +1,9 @@
 /* 
 LB Repo Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-14
+2025-02-22
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO:
-- Maybe
-  - html report with links to local and remote repos
 */
 
 include('global.js');
@@ -17,13 +13,6 @@ const LOCAL_ACTION_UPDATES_PATH =
   '~/Library/Application Support/LaunchBar/Actions/Local Action Updates.lbaction';
 
 function run() {
-  // TODO: remove following after testing
-  // LaunchBar.hide();
-  // const timestamp = Date.now();
-  // Action.preferences.timestamp = timestamp;
-  // LaunchBar.performAction('Local Action Updates', timestamp);
-  // return;
-
   validateCollectionDirs();
   validateRepositoryPaths();
 

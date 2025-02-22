@@ -59,11 +59,11 @@ echo "========================================" >> "$log_file"
         echo "Tracking branch: $tracking_branch" >> "$log_file"
 
         # Update remotes and get status
-        echo "Updating remotes..." >> "$log_file"
+        echo -e "\n🔁 Updating remotes..." >> "$log_file"
         git remote update >/dev/null 2>&1
         read -r behind ahead <<< "$(git rev-list --left-right --count "$tracking_branch"...HEAD 2>/dev/null || echo "0 0")"
         
-        echo "Status: $behind commits behind, $ahead commits ahead" >> "$log_file"
+        echo "📊 Status: $behind commits behind, $ahead commits ahead" >> "$log_file"
         
         # Base status object
         status="{

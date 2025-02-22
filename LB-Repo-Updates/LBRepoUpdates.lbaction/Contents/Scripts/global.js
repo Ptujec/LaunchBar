@@ -1,7 +1,7 @@
 /* 
 LB Repo Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-14
+2025-02-22
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
