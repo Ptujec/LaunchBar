@@ -66,9 +66,7 @@ function checkForUpdates() {
   // Initial notification
   LaunchBar.displayNotification({
     title: 'Repository Updates',
-    string: `Checking ${repoCount} repositor${
-      repoCount === 1 ? 'y' : 'ies'
-    } in the background…`,
+    string: `Checking ${repoCount} repositor${repoCount === 1 ? 'y' : 'ies'}…`,
   });
 
   LaunchBar.execute(
