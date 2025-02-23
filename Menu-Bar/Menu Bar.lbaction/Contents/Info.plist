@@ -9,7 +9,9 @@
 	<key>CFBundleName</key>
 	<string>Menu Bar</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.7</string>
+	<string>1.1</string>
+	<key>LBAssociatedApplication</key>
+	<string>com.roeybiran.Finbar</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -18,14 +20,12 @@
 		<string>ptujec@me.com</string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar</string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Menu-Bar/Menu%20Bar.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar</string>
 	</dict>
 	<key>LBRequiredApplication</key>
-	<string>com.roeybiran.Finbar</string>
-	<key>LBAssociatedApplication</key>
 	<string>com.roeybiran.Finbar</string>
 	<key>LBScripts</key>
 	<dict>

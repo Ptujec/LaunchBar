@@ -6,6 +6,8 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
+String.prototype.localizationTable = 'default';
+
 const finbarCLI = '/Applications/Finbar.app/Contents/MacOS/finbar-cli';
 
 function run() {
@@ -45,6 +47,10 @@ function run() {
 
         if (item.shortcut) {
           pushData.badge = item.shortcut.replace(/([⌘⇧⌃⌥])/g, '$1 ');
+        }
+
+        if (recentUIDs.includes(uID)) {
+          pushData.label = 'Recent'.localize();
         }
 
         return pushData;
