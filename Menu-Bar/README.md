@@ -4,6 +4,12 @@
 
 <img src="menubar.jpg" width="637"/> 
 
+## Annoncement
+
+**I created a new action that does the same thing, but it directly communicates with the "Application Services" API. It's called ["Menus"](https://github.com/Ptujec/LaunchBar/tree/master/Menus).**
+
+## Description
+
 This action allows to trigger [menu bar items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) right from within LaunchBar. The action will list all menu bar items of the frontmost application. You can then type to narrow down results. 
 
 **The main benefit of this approach is that it utilizes the superpower of LaunchBar. You’ll find stuff more easily without knowing the exact name. And LaunchBar learns and remembers your preferences.**
