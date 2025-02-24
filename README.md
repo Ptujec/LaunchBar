@@ -23,9 +23,3 @@ Most of my actions also support [Action Updates](https://renaghan.com/launchbar/
 If you like what I am doing, please spread the word. You can also **sponsor** my LaunchBar projects via [Buy me a coffee](https://www.buymeacoffee.com/ptujec) or [PayPal](https://www.paypal.com/donate/?business=J3RS8S74NDJPU&no_recurring=0&currency_code=EUR). Thanks! ♥️
 
 <a href="https://www.buymeacoffee.com/ptujec" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
----
-Anmerkungen: 0,1647 SHA-256 7cfe2484bc8da33ea7a73cdc2b0eb543  
-&ChatGPT: 329 463,6 628  
-@Christian: 469 579,49 629,33  
-...
