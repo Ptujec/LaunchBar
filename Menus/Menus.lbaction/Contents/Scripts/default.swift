@@ -16,7 +16,6 @@
 
  TODO:
  - fix mic, globe … display … fn & F5 … show sf symbols if possible ? I don't think so
- - option to include apple & help menu in config (false by default) includeAppleMenu: false
  */
 
 import Cocoa
@@ -26,6 +25,7 @@ import Cocoa
 struct UserConfig: Codable {
     var globalMenuExclusions: [String]
     var appMenuExclusions: [String: [String]]
+    var includeAppleMenu: Bool
 }
 
 struct Config {
@@ -34,11 +34,13 @@ struct Config {
         globalMenuExclusions: [
             "Open Recent", "Benutzte Dokumente", "Services", "Dienste", "History", "Verlauf",
         ],
-        appMenuExclusions: ["org.mozilla.firefox": ["Chronik"]]
+        appMenuExclusions: ["org.mozilla.firefox": ["Chronik"]],
+        includeAppleMenu: false
     )
 
     static let globalExclusions = userConfig.globalMenuExclusions
     static let appExclusions = userConfig.appMenuExclusions.mapValues(Set.init)
+    static let includeAppleMenu = userConfig.includeAppleMenu
 
     static func isPathExcluded(_ path: [String], for bundleId: String?) -> Bool {
         path.contains { item in
@@ -81,7 +83,7 @@ struct MenuItem {
 
     var uid: String? {
         guard let bundleId = NSWorkspace.shared.menuBarOwningApplication?.bundleIdentifier else { return nil }
-        return "\(bundleId).\(indices.map { String($0) }.joined(separator: "."))"
+        return Utils.generateUID(bundleId: bundleId, indices: indices)
     }
 }
 
@@ -106,12 +108,32 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
         return (menuBarRef as! AXUIElement)
     }
 
+    private func createMenuItem(title: String, path: [String], indices: [Int], attrs: [String: Any], hasSubmenu: Bool) -> MenuItem {
+        let shortcut = formatShortcut(
+            cmd: attrs[kAXMenuItemCmdCharAttribute as String] as? String,
+            modifiers: (attrs[kAXMenuItemCmdModifiersAttribute as String] as? NSNumber)?.intValue ?? 0,
+            virtualKey: (attrs[kAXMenuItemCmdVirtualKeyAttribute as String] as? NSNumber)?.intValue ?? 0
+        )
+        
+        let mark = attrs[kAXMenuItemMarkCharAttribute as String] as? String
+        
+        return MenuItem(
+            title: title,
+            path: path,
+            indices: indices,
+            shortcut: shortcut,
+            mark: mark,
+            hasSubmenu: hasSubmenu
+        )
+    }
+
     private func processSubmenu(_ menu: AXUIElement, currentPath: [String], currentIndices: [Int], recursive: Bool = false) -> [MenuItem] {
         guard let menuItems = getAttribute(element: menu, name: kAXChildrenAttribute) as? [AXUIElement] else {
             return []
         }
 
         var items: [MenuItem] = []
+        var hasEnabledItems = false
 
         for (index, menuItem) in menuItems.enumerated() {
             let attrs = getMultipleAttributes(element: menuItem, names: [
@@ -125,41 +147,48 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
             ])
 
             guard let title = attrs[kAXTitleAttribute as String] as? String,
-                  !title.isEmpty,
-                  attrs[kAXEnabledAttribute as String] as? Bool ?? false else { continue }
+                  !title.isEmpty else { continue }
 
             let path = currentPath + [title]
             guard !Config.isPathExcluded(path, for: bundleId) else { continue }
 
-            let indices = currentIndices + [index]
-            let shortcut = formatShortcut(
-                cmd: attrs[kAXMenuItemCmdCharAttribute as String] as? String,
-                modifiers: (attrs[kAXMenuItemCmdModifiersAttribute as String] as? NSNumber)?.intValue ?? 0,
-                virtualKey: (attrs[kAXMenuItemCmdVirtualKeyAttribute as String] as? NSNumber)?.intValue ?? 0
-            )
+            let isEnabled = attrs[kAXEnabledAttribute as String] as? Bool ?? false
+            let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement]
+            let hasSubmenu = submenu?.isEmpty == false
 
-            let mark = attrs[kAXMenuItemMarkCharAttribute] as? String
-            let hasSubmenu = (attrs[kAXChildrenAttribute as String] as? [AXUIElement])?.isEmpty == false
+            if hasSubmenu, let firstSubmenu = submenu?.first {
+                let submenuItems = processSubmenu(firstSubmenu, currentPath: path, currentIndices: currentIndices + [index], recursive: true)
+                if !submenuItems.isEmpty {
+                    hasEnabledItems = true
+                    let indices = currentIndices + [index]
+                    items.append(createMenuItem(title: title, path: path, indices: indices, attrs: attrs, hasSubmenu: true))
 
-            let currentItem = MenuItem(
-                title: title,
-                path: path,
-                indices: indices,
-                shortcut: shortcut,
-                mark: mark,
-                hasSubmenu: hasSubmenu
-            )
-
-            items.append(currentItem)
-
-            if recursive && hasSubmenu,
-               let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement],
-               !submenu.isEmpty {
-                items.append(contentsOf: processSubmenu(submenu[0], currentPath: path, currentIndices: indices, recursive: true))
+                    if recursive {
+                        items.append(contentsOf: submenuItems)
+                    }
+                }
+            } else if isEnabled {
+                hasEnabledItems = true
+                let indices = currentIndices + [index]
+                items.append(createMenuItem(title: title, path: path, indices: indices, attrs: attrs, hasSubmenu: false))
             }
         }
 
-        return items
+        return hasEnabledItems ? items : []
+    }
+
+    private func getMenuItemsWithExclusionCheck(from element: AXUIElement, attributeNames: [String]) -> (title: String?, submenu: [AXUIElement]?)? {
+        let attrs = getMultipleAttributes(element: element, names: attributeNames)
+        
+        guard let title = attrs[kAXTitleAttribute as String] as? String,
+              !title.isEmpty,
+              !Config.isPathExcluded([title], for: bundleId),
+              let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement],
+              !submenu.isEmpty else {
+            return nil
+        }
+        
+        return (title, submenu)
     }
 
     func getMenuItems(startingFrom indices: [Int]? = nil) -> [MenuItem] {
@@ -179,12 +208,6 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
             var currentPath = [String]()
             var currentIndices = [firstIndex]
 
-            func getSubmenu(from element: AXUIElement) -> AXUIElement? {
-                guard let submenu = getMultipleAttributes(element: element, names: [kAXChildrenAttribute as String])[kAXChildrenAttribute as String] as? [AXUIElement],
-                      !submenu.isEmpty else { return nil }
-                return submenu[0]
-            }
-
             for index in indices.dropFirst() {
                 guard let menu = getSubmenu(from: currentMenu),
                       let items = getAttribute(element: menu, name: kAXChildrenAttribute) as? [AXUIElement],
@@ -201,22 +224,18 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
             guard let submenu = getSubmenu(from: currentMenu) else { return [] }
             return processSubmenu(submenu, currentPath: currentPath, currentIndices: currentIndices)
         } else {
-            let itemCount = items.count - 1
+            let startIndex = Config.includeAppleMenu ? 0 : 1
+            let itemCount = items.count - startIndex
             var allProcessedItems: [[MenuItem]] = Array(repeating: [], count: itemCount)
 
             DispatchQueue.concurrentPerform(iterations: itemCount) { index in
-                let menuBarItem = items[index + 1]
-
-                let attrs = getMultipleAttributes(element: menuBarItem, names: [
+                let menuBarItem = items[index + startIndex]
+                
+                if let result = getMenuItemsWithExclusionCheck(from: menuBarItem, attributeNames: [
                     kAXTitleAttribute as String,
                     kAXChildrenAttribute as String,
-                ])
-
-                if let title = attrs[kAXTitleAttribute as String] as? String,
-                   let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement],
-                   !submenu.isEmpty,
-                   !Config.isPathExcluded([title], for: bundleId) {
-                    allProcessedItems[index] = processSubmenu(submenu[0], currentPath: [title], currentIndices: [index + 1], recursive: true)
+                ]), let title = result.title, let submenu = result.submenu {
+                    allProcessedItems[index] = processSubmenu(submenu[0], currentPath: [title], currentIndices: [index + startIndex], recursive: true)
                 }
             }
 
@@ -234,12 +253,6 @@ extension MenuBarAccess {
               let menuBarItems = getAttribute(element: menuBar, name: kAXChildrenAttribute) as? [AXUIElement],
               let firstIndex = indices.first,
               firstIndex < menuBarItems.count else { return }
-
-        func getSubmenu(from element: AXUIElement) -> AXUIElement? {
-            guard let submenu = getMultipleAttributes(element: element, names: [kAXChildrenAttribute as String])[kAXChildrenAttribute as String] as? [AXUIElement],
-                  !submenu.isEmpty else { return nil }
-            return submenu[0]
-        }
 
         var currentMenu = menuBarItems[firstIndex]
         for index in indices.dropFirst() {
@@ -259,6 +272,12 @@ extension MenuBarAccess {
 }
 
 // MARK: - Accessibility Helpers
+
+private func getSubmenu(from element: AXUIElement) -> AXUIElement? {
+    guard let submenu = getMultipleAttributes(element: element, names: [kAXChildrenAttribute as String])[kAXChildrenAttribute as String] as? [AXUIElement],
+          !submenu.isEmpty else { return nil }
+    return submenu[0]
+}
 
 private func getMultipleAttributes(element: AXUIElement, names: [String]) -> [String: Any] {
     var values: CFArray?
@@ -381,7 +400,7 @@ struct RecentMenuItem: Codable {
     let indices: [Int]
 
     var uid: String {
-        return "\(bundleId).\(indices.map { String($0) }.joined(separator: "."))"
+        return Utils.generateUID(bundleId: bundleId, indices: indices)
     }
 }
 
@@ -449,6 +468,10 @@ struct Utils {
 
     static var isGermanLocale: Bool {
         return Locale.current.identifier.starts(with: "de")
+    }
+    
+    static func generateUID(bundleId: String, indices: [Int]) -> String {
+        return "\(bundleId).\(indices.map { String($0) }.joined(separator: "."))"
     }
 }
 

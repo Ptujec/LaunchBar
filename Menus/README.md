@@ -6,21 +6,21 @@
 
 This action allows listing and triggering [menu items](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar) of the current application right from within LaunchBar. 
 
-The benefit of this vs. using the Help shortcut is that it utilizes the superpower of LaunchBar: **adaptive abbreviations**. This makes it easy to find the right menu with just a few keystrokes. 
+The benefit of this vs. using the Help shortcut is that it utilizes a superpower of LaunchBar: **adaptive abbreviations**. This makes it easy to find the right menu with just a few keystrokes. 
 
 The action also remembers the **last used item** per application. So if you want to trigger the same menu item again next time around, it's right there for you at the top of the list. 
 
-**NOTE:** The `Apple` and `Help` menu paths are excluded. It helps both performance and avoids unwanted results. More exclusions can be configured in the `config` section in the actions `preferences.plist` (see Advanced).
-
-**NOTE:** If you launch a menu item, after performing the action, the LB interface will not refresh automatically. This is especially relevant for [toggled items](https://developer.apple.com/design/human-interface-guidelines/menus#Toggled-items). If you bring up LB again the changed state is not reflected until you use the action again. You can reuse the item without it. Just be aware that it does the opposite of what it says.  
+**NOTE:** The Apple menu path is excluded by default. You can manage this and other exclusions in the `config` section in the actions `preferences.plist` (see below).
 
 ## Setup (IMPORTANT!)
 
-In order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
+**In order to run smoothly, actions written in Swift need to be both "un-quarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.**
 
-## Advanced
+## Configuration (Advanced)
 
-You can exclude certain menu paths, e.g., "History" in Safari, by editing the `config` section in the actions `preferences.plist`. Just hold `command` while launching the action. This automatically opens the plist in your default editor, so you can tinker away. If something goes wrong, the plist will be reset by the action.
+You can manage excluded menu paths or individual items by editing the `config` section in the actions `preferences.plist`. For example, "History" excludes showing browser history items. Exclusions can be configured either globally or by App ([bundle ID](https://github.com/Ptujec/LaunchBar/tree/master/Get-App-ID#launchbar-action-get-app-id)).  
+
+Just hold `command` while launching the action. This automatically opens the plist in your default editor, so you can tinker away. If something goes wrong, the plist will be reset by the action.
 
 ```
 <plist version="1.0">
@@ -47,9 +47,13 @@ You can exclude certain menu paths, e.g., "History" in Safari, by editing the `c
 </plist>
 ```
 
+## Nitty Gritty Details
+
+If you launch a menu item, after performing the action, the LB interface will not refresh automatically. This is especially relevant for [toggled items](https://developer.apple.com/design/human-interface-guidelines/menus#Toggled-items). If you bring up LB again, the changed state is not reflected until you use the action again. You can probably reuse the item without refreshing. Just be aware that it does the opposite of what it says.  
+
 ## Alternatives 
 
-If the setup sounds too cumbersome to you check out my ["Menu Bar"](https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar#launchbar-action-menu-bar-powered-by-finbar) action. It pretty much does the same thing but is powered by [Finbar](https://www.roeybiran.com/apps/finbar). 
+If the setup sounds too cumbersome to you, check out my ["Menu Bar"](https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar#launchbar-action-menu-bar-powered-by-finbar) action. It pretty much does the same thing but is powered by [Finbar](https://www.roeybiran.com/apps/finbar). 
 
 There are a few differences, though, compared to this action. The Finbar-powered action does not show menus, just the items in them. Exclusions happen after retrieving all contents rather than while retrieving them. 
 
