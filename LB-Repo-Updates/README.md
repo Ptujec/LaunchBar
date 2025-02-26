@@ -2,9 +2,9 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-<img src="01.jpg" width="744"/>
-
 This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action.
+
+<img src="02.jpg" width="750"/>
 
 ## How It Works
 
@@ -29,7 +29,6 @@ Even though there are two actions involved, it is one simple and largely automat
 A repository (short repo) is something like a folder. It lives on the web and has a local representation on your Mac if you clone it. 
 
 Most [repos with LaunchBar actions](https://github.com/topics/launchbar?o=desc&s=updated) are hosted on GitHub.
-
 
 ## Adding Repositories Locally (Cloning)
 
