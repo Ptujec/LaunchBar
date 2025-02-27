@@ -8,7 +8,7 @@
 
 Updating LaunchBar Actions is an unsolved problem. [Padraic built an action to check for new versions of your installed actions online](https://renaghan.com/launchbar/action-updates/). Most of my actions are compatible with his update action. It works well if you just have a few actions installed, but it can take quite some time if you have a lot of actions installed.
 
-So I wrote an action with a slightly different approach. It is not the ideal solution one would wish for either, but it works quite well with actions that are managed like [mine](https://ptujec.github.io/launchbar). That is, a lot of actions are maintained in a single GitHub repository, which means it is easy to download or clone them all in one go.
+So I wrote an action with a slightly different approach. It is not the ideal solution one would wish for either, but it works quite well with actions that are managed like [mine](https://ptujec.github.io/launchbar). That is, a lot of actions are maintained in a single GitHub repository.
 
 ## How This Action Works
 
