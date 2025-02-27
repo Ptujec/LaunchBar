@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>URLTemplate.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.LinkToWebsite</string>
+	<key>CFBundleName</key>
+	<string>Link to Website</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBSummary</key>
+		<string>This action pastes the title and URL of the current website, formatted as rich text or markdown, depending on the text field you are using. You can enter your own title by holding down the space bar. If you hold down the command key, only the simple link will be inserted.
+
+Note: This action needs to be compiled! The Compile Swift Action can help with this.</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/Link-To-Website/LinkToWebsite.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Link-To-Website</string>
+	</dict>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBRunInBackground</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.swift</string>
+		</dict>
+	</dict>
+	<key>LBTextInputTitle</key>
+	<string>Custom Title</string>
+</dict>
+</plist>
