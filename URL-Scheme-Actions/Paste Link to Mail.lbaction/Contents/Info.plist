@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Paste Link to Mail</string>
 	<key>CFBundleVersion</key>
-	<string>4.1</string>
+	<string>4.1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -23,7 +23,7 @@ The action creates a formatted link to an open or selected email. A rich text an
 
 This action includes a Swift script that should be compiled for best performance. You can use my Compile Swift Action for that.</string>
 		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/URL-Scheme-Actions/Paste%20Mail%20URL%20Scheme.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/URL-Scheme-Actions/Paste%20Link%20to%20Mail.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/URL-Scheme-Actions#mail</string>
 	</dict>
