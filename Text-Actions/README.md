@@ -10,8 +10,8 @@
 
 ## Full List
 - ~~Paste Date~~ [moved to new directory](https://github.com/Ptujec/LaunchBar/tree/master/Paste-Date)
-- Get Markdown Link from Safari (and paste into active text field)
-- Get RTF Link from Safari (and paste into active text field)
+- ~~Get Markdown Link from Safari (and paste into active text field)~~ replaced by [Link to Website](https://github.com/Ptujec/LaunchBar/tree/master/Link-To-Website) action
+- ~~Get RTF Link from Safari (and paste into active text field)~~ replaced by [Link to Website](https://github.com/Ptujec/LaunchBar/tree/master/Link-To-Website) action
 - Get URLs from text
 - Lorem Ipsum (Generate placeholder text)
 - Lorem Slovensko (Slovene version)
