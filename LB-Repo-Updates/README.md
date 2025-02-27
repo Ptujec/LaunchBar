@@ -32,7 +32,7 @@ Most [repos with LaunchBar actions](https://github.com/topics/launchbar?o=desc&s
 
 ## Adding Repositories Locally (Cloning)
 
-If you are new to Git, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally (cloning) easier.
+If you are new to Git, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally ([cloning](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)) easier.
 
 All platforms should offer a URL that ends on `.git` somewhere on the main repo page. On GitHub click the green `Code` button. On Codeberg you can find it next to the blue `HTTP` button.
 
@@ -44,7 +44,7 @@ The URL for this repo is:
 https://github.com/Ptujec/LaunchBar.git. 
 ```
 
-**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run "Local Action Updates" manually and select the newly created local repo.
+**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run "[Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates)" manually and select the newly created local repo.
 
 ## Requirements
 
@@ -52,4 +52,4 @@ https://github.com/Ptujec/LaunchBar.git.
 
 ## Download
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. However, the point of this action is that you don't have to do that manually for every new action or update.

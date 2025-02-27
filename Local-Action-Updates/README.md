@@ -12,11 +12,11 @@ So I wrote an action with a slightly different approach. It is not the ideal sol
 
 ## How This Action Works
 
-The idea is to do the work locally after downloading (or cloning) a whole GitHub repo of actions … or even multiple repos. **This action searches all actions in a given directory for new versions of the actions you have installed and offers to update them.**
+The idea is to do the work locally after downloading ([cloning](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)) a whole GitHub repo of actions … or even multiple repos. **This action searches all actions in a given directory for new versions of the actions you have installed and offers to update them.**
 
-The downside of this approach is that you need to do the downloading manually or through an app like GitHub Desktop (which is still a manual process).
+There are a couple of **advantages** to this approach: It is **fast** and **simple**. The only requirement is that the new version has a [standard version number](https://en.wikipedia.org/wiki/Software_versioning#Semantic_versioning). Plus, this action also helps to **easily identify new actions** from the input source.
 
-But there are also a couple of **advantages**: It is **faster**, especially if you have lots of actions installed. Installing new versions is very **simple**. The only requirement is that the new version has a [standard version number](https://en.wikipedia.org/wiki/Software_versioning#Semantic_versioning). Plus, this action also helps to **easily identify new actions** from the input source.
+The only downside is manually downloading repositories. But there is also an action for that, "**[LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)**." It is the perfect companion to this action. Actually, if you use "LaunchBar Repo Updates", it **will trigger this action automatically**. 
 
 ## Features
 
@@ -44,4 +44,4 @@ This is also helpful for updated actions that are written in Swift. Select the b
 
 ## Download
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.

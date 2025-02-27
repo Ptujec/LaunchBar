@@ -8,12 +8,6 @@ The full text of your search results might not be displayed in the interface. Pr
 
 Favorites are stored in a plain text file at `iCloud Drive/Shortcuts/dadjokes.txt`. Display your favorites with `⇧↩`. Open the text file with `⌘↩`.
 
-## Download
+## Download & Update
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
-
-## Updates
-
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
-
-This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.

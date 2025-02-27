@@ -29,11 +29,6 @@ Per default spaces are replaced with "AND" tags. Alternatively you can use quota
 **Advanced**: With "#" you can scroll to a specific book. For example "Moses#Acts_6:14" will return all verses with "Moses", but scroll to Acts 6:14. 
 You can also choose a specific translation from a list if you press `⌘⏎` after entering your query. 
 
-## Download
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
+## Download & Update
 
-## Updates
-
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
-
-This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.

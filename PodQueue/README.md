@@ -9,5 +9,6 @@ The action will try to get the URL from the frontmost app. If that is not succes
 This action requires an API from [PodQueue.fm](https://podqueue.fm/users/api_key). You will be prompted to enter it the first time you use the action. You can always (re)set it by pressing `option` + `return`.
 
 
-## Download
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.   
+## Download & Update
+
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.   

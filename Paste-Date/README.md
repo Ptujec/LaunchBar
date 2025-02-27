@@ -27,12 +27,6 @@ When you use the action, you can access the alternative format with `option` + `
 **Note:** Local date format styles are defined by the system. As of macOS Ventura, the only style you can modify seems to be "short" (`System Settings → Language & Region → Date format`). 
 You can try [tweaking the others in the Terminal](https://www.caseyliss.com/2022/11/14/ventura-date-formats). 
 
-## Download
+## Download & Update
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
-
-## Updates
-
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
-
-This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.

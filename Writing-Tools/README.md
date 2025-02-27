@@ -56,15 +56,9 @@ You can customize and add as many tools as you like. Make sure you keep the JSON
 
 To use this action, you need an [API key from OpenAI](https://platform.openai.com/account/api-keys). If you're using my [Ask ChatGPT](https://github.com/Ptujec/LaunchBar/tree/master/Ask-ChatGPT#readme) action already, it will automatically import the key.
 
-## Download
+## Download & Update
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
-
-## Updates
-
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
-
-This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
 
 [^1]: I have not had the chance to try Apple's AI Writing Tools, but so far, they do not sound too promising anyway. With this action, you can always benefit from the latest OpenAI models and refine the tools yourself.
 [^2]: Please consider privacy and the pitfalls of using LLMs in general as you use this. 

@@ -12,12 +12,6 @@ Documents will not show up in this list if you just open them without making cha
 
 **Note**: After tweeting about my actions I found out that [@nriley](https://github.com/nriley) already built [actions for the very same purpose](https://github.com/nriley/LBOfficeMRU/releases). They don't have some of the limitations but rely on Python.
 
-## Download
+## Download & Update
 
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
-
-## Updates
-
-Use [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates) to keep track of new versions of all my actions and discover new ones at the same time. 
-
-This action also supports [Action Updates](https://renaghan.com/launchbar/action-updates/) by Padraic Renaghan.
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.

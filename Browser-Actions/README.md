@@ -21,5 +21,6 @@ You can also close the site in the browser you came from with `⌘↩` (cmd-retu
 - Getting an URL from Firefox might be buggy, because it lacks sufficient AppleScript support! If it's not working properly it might help to [increase delay times](https://github.com/Ptujec/LaunchBar/blob/1c6609e474f8916d9d65f83793f48ffbdc277f74/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Scripts/default.js#L171).
 - If you can, avoid using Chrome. [It's bad](https://chromeisbad.com). Brave seems like a good replacement.
 
-## Download
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository.
+## Download & Update
+
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
