@@ -53,13 +53,7 @@ If you launch a menu item, after performing the action, the LB interface will no
 
 ## Alternatives 
 
-If the setup sounds too cumbersome to you, check out my ["Menu Bar"](https://github.com/Ptujec/LaunchBar/tree/master/Menu-Bar#launchbar-action-menu-bar-powered-by-finbar) action. It pretty much does the same thing but is powered by [Finbar](https://www.roeybiran.com/apps/finbar). 
-
-There are a few differences, though, compared to this action. The Finbar-powered action does not show menus, just the items in them. Exclusions happen after retrieving all contents rather than while retrieving them. 
-
-This action directly interacts with the Application Services API and should perform better because there is no added layer in between.
-
-If you want a standalone app for the task, Finbar is a great choice, though.
+If you want a global hotkey and even more granular control, check out [Finbar](https://www.roeybiran.com/apps/finbar). It is a great standalone app by a longtime [LaunchBar user](https://github.com/roeybiran/launchbar-actions).
 
 ## Download & Update
 
