@@ -9,13 +9,15 @@
 	<key>CFBundleName</key>
 	<string>Audio Devices</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
 		<string></string>
+		<key>LBRequirements</key>
+		<string>AirPlay requires macOS 15.2 or higher</string>
 		<key>LBSummary</key>
 		<string>⇧: Include AirPlay Devices ⌘: Show Excluded Devices
 More shortcuts for a selected device:  
@@ -29,6 +31,8 @@ More shortcuts for a selected device:
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Audio-Devices#readme</string>
 	</dict>
+	<key>LBRequirements</key>
+	<string>AirPlay support requires macOS 15.2 or higher</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>
@@ -43,7 +47,5 @@ More shortcuts for a selected device:
 			<string>default.swift</string>
 		</dict>
 	</dict>
-	<key>LSMinimumSystemVersion</key>
-	<string>15.2</string>
 </dict>
 </plist>
