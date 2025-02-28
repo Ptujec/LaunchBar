@@ -2,7 +2,7 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action.
+This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action. 
 
 <img src="02.jpg" width="750"/>
 
@@ -14,15 +14,17 @@ Even though there are two actions involved, it is one simple and largely automat
 
 1) Checks and updates included repositories.
 
-2) If a repo has new or updated LaunchBar actions, it automatically runs …
+2) If a repository has new or updated LaunchBar actions, it automatically runs action 2.
 
 **Action 2: Local Action Updates**
 
-3) Compares actions within repos included in Action 1 with your installed actions locally.
+3) Compares the actions in the repositories included in action 1 with the actions you have installed locally.
 
 4) Offers to update installed actions if a newer version is available.
 
-5) Sends a comprehensive report of updated, new, installed, and not installed actions.
+5) Sends a report of actions that are updated, new, installed, and not installed.
+
+**NOTE:** Usually, the second action is triggered only when new or updated actions are detected. However, it will also run after you add a new repository. 
 
 ## What Is a Repo?
 
@@ -44,11 +46,11 @@ The URL for this repo is:
 https://github.com/Ptujec/LaunchBar.git. 
 ```
 
-**Note:** Don't be surprised if you don't see any updates after the initial setup. Everything should already be up to date. In this case, you can run "[Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates)" manually and select the newly created local repo.
-
 ## Requirements
 
-[Git](https://git-scm.com). Check if it is installed with the terminal command `git -v`. If not, an easy solution is to install GitHub Desktop as this will also install git in the process.
+1) **[Git](https://git-scm.com)**. Check if it is installed with the terminal command `git -v`. If not, an easy solution is to install [GitHub Desktop](https://github.com/apps/desktop) as this will also install git in the process.
+
+2) When detecting action changes in repos, this action tries to initiate the **[Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates)** action. So, you need to install that action as well. 
 
 ## Download
 

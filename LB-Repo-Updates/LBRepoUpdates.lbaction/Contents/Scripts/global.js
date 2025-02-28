@@ -8,6 +8,10 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 const MAX_REPO_DEPTH = '4';
 const FIND_REPOS_SCRIPT = `${Action.path}/Contents/Scripts/find-repos.sh`;
+const LOCAL_ACTION_UPDATES_PATH =
+  '~/Library/Application Support/LaunchBar/Actions/Local Action Updates.lbaction';
+const LOCAL_ACTION_UPDATES_DOCS_URL =
+  'https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates';
 
 function listRepositories() {
   cleanupCollectionDirs();
@@ -30,7 +34,9 @@ function listRepositories() {
   const allRepos = repoPaths
     .map((path) => {
       const repoUrl = getRepoUrlFromConfig(`${path}/.git/config`);
-      return repoUrl ? { path, ...parseRepoUrl(repoUrl), url: repoUrl } : null;
+      return repoUrl
+        ? { localPath: path, ...parseRepoUrl(repoUrl), url: repoUrl }
+        : null;
     })
     .filter(Boolean);
 
@@ -40,7 +46,9 @@ function listRepositories() {
     const title = isIncluded ? includedRepos[repo.url].name : repo.name;
     const hasDuplicate = allRepos.some(
       (r) =>
-        r.path !== repo.path && r.name === repo.name && r.owner === repo.owner
+        r.localPath !== repo.localPath &&
+        r.name === repo.name &&
+        r.owner === repo.owner
     );
 
     return {
@@ -50,7 +58,7 @@ function listRepositories() {
       icon: isIncluded ? 'checkTemplate' : 'circleTemplate',
       alwaysShowsSubtitle: true,
       action: isIncluded ? 'removeRepository' : 'addRepository',
-      actionArgument: isIncluded ? repo.url : { ...repo, localPath: repo.path },
+      actionArgument: isIncluded ? repo.url : repo,
     };
   });
 
@@ -64,6 +72,7 @@ function listRepositories() {
 }
 
 function addRepository(repoData) {
+  Action.preferences.runLocalActionUpdates = true; // make sure it runs at least once
   if (!Action.preferences.repos) Action.preferences.repos = {};
   Action.preferences.repos[repoData.url] = repoData;
   return listRepositories();
@@ -286,4 +295,29 @@ function parseRepoUrl(url) {
     gitlab: 'GitLab',
   };
   return { name, owner, host: hostLabels[host] };
+}
+
+function installLocalActionUpdates() {
+  const repo =
+    Action.preferences.repos?.['https://github.com/Ptujec/LaunchBar.git'];
+  const actionPath =
+    repo &&
+    `${repo.localPath}/Local-Action-Updates/Local Action Updates.lbaction`;
+  const hasAction = actionPath && File.exists(actionPath);
+
+  const response = LaunchBar.alert(
+    'Local Action Updates missing!',
+    'The "Local Action Updates" action is needed to compare the actions in the repositories to your installed actions.',
+    ...(hasAction
+      ? ['Install', 'Learn More', 'Cancel']
+      : ['Learn More', 'Cancel'])
+  );
+
+  if (response === 0) {
+    hasAction
+      ? LaunchBar.openURL(File.fileURLForPath(actionPath))
+      : LaunchBar.openURL(LOCAL_ACTION_UPDATES_DOCS_URL);
+  } else if (response === 1 && hasAction) {
+    LaunchBar.openURL(LOCAL_ACTION_UPDATES_DOCS_URL);
+  }
 }

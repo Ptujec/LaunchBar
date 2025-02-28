@@ -9,8 +9,6 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 include('global.js');
 
 const PROCESS_REPOS_SCRIPT = `${Action.path}/Contents/Scripts/process-repos.sh`;
-const LOCAL_ACTION_UPDATES_PATH =
-  '~/Library/Application Support/LaunchBar/Actions/Local Action Updates.lbaction';
 
 function run() {
   validateCollectionDirs();
@@ -58,7 +56,15 @@ function run() {
 }
 
 function checkForUpdates() {
+  if (!File.exists(LOCAL_ACTION_UPDATES_PATH)) {
+    Action.preferences.runLocalActionUpdates = true; // make sure it runs at least once
+    installLocalActionUpdates();
+    return;
+  }
+
   LaunchBar.hide();
+  Action.preferences.runLocalActionUpdates =
+    Action.preferences.runLocalActionUpdates ?? true; // make sure it runs at least once
 
   const repos = Action.preferences.repos;
   const repoCount = Object.keys(repos).length;
@@ -121,12 +127,19 @@ function processResults(repos, results, repoCount) {
   );
 
   // Final Notification
+  const runLocalActionUpdates = Action.preferences.runLocalActionUpdates;
+
   const title =
     stats.totalBehind === 0
       ? 'All Up to Date!'
       : stats.failedUpdates.length === 0
       ? 'Updates Complete!'
       : 'Partial Success!';
+
+  const subtitle =
+    stats.hasAnyActionUpdates || runLocalActionUpdates
+      ? 'Running Local Action Updates…'
+      : 'No LaunchBar Action Changes!';
 
   const summaryLines = [
     `${repoCount} repo${repoCount === 1 ? '' : 's'}${
@@ -143,27 +156,20 @@ function processResults(repos, results, repoCount) {
     'Click to view full log!',
   ].filter(Boolean);
 
-  if (stats.hasAnyActionUpdates) performLocalActionUpdates();
+  if (stats.hasAnyActionUpdates || runLocalActionUpdates) {
+    performLocalActionUpdates();
+  }
 
   LaunchBar.displayNotification({
-    title: title,
-    subtitle: stats.hasAnyActionUpdates
-      ? undefined
-      : 'No LaunchBar Action Changes!',
+    title,
+    subtitle,
     string: summaryLines.join('\n'),
     url: File.fileURLForPath(results.logFile),
   });
 }
 
 function performLocalActionUpdates() {
-  if (!File.exists(LOCAL_ACTION_UPDATES_PATH)) {
-    LaunchBar.displayNotification({
-      title: 'Local Action Updates',
-      string: 'Action is not installed. Click this to learn more.',
-      url: 'https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates#launchbar-action-local-action-updates',
-    });
-    return;
-  }
+  Action.preferences.runLocalActionUpdates = false;
 
   // Sending timestamp for validation in Local Action Updates action
   const timestamp = Date.now();
