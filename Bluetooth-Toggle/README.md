@@ -6,7 +6,7 @@
 
 ## Limitations and other options
 
-This action uses GUI scripting. There is a slight delay for opening System Preferences in the background. 
+This action uses GUI scripting. It also needs to open System Preferences. This may break with updates to macOS. **The current version is tested with macOS 15.3.1.**
 
 If you are looking for a non GUI version and more features you can try [this action by @django-wong](https://github.com/django-wong/launchbar-bluetooth-devices#readme). It requires installing a 3rd-party command-line tool though.
 
