@@ -13,18 +13,16 @@ const bookmarksPath =
 function run() {
   const { roots } = File.readJSON(bookmarksPath);
   const results = Object.keys(roots).reduce(
-    (acc, key) => {
-      const { items, paths } = getBookmarks(roots[key], key);
-      acc.items.push(...items);
-      paths.forEach((p) => acc.paths.add(p));
-      return acc;
-    },
+    (acc, key) => ({
+      items: [...acc.items, ...getBookmarks(roots[key], key).items],
+      paths: new Set([...acc.paths, ...getBookmarks(roots[key], key).paths]),
+    }),
     { items: [], paths: new Set() }
   );
 
   return results.items.map((item) => ({
     ...item,
-    ...(results.paths.size > 1 ? { label: item._path } : {}),
+    ...(results.paths.size > 1 ? { label: getLastFolder(item._path) } : {}),
   }));
 }
 
@@ -32,26 +30,46 @@ function getBookmarks(node, path = '') {
   if (!node.children) return { items: [], paths: new Set() };
 
   return node.children.reduce(
-    (acc, child) => {
-      if (child.type === 'url') {
-        acc.items.push({
-          title: child.name,
-          subtitle: child.url,
-          alwaysShowsSubtitle: true,
-          url: child.url,
-          _path: path,
-        });
-        acc.paths.add(path);
-      } else if (child.type === 'folder') {
-        const nested = getBookmarks(
-          child,
-          path ? `${path}/${child.name}` : child.name
-        );
-        acc.items.push(...nested.items);
-        nested.paths.forEach((p) => acc.paths.add(p));
-      }
-      return acc;
-    },
+    (acc, child) => ({
+      items: [
+        ...acc.items,
+        ...(child.type === 'url'
+          ? [
+              {
+                title: child.name,
+                subtitle: child.url,
+                alwaysShowsSubtitle: true,
+                icon: 'URLTemplate',
+                action: 'openURL',
+                actionArgument: child.url,
+                _path: path,
+              },
+            ]
+          : []),
+        ...(child.type === 'folder'
+          ? getBookmarks(child, path ? `${path}/${child.name}` : child.name)
+              .items
+          : []),
+      ],
+      paths: new Set([
+        ...acc.paths,
+        ...(child.type === 'url' ? [path] : []),
+        ...(child.type === 'folder'
+          ? getBookmarks(child, path ? `${path}/${child.name}` : child.name)
+              .paths
+          : []),
+      ]),
+    }),
     { items: [], paths: new Set() }
   );
+}
+
+function getLastFolder(path) {
+  const parts = path.split('/');
+  return parts.length > 1 ? `…/${parts[parts.length - 1]}` : path;
+}
+
+function openURL(url) {
+  LaunchBar.hide();
+  LaunchBar.openURL(url, 'com.brave.Browser');
 }
