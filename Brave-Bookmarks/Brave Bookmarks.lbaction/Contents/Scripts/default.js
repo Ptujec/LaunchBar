@@ -12,61 +12,39 @@ const bookmarksPath =
 
 function run() {
   const { roots } = File.readJSON(bookmarksPath);
-  const results = Object.keys(roots).reduce(
-    (acc, key) => ({
-      items: [...acc.items, ...getBookmarks(roots[key], key).items],
-      paths: new Set([...acc.paths, ...getBookmarks(roots[key], key).paths]),
-    }),
-    { items: [], paths: new Set() }
+  const items = Object.keys(roots).flatMap((key) =>
+    traverseBookmarks(roots[key], key)
   );
+  const hasMultiplePaths = new Set(items.map((i) => i._path)).size > 1;
 
-  return results.items.map((item) => ({
+  return items.map((item) => ({
     ...item,
-    ...(results.paths.size > 1 ? { label: getLastFolder(item._path) } : {}),
+    ...(hasMultiplePaths && { label: item._path.split('/').pop() }),
   }));
 }
 
-function getBookmarks(node, path = '') {
-  if (!node.children) return { items: [], paths: new Set() };
+function traverseBookmarks(node, path = '') {
+  if (!node.children) return [];
 
-  return node.children.reduce(
-    (acc, child) => ({
-      items: [
-        ...acc.items,
-        ...(child.type === 'url'
-          ? [
-              {
-                title: child.name,
-                subtitle: child.url,
-                alwaysShowsSubtitle: true,
-                icon: 'URLTemplate',
-                action: 'openURL',
-                actionArgument: child.url,
-                _path: path,
-              },
-            ]
-          : []),
-        ...(child.type === 'folder'
-          ? getBookmarks(child, path ? `${path}/${child.name}` : child.name)
-              .items
-          : []),
-      ],
-      paths: new Set([
-        ...acc.paths,
-        ...(child.type === 'url' ? [path] : []),
-        ...(child.type === 'folder'
-          ? getBookmarks(child, path ? `${path}/${child.name}` : child.name)
-              .paths
-          : []),
-      ]),
-    }),
-    { items: [], paths: new Set() }
-  );
-}
-
-function getLastFolder(path) {
-  const parts = path.split('/');
-  return parts.length > 1 ? `…/${parts[parts.length - 1]}` : path;
+  return node.children.flatMap((child) => {
+    if (child.type === 'url') {
+      return [
+        {
+          title: child.name,
+          subtitle: child.url,
+          alwaysShowsSubtitle: true,
+          icon: 'URLTemplate',
+          action: 'openURL',
+          actionArgument: child.url,
+          _path: path,
+        },
+      ];
+    }
+    return traverseBookmarks(
+      child,
+      path ? `${path}/${child.name}` : child.name
+    );
+  });
 }
 
 function openURL(url) {
