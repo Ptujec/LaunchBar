@@ -2,7 +2,7 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-<img src="01.jpg" width="824"/>
+<img src="01.jpg" width="744"/>
 
 [Actual Budget](https://actualbudget.org/) is a free and [open-source](https://github.com/actualbudget/actual) alternative to YNAB. I don't love that the macOS client is an Electron app. But it is pretty good, and well maintained.
 
