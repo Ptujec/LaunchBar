@@ -8,7 +8,9 @@
 
 This action displays account balances and the most recent transactions.
 
-A special feature is that the action detects links to Mail in a transaction note and opens the linked Mail if you hit `Enter`.
+A special feature is that the action detects links to Mail in a transaction note and opens the linked Mail if you hit `enter`.
+
+If you have multiple budgets, you can show them with `command` + `→`. 
 
 ## Download & Update
 
