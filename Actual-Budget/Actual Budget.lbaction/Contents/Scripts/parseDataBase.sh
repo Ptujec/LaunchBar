@@ -130,7 +130,7 @@ SELECT * FROM (
                 ELSE 'cartTemplate' 
             END AS "icon",
             CASE
-                WHEN t.notes LIKE '%message://%' THEN '􀣪'
+                WHEN t.notes LIKE '%message://%' THEN '􀉣'
                 ELSE ""
             END AS "label",
             t.id AS transactionId
