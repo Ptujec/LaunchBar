@@ -1,147 +1,99 @@
-#!/bin/sh
+#!/bin/bash
 # 
 # Actual Budget Action for LaunchBar
 # by Christian Bender (@ptujec)
-# 2025-03-03
+# 2025-03-05
 # 
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 # 
 
-# Path to the original database
-path="$1"
+set -e  # Exit on error
 
-# Create a copy of the database with launchbar_ prefix in the same directory
-original_dir=$(dirname "$path")
-copy_path="${original_dir}/launchbar_$(basename "$path")"
-cp "$path" "$copy_path"
+DB_PATH="$1"
+DB_DIR=$(dirname "$DB_PATH")
+TEMP_DB="${DB_DIR}/launchbar_$(basename "$DB_PATH")"
 
-# Check if copy was successful
-if [ ! -f "$copy_path" ]; then
-    echo "Error: Failed to create a copy of the database."
-    exit 1
-fi
+# Create a copy of the database
+cp "$DB_PATH" "$TEMP_DB"
 
-# Query the 50 most recent transactions from the copied database and format as a JSON array
-sqlite3 "$copy_path" <<EOF
-.mode json
-SELECT * FROM (
-    -- Account balances
-    SELECT
-        name || ': ' || replace(printf('%.2f', COALESCE((
+# Get accounts and transactions data separately
+accounts=$(sqlite3 -json "$TEMP_DB" "
+    SELECT 
+        accounts.id, 
+        accounts.name,
+        accounts.closed,
+        accounts.offbudget,
+        accounts.sort_order,
+        COALESCE((
             SELECT SUM(amount)
             FROM v_transactions_internal_alive t
             WHERE t.account = accounts.id
             AND t.tombstone = 0
             AND t.is_child = 0
-        ), 0) / 100.0), '.', ',') || '€' as title,
-        '' as subtitle,
-        '' as badge,
-        'open' as action,
-        id as actionArgument,
-        1 as actionRunsInBackground,
-        1 as alwaysShowsSubtitle,
-        CASE 
-            WHEN (
-                SELECT SUM(amount)
-                FROM v_transactions_internal_alive t
-                WHERE t.account = accounts.id
-                AND t.tombstone = 0
-                AND t.is_child = 0
-            ) < 0 THEN 'creditcardRed'
-            ELSE 'creditcardTemplate'
-        END as "icon",
-        '' as "label",
-        '' as transactionId
+        ), 0) as balance
     FROM accounts
-    WHERE tombstone = 0 
-    AND closed = 0 
-    AND offbudget = 0
+    WHERE accounts.tombstone = 0 
+    AND accounts.closed = 0 
+    AND accounts.offbudget = 0
+    ORDER BY accounts.sort_order;" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "Error querying accounts: $accounts" >&2
+    accounts="[]"
+fi
 
-    UNION ALL
-
-    -- Existing transactions query
+transactions=$(sqlite3 -json "$TEMP_DB" "
     SELECT 
-        title,
-        subtitle,
-        badge,
-        action,
-        actionArgument,
-        actionRunsInBackground,
-        alwaysShowsSubtitle,
-        "icon",
-        "label",
-        transactionId
-    FROM (
-        SELECT
-            CASE 
-                WHEN t.transfer_id IS NOT NULL THEN 
-                    CASE 
-                        WHEN t.amount < 0 THEN 'Transfer: -' 
-                        ELSE 'Transfer: ' 
-                    END || 
-                    replace(printf('%.2f', abs(t.amount) / 100.0), '.', ',') || '€'
-                WHEN p.name IS NOT NULL THEN 
-                    p.name || ': ' || 
-                    CASE 
-                        WHEN t.amount < 0 THEN '-' 
-                        ELSE '' 
-                    END || 
-                    replace(printf('%.2f', abs(t.amount) / 100.0), '.', ',') || '€'
-                ELSE 
-                    CASE 
-                        WHEN t.amount < 0 THEN '-' 
-                        ELSE '' 
-                    END || 
-                    replace(printf('%.2f', abs(t.amount) / 100.0), '.', ',') || '€'
-            END ||
-            CASE 
-                WHEN t.cleared = 0 THEN ' (uncleared)' 
-                ELSE '' 
-            END AS title,
-            substr(t.date, 1, 4) || '-' || substr(t.date, 5, 2) || '-' || substr(t.date, 7, 2) || 
-            CASE 
-                WHEN p.name IS NULL AND t.notes = 'Reconciliation balance adjustment' THEN ' (Reconciliation balance adjustment)'
-                WHEN c.name IS NOT NULL THEN ' (' || c.name || ')' 
-                ELSE '' 
-            END AS subtitle,
-            a.name AS badge,
-            'open' AS action,
-            CASE
-                WHEN t.notes LIKE '%message://%' THEN
-                    substr(t.notes, instr(t.notes, 'message://'), 
-                           CASE 
-                               WHEN instr(substr(t.notes, instr(t.notes, 'message://')), ' ') > 0 
-                               THEN instr(substr(t.notes, instr(t.notes, 'message://')), ' ') - 1
-                               ELSE length(substr(t.notes, instr(t.notes, 'message://')))
-                           END)
-                ELSE t.id
-            END AS actionArgument,
-            0 AS actionReturnsItems,
-            1 AS actionRunsInBackground,
-            1 AS alwaysShowsSubtitle,
-            CASE 
-                WHEN p.name IS NULL AND t.notes = 'Reconciliation balance adjustment' THEN 'plusminusTemplate'
-                WHEN t.transfer_id IS NOT NULL THEN
-                    CASE 
-                        WHEN t.amount < 0 THEN 'transferOutTemplate' 
-                        ELSE 'transferInTemplate' 
-                    END
-                WHEN t.amount >= 0 THEN 'incomingTemplate' 
-                ELSE 'cartTemplate' 
-            END AS "icon",
-            CASE
-                WHEN t.notes LIKE '%message://%' THEN '􀉣'
-                ELSE ""
-            END AS "label",
-            t.id AS transactionId
-        FROM v_transactions_internal_alive t
-        LEFT JOIN accounts a ON t.account = a.id
-        LEFT JOIN payees p ON t.payee = p.id
-        LEFT JOIN categories c ON t.category = c.id
-        WHERE t.tombstone = 0
-        ORDER BY t.date DESC
-        LIMIT 150 
-    )
-)
-ORDER BY transactionId = '' DESC, subtitle DESC;
-EOF
+        t.id,
+        t.amount,
+        t.date,
+        t.notes,
+        t.cleared,
+        t.transfer_id,
+        a.name as account_name,
+        p.name as payee_name,
+        c.name as category_name
+    FROM v_transactions_internal_alive t
+    LEFT JOIN accounts a ON t.account = a.id
+    LEFT JOIN payees p ON t.payee = p.id
+    LEFT JOIN categories c ON t.category = c.id
+    WHERE t.is_child = 0
+    ORDER BY t.date DESC 
+    LIMIT 150;" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "Error querying transactions: $transactions" >&2
+    transactions="[]"
+fi
+
+# Get number format preference
+numberFormat=$(sqlite3 -json "$TEMP_DB" "
+    SELECT COALESCE(
+        (SELECT value FROM preferences WHERE id = 'numberFormat'),
+        'comma-dot'
+    ) as value;" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "Error querying number format preference: $numberFormat" >&2
+    numberFormat="[]"
+fi
+
+# Get date format preference
+dateFormat=$(sqlite3 -json "$TEMP_DB" "
+    SELECT COALESCE(
+        (SELECT value FROM preferences WHERE id = 'dateFormat'),
+        'MM-dd-yyyy'
+    ) as value;" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "Error querying date format preference: $dateFormat" >&2
+    dateFormat="[]"
+fi
+
+# Output JSON
+jq -n --argjson accounts "$accounts" --argjson transactions "$transactions" --argjson numberFormat "$numberFormat" --argjson dateFormat "$dateFormat" \
+    '{ 
+        accounts: $accounts, 
+        transactions: $transactions, 
+        numberFormat: ($numberFormat[0].value // "comma-dot"),
+        dateFormat: ($dateFormat[0].value // "MM-dd-yyyy")
+    }'
+
+# Clean up
+rm "$TEMP_DB"
