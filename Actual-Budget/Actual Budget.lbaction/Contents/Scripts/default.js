@@ -4,10 +4,6 @@ by Christian Bender (@ptujec)
 2025-03-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: 
-- cache data … only refresh if database has changed
-- clean up js code
 */
 
 const globalStorePath =
@@ -37,7 +33,10 @@ function run() {
           icon: 'walletTemplate',
           badge,
           action: 'parseDataBase',
-          actionArgument: `${budgetDataPath}/${item}/db.sqlite`,
+          actionArgument: {
+            databasePath: `${budgetDataPath}/${item}/db.sqlite`,
+            lastBudget: item,
+          },
           actionReturnsItems: true,
           isLastBudget: item === lastBudget,
         };
@@ -51,92 +50,96 @@ function run() {
       );
   }
 
-  return parseDataBase(databasePath);
+  return parseDataBase({ databasePath, lastBudget });
 }
 
-function parseDataBase(databasePath) {
+function parseDataBase({ databasePath, lastBudget }) {
+  const cacheFilePath = `${Action.supportPath}/db-cache-${lastBudget}.json`;
+
   const result = LaunchBar.execute(
     '/bin/bash',
     './parseDataBase.sh',
-    databasePath
+    databasePath,
+    cacheFilePath
   );
 
-  // LaunchBar.log(result);
-  // File.writeText(result, Action.supportPath + '/test.json');
-  // return;
-
   try {
-    const { accounts, transactions, numberFormat, dateFormat } =
-      JSON.parse(result);
-
-    const items = [
-      ...accounts
-        .filter((account) => !account.closed && !account.offbudget)
-        .map((account) => ({
-          title: `${account.name}: ${formatAmount(
-            account.balance,
-            numberFormat
-          )}`,
-          action: 'open',
-          actionArgument: '',
-          actionRunsInBackground: true,
-          icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
-        })),
-      ...transactions.map((t) => {
-        const isTransfer = t.transfer_id != null;
-        const isReconciliation =
-          !t.payee_name && t.notes === 'Reconciliation balance adjustment';
-
-        const title = [
-          isTransfer ? 'Transfer' : t.payee_name,
-          formatAmount(t.amount, numberFormat),
-          !t.cleared && '(uncleared)',
-        ]
-          .filter(Boolean)
-          .join(': ')
-          .replace(': (', ' (');
-
-        const formattedDate = formatDate(t.date, dateFormat);
-        const subtitle = [
-          formattedDate,
-          isReconciliation
-            ? '(Reconciliation balance adjustment)'
-            : t.category_name && `(${t.category_name})`,
-        ]
-          .filter(Boolean)
-          .join(' ');
-
-        const icon = isReconciliation
-          ? 'plusminusTemplate'
-          : isTransfer
-          ? t.amount < 0
-            ? 'transferOutTemplate'
-            : 'transferInTemplate'
-          : t.amount >= 0
-          ? 'incomingTemplate'
-          : 'cartTemplate';
-
-        const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
-
-        return {
-          title,
-          subtitle,
-          badge: t.account_name,
-          action: 'open',
-          actionArgument: messageUrl ?? '',
-          actionRunsInBackground: true,
-          alwaysShowsSubtitle: true,
-          icon,
-          label: messageUrl ? '􀉣' : undefined,
-        };
-      }),
-    ];
-
-    return items;
+    const data = JSON.parse(result);
+    if (data.useCache) return processData(File.readJSON(cacheFilePath));
+    File.writeJSON(data, cacheFilePath);
+    return processData(data);
   } catch (error) {
     LaunchBar.alert('Error parsing database:', error.message);
-    return [];
+    return;
   }
+}
+
+function processData(data) {
+  const { accounts, transactions, numberFormat, dateFormat } = data;
+
+  return [
+    ...accounts
+      .filter((account) => !account.closed && !account.offbudget)
+      .map((account) => ({
+        title: `${account.name}: ${formatAmount(
+          account.balance,
+          numberFormat
+        )}`,
+        action: 'open',
+        actionArgument: '',
+        actionRunsInBackground: true,
+        icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
+      })),
+
+    ...transactions.map((t) => {
+      const isTransfer = t.transfer_id != null;
+      const isReconciliation =
+        !t.payee_name && t.notes === 'Reconciliation balance adjustment';
+
+      const title = [
+        isTransfer ? 'Transfer' : t.payee_name,
+        formatAmount(t.amount, numberFormat),
+        !t.cleared && '(uncleared)',
+      ]
+        .filter(Boolean)
+        .join(': ')
+        .replace(': (', ' (');
+
+      const formattedDate = formatDate(t.date, dateFormat);
+      const subtitle = [
+        formattedDate,
+        isReconciliation
+          ? '(Reconciliation balance adjustment)'
+          : t.category_name && `(${t.category_name})`,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      const icon = isReconciliation
+        ? 'plusminusTemplate'
+        : isTransfer
+        ? t.amount < 0
+          ? 'transferOutTemplate'
+          : 'transferInTemplate'
+        : t.amount >= 0
+        ? 'incomingTemplate'
+        : 'cartTemplate';
+
+      const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
+
+      return {
+        title,
+        subtitle,
+        badge: t.account_name,
+        action: 'open',
+        actionArgument: messageUrl ?? '',
+        actionRunsInBackground: true,
+        alwaysShowsSubtitle: true,
+        icon,
+        label: messageUrl ? '􀉣' : undefined,
+      };
+    }),
+  ];
 }
 
 function formatAmount(amount, numberFormat) {

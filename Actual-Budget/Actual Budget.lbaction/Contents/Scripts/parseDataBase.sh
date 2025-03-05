@@ -1,15 +1,28 @@
 #!/bin/bash
-# 
+#
 # Actual Budget Action for LaunchBar
 # by Christian Bender (@ptujec)
 # 2025-03-05
-# 
+#
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-# 
+#
 
-set -e  # Exit on error
+set -e # Exit on error
 
 DB_PATH="$1"
+CACHE_FILE="$2"
+
+# If cache file exists, compare modification times
+if [ -f "$CACHE_FILE" ]; then
+  DB_MOD=$(stat -f %m "$DB_PATH")
+  CACHE_MOD=$(stat -f %m "$CACHE_FILE")
+  if [ $CACHE_MOD -gt $DB_MOD ]; then
+    # Cache is newer than database, tell JavaScript to use cache
+    echo '{"useCache": true}'
+    exit 0
+  fi
+fi
+
 DB_DIR=$(dirname "$DB_PATH")
 TEMP_DB="${DB_DIR}/launchbar_$(basename "$DB_PATH")"
 
@@ -37,8 +50,8 @@ accounts=$(sqlite3 -json "$TEMP_DB" "
     AND accounts.offbudget = 0
     ORDER BY accounts.sort_order;" 2>&1)
 if [ $? -ne 0 ]; then
-    echo "Error querying accounts: $accounts" >&2
-    accounts="[]"
+  echo "Error querying accounts: $accounts" >&2
+  accounts="[]"
 fi
 
 transactions=$(sqlite3 -json "$TEMP_DB" "
@@ -60,8 +73,8 @@ transactions=$(sqlite3 -json "$TEMP_DB" "
     ORDER BY t.date DESC 
     LIMIT 150;" 2>&1)
 if [ $? -ne 0 ]; then
-    echo "Error querying transactions: $transactions" >&2
-    transactions="[]"
+  echo "Error querying transactions: $transactions" >&2
+  transactions="[]"
 fi
 
 # Get number format preference
@@ -71,8 +84,8 @@ numberFormat=$(sqlite3 -json "$TEMP_DB" "
         'comma-dot'
     ) as value;" 2>&1)
 if [ $? -ne 0 ]; then
-    echo "Error querying number format preference: $numberFormat" >&2
-    numberFormat="[]"
+  echo "Error querying number format preference: $numberFormat" >&2
+  numberFormat="[]"
 fi
 
 # Get date format preference
@@ -82,13 +95,14 @@ dateFormat=$(sqlite3 -json "$TEMP_DB" "
         'MM-dd-yyyy'
     ) as value;" 2>&1)
 if [ $? -ne 0 ]; then
-    echo "Error querying date format preference: $dateFormat" >&2
-    dateFormat="[]"
+  echo "Error querying date format preference: $dateFormat" >&2
+  dateFormat="[]"
 fi
 
 # Output JSON
 jq -n --argjson accounts "$accounts" --argjson transactions "$transactions" --argjson numberFormat "$numberFormat" --argjson dateFormat "$dateFormat" \
-    '{ 
+  '{ 
+        useCache: false,
         accounts: $accounts, 
         transactions: $transactions, 
         numberFormat: ($numberFormat[0].value // "comma-dot"),
