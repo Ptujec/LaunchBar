@@ -100,10 +100,10 @@ if let screenshotURL = takeScreenshot() {
             let notification = content.notification
             notify(notification.text, callback: notification.callback)
         } else {
-            notify("No QR code found in the selected area")
+            notify("No QR code found in the selected area!")
         }
     } else {
-        notify("Failed to process screenshot")
+        notify("Failed to process screenshot!")
     }
     try? FileManager.default.removeItem(at: screenshotURL)
 }
