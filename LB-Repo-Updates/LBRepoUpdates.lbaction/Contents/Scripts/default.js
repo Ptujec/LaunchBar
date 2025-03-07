@@ -83,8 +83,8 @@ function checkForUpdates() {
   );
 
   const results = readResultsPlist();
-  LaunchBar.log('results: ', JSON.stringify(results));
-  LaunchBar.log('repos: ', JSON.stringify(repos));
+  // LaunchBar.log('results: ', JSON.stringify(results));
+  // LaunchBar.log('repos: ', JSON.stringify(repos));
 
   if (!results) return LaunchBar.alert('Error', 'Failed to parse results');
   if (results.error) return LaunchBar.alert('Error', results.error);

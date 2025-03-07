@@ -162,11 +162,10 @@ function locateDirectory() {
       return run();
     }
     const repoUrl = getRepoUrlFromConfig(`${path}/.git/config`);
-    const match = repoUrl?.match(/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);
-    if (match) {
-      const [, owner, name] = match;
-      addRepository({ name, owner, localPath: path, url: repoUrl });
-      autoIncludedRepo = name;
+    const repoInfo = repoUrl && parseRepoUrl(repoUrl);
+    if (repoInfo) {
+      addRepository({ ...repoInfo, localPath: path, url: repoUrl });
+      autoIncludedRepo = repoInfo.name;
     }
   }
 
@@ -285,14 +284,13 @@ function readResultsPlist() {
 
 function parseRepoUrl(url) {
   const match = url.match(
-    /(?:(github|codeberg|gitlab))\.(?:com|org)\/([^\/]+)\/([^\/]+?)(?:\.git)?$/
+    /(?:(github|codeberg))\.(?:com|org)\/([^\/]+)\/([^\/]+?)(?:\.git)?$/
   );
   if (!match) return null;
   const [, host, owner, name] = match;
   const hostLabels = {
     github: 'GitHub',
     codeberg: 'Codeberg',
-    gitlab: 'GitLab',
   };
   return { name, owner, host: hostLabels[host] };
 }

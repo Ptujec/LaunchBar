@@ -36,7 +36,7 @@ Most [repos with LaunchBar actions](https://github.com/topics/launchbar?o=desc&s
 
 If you are new to Git, I recommend using [GitHub Desktop](https://github.com/apps/desktop). This should make adding repos locally ([cloning](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)) easier.
 
-All platforms should offer a URL that ends on `.git` somewhere on the main repo page. On GitHub click the green `Code` button. On Codeberg you can find it next to the blue `HTTP` button.
+Platforms that host repositories should offer a URL that ends with `.git` somewhere on the main repository page. On GitHub, click the green `Code` button. On Codeberg, you can find it next to the blue `HTTP` button.
 
 In GitHub Desktop then go to `File > Clone Repository…` and enter the URL. 
 
@@ -46,11 +46,13 @@ The URL for this repo is:
 https://github.com/Ptujec/LaunchBar.git. 
 ```
 
+**NOTE:** Currently, the action only correctly handles repositories hosted on GitHub or Codeberg.
+
 ## Requirements
 
 1) **[Git](https://git-scm.com)**. Check if it is installed with the terminal command `git -v`. If not, an easy solution is to install [GitHub Desktop](https://github.com/apps/desktop) as this will also install git in the process.
 
-2) When detecting action changes in repos, this action tries to initiate the **[Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates)** action. So, you need to install that action as well. 
+2) When detecting action changes in repos, this action tries to initiate the **[Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates)** action. So, you need to install that action as well.
 
 ## Download
 
