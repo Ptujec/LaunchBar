@@ -4,7 +4,7 @@
 
 This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action. 
 
-<img src="02.jpg" width="750"/>
+<img src="02.jpg" width="500"/>
 
 ## How It Works
 
