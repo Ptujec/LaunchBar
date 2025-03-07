@@ -1,4 +1,11 @@
 #!/bin/bash
+# 
+# LB Repo Updates Action for LaunchBar
+# by Christian Bender (@ptujec)
+# 2025-03-06
+# 
+# Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+# 
 
 maxdepth="$1"
 shift

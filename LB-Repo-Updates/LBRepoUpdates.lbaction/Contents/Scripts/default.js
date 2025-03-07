@@ -1,7 +1,7 @@
 /* 
 LB Repo Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-22
+2025-03-06
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -83,11 +83,11 @@ function checkForUpdates() {
   );
 
   const results = readResultsPlist();
+  LaunchBar.log('results: ', JSON.stringify(results));
+  LaunchBar.log('repos: ', JSON.stringify(repos));
 
-  if (!results || results.error) {
-    LaunchBar.alert('Error', results.error || 'Failed to parse results');
-    return;
-  }
+  if (!results) return LaunchBar.alert('Error', 'Failed to parse results');
+  if (results.error) return LaunchBar.alert('Error', results.error);
 
   processResults(repos, results, repoCount);
 }

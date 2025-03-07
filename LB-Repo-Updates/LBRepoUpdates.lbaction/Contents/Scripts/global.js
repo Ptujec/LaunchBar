@@ -1,7 +1,7 @@
 /* 
 LB Repo Updates Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-22
+2025-03-06
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -279,7 +279,7 @@ function validateCollectionDirs() {
 
 function readResultsPlist() {
   const plistPath = `${Action.supportPath}/RepoResults.plist`;
-  if (!File.exists(plistPath)) return null;
+  if (!File.exists(plistPath)) return;
   return File.readPlist(plistPath);
 }
 
