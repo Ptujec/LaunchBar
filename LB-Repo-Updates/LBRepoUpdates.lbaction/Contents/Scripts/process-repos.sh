@@ -57,9 +57,7 @@ echo "========================================" >> "$log_file"
 
         tracking_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)" 2>/dev/null)
         if [ -z "$tracking_branch" ]; then
-            echo "ℹ️  No upstream branch configured" >> "$log_file"
-            output_status "$repo_path" --arg branch "$branch" \
-                '{"branch": $branch, "hasUpstream": false}'
+            echo "⚠️ No upstream branch configured" >> "$log_file"
             continue
         fi
 

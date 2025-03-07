@@ -24,7 +24,6 @@ function run() {
           subtitle:
             'Pulls updates from selected repos and runs "Local Action Updates"',
           alwaysShowsSubtitle: true,
-          // icon: 'downTemplate',
           icon: File.readPlist(`${Action.path}/Contents/info.plist`)
             ?.CFBundleIconFile,
           action: 'checkForUpdates',
@@ -83,8 +82,6 @@ function checkForUpdates() {
   );
 
   const results = readResultsPlist();
-  // LaunchBar.log('results: ', JSON.stringify(results));
-  // LaunchBar.log('repos: ', JSON.stringify(repos));
 
   if (!results) return LaunchBar.alert('Error', 'Failed to parse results');
   if (results.error) return LaunchBar.alert('Error', results.error);
@@ -99,7 +96,10 @@ function processResults(repos, results, repoCount) {
       const result = results[repo.localPath];
 
       if (!result) {
-        LaunchBar.log(`Skipping undefined result for repo: ${repo.name}`);
+        acc.skippedRepos += 1;
+        LaunchBar.log(
+          `Skipping undefined result for repo: ${repo.url}. Probably because it has no upstream.`
+        );
         return acc;
       }
 
@@ -128,6 +128,7 @@ function processResults(repos, results, repoCount) {
       failedUpdates: [],
       hasAnyActionUpdates: false,
       hasStashedChanges: false,
+      skippedRepos: 0,
     }
   );
 
@@ -148,6 +149,8 @@ function processResults(repos, results, repoCount) {
 
   const summaryLines = [
     `${repoCount} repo${repoCount === 1 ? '' : 's'}${
+      stats.skippedRepos > 0 ? ` (${stats.skippedRepos} skipped)` : ''
+    }${
       stats.totalBehind + stats.totalAhead > 0
         ? `, ${stats.totalBehind + stats.totalAhead} change(s)`
         : ''
