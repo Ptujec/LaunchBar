@@ -98,6 +98,11 @@ function processResults(repos, results, repoCount) {
     (acc, [_, repo]) => {
       const result = results[repo.localPath];
 
+      if (!result) {
+        LaunchBar.log(`Skipping undefined result for repo: ${repo.name}`);
+        return acc;
+      }
+
       if (result.behindBy > 0) {
         acc.totalBehind += result.behindBy;
         if (result.pullSuccess) {
