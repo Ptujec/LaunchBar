@@ -16,11 +16,21 @@ function findActions(paths) {
     '*.lbaction',
     '-type',
     'd',
+    '-exec',
+    'stat',
+    '-f',
+    '%Sm||%N', // Returns modification date and path separated by |
+    '{}',
+    ';',
   ];
 
   return LaunchBar.execute(...args)
     .trim()
-    .split('\n');
+    .split('\n')
+    .map((line) => {
+      const [date, path] = line.split('||');
+      return { date: new Date(date), path };
+    });
 }
 
 function findTargetActions(path) {

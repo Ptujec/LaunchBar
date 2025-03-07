@@ -72,8 +72,12 @@ function handleInputPath(folderPath) {
 }
 
 function scanForUpdates(folderPath) {
-  const { inputPaths, targetIDMap } = getActionPaths(folderPath);
-  const scanResults = processActionPaths(inputPaths, targetIDMap);
+  const { inputPaths, targetIDMap, creationDates } = getActionPaths(folderPath);
+  const scanResults = processActionPaths(
+    inputPaths,
+    targetIDMap,
+    creationDates
+  );
   const { newIDs } = compareBundleIDs(scanResults.bundleIDs);
 
   return {

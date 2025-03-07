@@ -7,12 +7,16 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 const actionsDir = `${LaunchBar.homeDirectory}/Library/Application Support/LaunchBar/Actions`;
-const reportDir = `/private/tmp/`; // `${Action.supportPath}/reports/`;
+const reportDir = `/private/tmp/`;
 
 function getActionPaths(folderPath) {
-  const inputPaths = findActions(folderPath);
-  const targetPaths = findTargetActions(actionsDir); // because of performance
+  const inputPathsWithDates = findActions(folderPath);
+  const inputPaths = inputPathsWithDates.map((item) => item.path);
+  const creationDates = new Map(
+    inputPathsWithDates.map((item) => [item.path, item.date])
+  );
 
+  const targetPaths = findTargetActions(actionsDir);
   const targetIDMap = new Map(
     targetPaths
       .map((targetPath) => {
@@ -26,11 +30,10 @@ function getActionPaths(folderPath) {
       .filter(Boolean)
   );
 
-  return { inputPaths, targetIDMap };
+  return { inputPaths, targetIDMap, creationDates };
 }
 
-function processActionPaths(inputPaths, targetIDMap) {
-  // First, group and filter actions by bundle ID
+function processActionPaths(inputPaths, targetIDMap, creationDates) {
   const inputActions = inputPaths
     .filter((inputPath) => File.exists(`${inputPath}/Contents/Info.plist`))
     .reduce((groups, inputPath) => {
@@ -42,6 +45,7 @@ function processActionPaths(inputPaths, targetIDMap) {
         inputPath,
         inputVersion: inputPlist.CFBundleVersion ?? 'unknown'.localize(),
         minSystemVersion: inputPlist.LSMinimumSystemVersion || null,
+        creationDate: creationDates?.get(inputPath),
       };
 
       if (!groups.has(inputID)) {
@@ -235,11 +239,18 @@ function isCompatibleWithSystem(minSystemVersion) {
 }
 
 function generateActionsList(actions, isInstalled = false) {
-  return actions
-    .map(([_, data]) =>
-      isInstalled
-        ? generateActionHtml(data, 'installed')
-        : generateActionHtml(data[0], 'notInstalled')
+  if (!isInstalled) {
+    actions = [...actions].sort(
+      ([, a], [, b]) => (b[0]?.creationDate || 0) - (a[0]?.creationDate || 0)
+    );
+  }
+
+  return [...actions]
+    .map(([, data]) =>
+      generateActionHtml(
+        isInstalled ? data : data[0],
+        isInstalled ? 'installed' : 'notInstalled'
+      )
     )
     .filter(Boolean)
     .join('\n\n');
