@@ -2,7 +2,9 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This is a simple action that lets you scan QR codes. Launching the action will bring up [the standard screenshot UI](https://support.apple.com/en-us/102646#portion). 
+This is a simple action that lets you scan QR codes. The action will send a notification that, depending on the QR code content, is clickable.
+
+Launching the action will bring up [the standard screenshot UI](https://support.apple.com/en-us/102646#portion). 
 
 <img src="01.jpg" width="205"/> 
 
@@ -15,8 +17,6 @@ Instead of selecting an area, you can also select the entire window that contain
 <img src="03.jpg" width="205"/> 
 
 If there is just one QR code visible on your screen, you can hold `command` while launching the action to capture the entire screen for scanning the QR code.
-
-The action will send a notification that, depending on the QR code content, is clickable.
 
 ## Setup (IMPORTANT!)
 
