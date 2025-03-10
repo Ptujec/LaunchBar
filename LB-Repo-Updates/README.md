@@ -2,7 +2,7 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action. 
+This action completes the idea behind my [Local Action Updates](https://github.com/Ptujec/LaunchBar/tree/master/Local-Action-Updates) action: a simple and fast way to update custom LaunchBar actions, that are shared in repositories like this one. 
 
 <img src="02.jpg" width="500"/>
 
