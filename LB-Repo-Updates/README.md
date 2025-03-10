@@ -10,15 +10,15 @@ This action completes the idea behind my [Local Action Updates](https://github.c
 
 Even though there are two actions involved, it is one simple and largely automatic flow:
 
-**Action 1: LaunchBar Repo Updates**
+**Action 1: LaunchBar Repo Updates:**
 
 1) Checks and updates included repositories.
 
 2) If a repository has new or updated LaunchBar actions, it automatically runs action 2.
 
-**Action 2: Local Action Updates**
+**Action 2: Local Action Updates:**
 
-3) Compares the actions in the repositories included in action 1 with the actions you have installed locally.
+3) Compares the actions in the repositories included in action 1 with your installed actions.
 
 4) Offers to update installed actions if a newer version is available.
 
