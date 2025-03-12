@@ -25,14 +25,43 @@ struct LocalizedStrings {
     private static let lang = Locale.preferredLanguages[0].components(separatedBy: "-")[0]
     
     static let contactAccessDenied = lang == "de" 
-        ? "Kontaktzugriff verweigert (⏎)" 
-        : "Contact Access Denied (⏎)"
+        ? "Kontaktzugriff verweigert!" 
+        : "Contact Access Denied"
     static let contactAccessRequired = lang == "de"
-        ? "Kontaktzugriff erforderlich (⏎)"
-        : "Contact Access Required (⏎)"
+        ? "Kontaktzugriff erforderlich!"
+        : "Contact Access Required"
     static let contactAccessSubtitle = lang == "de"
-        ? "Systemeinstellungen → Datenschutz & Sicherheit → Kontakte"
-        : "System Settings → Privacy & Security → Contacts"
+        ? "Systemeinstellungen → Datenschutz & Sicherheit → Kontakte\n(Klicken zum Öffnen!)"
+        : "System Settings → Privacy & Security → Contacts\n(Click to open!)"
+    static let noContactFound = lang == "de"
+        ? "Kontakt nicht gefunden"
+        : "Contact Not Found"
+    static let noContactInfo = lang == "de"
+        ? "Keine Kontaktinformationen verfügbar"
+        : "No Contact Information Available"
+}
+
+// MARK: - AppleScript Helpers
+
+func executeAppleScript(_ source: String) {
+    if let scriptObject = NSAppleScript(source: source) {
+        var error: NSDictionary?
+        scriptObject.executeAndReturnError(&error)
+    }
+}
+
+func showLaunchBarNotification(title: String, message: String, callbackURL: String? = nil) {
+    var script = """
+        tell application "LaunchBar"
+            display in notification center "\(message)" with title "\(title)"
+        """
+    
+    if let url = callbackURL {
+        script += " callback URL \"\(url)\""
+    }
+    
+    script += "\nend tell"
+    executeAppleScript(script)
 }
 
 // MARK: - Contact Management
@@ -43,11 +72,24 @@ final class ContactManager {
     
     func messageContact(name: String) async throws {
         let contacts = try fetchContacts(matching: name)
-        guard let contact = contacts.first else { return }
-        
-        if let contactInfo = extractContactInfo(from: contact) {
-            try await sendMessage(to: contactInfo)
+        guard !contacts.isEmpty else {
+            showLaunchBarNotification(
+                title: LocalizedStrings.noContactFound,
+                message: name
+            )
+            return
         }
+        
+        let contact = contacts[0]
+        guard let contactInfo = extractContactInfo(from: contact) else {
+            showLaunchBarNotification(
+                title: LocalizedStrings.noContactInfo,
+                message: "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
+            )
+            return
+        }
+        
+        try await sendMessage(to: contactInfo)
     }
     
     private func fetchContacts(matching name: String) throws -> [CNContact] {
@@ -95,34 +137,31 @@ struct MessageContactAction {
     static func main() async throws {
         // Check authorization
         let status = CNContactStore.authorizationStatus(for: .contacts)
+        let settingsURL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"
         
         if status == .notDetermined {
             let store = CNContactStore()
             guard try await store.requestAccess(for: .contacts) else {
-                print("""
-                    [{  "title": "\(LocalizedStrings.contactAccessDenied)",
-                        "subtitle": "\(LocalizedStrings.contactAccessSubtitle)",
-                        "alwaysShowsSubtitle": true,
-                        "icon": "alert",
-                        "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"}]
-                    """)
+                showLaunchBarNotification(
+                    title: LocalizedStrings.contactAccessDenied,
+                    message: LocalizedStrings.contactAccessSubtitle,
+                    callbackURL: settingsURL
+                )
                 return
             }
         }
         
         guard status == .authorized else {
-            print("""
-                [{  "title": "\(LocalizedStrings.contactAccessRequired)",
-                    "subtitle": "\(LocalizedStrings.contactAccessSubtitle)",
-                    "alwaysShowsSubtitle": true,
-                    "icon": "alert",
-                    "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"}]
-                """)
+            showLaunchBarNotification(
+                title: LocalizedStrings.contactAccessRequired,
+                message: LocalizedStrings.contactAccessSubtitle,
+                callbackURL: settingsURL
+            )
             return
         }
         
         // Hide LaunchBar
-        NSAppleScript(source: "tell application \"LaunchBar\" to hide")?.executeAndReturnError(nil)
+        executeAppleScript("tell application \"LaunchBar\" to hide")
         
         // Process arguments
         let arguments = Array(CommandLine.arguments.dropFirst())

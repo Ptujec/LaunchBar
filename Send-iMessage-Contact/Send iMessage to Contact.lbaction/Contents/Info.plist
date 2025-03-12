@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Send iMessage to Contact</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.2</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -33,13 +33,11 @@
 			<array>
 				<string>string</string>
 			</array>
-			<key>LBKeepWindowActive</key>
-			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBReturnsResult</key>
+			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.swift</string>
