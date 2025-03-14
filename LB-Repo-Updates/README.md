@@ -57,3 +57,9 @@ https://github.com/Ptujec/LaunchBar.git.
 ## Download
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. However, the point of this action is that you don't have to do that manually for every new action or update.
+
+## Support
+
+If you like what I am doing, please spread the word. You can also **sponsor** my LaunchBar projects via [Buy me a coffee](https://www.buymeacoffee.com/ptujec) or [PayPal](https://www.paypal.com/donate/?business=J3RS8S74NDJPU&no_recurring=0&currency_code=EUR). Thanks! ♥️
+
+<a href="https://www.buymeacoffee.com/ptujec" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
