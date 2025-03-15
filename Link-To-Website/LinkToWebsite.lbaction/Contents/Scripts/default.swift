@@ -73,6 +73,23 @@ func createAttributedString(text: String, url: String = "") -> NSAttributedStrin
     return attributedString
 }
 
+// MARK: - Title Cleaning
+
+func cleanTitle(_ title: String) -> String {
+    var cleanedTitle = title
+    
+    // Remove YouTube notification count at start
+    cleanedTitle = cleanedTitle.replacingOccurrences(of: #"^\(\d+\)\s*"#, with: "", options: .regularExpression)
+    
+    // Remove " - YouTube" at the end
+    cleanedTitle = cleanedTitle.replacingOccurrences(of: #"\s*-\s*YouTube$"#, with: "", options: .regularExpression)
+    
+    // Remove other common patterns if needed
+    // Add more patterns here as needed
+    
+    return cleanedTitle.trimmingCharacters(in: .whitespaces)
+}
+
 // MARK: - Browser Information Retrieval
 
 func getBrowserInfo(browser: String, customTitle: String?) throws -> (url: String, title: String) {
@@ -149,7 +166,8 @@ func main() {
         }
         
         let info = try getBrowserInfo(browser: browser, customTitle: customTitle)
-        copyToClipboard(title: info.title, url: info.url)
+        let cleanedTitle = cleanTitle(info.title)
+        copyToClipboard(title: cleanedTitle, url: info.url)
         executePaste()
     } catch {
         NSLog("Error: \(error.localizedDescription)")
