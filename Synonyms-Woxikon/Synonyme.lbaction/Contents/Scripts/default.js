@@ -51,17 +51,13 @@ function getSynonyms({ argument, url }) {
     resultType: 'text',
   }).data;
 
-  // File.writeText(html, Action.supportPath + '/test2.html');
-  // return;
-  // const html = File.readText(`${Action.supportPath}/test2.html`);
-
   const groups = html
     .replace(/(\n|\s+)/gm, ' ')
     .match(/<li class="synonyms-list-item.*?<\/li>/g);
 
-  // File.writeText(groups.join('\n'), Action.supportPath + '/test.html');
+  // File.writeText(groups.join('\n'), `${Action.supportPath}/test.html`);
 
-  const result = groups.map((group) => {
+  const processGroup = (group) => {
     const meaning = group.match(/<b>(.*?)<\/b>/)?.[1] || '';
     const synMatch =
       group.match(/<div class="upper-synonyms">(.*?)<\/div>/)?.[1] || '';
@@ -72,31 +68,42 @@ function getSynonyms({ argument, url }) {
         ?.map((match) => match.replace(/<[^>]+>/g, '').trim())
         .filter(Boolean) || [];
 
-    return {
-      title: meaning,
-      subtitle: synonyms.join(' - '),
-      // label: argument,
-      alwaysShowsSubtitle: true,
-      icon: 'equalTemplate',
-      action: 'showSynonyms',
-      actionArgument: { synonyms, meaning, url },
-      actionReturnsItems: true,
-    };
-  });
-  return result;
+    return { meaning, synonyms };
+  };
+
+  const { meaning, synonyms } = processGroup(groups[0]);
+
+  return groups.length === 1
+    ? synonyms.map((synonym) => createSynonymItem(synonym, meaning, url))
+    : groups.map((group) => {
+        const { meaning, synonyms } = processGroup(group);
+        return {
+          title: meaning,
+          subtitle: synonyms.join(' · '),
+          alwaysShowsSubtitle: true,
+          icon: 'equalTemplate',
+          action: 'showSynonyms',
+          actionArgument: { synonyms, meaning, url },
+          actionReturnsItems: true,
+        };
+      });
 }
 
 function showSynonyms({ synonyms, meaning, url }) {
   if (LaunchBar.options.commandKey) return LaunchBar.openURL(url);
   if (LaunchBar.options.shiftKey) return LaunchBar.paste(meaning);
 
-  return synonyms.map((synonym) => ({
+  return synonyms.map((synonym) => createSynonymItem(synonym, meaning, url));
+}
+
+function createSynonymItem(synonym, meaning, url) {
+  return {
     title: synonym,
     label: meaning,
     icon: 'equalTemplate',
     action: 'doSomething',
     actionArgument: { url, synonym },
-  }));
+  };
 }
 
 function doSomething({ url, synonym }) {
