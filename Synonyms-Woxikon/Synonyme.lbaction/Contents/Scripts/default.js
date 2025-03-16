@@ -56,19 +56,21 @@ function getSynonyms({ argument, url }) {
   // const html = File.readText(`${Action.supportPath}/test2.html`);
 
   const groups = html
-    .replace(/(\r\n|\n|\r|\s+)/gm, ' ')
+    .replace(/(\n|\s+)/gm, ' ')
     .match(/<li class="synonyms-list-item.*?<\/li>/g);
 
-  File.writeText(groups.join('\n'), Action.supportPath + '/test.html');
+  // File.writeText(groups.join('\n'), Action.supportPath + '/test.html');
 
   const result = groups.map((group) => {
     const meaning = group.match(/<b>(.*?)<\/b>/)?.[1] || '';
     const synMatch =
       group.match(/<div class="upper-synonyms">(.*?)<\/div>/)?.[1] || '';
-    const synonyms = synMatch
-      .replace(/<[^>]+>/g, '')
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
+
+    const synonyms =
+      synMatch
+        .match(/<(?:i|span class="text-black"|a)[^>]*>(.*?)<\/(?:i|span|a)>/g)
+        ?.map((match) => match.replace(/<[^>]+>/g, '').trim())
+        .filter(Boolean) || [];
 
     return {
       title: meaning,
