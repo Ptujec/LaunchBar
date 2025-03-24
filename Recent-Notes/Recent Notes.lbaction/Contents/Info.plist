@@ -5,11 +5,11 @@
 	<key>CFBundleIconFile</key>
 	<string>com.apple.Notes</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.SearchNotes</string>
+	<string>ptujec.LaunchBar.action.RecentNotes</string>
 	<key>CFBundleName</key>
-	<string>Search Notes</string>
+	<string>Recent Notes</string>
 	<key>CFBundleVersion</key>
-	<string>1.2</string>
+	<string>1.0</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.Notes</string>
 	<key>LBDescription</key>
@@ -17,13 +17,13 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Search-Notes</string>
+		<string></string>
 		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Search-Notes/Search%20Notes.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-Notes/Recent20%Notes.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-Notes</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.apple.Notes</string>
@@ -31,20 +31,14 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
-			<key>LBAcceptedArgumentTypes</key>
-			<array>
-				<string>string</string>
-			</array>
 			<key>LBKeepWindowActive</key>
-			<true/>
-			<key>LBRequiresArgument</key>
 			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 </dict>
