@@ -37,12 +37,22 @@ function formatNotes(notes) {
     ? notes
     : notes.filter((note) => note.folder !== 'Recently Deleted');
 
-  return filteredNotes.map((note) => ({
-    title: note.title || 'Untitled',
-    subtitle: note.modifiedAt ? new Date(note.modifiedAt).toLocaleString() : '',
-    label: note.folder || '',
-    alwaysShowsSubtitle: true,
-    icon: 'com.apple.Notes',
-    url: `notes://showNote?identifier=${note.id}`,
-  }));
+  return filteredNotes.map((note) => {
+    const date = note.modifiedAt
+      ? LaunchBar.formatDate(new Date(note.modifiedAt), {
+          relativeDateFormatting: true,
+          timeStyle: 'short',
+          dateStyle: 'full',
+        })
+      : '';
+
+    return {
+      title: note.title || 'Untitled',
+      subtitle: date,
+      label: note.folder || '',
+      alwaysShowsSubtitle: true,
+      icon: 'com.apple.Notes',
+      url: `notes://showNote?identifier=${note.id}`,
+    };
+  });
 }

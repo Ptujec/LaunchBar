@@ -28,9 +28,10 @@ notes=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     AND ZMARKEDFORDELETION != 1
     ORDER BY ZMODIFICATIONDATE1 DESC;" 2>&1)
 
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 ] || [ -z "$notes" ]; then
     echo "Error querying notes: $notes" >&2
-    notes="[]"
+    echo "[]"
+    exit 0
 fi
 
 echo "$notes"
