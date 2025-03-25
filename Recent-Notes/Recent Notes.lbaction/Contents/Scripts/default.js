@@ -4,6 +4,9 @@ by Christian Bender (@ptujec)
 2025-03-24
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+TODO:
+- pinnend label/badge … show on top
 */
 
 const databasePath = `${LaunchBar.homeDirectory}/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`;
@@ -37,6 +40,9 @@ function formatNotes(notes) {
     ? notes
     : notes.filter((note) => note.folder !== 'Recently Deleted');
 
+  const uniqueFolders = new Set(filteredNotes.map((note) => note.folder)).size;
+  const showLabel = uniqueFolders > 1;
+
   return filteredNotes.map((note) => {
     const date = note.modifiedAt
       ? LaunchBar.formatDate(new Date(note.modifiedAt), {
@@ -49,8 +55,8 @@ function formatNotes(notes) {
     return {
       title: note.title || 'Untitled',
       subtitle: date,
-      label: note.folder || '',
       alwaysShowsSubtitle: true,
+      label: showLabel ? note.folder : undefined,
       icon: 'com.apple.Notes',
       url: `notes://showNote?identifier=${note.id}`,
     };
