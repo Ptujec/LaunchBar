@@ -40,62 +40,77 @@ function showDrafts(argument) {
 }
 
 function formatDrafts(drafts, searchTerm) {
-  const sortedDrafts = drafts.sort((a, b) => {
-    const regex = new RegExp(searchTerm, 'gi');
-    const aMatches = ((a.title || '').match(regex) || []).length;
-    const bMatches = ((b.title || '').match(regex) || []).length;
+  const regex = new RegExp(searchTerm, 'gi');
 
-    return bMatches - aMatches;
-  });
+  return drafts
+    .map(({ content, flag, id }) => {
+      const [title = '', ...lines] = content.split('\n');
+      const matchingLine = lines.find((line) =>
+        line.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
-  return sortedDrafts.map((draft) => {
-    let subtitle = '';
-    if (draft.content && searchTerm) {
-      const matchingLine = draft.content
-        .split('\n')
-        .find((line) => line.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      if (matchingLine) {
-        const context = getContextAroundTerm(matchingLine, searchTerm);
-        if (context) {
-          subtitle = context;
-        }
-      }
-    }
-
-    return {
-      title: draft.title,
-      subtitle: subtitle,
-      alwaysShowsSubtitle: true,
-      icon: 'iconTemplate',
-      url: `drafts://open?uuid=${draft.id}`,
-    };
-  });
+      return {
+        title,
+        subtitle: matchingLine
+          ? getContextAroundTerm(matchingLine, searchTerm)
+          : '',
+        alwaysShowsSubtitle: true,
+        label: flag ? '⚑' : undefined,
+        icon: 'iconTemplate',
+        url: `drafts://open?uuid=${id}`,
+        matches: (title.match(regex) || []).length,
+      };
+    })
+    .sort((a, b) => b.matches - a.matches);
 }
 
 function getContextAroundTerm(line, searchTerm) {
-  const words = line.split(/\s+/);
-  const searchWordIndex = words.findIndex((w) =>
-    w?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+  const words = line.trim().split(/\s+/);
+  const matchIndex = words.findIndex((word) =>
+    word.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  if (searchWordIndex === -1) return null;
+  if (matchIndex === -1) return '';
 
   const maxLen = 53;
-  let [start, end] = [searchWordIndex, searchWordIndex + 1];
-  let context = words[searchWordIndex];
+  const result = words[matchIndex];
+  const before = words.slice(0, matchIndex);
+  const after = words.slice(matchIndex + 1);
 
-  while ((start > 0 || end < words.length) && context.length < maxLen) {
-    const prevWord = words[start - 1];
-    const nextWord = words[end];
-    const canAddPrev =
-      start > 0 && context.length + prevWord.length + 1 <= maxLen;
-    const canAddNext =
-      end < words.length && context.length + nextWord.length + 1 <= maxLen;
+  const addWords = (text, words, isPrefix) => {
+    const wordList = isPrefix ? [...words].reverse() : words;
+    const [result, remaining] = wordList.reduce(
+      ([acc, remaining], word) => {
+        const withSpace = isPrefix ? `${word} ${acc}` : `${acc} ${word}`;
+        return withSpace.length <= maxLen
+          ? [withSpace, remaining.slice(1)]
+          : [acc, remaining];
+      },
+      [text, wordList]
+    );
 
-    if (!canAddPrev && !canAddNext) break;
-    if (canAddPrev) context = `${words[--start]} ${context}`;
-    if (canAddNext) context = `${context} ${words[end++]}`;
+    return [result, isPrefix ? remaining.reverse() : remaining];
+  };
+
+  let final,
+    remainingBefore = [],
+    remainingAfter = [];
+
+  if (matchIndex === 0) {
+    [final, remainingAfter] = addWords(result, after, false);
+  } else if (matchIndex === words.length - 1) {
+    [final, remainingBefore] = addWords(result, before, true);
+  } else {
+    [final, remainingBefore] = addWords(result, before, true);
+    [final, remainingAfter] = addWords(final, after, false);
   }
 
-  return `${start > 0 ? '…' : ''}${context}${end < words.length ? '…' : ''}`;
+  const fullText = [
+    remainingBefore.length ? '…' : '',
+    final,
+    remainingAfter.length && final.length + remainingAfter[0].length > maxLen
+      ? '…'
+      : '',
+  ].join('');
+
+  return fullText.length <= maxLen ? fullText.trim() : fullText;
 }

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Drafts</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.agiletortoise.Drafts-OSX</string>
 	<key>LBDescription</key>
@@ -21,7 +21,7 @@
 		<key>LBTwitter</key>
 		<string></string>
 		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Drafts/Search20%Drafts.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Drafts/Search%20Drafts.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Drafts</string>
 	</dict>
