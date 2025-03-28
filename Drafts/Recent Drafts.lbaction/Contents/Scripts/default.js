@@ -42,8 +42,11 @@ function formatDrafts(drafts) {
         })
       : '';
 
+    let title = draft.content.trim().split('\n')[0];
+    if (!title) return;
+
     return {
-      title: draft.title || 'Untitled',
+      title,
       subtitle: date,
       alwaysShowsSubtitle: true,
       label: draft.flag ? '⚑' : undefined,

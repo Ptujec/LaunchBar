@@ -19,7 +19,7 @@ fi
 
 drafts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     SELECT 
-        SUBSTR(ZCONTENT, 1, 30) as title,
+        ZCONTENT as content,
         ZUUID as id,
         datetime(ZMODIFIED_AT + 978307200, 'unixepoch') as modifiedAt,
         ZFLAGGED as flag
