@@ -40,33 +40,16 @@ function showDrafts(argument) {
 }
 
 function formatDrafts(drafts, searchTerm) {
-  const filteredDrafts = LaunchBar.options.commandKey
-    ? drafts
-    : drafts.filter((draft) => draft.folder !== 'Recently Deleted');
-
-  // Sort drafts based on title matches and date
-  const sortedDrafts = filteredDrafts.sort((a, b) => {
-    if (!searchTerm) return new Date(b.accessedAt) - new Date(a.accessedAt);
-
+  const sortedDrafts = drafts.sort((a, b) => {
     const regex = new RegExp(searchTerm, 'gi');
     const aMatches = ((a.title || '').match(regex) || []).length;
     const bMatches = ((b.title || '').match(regex) || []).length;
 
-    return bMatches !== aMatches
-      ? bMatches - aMatches
-      : new Date(b.accessedAt) - new Date(a.accessedAt);
+    return bMatches - aMatches;
   });
 
   return sortedDrafts.map((draft) => {
-    const date = draft.accessedAt
-      ? LaunchBar.formatDate(new Date(draft.accessedAt), {
-          relativeDateFormatting: true,
-          timeStyle: 'none',
-          dateStyle: 'short',
-        })
-      : '';
-
-    let subtitle = date;
+    let subtitle = '';
     if (draft.content && searchTerm) {
       const matchingLine = draft.content
         .split('\n')
@@ -75,7 +58,7 @@ function formatDrafts(drafts, searchTerm) {
       if (matchingLine) {
         const context = getContextAroundTerm(matchingLine, searchTerm);
         if (context) {
-          subtitle = `${date}: ${context}`;
+          subtitle = context;
         }
       }
     }
@@ -97,7 +80,7 @@ function getContextAroundTerm(line, searchTerm) {
   );
   if (searchWordIndex === -1) return null;
 
-  const maxLen = 30;
+  const maxLen = 53;
   let [start, end] = [searchWordIndex, searchWordIndex + 1];
   let context = words[searchWordIndex];
 

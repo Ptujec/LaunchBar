@@ -23,15 +23,8 @@ ESCAPED_TERM=$(echo "$SEARCH_TERM" | sed 's/"/""/g')
 
 drafts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     SELECT 
-        CASE 
-            WHEN INSTR(ZCONTENT, char(10)) > 0 
-            THEN SUBSTR(ZCONTENT, 1, INSTR(ZCONTENT, char(10)) - 1)
-            ELSE SUBSTR(ZCONTENT, 1, 30)
-        END as title,
+        SUBSTR(ZCONTENT, 1, COALESCE(NULLIF(INSTR(ZCONTENT, char(10)), 0), 30)) as title,
         ZUUID as id,
-        datetime(ZACCESSED_AT + 978307200, 'unixepoch') as accessedAt,
-        ZFLAGGED as flagged,
-        ZFOLDER as folder,
         ZCONTENT as content
     FROM ZMANAGEDDRAFT
     WHERE ZHIDDEN != 1
