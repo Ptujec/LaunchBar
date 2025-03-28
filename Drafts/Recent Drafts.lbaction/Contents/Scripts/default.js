@@ -33,15 +33,7 @@ function showDrafts() {
 }
 
 function formatDrafts(drafts) {
-  const filteredDrafts = LaunchBar.options.commandKey
-    ? drafts
-    : drafts.filter((draft) => draft.folder !== 'Recently Deleted');
-
-  const uniqueFolders = new Set(filteredDrafts.map((draft) => draft.folder))
-    .size;
-  const showLabel = uniqueFolders > 1;
-
-  return filteredDrafts.map((draft) => {
+  return drafts.map((draft) => {
     const date = draft.modifiedAt
       ? LaunchBar.formatDate(new Date(draft.modifiedAt), {
           relativeDateFormatting: true,
@@ -54,7 +46,7 @@ function formatDrafts(drafts) {
       title: draft.title || 'Untitled',
       subtitle: date,
       alwaysShowsSubtitle: true,
-      label: showLabel ? draft.folder : undefined,
+      label: draft.flag ? '⚑' : undefined,
       icon: 'iconTemplate',
       url: `drafts://open?uuid=${draft.id}`,
     };

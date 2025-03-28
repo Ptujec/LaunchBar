@@ -19,14 +19,10 @@ fi
 
 drafts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     SELECT 
-        CASE 
-            WHEN INSTR(ZCONTENT, char(10)) > 0 
-            THEN SUBSTR(ZCONTENT, 1, INSTR(ZCONTENT, char(10)) - 1)
-            ELSE SUBSTR(ZCONTENT, 1, 30)
-        END as title,
+        SUBSTR(ZCONTENT, 1, 30) as title,
         ZUUID as id,
         datetime(ZMODIFIED_AT + 978307200, 'unixepoch') as modifiedAt,
-        ZFLAGGED as flagged
+        ZFLAGGED as flag
     FROM ZMANAGEDDRAFT
     WHERE ZHIDDEN != 1
     AND ZFOLDER != 10000
