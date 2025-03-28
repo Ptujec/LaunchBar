@@ -44,7 +44,7 @@ function formatDrafts(drafts, searchTerm) {
 
   return drafts
     .map(({ content, flag, id }) => {
-      const [title = '', ...lines] = content.split('\n');
+      const [title = '', ...lines] = content.trim().split('\n');
       const matchingLine = lines.find((line) =>
         line.toLowerCase().includes(searchTerm.toLowerCase())
       );
