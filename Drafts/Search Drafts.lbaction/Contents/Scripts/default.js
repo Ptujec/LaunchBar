@@ -65,52 +65,39 @@ function formatDrafts(drafts, searchTerm) {
 }
 
 function getContextAroundTerm(line, searchTerm) {
-  const words = line.trim().split(/\s+/);
+  const words = line.trim().replace(/\s+/g, ' ').split(' ');
   const matchIndex = words.findIndex((word) =>
     word.toLowerCase().includes(searchTerm.toLowerCase())
   );
   if (matchIndex === -1) return '';
 
   const maxLen = 53;
-  const result = words[matchIndex];
-  const before = words.slice(0, matchIndex);
-  const after = words.slice(matchIndex + 1);
+  const matchWord = words[matchIndex];
+  if (matchWord.length > maxLen) return `${matchWord.slice(0, maxLen - 1)}…`;
 
-  const addWords = (text, words, isPrefix) => {
-    const wordList = isPrefix ? [...words].reverse() : words;
-    const [result, remaining] = wordList.reduce(
-      ([acc, remaining], word) => {
-        const withSpace = isPrefix ? `${word} ${acc}` : `${acc} ${word}`;
-        return withSpace.length <= maxLen
-          ? [withSpace, remaining.slice(1)]
-          : [acc, remaining];
-      },
-      [text, wordList]
-    );
+  let result = [matchWord];
+  let leftSpace = maxLen - matchWord.length;
+  let left = words.slice(0, matchIndex).reverse();
+  let right = words.slice(matchIndex + 1);
 
-    return [result, isPrefix ? remaining.reverse() : remaining];
-  };
+  while ((left.length || right.length) && leftSpace > 0) {
+    const [nextLeft] = left;
+    const [nextRight] = right;
+    const addLeft = nextLeft && nextLeft.length + 1 <= leftSpace;
+    const addRight = nextRight && nextRight.length + 1 <= leftSpace;
 
-  let final,
-    remainingBefore = [],
-    remainingAfter = [];
-
-  if (matchIndex === 0) {
-    [final, remainingAfter] = addWords(result, after, false);
-  } else if (matchIndex === words.length - 1) {
-    [final, remainingBefore] = addWords(result, before, true);
-  } else {
-    [final, remainingBefore] = addWords(result, before, true);
-    [final, remainingAfter] = addWords(final, after, false);
+    if (addLeft) {
+      result.unshift(left.shift());
+      leftSpace -= nextLeft.length + 1;
+    }
+    if (addRight && leftSpace > 0) {
+      result.push(right.shift());
+      leftSpace -= nextRight.length + 1;
+    }
+    if (!addLeft && !addRight) break;
   }
 
-  const fullText = [
-    remainingBefore.length ? '…' : '',
-    final,
-    remainingAfter.length && final.length + remainingAfter[0].length > maxLen
-      ? '…'
-      : '',
-  ].join('');
-
-  return fullText.length <= maxLen ? fullText.trim() : fullText;
+  return `${left.length ? '…' : ''}${result.join(' ')}${
+    right.length ? '…' : ''
+  }`;
 }
