@@ -14,7 +14,6 @@ function run(argument) {
   //   LaunchBar.openURL(`drafts://x-callback-url/search?query=${argument}`);
   //   return;
   // }
-
   return showDrafts(argument);
 }
 
@@ -23,8 +22,10 @@ function showDrafts(argument) {
     '/bin/bash',
     './parseDataBase.sh',
     databasePath,
-    argument || ''
+    encodeURIComponent(argument)
   );
+
+  // LaunchBar.log(result);
 
   if (!result) {
     LaunchBar.alert('Error reading database. No result.');
@@ -45,15 +46,16 @@ function formatDrafts(drafts, searchTerm) {
   return drafts
     .map(({ content, flag, id }) => {
       const [title = '', ...lines] = content.trim().split('\n');
-      const matchingLine = lines.find((line) =>
+      const matchingLine = [title, ...lines].find((line) =>
         line.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      const subtitle = matchingLine
+        ? getContextAroundTerm(matchingLine, searchTerm)
+        : '';
 
       return {
         title,
-        subtitle: matchingLine
-          ? getContextAroundTerm(matchingLine, searchTerm)
-          : '',
+        subtitle: subtitle !== title ? subtitle : '',
         alwaysShowsSubtitle: true,
         label: flag ? '⚑' : undefined,
         icon: 'iconTemplate',
