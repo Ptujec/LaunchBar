@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search in Maps</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.5</string>
+	<string>1.2.6</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.Maps</string>
 	<key>LBDescription</key>
@@ -19,7 +19,7 @@
 		<key>LBEmail</key>
 		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Search-Maps/Search%20in%20Maps.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>

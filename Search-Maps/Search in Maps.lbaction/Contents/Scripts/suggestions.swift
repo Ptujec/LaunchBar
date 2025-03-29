@@ -11,174 +11,100 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 import Foundation
 import MapKit
 
+// Structures for What3Words API
 struct Suggestion: Codable {
-    let country: String
     let nearestPlace: String
     let words: String
-    let rank: Int
-    let language: String
 }
 
 struct ApiResponse: Codable {
     let suggestions: [Suggestion]
 }
 
-let input = CommandLine.arguments[1]
-parseInputAndGenerateJson(input)
+// Constants
+let what3wordsRegex = try! NSRegularExpression(pattern: "(?:[a-züäöß]+\\.){2}[a-züäöß]+")
+let dividers = [" to ": ("to", "My Location"), " nach ": ("nach", "My Location"), 
+                " von ": ("nach", "Mein Standort"), " from ": ("to", "My Location")]
 
-func parseInput(_ input: String) -> (saddr: String?, daddr: String?, divider: String?) {
-    let dividers = [" to ", " nach ", " von ", " from "]
-    var saddr: String?
-    var daddr: String?
-    var divider: String?
-    var myLoc: String? = "My Location"
-
-    for div in dividers {
-        if input.contains(div) {
-            let parts = input.components(separatedBy: div)
-            if div == " to " || div == " nach " {
-                saddr = parts[0]
-                daddr = parts[1]
-                divider = div.trimmingCharacters(in: .whitespacesAndNewlines)
-            } else {
-                daddr = parts[0]
-                saddr = parts[1]
-
-                if div == " von " {
-                    divider = "nach"
-                    myLoc = "Mein Standort"
-                } else {
-                    divider = "to"
-                }
-            }
-            break
+// Parse input and generate suggestions
+func handleInput(_ input: String) {
+    // Check for route query (contains divider)
+    for (divider, (action, myLoc)) in dividers {
+        if input.contains(divider) {
+            let parts = input.components(separatedBy: divider)
+            let isReversed = divider == " from " || divider == " von "
+            let saddr = isReversed ? parts[1] : (parts[0].isEmpty ? myLoc : parts[0])
+            let daddr = isReversed ? parts[0] : parts[1]
+            
+            let saddrIcon = saddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil ? "w3wCircleTemplate" : "circleTemplate"
+            let daddrIcon = daddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil ? "w3wPinTemplate" : "pinTemplate"
+            
+            let output = [
+                ["title": saddr, "icon": saddrIcon],
+                ["title": action, "icon": "dotsTemplate"],
+                ["title": daddr, "icon": daddrIcon]
+            ]
+            print(String(data: try! JSONSerialization.data(withJSONObject: output), encoding: .utf8)!)
+            return
         }
     }
-
-    saddr = saddr?.isEmpty == true ? myLoc : saddr
-    return (saddr, daddr, divider)
-}
-
-func parseInputAndGenerateJson(_ input: String) {
-    let (saddr, daddr, divider) = parseInput(input)
-
-    if let saddr = saddr, let daddr = daddr, let divider = divider {
-        generateJsonWithDivider(saddr: saddr, daddr: daddr, divider: divider)
-    } else {
-        generateJsonWithoutDivider(input: input)
-    }
-}
-
-func generateJsonWithDivider(saddr: String, daddr: String, divider: String) {
-    // ... code for generating JSON with divider ...
-    let what3wordsRegex = try! NSRegularExpression(pattern: "(?:[a-züäöß]+\\.){2}[a-züäöß]+")
     
-    var saddrIcon = "circleTemplate"
-    var daddrIcon = "pinTemplate"
-    
-    if (saddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil) {
-        saddrIcon = "w3wCircleTemplate"
-    }
-    
-    if (daddr.range(of: what3wordsRegex.pattern, options: .regularExpression) != nil) {
-        daddrIcon = "w3wPinTemplate"
-    }
-    
-    let output = [
-        ["title": saddr, "icon": saddrIcon],
-        ["title": divider, "icon": "dotsTemplate"],
-        ["title": daddr, "icon": daddrIcon],
-    ]
-
-    let jsonData = try! JSONSerialization.data(withJSONObject: output)
-    if let jsonString = String(data: jsonData, encoding: .utf8) {
-        print(jsonString)
-    }
-}
-
-func generateJsonWithoutDivider(input: String) {
-    let what3wordsRegex = try! NSRegularExpression(pattern: "(?:[a-züäöß]+\\.){2}[a-züäöß]+")
-    
+    // Handle single location query
     if let what3words = input.range(of: what3wordsRegex.pattern, options: .regularExpression) {
-        showWhat3wordsSuggestions(what3words: String(input[what3words]))
+        fetchWhat3WordsSuggestions(String(input[what3words]))
     } else {
-        // Location Suggestions
-        let searchCompleter = MKLocalSearchCompleter()
-        let searchCompleterDelegate = SearchCompleterDelegate()
-        searchCompleter.delegate = searchCompleterDelegate
-        searchCompleter.queryFragment = input
-        searchCompleter.resultTypes = .address
-        
-        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
+        fetchLocationSuggestions(input)
     }
+}
+
+// Location suggestions using MKLocalSearchCompleter
+func fetchLocationSuggestions(_ query: String) {
+    let searchCompleter = MKLocalSearchCompleter()
+    let delegate = SearchCompleterDelegate()
+    searchCompleter.delegate = delegate
+    searchCompleter.queryFragment = query
+    searchCompleter.resultTypes = .address
+    RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
 }
 
 class SearchCompleterDelegate: NSObject, MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        var suggestionResults = [[String: Any]]()
-        var uniqueTitles = Set<String>()
-
-        completer.results.forEach { suggestion in
-            if !uniqueTitles.contains(suggestion.title) {
-                uniqueTitles.insert(suggestion.title)
-                suggestionResults.append(["title": suggestion.title, "icon": "pinTemplate"])
-            }
-        }
-
-        let jsonData = try! JSONSerialization.data(withJSONObject: suggestionResults)
-        if let jsonString = String(data: jsonData, encoding: .utf8) {
-            print(jsonString)
-        }
+        let suggestions = Array(Set(completer.results.map { $0.title }))
+            .map { ["title": $0, "icon": "pinTemplate"] }
+        print(String(data: try! JSONSerialization.data(withJSONObject: suggestions), encoding: .utf8)!)
     }
-
+    
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         print("Error: \(error.localizedDescription)")
     }
 }
 
-func showWhat3wordsSuggestions(what3words: String) {
-    var urlComponents = URLComponents(string: "https://mapapi.what3words.com/api/autosuggest")!
-    urlComponents.queryItems = [URLQueryItem(name: "input", value: what3words)]
-    let url = urlComponents.url!
-
-    var request = URLRequest(url: url)
-    request.httpMethod = "GET"
-
+// What3Words API suggestions
+func fetchWhat3WordsSuggestions(_ what3words: String) {
+    var components = URLComponents(string: "https://mapapi.what3words.com/api/autosuggest")!
+    components.queryItems = [URLQueryItem(name: "input", value: what3words)]
+    
     let semaphore = DispatchSemaphore(value: 0)
-
-    URLSession.shared.dataTask(with: request) { data, _, error in
-        if let error = error {
-            print("Error fetching data: \(error)")
+    URLSession.shared.dataTask(with: URLRequest(url: components.url!)) { data, _, error in
+        defer { semaphore.signal() }
+        
+        guard let data = data, error == nil else {
+            print("Error: \(error?.localizedDescription ?? "Unknown error")")
             return
         }
-        guard let data = data else {
-            print("No data received.")
-            return
-        }
-
+        
         do {
-            let decodedData = try JSONDecoder().decode(ApiResponse.self, from: data)
-            let w3wSuggs = decodedData.suggestions
-
-            var suggestions: [[String: Any]] = []
-
-            for item in w3wSuggs {
-                suggestions.append([
-                    "title": item.words,
-                    "subtitle": item.nearestPlace,
-                    "icon": "w3wPinTemplate",
-                ])
+            let response = try JSONDecoder().decode(ApiResponse.self, from: data)
+            let suggestions = response.suggestions.map {
+                ["title": $0.words, "subtitle": $0.nearestPlace, "icon": "w3wPinTemplate"]
             }
-
-            let jsonData = try JSONSerialization.data(withJSONObject: suggestions, options: [])
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print(jsonString)
-            }
+            print(String(data: try JSONSerialization.data(withJSONObject: suggestions), encoding: .utf8)!)
         } catch {
             print("Error decoding JSON: \(error)")
         }
-        semaphore.signal()
     }.resume()
     _ = semaphore.wait(timeout: .distantFuture)
-    //  RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.35))
 }
+
+// Main execution
+handleInput(CommandLine.arguments[1])
