@@ -6,75 +6,41 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-const globalStorePath =
-  '~/Library/Application Support/Actual/global-store.json';
+include('global.js');
 
 function run() {
-  const globalStoreJson = File.readJSON(globalStorePath);
-  const budgetDataPath = globalStoreJson['document-dir'];
-  const lastBudget = globalStoreJson.lastBudget;
-  const databasePath = `${budgetDataPath}/${lastBudget}/db.sqlite`;
+  if (LaunchBar.options.alternateKey) {
+    return showBudgets();
+  }
 
+  const { databasePath } = getBudgetInfo();
   if (!File.exists(databasePath)) {
     return LaunchBar.alert('Database not found');
   }
 
-  if (LaunchBar.options.commandKey) {
-    const contents = File.getDirectoryContents(budgetDataPath);
-
-    return contents
-      .map((item) => {
-        const badge = item === lastBudget ? '✓' : undefined;
-        const metadataPath = budgetDataPath + '/' + item + '/metadata.json';
-        const metadata = File.readJSON(metadataPath);
-        const title = metadata.budgetName;
-        return {
-          title,
-          icon: 'walletTemplate',
-          badge,
-          action: 'parseDataBase',
-          actionArgument: {
-            databasePath: `${budgetDataPath}/${item}/db.sqlite`,
-            lastBudget: item,
-          },
-          actionReturnsItems: true,
-          isLastBudget: item === lastBudget,
-        };
-      })
-      .sort((a, b) =>
-        a.isLastBudget
-          ? -1
-          : b.isLastBudget
-          ? 1
-          : a.title.localeCompare(b.title)
-      );
-  }
-
-  return parseDataBase({ databasePath, lastBudget });
+  return LaunchBar.options.commandKey
+    ? showCategories()
+    : showAccountsAndTransactions();
 }
 
-function parseDataBase({ databasePath, lastBudget }) {
-  const cacheFilePath = `${Action.supportPath}/db-cache-${lastBudget}.json`;
-
-  const result = LaunchBar.execute(
-    '/bin/bash',
-    './parseDataBase.sh',
-    databasePath,
-    cacheFilePath
-  );
-
-  try {
-    const data = JSON.parse(result);
-    if (data.useCache) return processData(File.readJSON(cacheFilePath));
-    File.writeJSON(data, cacheFilePath);
-    return processData(data);
-  } catch (error) {
-    LaunchBar.alert('Error parsing database:', error.message);
-    return;
+function handleBudgetSelection(arg) {
+  const { databasePath, budgetID } = arg;
+  if (!File.exists(databasePath)) {
+    return LaunchBar.alert('Database not found');
   }
+
+  // Use the selected budget's data directly without changing the default
+  return LaunchBar.options.commandKey
+    ? showCategories(databasePath, budgetID)
+    : showAccountsAndTransactions(databasePath, budgetID);
 }
 
-function processData(data) {
+// MARK: - Account & Transactions Display
+
+function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
+  const data = getDatabaseData(customDatabasePath, customBudgetID);
+  if (!data) return [];
+
   const { accounts, transactions, numberFormat, dateFormat } = data;
 
   return [
@@ -142,36 +108,43 @@ function processData(data) {
   ];
 }
 
-function formatAmount(amount, numberFormat) {
-  const locales = {
-    'dot-comma': 'de-DE',
-    'comma-dot': 'en-US',
-    'space-comma': 'sv-SE',
-    'apostrophe-dot': 'it-CH',
-    'comma-dot-in': 'en-IN',
-  };
+// MARK: - Category Display
 
-  const locale = locales[numberFormat] || 'en-US';
-  const formatter = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+function showCategories(customDatabasePath, customBudgetID) {
+  const data = getDatabaseData(customDatabasePath, customBudgetID);
+  if (!data || !data.categories || !data.categories.length) {
+    return [{ title: 'No categories found', icon: 'alert' }];
+  }
 
-  return formatter.format(amount / 100);
+  const { categories, zero_budgets, transactions, numberFormat } = data;
+
+  return categories
+    .filter((cat) => cat.name !== 'Starting Balances')
+    .map((cat) => {
+      const budgeted =
+        zero_budgets.find((b) => b.category === cat.id)?.budgeted || 0;
+      const balance = budgeted + getCategoryBalance(cat.id, transactions);
+      return {
+        title: cat.name,
+        subtitle: cat.group_name,
+        alwaysShowsSubtitle: true,
+        badge:
+          balance === budgeted
+            ? formatAmount(balance, numberFormat)
+            : `${formatAmount(balance, numberFormat)} (${formatAmount(
+                budgeted,
+                numberFormat
+              )})`,
+        icon: balance < 0 ? 'categoryRed' : 'categoryTemplate',
+        action: 'open',
+        actionArgument: '',
+        balance,
+      };
+    })
+    .sort((a, b) => (a.balance < 0 ? -1 : 1) - (b.balance < 0 ? -1 : 1));
 }
 
-function formatDate(dateString, format) {
-  const date = new Date(
-    String(dateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')
-  );
-
-  return format
-    .replace('yyyy', date.getFullYear())
-    .replace('MM', String(date.getMonth() + 1).padStart(2, '0'))
-    .replace('M', date.getMonth() + 1)
-    .replace('dd', String(date.getDate()).padStart(2, '0'))
-    .replace('d', date.getDate());
-}
+// MARK: - Interface Item Actions
 
 function open(arg) {
   LaunchBar.hide();
