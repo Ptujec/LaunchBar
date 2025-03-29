@@ -55,7 +55,7 @@ function formatNotes(notes) {
     return {
       title: note.title || 'Untitled',
       subtitle: date,
-      alwaysShowsSubtitle: true,
+      // alwaysShowsSubtitle: true,
       label: showLabel ? note.folder : undefined,
       icon: 'com.apple.Notes',
       url: `notes://showNote?identifier=${note.id}`,

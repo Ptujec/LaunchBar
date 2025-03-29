@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent Notes</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.Notes</string>
 	<key>LBDescription</key>
