@@ -26,7 +26,8 @@ drafts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     FROM ZMANAGEDDRAFT
     WHERE ZHIDDEN != 1
     AND ZFOLDER != 10000
-    ORDER BY ZACCESSED_AT DESC;" 2>&1)
+    ORDER BY ZACCESSED_AT DESC
+    LIMIT 20;" 2>&1)
 
 if [ $? -ne 0 ] || [ -z "$drafts" ]; then
     echo "Error querying drafts: $drafts" >&2
