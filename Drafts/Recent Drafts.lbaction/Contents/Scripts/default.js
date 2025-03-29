@@ -38,7 +38,7 @@ function formatDrafts(drafts) {
       ? LaunchBar.formatDate(new Date(draft.modifiedAt), {
           relativeDateFormatting: true,
           timeStyle: 'short',
-          dateStyle: 'full',
+          dateStyle: 'short',
         })
       : '';
 
@@ -48,7 +48,7 @@ function formatDrafts(drafts) {
     return {
       title,
       subtitle: date,
-      alwaysShowsSubtitle: true,
+      // alwaysShowsSubtitle: true,
       label: draft.flag ? '⚑' : undefined,
       icon: 'iconTemplate',
       url: `drafts://open?uuid=${draft.id}`,
