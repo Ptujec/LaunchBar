@@ -122,24 +122,25 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
 
   // ERROR HANDLING
   if (result.response == undefined) {
-    return { title: result.error, icon: 'alert' };
+    return { title: result.error || 'Unknown error occurred', icon: 'alert' };
   }
 
   if (result.response.status != 200) {
-    let details;
-    if (result.data != undefined) {
-      const data = JSON.parse(result.data);
-      if (data.error != undefined) {
-        details = data.error.message;
+    let errorMessage = result.response.localizedStatus;
+
+    try {
+      if (result.data) {
+        const data = JSON.parse(result.data);
+        if (data.error?.message) {
+          errorMessage = data.error.message;
+        }
       }
+    } catch (e) {
+      LaunchBar.log('Error parsing error response:', e);
     }
 
-    return {
-      title:
-        result.response.status + ': ' + details ??
-        result.response.localizedStatus,
-      icon: 'alert',
-    };
+    LaunchBar.alert(`${result.response.status}: ${errorMessage}`);
+    return;
   }
 
   // PARSE RESULT
