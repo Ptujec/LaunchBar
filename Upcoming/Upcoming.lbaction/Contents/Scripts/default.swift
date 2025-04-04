@@ -86,6 +86,9 @@ enum CalendarApp: String {
 
 struct LocalizedStrings {
     static let noEvents = Environment.lang.hasPrefix("de") ? "Keine Termine!" : "No events!"
+    static let noEventsInRange = Environment.lang.hasPrefix("de") 
+        ? "Keine Termine in den nächsten %d Tagen!"
+        : "No events in the next %d %@!"
     static let remainingDayFormat =
         Environment.lang.hasPrefix("de")
             ? "noch %d Tag%@"
@@ -127,8 +130,6 @@ struct LocalizedStrings {
     static let chooseCalendars = Environment.lang.hasPrefix("de") ? "Kalender auswählen" : "Choose Calendars"
     static let setRange = Environment.lang.hasPrefix("de") ? "Zeitraum festlegen" : "Set Range"
     static let openEventsIn = Environment.lang.hasPrefix("de") ? "Termine öffnen in…" : "Open Events In…"
-    static let daySingularShort = Environment.lang.hasPrefix("de") ? "Tag" : "day"
-    static let dayPluralShort = Environment.lang.hasPrefix("de") ? "Tage" : "days"
 }
 
 // MARK: - Utilities
@@ -235,7 +236,12 @@ final class CalendarManager: CalendarDataProvider {
         }
 
         return results.isEmpty
-            ? [["title": LocalizedStrings.noEvents, "icon": "alert.png"]]
+            ? [["title": Environment.lang.hasPrefix("de")
+                ? String(format: LocalizedStrings.noEventsInRange, Preferences.loadRangePreference())
+                : String(format: LocalizedStrings.noEventsInRange, 
+                        Preferences.loadRangePreference(),
+                        Preferences.loadRangePreference() == 1 ? LocalizedStrings.daySingular : LocalizedStrings.dayPlural),
+                "icon": "smileTemplate"]]
             : results
     }
 
@@ -858,9 +864,7 @@ struct UpcomingEventsAction {
     }
 
     private static func formatDayCount(_ days: Int, short: Bool = true) -> String {
-        let daySuffix = days == 1 ? 
-            (short ? LocalizedStrings.daySingularShort : LocalizedStrings.daySingular) :
-            (short ? LocalizedStrings.dayPluralShort : LocalizedStrings.dayPlural)
+        let daySuffix = days == 1 ? LocalizedStrings.daySingular : LocalizedStrings.dayPlural
         return String(format: "%d %@", days, daySuffix)
     }
 }

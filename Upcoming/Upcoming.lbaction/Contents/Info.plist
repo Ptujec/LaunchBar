@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Upcoming</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -38,6 +38,6 @@
 		</dict>
 	</dict>
 	<key>LBTextInputTitle</key>
-	<string> </string>
+	<string></string>
 </dict>
 </plist>
