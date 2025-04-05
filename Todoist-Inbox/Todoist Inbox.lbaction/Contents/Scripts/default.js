@@ -189,7 +189,6 @@ function advancedOptions(taskDict) {
   if (labelDict) {
     taskDict.usedLabels = [...usedLabels, labelDict];
 
-    // Get usage information
     const labelIndex = labels.findIndex(
       (item) => item.id === labelDict.labelId
     );
@@ -200,11 +199,10 @@ function advancedOptions(taskDict) {
     lastUsedLabelId = labels[labelIndex].lastUsedLabelId;
   }
 
-  // Remove used labels from labels list
-  if (usedLabels.includes(labelDict)) {
-    const usedLabelsNames = usedLabels.map((usedLabel) => usedLabel.labelName);
-    labels = labels.filter((label) => !usedLabelsNames.includes(label.name));
-  }
+  const usedLabelsNames = taskDict.usedLabels
+    ? taskDict.usedLabels.map((usedLabel) => usedLabel.labelName)
+    : [];
+  labels = labels.filter((label) => !usedLabelsNames.includes(label.name));
 
   // Clean up and split used words
   const words = taskDict.content
