@@ -4,6 +4,9 @@ by Christian Bender (@ptujec)
 2024-10-04
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Wait for modifier key to be released before running AppleScript:
+https://stackoverflow.com/questions/36822613/wait-until-any-key-is-held-in-applescript
 */
 
 String.prototype.localizationTable = 'default';
@@ -19,6 +22,7 @@ function runWithString(string) {
   }
   if (string === '.') return getAppLinks();
   if (string === ',') return getClipboard();
+  if (string.split('"').length === 2) return handleQuotes(string);
   return main(string);
 }
 
@@ -35,7 +39,7 @@ function getAppLinks() {
     };
   }
 
-  return eval('[' + output + ']').sort((a, b) => a.date < b.date);
+  return eval(`[${output}]`).sort((a, b) => a.date < b.date);
 }
 
 function getClipboard() {
@@ -50,7 +54,7 @@ function getClipboard() {
 
   let newClipboard = currentClipboard;
   let moveAS = '';
-  let clipboardAS = '';
+  let restoreClipboardAS = '';
 
   if (!currentClipboard.startsWith('[')) {
     if (currentClipboard.includes('://')) {
@@ -60,27 +64,68 @@ function getClipboard() {
         newClipboard = `[](${currentClipboard.replace(/https?/, 'msteams')})`;
       }
 
-      moveAS = 'key code 123 using command down\n' + 'key code 124\n';
-      clipboardAS = `set the clipboard to "${currentClipboard}"`;
       LaunchBar.setClipboardString(newClipboard);
+
+      moveAS = `key code 123 using command down\nkey code 124\n`;
+      restoreClipboardAS = `set the clipboard to "${currentClipboard}"`;
     }
   } else {
-    moveAS = 'key code 123 using command down\n' + 'key code 124\n';
+    moveAS = `key code 123 using command down\nkey code 124\n`;
   }
 
-  LaunchBar.executeAppleScript(
-    'tell application "System Events"\n' +
-      'keystroke "a" using command down\n' +
-      'keystroke "v" using command down\n' +
-      moveAS +
-      'end tell\n' +
-      'delay 0.1\n' +
-      clipboardAS
+  const pasteClipboardAS = `
+    tell application "System Events"
+      keystroke "a" using command down
+      delay 0.2
+      keystroke "v" using command down
+      ${moveAS}
+    end tell
+    ${restoreClipboardAS}
+  `;
+
+  LaunchBar.executeAppleScript(pasteClipboardAS);
+}
+
+function handleQuotes(string) {
+  // some hacky stuff in here to get this to work
+  const currentClipboard = LaunchBar.getClipboardString() || '';
+
+  LaunchBar.setClipboardString(
+    string === '"' ? '""' : `"${string.replace(/"/g, '').trim()}"`
   );
+
+  const moveCursor = string === '"' ? 'key code 123' : '';
+  const handleQuotesAS = `
+    use scripting additions
+    use framework "Foundation"
+    
+    property NSShiftKeyMask : a reference to 131072
+    property NSEvent : a reference to current application's NSEvent
+    
+    on run ()
+    	set modifier_down to true
+    	repeat while modifier_down
+    		set modifier_flags to NSEvent's modifierFlags()
+    		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
+    		set modifier_down to shift_down
+    	end repeat
+    	
+    	tell application "System Events"
+    		keystroke "a" using command down
+    		delay 0.05
+    		keystroke "v" using command down
+    		delay 0.05
+    		${moveCursor}
+    	end tell
+    	
+    	set the clipboard to "${currentClipboard}"
+    end run
+  `;
+
+  LaunchBar.executeAppleScript(handleQuotesAS);
 }
 
 function main(string) {
-  // Main Action
   let suggestions = [];
   let quotedParts, show, dueExists, p, icon;
 
@@ -101,11 +146,14 @@ function main(string) {
     show = true;
     let description = string.match(reDescription)[1];
 
-    suggestions.push({
-      title: capitalizeFirstLetter(description),
-      icon: 'descriptionTemplate',
-      order: 2,
-    });
+    suggestions = [
+      ...suggestions,
+      {
+        title: capitalizeFirstLetter(description),
+        icon: 'descriptionTemplate',
+        order: 2,
+      },
+    ];
     string = string.replace(reDescription, '');
   }
 
@@ -128,11 +176,14 @@ function main(string) {
 
   if (p) {
     show = true;
-    suggestions.push({
-      title: p,
-      icon: icon,
-      order: 5,
-    });
+    suggestions = [
+      ...suggestions,
+      {
+        title: p,
+        icon: icon,
+        order: 5,
+      },
+    ];
   }
 
   // Due String
@@ -141,11 +192,14 @@ function main(string) {
   if (string.includes(' @')) {
     show = true;
     dueExists = true;
-    suggestions.push({
-      title: string.match(reDueStringWithAt)[1],
-      icon: 'dueTemplate',
-      order: 2,
-    });
+    suggestions = [
+      ...suggestions,
+      {
+        title: string.match(reDueStringWithAt)[1],
+        icon: 'dueTemplate',
+        order: 2,
+      },
+    ];
     string = string.replace(reDueStringWithAt, '$2');
   } else {
     let due = [];
@@ -160,11 +214,14 @@ function main(string) {
       show = true;
       dueExists = true;
 
-      suggestions.push({
-        title: due.join(' '),
-        icon: 'dueTemplate',
-        order: 3,
-      });
+      suggestions = [
+        ...suggestions,
+        {
+          title: due.join(' '),
+          icon: 'dueTemplate',
+          order: 3,
+        },
+      ];
     }
   }
 
@@ -173,32 +230,41 @@ function main(string) {
     show = true;
 
     if (!dueExists) {
-      suggestions.push({
-        title: 'Now'.localize(),
-        icon: 'dueTemplate',
-        order: 3,
-      });
+      suggestions = [
+        ...suggestions,
+        {
+          title: 'Now'.localize(),
+          icon: 'dueTemplate',
+          order: 3,
+        },
+      ];
     }
 
     const duration = string.match(reDuration)[0].trim();
 
-    suggestions.push({
-      title: duration,
-      icon: 'durationTemplate',
-      order: 4,
-    });
+    suggestions = [
+      ...suggestions,
+      {
+        title: duration,
+        icon: 'durationTemplate',
+        order: 4,
+      },
+    ];
     string = string.replace(reDuration, ' ');
   }
 
   // Add quoted string parts
-  string = quotedParts ? quotedParts + string : string;
+  string = quotedParts ? `${quotedParts}${string}` : string;
 
   if (show == true) {
-    suggestions.push({
-      title: capitalizeFirstLetter(string.trim()),
-      icon: 'titleTemplate',
-      order: 1,
-    });
+    suggestions = [
+      ...suggestions,
+      {
+        title: capitalizeFirstLetter(string.trim()),
+        icon: 'titleTemplate',
+        order: 1,
+      },
+    ];
 
     return suggestions.sort((a, b) => a.order > b.order);
   }

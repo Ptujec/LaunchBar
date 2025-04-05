@@ -83,7 +83,7 @@ Another nice bonus feature is the ability to pull in the current clipboard entry
 
 ### Exclude text from being parsed
 
-You can prevent text from being parsed by putting it in quotation marks. 
+You can prevent text from being parsed by putting it in quotation marks. If you add a single quotation mark, your entry will be automatically wrapped in quotation marks. 
 
 ### Setup & Settings
 

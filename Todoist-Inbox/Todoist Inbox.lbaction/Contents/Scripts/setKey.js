@@ -1,7 +1,7 @@
 /* 
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-10-04
+2025-04-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -31,10 +31,10 @@ function setApiKey() {
       if (clipboardContent.length == 40) {
         // Test API-Token
         const projectsOnline = HTTP.getJSON(
-          'https://api.todoist.com/rest/v2/projects',
+          'https://api.todoist.com/api/v1.0/projects',
           {
             headerFields: {
-              Authorization: 'Bearer ' + clipboardContent,
+              Authorization: `Bearer ${clipboardContent}`,
             },
           }
         );

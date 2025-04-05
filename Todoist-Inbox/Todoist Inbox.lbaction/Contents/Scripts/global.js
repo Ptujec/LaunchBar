@@ -8,15 +8,19 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 // Constants
 const apiToken = Action.preferences.apiToken;
+
+const supportPath = Action.supportPath;
+const actionPath = Action.path;
+
 const dueStringsJSON = File.readJSON(
-  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/dueStringOptions.json'
+  `${actionPath}/Contents/Resources/dueStringOptions.json`
 );
 const stopwordsJSON = File.readJSON(
-  '~/Library/Application Support/LaunchBar/Actions/Todoist Inbox.lbaction/Contents/Resources/stopwords.json'
+  `${actionPath}/Contents/Resources/stopwords.json`
 );
-const sectionsPath = Action.supportPath + '/sections.json';
-const projectsPath = Action.supportPath + '/projects.json';
-const labelsPath = Action.supportPath + '/labels.json';
+const sectionsPath = `${supportPath}/sections.json`;
+const projectsPath = `${supportPath}/projects.json`;
+const labelsPath = `${supportPath}/labels.json`;
 
 const rePrio = /( p[1-3]( |$))|((^| )p[1-3] )/i;
 const reDueStringWithAt = / @(.*?)(p\d|((^| )#($| ))|$)/i;
@@ -25,5 +29,5 @@ const reQuotedParts = /"(.*?)"/g;
 
 // Functions
 function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 }
