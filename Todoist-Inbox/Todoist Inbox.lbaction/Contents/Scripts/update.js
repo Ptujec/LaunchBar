@@ -215,6 +215,7 @@ function migrateData() {
         projectData.data.results = projectData.data.results.map((item) => ({
           ...item,
           id: projectIdMappings[item.id] || item.id,
+          parent_id: projectIdMappings[item.parent_id] || item.parent_id,
         }));
 
         File.writeJSON(projectData, projectPath);
