@@ -31,7 +31,8 @@ function run(argument) {
     duration,
     durationUnit,
     description,
-    quotedParts;
+    quotedParts,
+    deadline;
 
   if (!apiToken) {
     setApiKey();
@@ -112,6 +113,14 @@ function run(argument) {
       }, '') || undefined;
   }
 
+  // Deadline
+  const deadlineMatch = argument.match(reDeadline);
+  if (deadlineMatch) {
+    const parsedDate = parseDeadlineDate(deadlineMatch[1]);
+    if (parsedDate) deadline = { date: parsedDate, lang };
+    argument = argument.replace(reDeadline, ' ').trim();
+  }
+
   // Duration
   if (reDuration.test(argument)) {
     durationUnit = 'minute';
@@ -152,6 +161,7 @@ function run(argument) {
     durationUnit,
     prioValue,
     prioText,
+    deadline,
     lang,
     advancedData: false,
   };
@@ -260,6 +270,7 @@ function advancedOptions(taskDict) {
   });
 
   // MARK: Sections
+
   const sections = File.readJSON(sectionsPath).data.results;
 
   const sectionResults = sections.map((section, index) => {
@@ -309,6 +320,7 @@ function advancedOptions(taskDict) {
   });
 
   // MARK: Labels
+
   const labelResults = labels.map((label) => {
     const name = label.name;
     const id = label.id;
@@ -410,6 +422,8 @@ function postTask(taskDict) {
       priority: taskDict.prioValue,
       duration: taskDict.duration,
       duration_unit: taskDict.durationUnit,
+      deadline_date: taskDict.deadline?.date,
+      deadline_lang: taskDict.deadline?.lang,
     };
   }
 
@@ -435,6 +449,8 @@ function processAdvancedData(taskDict, projects, sections) {
     priority: taskDict.prioValue,
     duration: taskDict.duration,
     duration_unit: taskDict.durationUnit,
+    deadline_date: taskDict.deadline?.date,
+    deadline_lang: taskDict.deadline?.lang,
     project_id: taskDict.id,
   };
 
@@ -614,6 +630,19 @@ function processPostResponse(result, sections, projects) {
           : `${'Due'.localize()}: ${dueDateTime}`
         : '';
 
+      // Deadline
+      const deadline = data.deadline;
+      const deadlineDate = deadline?.date
+        ? LaunchBar.formatDate(new Date(deadline.date), {
+            relativeDateFormatting: true,
+            timeStyle: 'none',
+          })
+        : null;
+
+      const deadlineString = deadlineDate
+        ? `\n${'Deadline'.localize()}: ${deadlineDate}`
+        : '';
+
       // Duration
       const duration = data.duration;
 
@@ -624,7 +653,7 @@ function processPostResponse(result, sections, projects) {
         : '';
 
       let notificationString = dueString
-        ? `${dueString}${durationString}\n${projectString}`
+        ? `${dueString}${deadlineString}${durationString}\n${projectString}`
         : projectString;
 
       // Labels

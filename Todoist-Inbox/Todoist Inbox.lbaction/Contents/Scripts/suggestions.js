@@ -23,6 +23,8 @@ function runWithString(string) {
   if (string === '.') return getAppLinks();
   if (string === ',') return getClipboard();
   if (string.split('"').length === 2) return handleQuotes(string);
+  if (string.includes('{') && !string.includes('}')) return expandCurlyBraces();
+
   return main(string);
 }
 
@@ -125,6 +127,15 @@ function handleQuotes(string) {
   LaunchBar.executeAppleScript(handleQuotesAS);
 }
 
+function expandCurlyBraces() {
+  LaunchBar.executeAppleScript(`
+    tell application "System Events"  
+      keystroke "}"
+      key code 123
+    end tell
+  `);
+}
+
 function main(string) {
   let suggestions = [];
   let quotedParts, show, dueExists, p, icon;
@@ -181,14 +192,13 @@ function main(string) {
       {
         title: p,
         icon: icon,
-        order: 5,
+        order: 6,
       },
     ];
   }
 
   // Due String
   // - with @ (should work for most cenarios except for "@date <title>")
-
   if (string.includes(' @')) {
     show = true;
     dueExists = true;
@@ -197,7 +207,7 @@ function main(string) {
       {
         title: string.match(reDueStringWithAt)[1],
         icon: 'dueTemplate',
-        order: 2,
+        order: 3,
       },
     ];
     string = string.replace(reDueStringWithAt, '$2');
@@ -222,6 +232,26 @@ function main(string) {
           order: 3,
         },
       ];
+    }
+  }
+
+  // Deadline
+  if (string.includes('{')) {
+    const deadlineMatch = string.match(reDeadline);
+    if (deadlineMatch) {
+      const parsedDate = parseDeadlineDate(deadlineMatch[1]);
+      if (parsedDate) {
+        show = true;
+        suggestions = [
+          ...suggestions,
+          {
+            title: deadlineMatch[1],
+            icon: 'deadlineTemplate',
+            order: 5,
+          },
+        ];
+      }
+      string = string.replace(reDeadline, ' ');
     }
   }
 

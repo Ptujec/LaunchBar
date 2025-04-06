@@ -8,8 +8,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 let lang, dueStringOptions, reDuration, stopwords;
 
-if (LaunchBar.currentLocale == 'de') {
-  lang = 'de';
+if (locale == 'de') {
+  lang = locale;
   dueStringOptions = dueStringsJSON.de;
   reDuration =
     /(?:für)?(?:\s+|^)(\d+(?:(?:\.|,)\d+)?)(\s+min(?:uten)?|m|h|\s+stunde(?:n)?)/i;

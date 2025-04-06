@@ -7,164 +7,187 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 function update() {
-  LaunchBar.hide(); // causes notification not to show when the api key was set just before the updating process
+  LaunchBar.hide();
 
   const apiToken = Action.preferences.apiToken;
+  const timestamp = new Date().toLocaleString('sv').replace(/[: ]/g, '-');
+  const logPath = `/tmp/todoist_inbox_log_${timestamp}.txt`;
 
-  // Projects
-  const projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/api/v1.0/projects',
-    {
-      headerFields: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
-  );
+  const fetchResource = (endpoint) =>
+    HTTP.getJSON(`https://api.todoist.com/api/v1.0/${endpoint}?limit=200`, {
+      headerFields: { Authorization: `Bearer ${apiToken}` },
+    });
 
-  if (projectsOnline.error) {
-    LaunchBar.alert(projectsOnline.error);
+  // Fetch all resources
+  const resources = [
+    { name: 'projects', data: fetchResource('projects') },
+    { name: 'sections', data: fetchResource('sections') },
+    { name: 'labels', data: fetchResource('labels') },
+  ];
+
+  // Check for errors
+  const error = resources.find((r) => r.data.error);
+  if (error) {
+    LaunchBar.alert(error.data.error);
     return;
   }
 
-  // Sections
-  const sectionsOnline = HTTP.getJSON(
-    'https://api.todoist.com/api/v1.0/sections',
-    {
-      headerFields: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
-  );
+  // Process all resources
+  const results = resources.map(({ name, data }) => ({
+    type: name,
+    changes: updateResourceData(data, eval(`${name}Path`)),
+  }));
 
-  if (sectionsOnline.error) {
-    LaunchBar.alert(sectionsOnline.error);
-    return;
-  }
+  // Generate log
+  const log = [
+    `Todoist Inbox Update Log - ${timestamp}\n`,
+    ...results
+      .map(({ type, changes }) => {
+        const changeLog = formatChanges(type, changes);
+        return changeLog
+          ? `${
+              type.charAt(0).toUpperCase() + type.slice(1)
+            } Changes:\n${changeLog}`
+          : '';
+      })
+      .filter(Boolean),
+  ].join('\n\n');
 
-  // Labels
-  const labelsOnline = HTTP.getJSON('https://api.todoist.com/api/v1.0/labels', {
-    headerFields: {
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
-
-  if (labelsOnline.error) {
-    LaunchBar.alert(labelsOnline.error);
-    return;
-  }
-
-  const projectsResult = updateResourceData(projectsOnline, projectsPath);
-  const sectionsResult = updateResourceData(sectionsOnline, sectionsPath);
-  const labelsResult = updateResourceData(labelsOnline, labelsPath);
+  // Write log file
+  File.writeText(log, logPath);
 
   // Calculate total changes
-  const changes = [projectsResult, sectionsResult, labelsResult].reduce(
-    (total, result) => {
-      return (
-        total +
-        result.newIds.length +
-        result.oldIds.length +
-        result.updatedNameCount
-      );
-    },
+  const totalChanges = results.reduce(
+    (total, { changes }) =>
+      total +
+      changes.newIds.length +
+      changes.oldIds.length +
+      changes.updatedItems.length,
     0
   );
 
   LaunchBar.displayNotification({
     title: 'Projects, sections & labels updated.'.localize(),
-    string: `${changes} change(s)`.localize(),
+    string: `${totalChanges} change(s)\nClick to open log!`.localize(),
+    url: File.fileURLForPath(logPath),
   });
 }
 
-function updateResourceData(onlineData, localPath) {
-  let newIds = [];
-  let oldIds = [];
-  let updatedNameCount = 0;
+function formatChanges(type, { newIds, oldIds, updatedItems }) {
+  const sections = [
+    {
+      title: `New ${type}`,
+      items: newIds?.map((item) => item.name) ?? [],
+    },
+    {
+      title: `Removed ${type}`,
+      items: oldIds?.map((item) => item.name) ?? [],
+    },
+    {
+      title: `Updated ${type} names`,
+      items:
+        updatedItems?.map(
+          ({ oldName, newName }) => `"${oldName}" → "${newName}"`
+        ) ?? [],
+    },
+  ];
 
+  return sections
+    .filter((section) => section.items.length > 0)
+    .map(
+      ({ title, items }) =>
+        `- ${title} (${items.length}):\n  • ${items.join('\n  • ')}`
+    )
+    .join('\n\n');
+}
+
+function updateResourceData(onlineData, localPath) {
   if (!File.exists(localPath)) {
     File.writeJSON(onlineData, localPath);
     return {
       newIds: onlineData.data.results,
       oldIds: [],
+      updatedItems: [],
       updatedNameCount: 0,
     };
   }
 
   const localData = File.readJSON(localPath);
+  const localResults = localData.data.results;
+  const onlineResults = onlineData.data.results;
 
-  // Update names
-  localData.data.results = localData.data.results.map((localItem) => {
-    const onlineItem = onlineData.data.results.find(
-      (item) => item.id === localItem.id
-    );
-    if (onlineItem && localItem.name !== onlineItem.name) {
-      localItem.name = onlineItem.name;
-      updatedNameCount++;
-    }
-    return localItem;
+  // Track name updates
+  const updatedItems = localResults
+    .map((localItem) => {
+      const onlineItem = onlineResults.find((item) => item.id === localItem.id);
+      if (onlineItem && localItem.name !== onlineItem.name) {
+        return {
+          oldName: localItem.name,
+          newName: onlineItem.name,
+          id: localItem.id,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  // Update names in local data
+  localData.data.results = localResults.map((localItem) => {
+    const onlineItem = onlineResults.find((item) => item.id === localItem.id);
+    return onlineItem && localItem.name !== onlineItem.name
+      ? { ...localItem, name: onlineItem.name }
+      : localItem;
   });
 
-  // Add new items
-  const localIds = localData.data.results.map((item) => item.id);
-  newIds = onlineData.data.results.filter(
-    (item) => !localIds.includes(item.id)
-  );
+  // Find new and removed items
+  const localIds = new Set(localResults.map((item) => item.id));
+  const onlineIds = new Set(onlineResults.map((item) => item.id));
 
-  localData.data.results = [...localData.data.results, ...newIds];
+  const newIds = onlineResults.filter((item) => !localIds.has(item.id));
+  const oldIds = localResults.filter((item) => !onlineIds.has(item.id));
 
-  // Remove old items
-  const onlineIds = onlineData.data.results.map((item) => item.id);
-  oldIds = localData.data.results.filter(
-    (item) => !onlineIds.includes(item.id)
-  );
-
-  localData.data.results = localData.data.results.filter(
-    (item) => !oldIds.includes(item)
-  );
+  // Update local data
+  localData.data.results = [
+    ...localData.data.results.filter((item) => onlineIds.has(item.id)),
+    ...newIds,
+  ];
 
   File.writeJSON(localData, localPath);
 
-  return { newIds, oldIds, updatedNameCount };
+  return {
+    newIds,
+    oldIds,
+    updatedItems,
+    updatedNameCount: updatedItems.length,
+  };
 }
 
 function reset() {
   LaunchBar.hide();
 
-  // Projects & Check
-  const projectsOnline = HTTP.getJSON(
-    'https://api.todoist.com/api/v1.0/projects',
-    {
-      headerFields: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
-  );
+  const fetchResource = (endpoint) =>
+    HTTP.getJSON(`https://api.todoist.com/api/v1.0/${endpoint}?limit=200`, {
+      headerFields: { Authorization: `Bearer ${apiToken}` },
+    });
 
+  // Projects & Check
+  const projectsOnline = fetchResource('projects');
   if (projectsOnline.error) {
     LaunchBar.alert(projectsOnline.error);
     return;
   }
 
-  File.writeJSON(projectsOnline, projectsPath);
+  // Reset all resources
+  const resources = [
+    { data: projectsOnline, path: projectsPath },
+    { data: fetchResource('sections'), path: sectionsPath },
+    { data: fetchResource('labels'), path: labelsPath },
+  ];
 
-  // Sections
-  const sectionsOnline = HTTP.getJSON(
-    'https://api.todoist.com/api/v1.0/sections',
-    {
-      headerFields: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
-  );
-  File.writeJSON(sectionsOnline, sectionsPath);
-
-  // Labels
-  const labelsOnline = HTTP.getJSON('https://api.todoist.com/api/v1.0/labels', {
-    headerFields: {
-      Authorization: `Bearer ${apiToken}`,
-    },
+  resources.map(({ data, path }) => {
+    File.writeJSON(data, path);
+    return path;
   });
-  File.writeJSON(labelsOnline, labelsPath);
 
   // Notification
   LaunchBar.displayNotification({
