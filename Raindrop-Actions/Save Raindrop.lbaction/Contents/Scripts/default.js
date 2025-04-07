@@ -121,6 +121,7 @@ const createResultItem = (type, item) => {
     {
       title: `${type}: ${item.title}`,
       subtitle: `${link} ${formatTags(item.tags)}`,
+      alwaysShowsSubtitle: true,
       icon: 'drop',
       url: getRaindropAppURL(),
     },
