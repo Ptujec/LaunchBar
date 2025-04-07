@@ -61,7 +61,13 @@ function parseDeadlineDate(string) {
   try {
     const fullYear = year < 100 ? year + 2000 : year;
     if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-    return `${fullYear}-${month.toString().padStart(2, '0')}-${day
+
+    // Create the date and check if it's in the past
+    const date = new Date(fullYear, month - 1, day);
+    const targetYear =
+      dateParts.length === 2 && date < new Date() ? currentYear + 1 : fullYear;
+
+    return `${targetYear}-${month.toString().padStart(2, '0')}-${day
       .toString()
       .padStart(2, '0')}`;
   } catch {

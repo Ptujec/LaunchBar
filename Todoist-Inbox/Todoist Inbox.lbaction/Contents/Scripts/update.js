@@ -68,7 +68,7 @@ function update() {
 
   LaunchBar.displayNotification({
     title: 'Projects, sections & labels updated.'.localize(),
-    string: `${totalChanges} change(s)\nClick to open log!`.localize(),
+    string: `${totalChanges}${' change(s)'.localize()}\n${'Click to open log!'.localize()}`,
     url: File.fileURLForPath(logPath),
   });
 }
@@ -131,12 +131,17 @@ function updateResourceData(onlineData, localPath) {
     })
     .filter(Boolean);
 
-  // Update names in local data
+  // Update all data except usage and usedWords
   localData.data.results = localResults.map((localItem) => {
     const onlineItem = onlineResults.find((item) => item.id === localItem.id);
-    return onlineItem && localItem.name !== onlineItem.name
-      ? { ...localItem, name: onlineItem.name }
-      : localItem;
+    if (onlineItem) {
+      return {
+        ...onlineItem,
+        usage: localItem.usage || 0,
+        usedWords: localItem.usedWords || [],
+      };
+    }
+    return localItem;
   });
 
   // Find new and removed items
@@ -146,10 +151,14 @@ function updateResourceData(onlineData, localPath) {
   const newIds = onlineResults.filter((item) => !localIds.has(item.id));
   const oldIds = localResults.filter((item) => !onlineIds.has(item.id));
 
-  // Update local data
+  // Update local data with new items
   localData.data.results = [
     ...localData.data.results.filter((item) => onlineIds.has(item.id)),
-    ...newIds,
+    ...newIds.map((item) => ({
+      ...item,
+      usage: 0,
+      usedWords: [],
+    })),
   ];
 
   File.writeJSON(localData, localPath);
@@ -196,6 +205,11 @@ function reset() {
 }
 
 function migrateData() {
+  LaunchBar.displayNotification({
+    title: 'Migrating data...'.localize(),
+    string: 'Please wait...'.localize(),
+  });
+
   const files = [projectsPath, sectionsPath, labelsPath];
 
   files.map((file) => {
@@ -276,6 +290,8 @@ function migrateData() {
       }
     }
   }
+
+  update();
 
   LaunchBar.displayNotification({
     title: 'Todoist Action',

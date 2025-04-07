@@ -8,7 +8,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 let lang, dueStringOptions, reDuration, stopwords;
 
-if (locale == 'de') {
+if (locale.startsWith('de')) {
   lang = locale;
   dueStringOptions = dueStringsJSON.de;
   reDuration =

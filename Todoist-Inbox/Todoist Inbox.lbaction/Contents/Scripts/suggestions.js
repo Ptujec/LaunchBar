@@ -245,7 +245,10 @@ function main(string) {
         suggestions = [
           ...suggestions,
           {
-            title: deadlineMatch[1],
+            title: LaunchBar.formatDate(new Date(parsedDate), {
+              relativeDateFormatting: true,
+              timeStyle: 'none',
+            }),
             icon: 'deadlineTemplate',
             order: 5,
           },

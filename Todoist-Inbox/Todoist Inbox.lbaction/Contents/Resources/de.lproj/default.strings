@@ -32,3 +32,6 @@
 "No links to emails or websites found!" = "Keine Links zu E-Mails oder Websites gefunden!";
 "No clipboard entry found!" = "Kein Eintrag in der Zwischenablage gefunden!";
 "Data structure and IDs updated to conform to the new Todoist API" = "Die Datenstruktur und IDs wurden aktualisiert für die neue Todoist API";
+"Migrating data..." = "Daten werden aktualisiert...";
+"Please wait..." = "Bitte warten...";
+"Click to open log!" = "Klicken, um das Protokoll anzuzeigen!";

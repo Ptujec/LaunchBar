@@ -17,13 +17,13 @@ The were only a few minor things bugging me with when using my old action:
 
 **Obviously some of this could easily be solved by just using the global shortcut. But I just like the LaunchBar workflow of pressing cmd-space followed by the initials of the app/action**. It's second nature. It's easier to remember and execute than most global shortcuts. It's kind of my [hyper key](https://thesweetsetup.com/macos-hyper-key-bettertouchtool/).  
 
-So I took another look at the [API](https://developer.todoist.com/rest/v1/#create-a-new-task) and started making this action.
+So I took another look at the [API](https://todoist.com/api/v1/docs) and started making this action.
 
 ## How it works
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
-<img src="01.jpg" width="817"/> 
+<img src="01.jpg" width="726"/> 
 
 However, as I enjoyed adding things to Todoist that way, I added a few more features:
 
@@ -31,7 +31,7 @@ However, as I enjoyed adding things to Todoist that way, I added a few more feat
 
 Simply use a colon to add a description. The description should be at the end of the input.
 
-<img src="02.jpg" width="817"/> 
+<img src="02.jpg" width="726"/> 
 
 ### Due dates and times 
 
@@ -39,27 +39,33 @@ Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-
 
 The action will detect a bunch of due strings like "today, next week, …" automatically (German or English depending on the current locale of your system). The action will provide feedback on how it parses your input. 
 
-<img src="03.jpg" width="817"/> 
+<img src="03.jpg" width="726"/> 
 
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
 
-### Time blocking
+### Duration (Time blocking)
 
-The action also lets you enter a duration for your task. You can use multiple formats, such as "for 30 minutes" or simply "30m." If no duration is set, the timer will start from the current time.
+The action also lets you enter a duration for your task. You can use multiple formats, such as "for 30 minutes" or simply "30m." If no starting time is set, the timer will start from the current time.
  
-<img src="04.jpg" width="817"/> 
+<img src="04.jpg" width="726"/> 
+
+### Deadlines
+
+You can add deadlines in curly braces. The deadline has to be in a valid date format (see System Settings/General/Language & Region). You can, however, omit the year. 
+
+<img src="05.jpg" width="726"/> 
 
 ### Priorities
 
 Add priorities like you would in Todoists interface with p1-3.
 
-<img src="05.jpg" width="817"/> 
+<img src="06.jpg" width="726"/> 
 
 ### Projects, sections and labels
 
 If you complete your entry with `⌘ ⏎` (command + return), you can select a project, section or label for your task. 
 
-<img src="06.jpg" width="817"/> 
+<img src="07.jpg" width="726"/> 
 
 Select a project, section, or label using the arrow keys or by typing its name. Confirm your selection by pressing `↩`. To add labels, you need to select them before selecting a project or section. You can add multiple labels, one at a time.
 
@@ -67,25 +73,27 @@ I also built some smart into it. Projects, sections and labels you use frequentl
 
 Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
 
+### Exclude text from being parsed
+
+You can prevent text from being parsed by putting it in quotation marks. If you add a single quotation mark, your entry will be automatically wrapped in quotation marks. 
+
+Also, **you can always start over by selecting the parsed title** with arrow down. 
+
 ### Bonus
 
 #### URLs from Safari or Mail
 
 You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start your entry with a period ".".
 
-<img src="md_links.gif" width="817"/> 
+<img src="md_links.gif" width="726"/> 
 
 #### Clipboard entry pull in
 
 Another nice bonus feature is the ability to pull in the current clipboard entry if you start your entry with a comma ",". Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
 
-<img src="07.jpg" width="817"/> 
+<img src="08.jpg" width="726"/> 
 
-### Exclude text from being parsed
-
-You can prevent text from being parsed by putting it in quotation marks. If you add a single quotation mark, your entry will be automatically wrapped in quotation marks. 
-
-### Setup & Settings
+## Setup & Settings
 
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
@@ -95,4 +103,8 @@ Hit `⇧ ↩` (shift + return) to get to the settings. You can change the API-To
 ## Download & Update
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
+
+
+
+
 
