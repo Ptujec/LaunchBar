@@ -19,7 +19,7 @@ The were only a few minor things bugging me with when using my old action:
 
 So I took another look at the [API](https://todoist.com/api/v1/docs) and started making this action.
 
-## How it works
+## How It Works
 
 The basic idea is very simple. **You select the action in LaunchBar (or the app), hit space, type a few words, hit return, it's in your inbox.** That's it. This is the main purpose. Hence the name.
 
@@ -33,7 +33,7 @@ Simply use a colon to add a description. The description should be at the end of
 
 <img src="02.jpg" width="726"/> 
 
-### Due dates and times 
+### Due Dates and Times
 
 Todoists [Natural Language support](https://todoist.com/help/articles/due-dates-and-times#some-example-date-formats-you-can-use) is the best I have seen in any app. Fortunately you can make use of it with the API.
 
@@ -61,7 +61,7 @@ Add priorities like you would in Todoists interface with p1-3.
 
 <img src="06.jpg" width="726"/> 
 
-### Projects, sections and labels
+### Projects, Sections and Labels
 
 If you complete your entry with `⌘ ⏎` (command + return), you can select a project, section or label for your task. 
 
@@ -73,7 +73,7 @@ I also built some smart into it. Projects, sections and labels you use frequentl
 
 Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
 
-### Exclude text from being parsed
+### Exclude Text From Being Parsed
 
 You can prevent text from being parsed by putting it in quotation marks. If you add a single quotation mark, your entry will be automatically wrapped in quotation marks. 
 
@@ -81,13 +81,13 @@ Also, **you can always start over by selecting the parsed title** with arrow dow
 
 ### Bonus
 
-#### URLs from Safari or Mail
+#### URLs From Safari or Mail
 
 You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start your entry with a period ".".
 
 <img src="md_links.gif" width="726"/> 
 
-#### Clipboard entry pull in
+#### Clipboard Entry Pull-In
 
 Another nice bonus feature is the ability to pull in the current clipboard entry if you start your entry with a comma ",". Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
 
@@ -108,3 +108,8 @@ Hit `⇧ ↩` (shift + return) to get to the settings. You can change the API-To
 
 
 
+
+---
+Anmerkungen: 0,6277 SHA-256 95f8e56492ebc14aeff825f7e3acac39  
+&ChatGPT: 5096  
+...
