@@ -43,7 +43,7 @@ The action will detect a bunch of due strings like "today, next week, …" autom
 
 If what you are typing is not detected automatically, you can add "@" at the beginning of your due string to force the action to use that as the due date/time. (In that case just make sure your date string is not followed by some content you want to use for the title.) 
 
-### Duration (Time blocking)
+### Duration (Time Blocking)
 
 The action also lets you enter a duration for your task. You can use multiple formats, such as "for 30 minutes" or simply "30m." If no starting time is set, the timer will start from the current time.
  
@@ -108,8 +108,3 @@ Hit `⇧ ↩` (shift + return) to get to the settings. You can change the API-To
 
 
 
-
----
-Anmerkungen: 0,6277 SHA-256 95f8e56492ebc14aeff825f7e3acac39  
-&ChatGPT: 5096  
-...
