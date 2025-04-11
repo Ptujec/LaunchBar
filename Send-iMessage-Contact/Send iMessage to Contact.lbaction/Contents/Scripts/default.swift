@@ -68,7 +68,14 @@ func showLaunchBarNotification(title: String, message: String, callbackURL: Stri
 
 final class ContactManager {
     private let store = CNContactStore()
-    private let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey] as [CNKeyDescriptor]
+    private let keysToFetch = [
+        CNContactGivenNameKey,
+        CNContactFamilyNameKey,
+        CNContactNicknameKey,
+        CNContactOrganizationNameKey,
+        CNContactPhoneNumbersKey,
+        CNContactEmailAddressesKey
+    ] as [CNKeyDescriptor]
     
     func messageContact(name: String) async throws {
         let contacts = try fetchContacts(matching: name)
@@ -80,7 +87,7 @@ final class ContactManager {
             return
         }
         
-        let contact = contacts[0]
+        let contact = findBestMatch(name, contacts)
         guard let contactInfo = extractContactInfo(from: contact) else {
             showLaunchBarNotification(
                 title: LocalizedStrings.noContactInfo,
@@ -90,6 +97,41 @@ final class ContactManager {
         }
         
         try await sendMessage(to: contactInfo)
+    }
+    
+    private func findBestMatch(_ query: String, _ contacts: [CNContact]) -> CNContact {
+        if contacts.count == 1 { return contacts[0] }
+        
+        let query = query.lowercased()
+        return contacts.max { a, b in
+            let aScore = matchScore(for: a, query: query)
+            let bScore = matchScore(for: b, query: query)
+            return aScore < bScore
+        } ?? contacts[0]
+    }
+    
+    private func matchScore(for contact: CNContact, query: String) -> Int {
+        let fields = [
+            (contact.givenName.lowercased(), 40),
+            (contact.familyName.lowercased(), 30),
+            (contact.nickname.lowercased(), 45),
+            (contact.organizationName.lowercased(), 35),
+            ("\(contact.givenName) \(contact.familyName)".lowercased(), 50)
+        ]
+        
+        var score = fields.reduce(0) { total, field in
+            if field.0.isEmpty { return total }
+            if field.0 == query { return total + field.1 + 50 }  // Bonus for exact match
+            if field.0.contains(query) || query.contains(field.0) { return total + field.1 }
+            return total
+        }
+        
+        // Phone number quality
+        if contact.phoneNumbers.contains(where: { ($0.label ?? "").contains("Mobil") || ($0.label ?? "").contains("iPhone") }) {
+            score += 20
+        }
+        
+        return score
     }
     
     private func fetchContacts(matching name: String) throws -> [CNContact] {
@@ -103,11 +145,11 @@ final class ContactManager {
             if contact.phoneNumbers.count > 1 {
                 for num in contact.phoneNumbers {
                     if let label = num.label, (label.contains("Mobil") || label.contains("iPhone")) {
-                        return num.value.stringValue
+                        return num.value.stringValue.replacingOccurrences(of: #"\s+"#, with: "", options: .regularExpression)
                     }
                 }
             }
-            return contact.phoneNumbers[0].value.stringValue
+            return contact.phoneNumbers[0].value.stringValue.replacingOccurrences(of: #"\s+"#, with: "", options: .regularExpression)
         }
         
         // Fall back to email
@@ -119,13 +161,7 @@ final class ContactManager {
     }
     
     private func sendMessage(to contactInfo: String) async throws {
-        let cleanedInfo = contactInfo.replacingOccurrences(
-            of: #"\s*"#,
-            with: "",
-            options: .regularExpression
-        )
-        
-        let messageURL = "imessage://" + cleanedInfo
+        let messageURL = "imessage://" + contactInfo
         guard let url = URL(string: messageURL) else { return }
         NSWorkspace.shared.open(url)
     }
