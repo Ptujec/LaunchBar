@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Brave History</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.brave.Browser</string>
 	<key>LBDescription</key>
@@ -41,7 +41,5 @@
 			<string>default.sh</string>
 		</dict>
 	</dict>
-	<key>LSMinimumSystemVersion</key>
-	<string>15.2</string>
 </dict>
 </plist>

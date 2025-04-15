@@ -4,10 +4,14 @@
 # by Christian Bender (@ptujec)
 # 2024-03-19
 #
-# This action was created with help from Phind.com
-#
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 #
+
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo '{"icon": "alert", "title": "You need macOS 15.2 or higher or manually install jq."}'
+    exit 0
+fi
 
 if [ "$1" ]; then
     open -a "Brave Browser" "$1" &
