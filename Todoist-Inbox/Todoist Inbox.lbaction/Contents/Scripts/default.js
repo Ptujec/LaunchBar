@@ -233,8 +233,19 @@ function advancedOptions(taskDict) {
     const id = project.id;
     const usage = project.usage || 0;
 
+    const getProjectPath = (proj) => {
+      if (!proj.parent_id) return '';
+      const parent = projects.find((p) => p.id === proj.parent_id);
+      if (!parent) return '';
+      const parentPath = getProjectPath(parent);
+      return parentPath ? `${parentPath}/${parent.name}` : parent.name;
+    };
+
+    const projectPath = project.name == 'Inbox' ? '' : getProjectPath(project);
+
     const pushDataProject = {
       title,
+      label: projectPath || undefined,
       icon: 'projectTemplate',
       usage,
       action: 'postTask',
@@ -279,11 +290,21 @@ function advancedOptions(taskDict) {
     const sectionProjectId = section.project_id;
 
     const project = projects.find((item) => item.id === sectionProjectId);
-    const sectionProjectName = project ? project.name : '';
     const usage = section.usage || 0;
 
+    // Get full project hierarchy for the section
+    const getFullProjectPath = (proj) => {
+      if (!proj) return '';
+      const parent = projects.find((p) => p.id === proj.parent_id);
+      const parentPath = parent ? getFullProjectPath(parent) : '';
+      return parentPath ? `${parentPath}/${proj.name}` : proj.name;
+    };
+
+    const projectPath = project ? getFullProjectPath(project) : '';
+
     const pushDataSection = {
-      title: `${name} (${sectionProjectName})`,
+      title: name,
+      label: projectPath,
       icon: 'sectionTemplate',
       usage,
       action: 'postTask',
@@ -581,6 +602,8 @@ function processPostResponse(result, sections, projects) {
       }
       return;
     }
+
+    // MARK: Open Task URL
 
     const data = eval(`[${result.data}]`)[0];
     const url = `todoist://task?id=${data.id}`;
