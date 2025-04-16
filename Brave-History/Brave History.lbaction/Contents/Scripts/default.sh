@@ -7,6 +7,10 @@
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 #
 
+# Add Homebrew paths if they exist
+[ -d "/opt/homebrew/bin" ] && PATH="/opt/homebrew/bin:$PATH"
+[ -d "/usr/local/bin" ] && PATH="/usr/local/bin:$PATH"
+
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
     echo '{"icon": "alert", "title": "You need macOS 15.2 or higher or manually install jq."}'
