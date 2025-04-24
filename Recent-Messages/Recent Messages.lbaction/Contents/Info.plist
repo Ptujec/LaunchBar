@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>blue.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>ptujec.LaunchBar.action.RecentMessages</string>
+	<key>CFBundleName</key>
+	<string>Recent Messages</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBAssociatedApplication</key>
+	<string>com.apple.MobileSMS</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Christian Bender</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBTwitter</key>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Recent-Messages/Recent%20Messages.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Recent-Messages</string>
+	</dict>
+	<key>LBRequiredApplication</key>
+	<string>com.apple.MobileSMS</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.swift</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
