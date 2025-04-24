@@ -18,6 +18,10 @@ This action also requires **contact access**. You will be prompted for it. You c
 
 Let me know if you need help. 
 
+## Download & Update
+
+[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
+
 ## Known Limitations
 
 While this action is simple on the surface, it is not so simple underneath. So there might be some rough edges.
@@ -46,6 +50,3 @@ The performance may vary a little. Getting names takes a while. We try to compen
 
 If you want to renew cached names hold `command` when running the action.  
 
-## Download & Update
-
-[Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
