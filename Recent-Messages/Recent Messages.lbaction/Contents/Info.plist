@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Recent Messages</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.apple.MobileSMS</string>
 	<key>LBDescription</key>

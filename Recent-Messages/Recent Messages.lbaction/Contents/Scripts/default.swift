@@ -449,37 +449,34 @@ class ContactManager {
         }
     }
 
-    func checkContactAccess() async throws -> Bool {
-        let status = CNContactStore.authorizationStatus(for: .contacts)
-        let settingsURL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"
-
-        if status == .notDetermined {
-            guard try await store.requestAccess(for: .contacts) else {
-                showLaunchBarNotification(
-                    title: LocalizedStrings.contactAccessDenied,
-                    message: LocalizedStrings.contactAccessSubtitle,
-                    callbackURL: settingsURL
-                )
-                return false
-            }
-        }
-
-        guard status == .authorized else {
-            showLaunchBarNotification(
-                title: LocalizedStrings.contactAccessRequired,
-                message: LocalizedStrings.contactAccessSubtitle,
-                callbackURL: settingsURL
-            )
-            return false
-        }
-
-        return true
-    }
-
     func fetchContactNames(for identifiers: [String]) async throws -> [String: (name: String?, nickname: String?, organization: String?, isOrganization: Bool)] {
         let uncachedIdentifiers = identifiers.filter { !identifierMap.keys.contains($0) }
 
         if !uncachedIdentifiers.isEmpty {
+            // Only check contact access if we have new identifiers to look up
+            let status = CNContactStore.authorizationStatus(for: .contacts)
+            let settingsURL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"
+
+            if status == .notDetermined {
+                guard try await store.requestAccess(for: .contacts) else {
+                    showLaunchBarNotification(
+                        title: LocalizedStrings.contactAccessDenied,
+                        message: LocalizedStrings.contactAccessSubtitle,
+                        callbackURL: settingsURL
+                    )
+                    return [:]
+                }
+            }
+
+            guard status == .authorized else {
+                showLaunchBarNotification(
+                    title: LocalizedStrings.contactAccessRequired,
+                    message: LocalizedStrings.contactAccessSubtitle,
+                    callbackURL: settingsURL
+                )
+                return [:]
+            }
+
             let keys = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey,
                         CNContactTypeKey, CNContactIdentifierKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey,
                         CNContactNicknameKey] as [CNKeyDescriptor]
@@ -809,9 +806,6 @@ struct MessagesAction {
         let contactManager = ContactManager()
         let dbManager = try DatabaseManager(path: dbPath)
 
-        // Check contact access once at the start
-        let hasContactAccess = try await contactManager.checkContactAccess()
-
         // Fetch messages and prepare contact lookup
         let messages = try dbManager.fetchRecentMessages()
         let identifiersToLookup = Set(messages.flatMap { (message: [String: Any]) -> [String] in
@@ -823,9 +817,8 @@ struct MessagesAction {
             return participants.split(separator: ",").map(String.init)
         })
 
-        // Batch lookup contacts
-        let contactInfo = hasContactAccess && !identifiersToLookup.isEmpty ?
-            try await contactManager.fetchContactNames(for: Array(identifiersToLookup)) : [:]
+        // Batch lookup contacts - will only check permissions if needed
+        let contactInfo = try await contactManager.fetchContactNames(for: Array(identifiersToLookup))
 
         // Get pinned chats
         let pinnedChats = PinnedChatsManager.getPinnedChats()
