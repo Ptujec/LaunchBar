@@ -397,14 +397,7 @@ class ContactManager {
     }
 
     init() {
-        // Create cache directory if it doesn't exist
-        let cachePath = "\(Environment.supportPath)/Cache"
-        try? FileManager.default.createDirectory(
-            atPath: cachePath,
-            withIntermediateDirectories: true
-        )
-
-        cacheFile = URL(fileURLWithPath: "\(cachePath)/contacts.json")
+        cacheFile = URL(fileURLWithPath: "\(Environment.supportPath)/contacts_cache.json")
 
         if Environment.isCommandKeyPressed {
             try? FileManager.default.removeItem(at: cacheFile)
