@@ -9,13 +9,7 @@
  - https://chrissardegna.com/blog/reverse-engineering-apples-typedstream-format/
  
  Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
- TODO:
- - fix group chats that have a name (the url creats a new group chat) … not sure I can fix this
- - link to service messages possible?
-
- - clean up unused code
- */
+*/
 
 import Contacts
 import Foundation
@@ -388,12 +382,12 @@ class ContactManager {
         var contactDetails: [String: ContactInfo]
     }
 
-    // TODO: probably can be improved
+    // Normalize phone number to a standard format. This helps reduce API calls, but requires correct formatting in the addressbook. Falty formatting is not a big issue though. The worst case is that an extra API call is required because the number is not recognized as an identifier. 
     private func normalizePhoneNumber(_ number: String) -> String {
-        return number
-            .replacingOccurrences(of: "\\s", with: "", options: .regularExpression) // Remove all whitespace
-            // .replacingOccurrences(of: "\\(0\\)", with: "", options: .regularExpression)  // Remove (0)
-            .replacingOccurrences(of: "[()\\-]", with: "", options: .regularExpression) // Remove parentheses and hyphens
+        let digits = number
+            .components(separatedBy: CharacterSet.decimalDigits.inverted)
+            .joined()
+        return "+\(digits)"
     }
 
     init() {
