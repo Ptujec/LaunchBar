@@ -34,9 +34,11 @@ This database file might be corrupted, empty, or not properly updated by Apple.
 
 Don't blame me if something goes wrong. And I can't promise that it will work. However, for me, it helped to log out of iCloud, close the app, delete all content in `~/Library/Messages/`, restart, and then log in again. 
 
-### Opening Group Chats
+### Opening Group Chats & Service Messages
 
-Support for group chats is limited. Group chats will show up, but instead of opening the existing chat, it might start a new chat with those people if the group has a name. 
+Support for group chats is limited. All chats will show up. However, the URL scheme (`imessage://open?addresses=`) does not work properly with named group chats. Instead of opening the existing chat, it will start a new chat with the participants. This is why, in that case, the generic `messages://` URL is used, which just opens Messages.
+
+Service messages don't have a proper identifier. So, in these cases, the action also uses the generic URL.
 
 ### Message Display Weirdness
 

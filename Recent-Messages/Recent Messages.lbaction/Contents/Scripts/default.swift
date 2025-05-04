@@ -773,8 +773,10 @@ struct MessagesAction {
         return identifier.hasPrefix("s:mailto:")
     }
 
-    private static func getMessageURL(identifier: String, fallbackHash: String?, isGroup: Bool = false, participants: String? = nil) -> String {
+    private static func getMessageURL(identifier: String, fallbackHash: String?, isGroup: Bool = false, participants: String? = nil, displayName: String? = nil) -> String {
         if let hash = fallbackHash, hash.hasPrefix("s:mailto:") { return "messages://" }
+        
+        if let name = displayName, !name.isEmpty { return "messages://" }
 
         if isGroup, let participantsList = participants {
             let addresses = participantsList
@@ -786,6 +788,8 @@ struct MessagesAction {
 
         return "imessage://\(identifier)"
     }
+
+    // MARK: - Main function
 
     static func run() async throws {
         let dbPath = NSString(string: "~/Library/Messages/chat.db").expandingTildeInPath
@@ -884,7 +888,7 @@ struct MessagesAction {
                         !isSent ? "greyTemplate" :
                         (serviceName == "iMessage" ? "blue" : "green")
                 }(),
-                "url": getMessageURL(identifier: identifier, fallbackHash: message["fallback_hash"] as? String, isGroup: isGroup, participants: message["participants"] as? String),
+                "url": getMessageURL(identifier: identifier, fallbackHash: message["fallback_hash"] as? String, isGroup: isGroup, participants: message["participants"] as? String, displayName: message["display_name"] as? String),
                 "timestamp": timestamp,
                 "isPinned": isPinned,
             ]
