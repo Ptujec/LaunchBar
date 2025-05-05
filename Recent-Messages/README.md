@@ -52,3 +52,5 @@ The performance may vary a little. Getting names takes a while. We try to compen
 
 If you want to renew cached names hold `command` when running the action.  
 
+Cached data is stored in the actions support path (`~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.RecentMessages`).
+
