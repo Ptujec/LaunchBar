@@ -44,8 +44,8 @@ struct LocalizedStrings {
     private static let lang = Locale.preferredLanguages[0].components(separatedBy: "-")[0]
     
     static let noMeetings = lang == "de" 
-        ? "Kein virtuelles Treffen geplant!" 
-        : "No virtual meeting scheduled!"
+        ? "Kein Treffen geplant!" 
+        : "No meeting scheduled!"
     static let joinNow = lang == "de" 
         ? "Jetzt teilnehmen" 
         : "Join now"
@@ -67,7 +67,7 @@ struct LocalizedStrings {
 
 struct ZoomProvider: MeetingProvider {
     let name = "Zoom"
-    let icon = "videoTemplate"
+    let icon = "zoomTemplate"
     private let urlPattern = #"https:\/\/us02web.zoom.us\/j\/(\d+)(?:(?:\?pwd=)(.*))?"#
     
     func extractMeetingURL(from urlString: String) -> String? {
@@ -107,12 +107,30 @@ struct TeamsProvider: MeetingProvider {
     }
 }
 
+struct FaceTimeProvider: MeetingProvider {
+    let name = "FaceTime"
+    let icon = "videoTemplate"
+    private let urlPattern = #"(https:\/\/facetime\.apple\.com\/join#.*)"#
+    
+    func extractMeetingURL(from urlString: String) -> String? {
+        guard urlString.contains("facetime.apple.com") else { return nil }
+        return urlString
+    }
+    
+    func extractMeetingURLFromNotes(_ notes: String) -> String? {
+        guard notes.contains("facetime.apple.com") else { return nil }
+        let matched = RegexHelper.matches(for: urlPattern, in: notes)
+        return matched.first
+    }
+}
+
 // MARK: - Meeting URL Extraction
 
 struct MeetingExtractor {
     private let providers: [MeetingProvider] = [
         ZoomProvider(),
-        TeamsProvider()
+        TeamsProvider(),
+        FaceTimeProvider()
     ]
     
     func extractMeetingURL(from event: EKEvent) -> (url: String, icon: String)? {
