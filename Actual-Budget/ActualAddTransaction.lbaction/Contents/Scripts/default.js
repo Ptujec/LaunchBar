@@ -61,6 +61,8 @@ function setBudgetForTransaction({ databasePath, budgetID, amount }) {
 }
 
 function showPayees() {
+  Action.preferences.skipFileCheck = true; // Enable cache for subsequent calls after getDatabaseData() in suggestions.js and potentially setBudgetForTransaction(), which would require a new db connection
+
   const data = getDatabaseData();
 
   if (!data || !data.payees || !data.payees.length) {
@@ -431,6 +433,8 @@ function postTransaction() {
     return;
   }
 
+  Action.preferences.skipFileCheck = false; // Reset flag to ensure fresh data
+
   const data = parseDataBase({ databasePath });
   const formattedAmount = formatAmount(amount, data.numberFormat);
   const account =
@@ -470,7 +474,6 @@ function postTransaction() {
   };
 
   // Get base category balance and add the new transaction amount
-  // TODO: maybe we don't need to get the data again? … on the other hand it is confirmation that it got written to the db
   const categoryBalance = getCategoryBalance(
     categoryId,
     data.transactions,
