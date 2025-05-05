@@ -4,6 +4,11 @@ by Christian Bender (@ptujec)
 2025-03-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Documentation:
+- https://actualbudget.org/docs/budgeting/
+- https://github.com/actualbudget/actual/tree/master/packages/loot-core (The core application that runs on any platform)
+)
 */
 
 include('global.js');
@@ -35,117 +40,162 @@ function handleBudgetSelection(arg) {
     : showAccountsAndTransactions(databasePath, budgetID);
 }
 
+function getTransactionIcon(isReconciliation, isTransfer, amount) {
+  if (isReconciliation) return 'plusminusTemplate';
+  if (isTransfer)
+    return amount < 0 ? 'transferOutTemplate' : 'transferInTemplate';
+  return amount >= 0 ? 'incomingTemplate' : 'cartTemplate';
+}
+
 // MARK: - Account & Transactions Display
 
 function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
-  const data = getDatabaseData(customDatabasePath, customBudgetID);
+  const data = getDatabaseData(customDatabasePath, customBudgetID, false);
   if (!data) return [];
 
   const { accounts, transactions, numberFormat, dateFormat } = data;
 
-  return [
-    ...accounts
-      .filter((account) => !account.closed && !account.offbudget)
-      .map((account) => ({
-        title: `${account.name}: ${formatAmount(
-          account.balance,
-          numberFormat
-        )}`,
-        action: 'open',
-        actionArgument: '',
-        actionRunsInBackground: true,
-        icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
-      })),
+  const accountResults = accounts
+    .filter((account) => !account.closed && !account.offbudget)
+    .map((account) => ({
+      title: `${account.name}: ${formatAmount(account.balance, numberFormat)}`,
+      action: 'open', // TODO: implement transaction details
+      actionArgument: '', // TODO: implement transaction details
+      actionRunsInBackground: true,
+      icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
+    }));
 
-    ...transactions.map((t) => {
-      const isTransfer = t.transfer_id != null;
-      const isReconciliation =
-        !t.payee_name && t.notes === 'Reconciliation balance adjustment';
+  const recentTransactions = transactions
+    .slice(0, 150)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat));
 
-      const title = [
-        isTransfer ? 'Transfer' : t.payee_name,
-        formatAmount(t.amount, numberFormat),
-        !t.cleared && '(uncleared)',
-      ]
-        .filter(Boolean)
-        .join(': ')
-        .replace(': (', ' (');
-
-      const formattedDate = formatDate(t.date, dateFormat);
-      const subtitle = [
-        formattedDate,
-        isReconciliation
-          ? '(Reconciliation balance adjustment)'
-          : t.category_name && `(${t.category_name})`,
-      ]
-        .filter(Boolean)
-        .join(' ');
-
-      const icon = isReconciliation
-        ? 'plusminusTemplate'
-        : isTransfer
-        ? t.amount < 0
-          ? 'transferOutTemplate'
-          : 'transferInTemplate'
-        : t.amount >= 0
-        ? 'incomingTemplate'
-        : 'cartTemplate';
-
-      const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
-
-      return {
-        title,
-        subtitle,
-        badge: t.account_name,
-        action: 'open',
-        actionArgument: messageUrl ?? '',
-        actionRunsInBackground: true,
-        alwaysShowsSubtitle: true,
-        icon,
-        label: messageUrl ? '􀉣' : undefined,
-      };
-    }),
-  ];
+  return [...accountResults, ...recentTransactions];
 }
 
 // MARK: - Category Display
 
 function showCategories(customDatabasePath, customBudgetID) {
-  const data = getDatabaseData(customDatabasePath, customBudgetID);
+  const data = getDatabaseData(customDatabasePath, customBudgetID, true);
   if (!data || !data.categories || !data.categories.length) {
     return [{ title: 'No categories found', icon: 'alert' }];
   }
 
-  const { categories, zero_budgets, transactions, numberFormat } = data;
+  const {
+    categories,
+    zero_budgets,
+    transactions,
+    numberFormat,
+    dateFormat,
+    notes,
+  } = data;
+
+  const currentDate = new Date();
+  const currentMonth =
+    currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1); // YYYYMM
+
+  const currentMonthTransactions = transactions.filter(
+    (t) => Math.floor(t.date / 100) === currentMonth
+  );
 
   return categories
     .filter((cat) => cat.name !== 'Starting Balances')
     .map((cat) => {
-      const budgeted =
-        zero_budgets.find((b) => b.category === cat.id)?.budgeted || 0;
-      const balance = budgeted + getCategoryBalance(cat.id, transactions);
+      const balance = getCategoryBalance(
+        cat.id,
+        transactions,
+        zero_budgets,
+        cat
+      );
+
+      const budgetData = zero_budgets.find(
+        (b) => b.month === currentMonth && b.category === cat.id
+      ) || { budgeted: 0, carryover: 0 }; // budgeted is amount, carryover is 1 or 0
+
+      const categoryTransactions = currentMonthTransactions.filter(
+        (t) => t.category_id === cat.id
+      );
+
+      const netFlow = categoryTransactions.reduce(
+        (sum, t) => sum + t.amount,
+        0
+      );
+
+      const noteText = notes?.find((note) => note.id === cat.id)?.note;
+
+      const displayCarryover = budgetData?.carryover === 1 ? '→ ' : '';
+
+      const displayBalance =
+        balance !== 0 ? `: ${formatAmount(balance, numberFormat)}` : '';
+
+      const displayNetFlow =
+        netFlow !== 0 && netFlow !== balance
+          ? `Flow: ${formatAmount(netFlow, numberFormat)}`
+          : undefined;
+
+      const displayBudgeted =
+        budgetData.budgeted > 0
+          ? `Budgeted: ${formatAmount(budgetData.budgeted, numberFormat)}`
+          : 'No Budget';
+
+      const subtitle =
+        cat.group_is_income === 0
+          ? displayCarryover +
+            [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
+          : undefined;
+
+      const icon =
+        balance < 0
+          ? 'categoryRed'
+          : balance === 0
+          ? 'categoryGreyTemplate'
+          : 'categoryTemplate';
+
       return {
-        title: cat.name,
-        subtitle: cat.group_name,
+        title: `${cat.name}${displayBalance}`,
+        subtitle,
         alwaysShowsSubtitle: true,
-        badge:
-          balance === budgeted
-            ? formatAmount(balance, numberFormat)
-            : `${formatAmount(balance, numberFormat)} (${formatAmount(
-                budgeted,
-                numberFormat
-              )})`,
-        icon: balance < 0 ? 'categoryRed' : 'categoryTemplate',
-        action: 'open',
-        actionArgument: '',
+        label: cat.group_name,
+        icon,
+        action: 'handleCategoryAction',
+        actionArgument: {
+          categoryTransactions,
+          numberFormat,
+          dateFormat,
+          noteText,
+        },
+        actionReturnsItems: categoryTransactions.length > 0 || noteText != null,
         balance,
       };
     })
     .sort((a, b) => (a.balance < 0 ? -1 : 1) - (b.balance < 0 ? -1 : 1));
 }
 
-// MARK: - Interface Item Actions
+// MARK: - Item Actions
 
+function handleCategoryAction({
+  categoryTransactions,
+  numberFormat,
+  dateFormat,
+  noteText,
+}) {
+  if (
+    LaunchBar.options.commandKey ||
+    (categoryTransactions.length === 0 && !noteText)
+  ) {
+    LaunchBar.hide();
+    return LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
+  }
+
+  const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
+
+  const transactionItems = categoryTransactions.map((t) =>
+    formatTransaction(t, numberFormat, dateFormat)
+  );
+
+  return [...noteItem, ...transactionItems];
+}
+
+// TODO: turn into handle transaction actions … show details e.g. notes … or/and enable browsing
 function open(arg) {
   LaunchBar.hide();
   if (arg.startsWith('message://')) return LaunchBar.openURL(arg);

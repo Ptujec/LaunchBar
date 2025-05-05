@@ -4,13 +4,13 @@
 
 <img src="01.jpg" width="722"/>
 
-[Actual Budget](https://actualbudget.org/) is a free and [open-source](https://github.com/actualbudget/actual) alternative to YNAB. I don't love that the macOS client is an Electron app. But it is pretty good, and well maintained.
+[Actual Budget](https://actualbudget.org/) is a free and [open-source](https://github.com/actualbudget/actual) alternative to YNAB. I don't love that the macOS client is an Electron app. But the project is pretty well maintained and does what I need.
 
 This action displays account balances and the most recent transactions.
 
-A special feature is that the action detects links to Mail in a transaction note and opens the linked Mail if you hit `enter`.
+You can show category balances and budgets with `command` + `enter`. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
 
-If you have multiple budgets, you can show them with `command` + `→`. 
+If you have multiple budgets, you can select them with `option` + `enter`. 
 
 ## Download & Update
 
