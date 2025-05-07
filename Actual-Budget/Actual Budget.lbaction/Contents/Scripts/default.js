@@ -59,13 +59,12 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
     .filter((account) => !account.closed && !account.offbudget)
     .map((account) => ({
       title: `${account.name}: ${formatAmount(account.balance, numberFormat)}`,
-      action: 'open', // TODO: implement transaction details
-      actionArgument: '', // TODO: implement transaction details
-      actionRunsInBackground: true,
+      url: actualFileURL,
       icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
     }));
 
   const recentTransactions = transactions
+    .filter((t) => !t.is_child)
     .slice(0, 150)
     .map((t) => formatTransaction(t, numberFormat, dateFormat));
 
@@ -178,13 +177,13 @@ function handleCategoryAction({
   dateFormat,
   noteText,
 }) {
-  if (
-    LaunchBar.options.commandKey ||
-    (categoryTransactions.length === 0 && !noteText)
-  ) {
-    LaunchBar.hide();
-    return LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
-  }
+  // if (
+  //   LaunchBar.options.commandKey ||
+  //   (categoryTransactions.length === 0 && !noteText)
+  // ) {
+  //   LaunchBar.hide();
+  //   return LaunchBar.openURL(actualFileURL);
+  // }
 
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
@@ -195,9 +194,148 @@ function handleCategoryAction({
   return [...noteItem, ...transactionItems];
 }
 
-// TODO: turn into handle transaction actions … show details e.g. notes … or/and enable browsing
-function open(arg) {
-  LaunchBar.hide();
-  if (arg.startsWith('message://')) return LaunchBar.openURL(arg);
-  return LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
+function handleTransactionAction({
+  t,
+  formattedAmount,
+  formattedDate,
+  messageUrl,
+}) {
+  if (messageUrl && LaunchBar.options.commandKey) {
+    LaunchBar.openURL(messageUrl);
+    return;
+  }
+
+  if (t.is_parent) {
+    const { budgetID } = getBudgetInfo();
+    const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
+    const data = File.readJSON(cacheFilePath);
+    if (!data) return [];
+
+    const { transactions, numberFormat, dateFormat } = data;
+    const childTransactions = transactions
+      .filter((ct) => ct.parent_id === t.id)
+      .map((ct) => formatTransaction(ct, numberFormat, dateFormat));
+
+    return childTransactions.length > 0
+      ? childTransactions
+      : [{ title: 'No child transactions found', icon: 'alert' }];
+  }
+
+  const displayNotes = t.notes ? t.notes.replace(/message:\/\/[^\s]*/, '') : '';
+
+  return [
+    {
+      title: t.payee_name,
+      icon: 'payeeTemplate',
+      action: 'showPayeeTransactions',
+      actionArgument: {
+        payeeName: t.payee_id,
+      },
+      actionReturnsItems: true,
+    },
+    {
+      title: t.category_name,
+      icon: 'categoryTemplate',
+      // TODO: implement show category transactions … not just for the current month
+    },
+    {
+      title: t.account_name,
+      icon: 'creditcardTemplate',
+    },
+    {
+      title: formattedAmount,
+      icon: 'cartTemplate',
+    },
+    {
+      title: formattedDate,
+      icon: 'calTemplate',
+    },
+    {
+      title: displayNotes,
+      icon: 'noteTemplate',
+      url: messageUrl ? messageUrl : undefined,
+      label: messageUrl ? '􀉣' : undefined,
+      badge: messageUrl ? 'Link' : undefined,
+    },
+  ];
+}
+
+// MARK: - Payee Transactions Display
+
+function showPayeeTransactions(
+  { payeeName: payeeId },
+  customDatabasePath,
+  customBudgetID
+) {
+  const { budgetID: defaultBudgetID } = getBudgetInfo();
+  const budgetID = customBudgetID || defaultBudgetID;
+  const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
+
+  let data;
+  if (LaunchBar.options.commandKey || !File.exists(cacheFilePath)) {
+    data = getDatabaseData(customDatabasePath, customBudgetID, true);
+  } else {
+    data = File.readJSON(cacheFilePath);
+  }
+
+  if (!data) return [];
+  const { transactions, numberFormat, dateFormat } = data;
+
+  const payeeTransactions = transactions
+    .filter((t) => t.payee_id === payeeId)
+    .slice(0, LaunchBar.options.commandKey ? undefined : 50)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+
+  return payeeTransactions.length > 0
+    ? payeeTransactions
+    : [{ title: 'No transactions found', icon: 'alert' }];
+}
+
+// MARK: - Transaction Formatting
+
+function formatTransaction(t, numberFormat, dateFormat) {
+  const isTransfer = t.transfer_id != null;
+  const isReconciliation =
+    !t.payee_name && t.notes === 'Reconciliation balance adjustment';
+  const formattedAmount = formatAmount(t.amount, numberFormat);
+
+  const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
+
+  const title = [
+    isTransfer ? 'Transfer' : t.payee_name,
+    formattedAmount,
+    !t.cleared && '(uncleared)',
+  ]
+    .filter(Boolean)
+    .join(t.cleared ? ': ' : ' ');
+
+  const formattedDate = formatDate(t.date, dateFormat);
+
+  const subtitle = t.is_parent
+    ? `${formattedDate} (Split)`
+    : t.category_name
+    ? `${formattedDate} (${t.category_name})`
+    : formattedDate;
+
+  // TODO: add note if enough space in subtitle … wenn note vorhanden
+
+  return {
+    icon: getTransactionIcon(isReconciliation, isTransfer, t.amount),
+    title,
+    subtitle,
+    alwaysShowsSubtitle: true,
+    label: t.is_parent ? '􀙠' : messageUrl ? '􀉣' : undefined,
+    badge: t.account_name,
+    url: isTransfer ? actualFileURL : undefined,
+    action: isTransfer ? undefined : 'handleTransactionAction',
+    actionArgument: isTransfer
+      ? undefined
+      : {
+          t,
+          formattedAmount,
+          formattedDate,
+          messageUrl,
+        },
+    actionReturnsItems: isTransfer ? false : true,
+  };
 }

@@ -16,11 +16,13 @@ You can show category balances and budgets with `command` + `enter`. Depending o
 
 If you have multiple budgets, you can select them with `option` + `enter`.
 
+**Note:** This action is using [SF Symbols](https://developer.apple.com/sf-symbols/) to indicate and split transactions and mail links in the `label` item. Those will not show correctly if SF Symbols is not installed. 
+
 ## Add Transaction
 
 This action lets you add transactions. Start by pressing `space` to enter the amount.
 
-Note: While the other action only reads data, this action writes directly to the database, which could lead to issues. Before doing so, it will close the app and always create a backup, which can be restored using the desktop app if needed. In addition, the action currently deletes the cache of the desktop app after creating a new transaction to ensure proper display of budgets. This will slow down the performance of the desktop app a little.
+**Note:** While the other action only reads data, this action writes directly to the database, which could lead to issues. Before doing so, it will close the app and always create a backup, which can be restored using the desktop app if needed. In addition, the action currently deletes the cache of the desktop app after creating a new transaction to ensure proper display of budgets. This will slow down the performance of the desktop app a little.
 
 ## Download & Update
 

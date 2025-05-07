@@ -13,17 +13,17 @@ IFS=$'\n\t'
 DB_PATH="$1"
 CACHE_FILE="$2"
 FETCH_MODE="${3:-full}"  # Default to full if not specified
+HAS_FULL_DATA="${4:-false}"  # Whether cache has full data, defaults to false
 
-# If cache file exists, compare modification times
+# Cache validation - check if DB is newer and if we have the required data
 if [ -f "$CACHE_FILE" ]; then
   DB_MOD=$(stat -f %m "$DB_PATH")
   CACHE_MOD=$(stat -f %m "$CACHE_FILE")
-  if [ $CACHE_MOD -gt $DB_MOD ]; then
-    CACHE_CONTENT=$(cat "$CACHE_FILE")
-    # For basic mode (showAccountsAndTransactions), we can always use newer cache
-    # For full mode (showCategories), we need hasFullData to be true
-    if [ "$FETCH_MODE" = "basic" ] || [ "$(echo "$CACHE_CONTENT" | jq -r '.hasFullData')" = "true" ]; then
-      echo '{"useCache": true}'
+  
+  # If database is NOT newer than cache, check if we have required data
+  if [ $DB_MOD -lt $CACHE_MOD ]; then
+    if [ "$FETCH_MODE" = "basic" ] || { [ "$FETCH_MODE" = "full" ] && [ "$HAS_FULL_DATA" = "true" ]; }; then
+      echo "{\"useCache\": true}"
       exit 0
     fi
   fi
@@ -62,52 +62,38 @@ fi
 
 # Get transactions data - basic mode gets limited fields and only recent transactions
 if [ "$FETCH_MODE" = "basic" ]; then
-  transactions=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
-      SELECT 
-          t.id,
-          t.amount,
-          t.date,
-          t.notes,
-          t.cleared,
-          t.transfer_id,
-          t.payee as payee_id,
-          a.name as account_name,
-          p.name as payee_name
-      FROM v_transactions_internal_alive t
-      LEFT JOIN accounts a ON t.account = a.id
-      LEFT JOIN payees p ON t.payee = p.id
-      WHERE t.is_child = 0
-      AND a.offbudget = 0
-      ORDER BY t.date DESC
-      LIMIT 150;" 2>&1)
+  LIMIT_CLAUSE="LIMIT 150"
 else
-  transactions=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
-      SELECT 
-          t.id,
-          t.amount,
-          t.date,
-          t.notes,
-          t.cleared,
-          t.transfer_id,
-          t.account as account_id,
-          t.payee as payee_id,
-          t.category as category_id,
-          t.is_parent,
-          t.is_child,
-          t.parent_id,
-          a.name as account_name,
-          p.name as payee_name,
-          c.name as category_name,
-          c.is_income as category_is_income,
-          a.offbudget as account_offbudget
-      FROM v_transactions_internal_alive t
-      LEFT JOIN accounts a ON t.account = a.id
-      LEFT JOIN payees p ON t.payee = p.id
-      LEFT JOIN categories c ON t.category = c.id
-      WHERE (t.is_child = 0 OR t.parent_id IS NOT NULL)
-      AND a.offbudget = 0
-      ORDER BY t.date DESC;" 2>&1)
+  LIMIT_CLAUSE=""
 fi
+
+transactions=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
+    SELECT 
+        t.id,
+        t.amount,
+        t.date,
+        t.notes,
+        t.cleared,
+        t.transfer_id,
+        t.account as account_id,
+        t.payee as payee_id,
+        t.category as category_id,
+        t.is_parent,
+        t.is_child,
+        t.parent_id,
+        a.name as account_name,
+        p.name as payee_name,
+        c.name as category_name,
+        c.is_income as category_is_income,
+        a.offbudget as account_offbudget
+    FROM v_transactions_internal_alive t
+    LEFT JOIN accounts a ON t.account = a.id
+    LEFT JOIN payees p ON t.payee = p.id
+    LEFT JOIN categories c ON t.category = c.id
+    WHERE (t.is_child = 0 OR t.parent_id IS NOT NULL)
+    AND a.offbudget = 0
+    ORDER BY t.date DESC
+    $LIMIT_CLAUSE;" 2>&1)
 if [ $? -ne 0 ]; then
   echo "Error querying transactions: $transactions" >&2
   transactions="[]"

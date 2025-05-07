@@ -9,6 +9,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 const globalStorePath =
   '~/Library/Application Support/Actual/global-store.json';
 
+const actualFileURL = File.fileURLForPath('/Applications/Actual.app');
+
 // MARK: - Core Configuration and State Management
 
 function getBudgetInfo() {
@@ -58,12 +60,19 @@ function getDatabaseData(
 
   const fetchMode = requireFullData ? 'full' : 'basic';
 
+  let hasFullData = false;
+  if (File.exists(cacheFilePath)) {
+    const cachedData = File.readJSON(cacheFilePath);
+    hasFullData = cachedData.hasFullData || false;
+  }
+
   const result = LaunchBar.execute(
     '/bin/bash',
     './parseDataBase.sh',
     databasePath,
     cacheFilePath,
-    fetchMode
+    fetchMode,
+    hasFullData.toString()
   );
 
   if (!result) {
@@ -73,35 +82,23 @@ function getDatabaseData(
 
   try {
     const data = JSON.parse(result);
-    // LaunchBar.log(data.useCache); // TODO: Remove
+    LaunchBar.log('Using cache:', data.useCache); // TODO: remove later
 
     if (data.useCache) return File.readJSON(cacheFilePath);
 
-    // For full data requests, completely replace the cache
     if (requireFullData) {
       File.writeJSON(data, cacheFilePath);
       return data;
     }
 
-    // For partial updates, carefully merge with existing cache
-    // TODO: Check
-    let finalData = data;
-    if (File.exists(cacheFilePath)) {
-      const cachedData = File.readJSON(cacheFilePath);
-
-      finalData = {
-        ...cachedData,
-        accounts: data.accounts,
-        numberFormat: data.numberFormat,
-        dateFormat: data.dateFormat,
-        transactions: mergeTransactions(
-          data.transactions,
-          cachedData.transactions
-        ),
-        // Mark as not having full data anymore since historic data might be stale
-        hasFullData: false,
-      };
-    }
+    const finalData = {
+      accounts: data.accounts,
+      transactions: data.transactions.sort((a, b) => b.date - a.date),
+      numberFormat: data.numberFormat,
+      dateFormat: data.dateFormat,
+      // Always false for basic mode since we don't have categories
+      hasFullData: false,
+    };
 
     File.writeJSON(finalData, cacheFilePath);
     return finalData;
@@ -109,13 +106,6 @@ function getDatabaseData(
     LaunchBar.alert('Error parsing database:', error.message);
     return;
   }
-}
-
-function mergeTransactions(newTransactions, existingTransactions = []) {
-  return Object.values({
-    ...Object.fromEntries(existingTransactions.map((t) => [t.id, t])),
-    ...Object.fromEntries(newTransactions.map((t) => [t.id, t])),
-  });
 }
 
 // MARK: - Budget Management
@@ -191,42 +181,6 @@ function formatDate(dateString, format) {
     .replace('M', date.getMonth() + 1)
     .replace('dd', String(date.getDate()).padStart(2, '0'))
     .replace('d', date.getDate());
-}
-
-// MARK: - Transaction Formatting
-
-function formatTransaction(t, numberFormat, dateFormat) {
-  const isTransfer = t.transfer_id != null;
-  const isReconciliation =
-    !t.payee_name && t.notes === 'Reconciliation balance adjustment';
-  const formattedAmount = formatAmount(t.amount, numberFormat);
-  const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
-
-  const title = [
-    isTransfer ? 'Transfer' : t.payee_name,
-    formattedAmount,
-    !t.cleared && '(uncleared)',
-  ]
-    .filter(Boolean)
-    .join(t.cleared ? ': ' : ' ');
-
-  const subtitle = isReconciliation
-    ? `${formatDate(t.date, dateFormat)} (Reconciliation balance adjustment)`
-    : t.category_name
-    ? `${formatDate(t.date, dateFormat)} (${t.category_name})`
-    : `${formatDate(t.date, dateFormat)}${t.notes ? ` - ${t.notes}` : ''}`;
-
-  return {
-    icon: getTransactionIcon(isReconciliation, isTransfer, t.amount),
-    title,
-    subtitle,
-    alwaysShowsSubtitle: true,
-    label: messageUrl ? '􀉣' : undefined,
-    badge: t.account_name,
-    action: 'open',
-    actionArgument: messageUrl ?? '',
-    actionRunsInBackground: true,
-  };
 }
 
 // MARK: - Category Balance Calculation
