@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Zed Recent Workspaces Action for LaunchBar
+# Recent Zed Workspaces Action for LaunchBar
 # by Christian Bender (@ptujec)
 # 2025-05-08
 #
