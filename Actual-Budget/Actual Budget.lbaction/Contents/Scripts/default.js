@@ -1,4 +1,4 @@
-/* 
+/*
 Actual Budget Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-03-05
@@ -40,13 +40,6 @@ function handleBudgetSelection(arg) {
     : showAccountsAndTransactions(databasePath, budgetID);
 }
 
-function getTransactionIcon(isReconciliation, isTransfer, amount) {
-  if (isReconciliation) return 'plusminusTemplate';
-  if (isTransfer)
-    return amount < 0 ? 'transferOutTemplate' : 'transferInTemplate';
-  return amount >= 0 ? 'incomingTemplate' : 'cartTemplate';
-}
-
 // MARK: - Account & Transactions Display
 
 function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
@@ -65,8 +58,24 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
 
   const recentTransactions = transactions
     .filter((t) => !t.is_child)
+    .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
     .slice(0, 150)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+    .map((t) => {
+      const item = formatTransaction(t, numberFormat, dateFormat);
+
+      if (t.transfer_id) {
+        const relatedTransfer = transactions.find(
+          (tr) => tr.id === t.transfer_id
+        );
+        if (relatedTransfer) {
+          item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
+          item.icon = 'transferTemplate';
+          item.title = item.title.replace('-', '');
+        }
+      }
+
+      return item;
+    });
 
   return [...accountResults, ...recentTransactions];
 }
@@ -205,6 +214,8 @@ function handleTransactionAction({
     return;
   }
 
+  if (t.transfer_id) return;
+
   if (t.is_parent) {
     const { budgetID } = getBudgetInfo();
     const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
@@ -311,31 +322,51 @@ function formatTransaction(t, numberFormat, dateFormat) {
 
   const formattedDate = formatDate(t.date, dateFormat);
 
-  const subtitle = t.is_parent
+  let subtitle = t.is_parent
     ? `${formattedDate} (Split)`
     : t.category_name
-    ? `${formattedDate} (${t.category_name})`
+    ? `${formattedDate} ⋅ ${t.category_name}`
     : formattedDate;
 
-  // TODO: add note if enough space in subtitle … wenn note vorhanden
+  if (t.notes && subtitle.length < 40) {
+    const displayNotes = t.notes
+      ? t.notes.replace(/message:\/\/[^\s]*/, '')
+      : '';
+    const remainingSpace = 48 - subtitle.length - 3; // 3 for " ⋅ "
+    const truncatedNotes =
+      displayNotes.length > remainingSpace
+        ? displayNotes.slice(0, remainingSpace - 1) + '…'
+        : displayNotes;
+    subtitle += ` ⋅ ${truncatedNotes}`;
+  }
 
   return {
-    icon: getTransactionIcon(isReconciliation, isTransfer, t.amount),
+    icon: getTransactionIcon(isReconciliation, t.amount),
     title,
     subtitle,
     alwaysShowsSubtitle: true,
     label: t.is_parent ? '􀙠' : messageUrl ? '􀉣' : undefined,
     badge: t.account_name,
-    url: isTransfer ? actualFileURL : undefined,
-    action: isTransfer ? undefined : 'handleTransactionAction',
-    actionArgument: isTransfer
-      ? undefined
-      : {
-          t,
-          formattedAmount,
-          formattedDate,
-          messageUrl,
-        },
+    action: 'handleTransactionAction',
+    actionArgument: {
+      t,
+      formattedAmount,
+      formattedDate,
+      messageUrl,
+    },
     actionReturnsItems: isTransfer ? false : true,
+    transferItem: isTransfer
+      ? {
+          id: t.id,
+          transfer_id: t.transfer_id,
+          amount: t.amount,
+          account_name: t.account_name,
+        }
+      : undefined,
   };
+}
+
+function getTransactionIcon(isReconciliation, amount) {
+  if (isReconciliation) return 'plusminusTemplate';
+  return amount >= 0 ? 'incomingTemplate' : 'cartTemplate';
 }

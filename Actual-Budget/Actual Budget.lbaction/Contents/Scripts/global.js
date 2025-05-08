@@ -1,4 +1,4 @@
-/* 
+/*
 Actual Budget - Shared Functions
 by Christian Bender (@ptujec)
 2025-03-10
@@ -91,6 +91,7 @@ function getDatabaseData(
       return data;
     }
 
+
     const finalData = {
       accounts: data.accounts,
       transactions: data.transactions.sort((a, b) => b.date - a.date),
@@ -145,8 +146,8 @@ function showBudgets() {
       a.isDefaultBudget
         ? -1
         : b.isDefaultBudget
-        ? 1
-        : a.title.localeCompare(b.title)
+          ? 1
+          : a.title.localeCompare(b.title)
     );
 }
 
