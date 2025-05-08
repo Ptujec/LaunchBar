@@ -1,4 +1,4 @@
-/* 
+/*
 Actual Budget - Add Transaction Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-03-10
@@ -249,6 +249,7 @@ function formatTransaction(t, numberFormat, dateFormat) {
   const isReconciliation =
     !t.payee_name && t.notes === 'Reconciliation balance adjustment';
   const formattedAmount = formatAmount(t.amount, numberFormat);
+
   const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
 
   const title = [
@@ -259,14 +260,28 @@ function formatTransaction(t, numberFormat, dateFormat) {
     .filter(Boolean)
     .join(t.cleared ? ': ' : ' ');
 
-  const subtitle = isReconciliation
-    ? `${formatDate(t.date, dateFormat)} (Reconciliation balance adjustment)`
+  const formattedDate = formatDate(t.date, dateFormat);
+
+  let subtitle = t.is_parent
+    ? `${formattedDate} (Split)`
     : t.category_name
-    ? `${formatDate(t.date, dateFormat)} (${t.category_name})`
-    : `${formatDate(t.date, dateFormat)}${t.notes ? ` - ${t.notes}` : ''}`;
+    ? `${formattedDate} ⋅ ${t.category_name}`
+    : formattedDate;
+
+  if (t.notes && subtitle.length < 40) {
+    const displayNotes = t.notes
+      ? t.notes.replace(/message:\/\/[^\s]*/, '')
+      : '';
+    const remainingSpace = 48 - subtitle.length - 3; // 3 for " ⋅ "
+    const truncatedNotes =
+      displayNotes.length > remainingSpace
+        ? displayNotes.slice(0, remainingSpace - 1) + '…'
+        : displayNotes;
+    subtitle += ` ⋅ ${truncatedNotes}`;
+  }
 
   return {
-    icon: getTransactionIcon(isReconciliation, isTransfer, t.amount),
+    icon: getTransactionIcon(isReconciliation, t.amount),
     title,
     subtitle,
     alwaysShowsSubtitle: true,
@@ -275,13 +290,19 @@ function formatTransaction(t, numberFormat, dateFormat) {
     action: 'open',
     actionArgument: messageUrl ?? '',
     actionRunsInBackground: true,
+    transferItem: isTransfer
+      ? {
+          id: t.id,
+          transfer_id: t.transfer_id,
+          amount: t.amount,
+          account_name: t.account_name,
+        }
+      : undefined,
   };
 }
 
-function getTransactionIcon(isReconciliation, isTransfer, amount) {
+function getTransactionIcon(isReconciliation, amount) {
   if (isReconciliation) return 'plusminusTemplate';
-  if (isTransfer)
-    return amount < 0 ? 'transferOutTemplate' : 'transferInTemplate';
   return amount >= 0 ? 'incomingTemplate' : 'cartTemplate';
 }
 

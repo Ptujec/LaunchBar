@@ -1,11 +1,11 @@
-/* 
+/*
 Actual Budget - Add Transaction Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-03-10
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-TODO: 
+TODO:
 - implement cleared setting later … for now make all cleared
 */
 
@@ -133,15 +133,38 @@ function handlePayeeAction({ payeeId }) {
   // Get the 5 most recent transactions for this payee
   const payeeTransactions = data.transactions
     .filter((t) => t.payee_id === payeeId)
+    .filter((t) => !t.is_parent)
     .slice(0, 5);
 
   if (!payeeTransactions || payeeTransactions.length === 0) {
     return [{ title: 'No recent transactions', icon: 'alert' }];
   }
 
-  return payeeTransactions.map((t) =>
-    formatTransaction(t, data.numberFormat, data.dateFormat)
+  // Filter transfers to show only outgoing transactions
+  const filteredTransactions = payeeTransactions.filter(
+    (t) =>
+      !t.transfer_id || // Keep non-transfers
+      (t.transfer_id && t.amount < 0) // For transfers, keep only outgoing ones
   );
+
+  return filteredTransactions.map((t) => {
+    const item = formatTransaction(t, data.numberFormat, data.dateFormat);
+
+    // For transfers, update the badge to show direction
+    if (t.transfer_id) {
+      const relatedTransfer = data.transactions.find(
+        (tr) => tr.id === t.transfer_id
+      );
+      if (relatedTransfer) {
+        item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
+        item.icon = 'transferTemplate';
+        item.title = item.title.replace('-', '');
+        // item.title = `Transfer: ${formatAmount(Math.abs(t.amount), data.numberFormat)}`;
+      }
+    }
+
+    return item;
+  });
 }
 
 function showCategories() {
