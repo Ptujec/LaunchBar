@@ -24,9 +24,6 @@ if [ "$1" ]; then
 fi
 
 history_path="${HOME}/Library/Application Support/BraveSoftware/Brave-Browser/Default/History"
-tmp_history="/tmp/brave_history_tmp"
-
-cp "${history_path}" "${tmp_history}"
 
 query="SELECT DISTINCT u.title, u.url, u.last_visit_time
 FROM urls u
@@ -40,7 +37,7 @@ GROUP BY u.id
 ORDER BY u.last_visit_time DESC
 LIMIT 1000;"
 
-sqlite3 -json "${tmp_history}" "${query}" | jq 'map({
+sqlite3 -readonly -json "${history_path}" "${query}" | jq 'map({
     title: (if .title == null or .title == "" then .url else .title end),
     url: .url,
     subtitle: .url,
@@ -50,5 +47,3 @@ sqlite3 -json "${tmp_history}" "${query}" | jq 'map({
     actionRunsInBackground: true,
     icon: "URLTemplate"
 })'
-
-rm "${tmp_history}"
