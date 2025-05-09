@@ -1,5 +1,5 @@
 /*
-Writing Tools Action for LaunchBar (using Chat GPT) 
+Writing Tools Action for LaunchBar (using Chat GPT)
 by Christian Bender (@ptujec)
 2024-12-18
 
@@ -13,7 +13,7 @@ Documentation:
 - https://platform.openai.com/docs/guides/prompt-engineering
 
 
-TODO: 
+TODO:
 - savety check only with longer text? Needs better way to select text (see issue above)
 - make faster detect frontmost and get contents?
 - code cleanup
@@ -121,8 +121,11 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
   const prefs = Action.preferences;
 
   // ERROR HANDLING
-  if (result.response == undefined) {
-    return { title: result.error || 'Unknown error occurred', icon: 'alert' };
+  if (!result.response) {
+    LaunchBar.alert(
+      result.error || 'Unknown error occurred'
+    );
+    return
   }
 
   if (result.response.status != 200) {
@@ -184,7 +187,7 @@ function pasteAnswerInWriter({ answer, hasArgument }) {
 
   const markAllAS = !hasArgument
     ? // ? 'delay 0.2\nkeystroke "a" using command down\n'
-      'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
+    'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
     : '';
   const authorName = prefs.iaAuthor;
 
