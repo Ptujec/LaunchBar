@@ -4,7 +4,7 @@
 
 <img src="01.jpg" width="747"/>
 
-This is a simple action that displays your recently used workspaces in Zed. Hold `command` to reveal the local path (will open the first if more than one).  
+This is a simple action that displays your recently used workspaces in [Zed](https://zed.dev). Hold `command` to reveal the local path (will open the first if more than one).  
 
 ## Download & Update
 
