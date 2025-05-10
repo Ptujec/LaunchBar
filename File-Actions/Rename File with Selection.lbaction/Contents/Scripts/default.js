@@ -8,11 +8,18 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 function run(argument) {
   const output = LaunchBar.executeAppleScript(
-    ` tell application (path to frontmost application as text)
-        set _path to file of document of window 1
-        set _path to POSIX path of _path
-      end tell`
+    `tell application (path to frontmost application as text)
+      try
+		    set _path to file spec of document of window 1
+	    on error
+		    set _path to file of document 1
+	    end try
+	    
+      set _path to POSIX path of _path
+    end tell`
   ).trim();
+
+  // LaunchBar.log(output);
 
   const oldFile = output.trim();
   const oldName = File.displayName(output);
