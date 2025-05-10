@@ -12,9 +12,9 @@ The following actions are trying to improve the experience a little.
 
 This action displays account balances and the most recent transactions.
 
-You can show category balances and budgets with `command` + `enter`. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
+You can show category balances and budgets with <kbd>command<\kbd> + <kbd>enter<\kbd>. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
 
-If you have multiple budgets, you can select them with `option` + `enter`.
+If you have multiple budgets, you can select them with <kbd>option<\kbd> + <kbd>enter<\kbd>.
 
 **Note:** This action is using [SF Symbols](https://developer.apple.com/sf-symbols/) to indicate and split transactions and mail links in the `label` item. Those will not show correctly if SF Symbols is not installed. 
 
