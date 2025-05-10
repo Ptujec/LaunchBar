@@ -1,12 +1,12 @@
 # LaunchBar Action: Upcoming 
 
-This action lists upcoming calendar events. You can display the details of a selected event in your calendar app by pressing `enter`.
+This action lists upcoming calendar events. You can display the details of a selected event in your calendar app by pressing <kbd>enter</kbd>.
 
 <img src="01.jpg" width="726"/>
 
 ## Settings
 
-Hold `option` to view action settings. 
+Hold <kbd>option</kbd> to view action settings. 
 
 <img src="02.jpg" width="726"/> 
 
@@ -20,7 +20,7 @@ The action currently supports opening events in [Fantastical](https://flexibits.
 
 Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
 
-This action requires **full calendar access**. You will be prompted for it. You can also access the relevant privacy settings (System Settings → Privacy & Security → Calendars) by pressing `enter` on the alert message in the LaunchBar interface. 
+This action requires **full calendar access**. You will be prompted for it. You can also access the relevant privacy settings (System Settings → Privacy & Security → Calendars) by pressing <kbd>enter</kbd> on the alert message in the LaunchBar interface. 
 
 ## Download & Update
 

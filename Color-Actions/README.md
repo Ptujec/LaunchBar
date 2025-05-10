@@ -10,14 +10,14 @@ This action extracts color codes (hex and rgba) from a website and puts them in 
 
 - Copy a color value by clicking on it. 
 - Import the whole palette as a list to the system color picker. 
-- Browse files (with `space`).
-- Choose a browser in which the files should be opened (with `option` + `enter`).
+- Browse files (with <kbd>space</kbd>).
+- Choose a browser in which the files should be opened (with <kbd>option</kbd> + <kbd>enter</kbd>).
 
 ## Import Colors
 
 <img src="02.jpg" width="649"/> 
 
-This action is meant to be used with LaunchBar's "send to" feature. Select a list of color values, e.g., from the clipboard history, hit `tab`, select the action and press `enter`. 
+This action is meant to be used with LaunchBar's "send to" feature. Select a list of color values, e.g., from the clipboard history, hit `tab`, select the action and press <kbd>enter</kbd>. 
 
 ## Note
 

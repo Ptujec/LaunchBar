@@ -2,7 +2,7 @@
 
 This action displays synonyms from https://synonyme.woxikon.de/ in LaunchBar. The action currently supports German and English. 
 
-You can paste results by holding `shift` as usual or open the website with `command`.
+You can paste results by holding <kbd>shift</kbd> as usual or open the website with <kbd>command</kbd>.
 
 <img src="01.jpg" width="790"/>
 

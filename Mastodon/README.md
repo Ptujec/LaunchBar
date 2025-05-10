@@ -8,23 +8,23 @@
 
 Search Mastodon accounts and hashtags easily with LaunchBar. You can limit results to just accounts by starting with `@` or just hashtags with `#`.
 
-On first run you will have to choose your preferred Mastodon instance, the one, you are signed in on. You can change your preferred Mastodon instance any time in settings `⇧↩`. 
+On first run you will have to choose your preferred Mastodon instance, the one, you are signed in on. You can change your preferred Mastodon instance any time in settings <kbd>⇧</kbd> + <kbd>↩</kbd> . 
 
-**Note**: You get better search results, if you use an [API-Token](#api-token). You can set your token in settings `⇧↩`.  
+**Note**: You get better search results, if you use an [API-Token](#api-token). You can set your token in settings <kbd>⇧</kbd> + <kbd>↩</kbd> .  
 
 ### Accounts
 
-If you hit return `↩` on a selected account it will open the account on your preferred Mastodon instance. Use `⌘↩` to open the account on it's original page. You can also **follow** a selected account right from LaunchBar with `⌥↩`. 
+If you hit return <kbd>↩</kbd> on a selected account it will open the account on your preferred Mastodon instance. Use <kbd>⌘</kbd> + <kbd>↩</kbd>  to open the account on it's original page. You can also **follow** a selected account right from LaunchBar with <kbd>⌥</kbd> + <kbd>↩</kbd> . 
 
 ### Hashtags
 
-Hashtags open per default on http://mastodon.social, which usually has a lot more results. Use `⌘↩` to view results on your home instance. You can also **follow** a selected hashtag right from LaunchBar with `⌥↩`. 
+Hashtags open per default on http://mastodon.social, which usually has a lot more results. Use <kbd>⌘</kbd> + <kbd>↩</kbd>  to view results on your home instance. You can also **follow** a selected hashtag right from LaunchBar with <kbd>⌥</kbd> + <kbd>↩</kbd> . 
 
 **Note**: Following requires a (free) **[API-Token](#api-token)**.
 
 ### Settings
 
-There are a couple of settings, that you can access with `⇧↩`:
+There are a couple of settings, that you can access with <kbd>⇧</kbd> + <kbd>↩</kbd> :
 - Open results in your favorite client (e.g. Elk or Ice Cubes)
 - Set Instance
 - Set API-Token
@@ -36,7 +36,7 @@ There are a couple of settings, that you can access with `⇧↩`:
 
 This action opens the current post or profile on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
 
-There are a couple of settings, that you can access with `⇧↩`:
+There are a couple of settings, that you can access with <kbd>⇧</kbd> + <kbd>↩</kbd> :
 - Close Original Site
 - Redirect to your favorite client (e.g. Elk or Ice Cubes)
 - Set Instance
@@ -60,9 +60,9 @@ This is a simple action to post a status (toot) on Mastodon.
 
 Additional features: 
 - Include a link from Safari with `..`. 
-- Add a content warning with `⌘↩`. 
+- Add a content warning with <kbd>⌘</kbd> + <kbd>↩</kbd> . 
 
-Settings (`⇧↩`): 
+Settings (<kbd>⇧</kbd> + <kbd>↩</kbd> ): 
 - Toggle to always show counter or just above 400 characters.
 - Choose to open your timeline in Safari, Elk or Ice Cubes after a successful post.
 - Set Instance
@@ -72,7 +72,7 @@ Settings (`⇧↩`):
 
 ## 4) Elk
 
-Elk.zone is a web client for Mastodon. This action combines [search](#1-search-action) (triggered by `␣`) and [home/redirect](#2-home-redirect-action) (triggered by `⌘↩`) into one action. The only difference is that selected search results will open in Elk. You can also use the action to simply open https://elk.zone/home (with `↩`). 
+Elk.zone is a web client for Mastodon. This action combines [search](#1-search-action) (triggered by <kbd>␣</kbd>) and [home/redirect](#2-home-redirect-action) (triggered by <kbd>⌘</kbd> + <kbd>↩</kbd> ) into one action. The only difference is that selected search results will open in Elk. You can also use the action to simply open https://elk.zone/home (with <kbd>↩</kbd>). 
 
 <img src="06.jpg" width="582"/> 
 

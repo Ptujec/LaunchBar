@@ -6,7 +6,7 @@ The action will try to get the URL from the frontmost app. If that is not succes
 
 ## Requirements
 
-This action requires an API from [PodQueue.fm](https://podqueue.fm/users/api_key). You will be prompted to enter it the first time you use the action. You can always (re)set it by pressing `option` + `return`.
+This action requires an API from [PodQueue.fm](https://podqueue.fm/users/api_key). You will be prompted to enter it the first time you use the action. You can always (re)set it by pressing <kbd>option</kbd> + <kbd>enter</kbd>.
 
 
 ## Download & Update

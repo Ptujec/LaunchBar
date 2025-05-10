@@ -9,13 +9,13 @@ This action allows you to send requests to ChatGPT. There are **two main ways to
 
 <img src="01.jpg" width="740"/> 
 
-Press `space` to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
+Press <kbd>space</kbd> to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
 
 <img src="02.jpg" width="740"/> 
 
 ### 2: Use predefined prompts 
 
-Press `enter` to access a menu of predefined prompts. You can customize them in the [settings](#settings) to suit your needs. This is convenient for frequently used tasks.
+Press <kbd>enter</kbd> to access a menu of predefined prompts. You can customize them in the [settings](#settings) to suit your needs. This is convenient for frequently used tasks.
 
 <img src="03.jpg" width="740"/> 
 
@@ -33,13 +33,13 @@ This action works very well with [iA Writer](https://ia.net/writer) in preview m
 
 ### Additional Features
 
-- To view recent chats, select the action in LaunchBar and press `command` + `enter` 
-- Use alternative personas with `command` + `enter` when you are done entering text. 
+- To view recent chats, select the action in LaunchBar and press <kbd>command</kbd> + <kbd>enter</kbd> 
+- Use alternative personas with <kbd>command</kbd> + <kbd>enter</kbd> when you are done entering text. 
 - Optionally compare input and answer in [BBEdit](https://www.barebones.com/products/bbedit/) instead of creating a chat by setting `useCompare` to `true` in a custom prompt.
 
 ### Settings
 
-Access the settings with `option` + `enter`. Here you can:
+Access the settings with <kbd>option</kbd> + <kbd>enter</kbd>. Here you can:
 
 - Choose a default persona
 - Choose between models

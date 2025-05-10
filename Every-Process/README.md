@@ -4,10 +4,10 @@ This action lists current running processes sorted by CPU usage percentage. You 
 
 <img src="01.png" width="684"/> 
 
-You can press return `↩` to kill a selected process. Press `⌥↩` to reveal the executable of the selected process in `Finder`. 
+You can press return <kbd>↩</kbd> to kill a selected process. Press <kbd>⌥</kbd> + <kbd>↩</kbd>  to reveal the executable of the selected process in `Finder`. 
 
-**Note:** It is totally normal that both `WindowServer` and `LaunchBar` are fairly high, it reflects what you where just doing. You get a more "realistic" picture if you delay the terminal command the action is built upon (with `⇧↩`). It still is **only a snapshot** and CPU usage changes constantly. So please use Activity Monitor for a more accurate picture over time. 
-You can also use arrow keys `←` `→` to "refresh" the action fairly quickly. 
+**Note:** It is totally normal that both `WindowServer` and `LaunchBar` are fairly high, it reflects what you where just doing. You get a more "realistic" picture if you delay the terminal command the action is built upon (with <kbd>⇧</kbd> + <kbd>↩</kbd> ). It still is **only a snapshot** and CPU usage changes constantly. So please use Activity Monitor for a more accurate picture over time. 
+You can also use arrow keys <kbd>←</kbd> <kbd>→</kbd> to "refresh" the action fairly quickly. 
 
 ## Download & Update
 

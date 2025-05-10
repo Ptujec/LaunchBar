@@ -4,7 +4,7 @@ A simple action to show recent Apple Notes and open them in the app.
 
 <img src="01.jpg" width="604"/>
 
-The action is associated with Notes.app, so you can simply select Notes.app and press `Space` to show your notes. Narrow down the results by typing as usual.
+The action is associated with Notes.app, so you can simply select Notes.app and press <kbd>space</kbd> to show your notes. Narrow down the results by typing as usual.
 
 **Note:** If you are looking for more features, you can try [Roey's Action](https://github.com/roeybiran/launchbar-actions/tree/main/notes-search.lbaction/Contents/Scripts).
 

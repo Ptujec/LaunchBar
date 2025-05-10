@@ -4,13 +4,13 @@ This action checks your recent events for links to Zoom or Microsoft Teams, even
 
 <img src="01.png" width="648"/>
 
-Press `Enter` to join a selected meeting. If there is only one meeting, it will be launched directly.
+Press <kbd>enter</kbd> to join a selected meeting. If there is only one meeting, it will be launched directly.
 
 ## Installation & Requirements (IMPORTANT!)
 
 Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
 
-This action also requires **full calendar access**. You will be prompted for it. You can also get to the respective privacy settings when you hit `Enter` on the alert message in the LaunchBar interface.
+This action also requires **full calendar access**. You will be prompted for it. You can also get to the respective privacy settings when you hit <kbd>enter</kbd> on the alert message in the LaunchBar interface.
 
 Let me know if you need help. 
 

@@ -20,7 +20,7 @@ The action also remembers the **last used item** per application. So if you want
 
 You can manage excluded menu paths or individual items by editing the `config` section in the actions `preferences.plist`. For example, "History" excludes showing browser history items. Exclusions can be configured either globally or by App ([bundle ID](https://github.com/Ptujec/LaunchBar/tree/master/Get-App-ID#launchbar-action-get-app-id)).  
 
-Just hold `command` while launching the action. This automatically opens the plist in your default editor, so you can tinker away. If something goes wrong, the plist will be reset by the action.
+Just hold <kbd>command</kbd> while launching the action. This automatically opens the plist in your default editor, so you can tinker away. If something goes wrong, the plist will be reset by the action.
 
 ```
 <plist version="1.0">

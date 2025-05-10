@@ -1,12 +1,12 @@
 # LaunchBar Actions: Recent MindNode Next Documents
 
-Do you miss seeing recent files when you select [MindNode Next](https://mindnode.com/next) in LaunchBar and press `space`? 
+Do you miss seeing recent files when you select [MindNode Next](https://mindnode.com/next) in LaunchBar and press <kbd>space</kbd>? 
 
 <img src="01.jpg" width="958"/> 
 
-This action should at least come close to [what you are used to from apps like Pages, Keynote, etc.](https://youtu.be/lLZgKIthbOk?t=82). If you select MindNode Next and press `space`, it will show your recent documents. 
+This action should at least come close to [what you are used to from apps like Pages, Keynote, etc.](https://youtu.be/lLZgKIthbOk?t=82). If you select MindNode Next and press <kbd>space</kbd>, it will show your recent documents. 
 
-With another `space` you can even use quicklook to preview the selected document. 
+With another <kbd>space</kbd> you can even use quicklook to preview the selected document. 
 
 ## Limitations 
 

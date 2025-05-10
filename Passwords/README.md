@@ -8,15 +8,15 @@ After a little setup ([see below](#setup)) you can view a list of all your login
 
 ## Features 
 
-- You can view items also when 1Password is selected simply by pressing `space` or `→`. 
+- You can view items also when 1Password is selected simply by pressing <kbd>space</kbd> or <kbd>→</kbd>. 
 - Login items will open and autofill by default in your default browser (as long as they have an URL). 
 - Other items will open in 1Password by default. 
-- You can alter the default behavior with `⌘↩`. 
-- You can open login items in a secondary browser with `⌥↩`. (Other items that contain an URL with `⌥⌘↩`.) 
+- You can alter the default behavior with <kbd>⌘</kbd> + <kbd>↩</kbd> . 
+- You can open login items in a secondary browser with <kbd>⌥</kbd> + <kbd>↩</kbd> . (Other items that contain an URL with `⌥⌘↩`.) 
 
 ## Settings 
 
-In action settings you can choose a secondary browser and refresh data. Access the settings by selecting the action and then press `⌥↩`.
+In action settings you can choose a secondary browser and refresh data. Access the settings by selecting the action and then press <kbd>⌥</kbd> + <kbd>↩</kbd> .
 
 <img src="02.png" width="634"/>
 
@@ -30,7 +30,7 @@ Follow the "Install" instructions and also make sure you do step 1 of "Sign in".
 ## Limitations
 
 - The action does not copy any passwords. In theory it would be possible to copy passwords to the clipboard. But those would also appear in your clipboard history. You would need to exclude LaunchBar from the clipboard history to prevent that. But this in turn would effect every other built in or custom action. 
-- Because this is just a standard user action there is no indexing going on in the background. You need to refresh data manually in the action settings. `⌥↩`. Access the settings by selecting the action and then press `⌥↩`.
+- Because this is just a standard user action there is no indexing going on in the background. You need to refresh data manually in the action settings. <kbd>⌥</kbd> + <kbd>↩</kbd> . Access the settings by selecting the action and then press <kbd>⌥</kbd> + <kbd>↩</kbd> .
 - You need to be signed-in either in the CLI or 1Password for autofill to work. You get a prompt if that is not the case. But it may still fail if you use it for the first time after a sign-in. Just open the item again. It should be still selected in LaunchBar. (The 1Password team is looking into this issue.)  
 
 ## Download & Update

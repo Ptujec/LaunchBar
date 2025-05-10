@@ -6,11 +6,11 @@ Use the calculating power of the excellent app [Soulver](https://soulver.app/fea
 
 <img src="01.png" width="600"/> 
 
-Press `↓` to select a result and continue calculating. 
+Press <kbd>↓</kbd> to select a result and continue calculating. 
 
 <img src="02.png" width="600"/> 
 
-Press `⌘` + `↩` to open the entry in Soulver. Paste the result in the active text field with `⇧` + `↩`. Select the result in LaunchBar simply with `↩` . 
+Press <kbd>⌘</kbd> + <kbd>↩</kbd> to open the entry in Soulver. Paste the result in the active text field with <kbd>⇧</kbd> + <kbd>↩</kbd>. Select the result in LaunchBar simply with <kbd>↩</kbd> . 
 
 ## Requirements
 

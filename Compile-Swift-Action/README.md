@@ -12,17 +12,17 @@ Follow these steps:
 
 1. Run this action.
 2. Select the `.lbaction` bundle of the action you want to compile.
-3. Confirm by pressing `return` (`↩`).
+3. Confirm by pressing <kbd>enter</kbd> (<kbd>↩</kbd>).
 
 If you want to do this for an already installed action, you will find the `.lbaction` bundle at `~/Library/Application Support/LaunchBar/Actions`.
 
 Alternatively, you can:
 
 1. Select the action you want to compile in LaunchBar.
-2. Press and hold the `option` (`⌥`) key, then press `→` to select the `.lbaction` bundle.
+2. Press and hold the <kbd>option</kbd> (<kbd>⌥</kbd>) key, then press <kbd>→</kbd> to select the `.lbaction` bundle.
 3. Press `tab` (`⇥`).
 4. Select this action.
-5. Confirm by pressing `return` (`↩`).
+5. Confirm by pressing <kbd>enter</kbd> (<kbd>↩</kbd>).
 
 Since version 1.3 the action can also process multiple action bundles at once.
 

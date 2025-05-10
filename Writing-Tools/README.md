@@ -18,14 +18,14 @@ If you prefer, you can also use the [BBEdit](https://www.barebones.com) comparis
 
 ## Tools
 
-By default, the action will use your default tool (see Settings). To select a different tool, press `Command` + `Enter`. Tools are fully customizable (see Edit tools).
+By default, the action will use your default tool (see Settings). To select a different tool, press <kbd>command</kbd> + <kbd>enter</kbd>. Tools are fully customizable (see Edit tools).
 
 <img src="02.jpg" width="848"/> 
 
 
 ## Settings
 
-Access the settings with `Option` + `Enter`. 
+Access the settings with <kbd>option</kbd> + <kbd>enter</kbd>. 
 
 <img src="03.jpg" width="848"/> 
 
@@ -62,4 +62,4 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 
 [^1]: I have not had the chance to try Apple's AI Writing Tools, but so far, they do not sound too promising anyway. With this action, you can always benefit from the latest OpenAI models and refine the tools yourself.
 [^2]: Please consider privacy and the pitfalls of using LLMs in general as you use this. 
-[^3]: In the case of automatic text selection there is an alert to protect you from triggering this accidentally. You can disable that alert for a given app in settings (`Option` + `Enter`).
+[^3]: In the case of automatic text selection there is an alert to protect you from triggering this accidentally. You can disable that alert for a given app in settings (<kbd>option</kbd> + <kbd>enter</kbd>).

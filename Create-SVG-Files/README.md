@@ -5,7 +5,7 @@
 
 **Create SVG from Website:** This will pull .svg files and svg code from the current website in Safari and place them at your fingertips. From here it is super easy to preview them with Quicklook (`‌␣`) or open them in your graphic tool or editor of choice (`⇥`). 
 
-*Note: Some websites (e.g. 1password.com) store links to svg files in other places like meta tags. You can find them when using `⌥↩`. Depending on the website this can take much longer*.
+*Note: Some websites (e.g. 1password.com) store links to svg files in other places like meta tags. You can find them when using <kbd>⌥</kbd> + <kbd>↩</kbd> . Depending on the website this can take much longer*.
 
 **Split SVG into Symbols:** Sometimes there are multiple icons bundled in one file. This action can help split them up in single files.
 

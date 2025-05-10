@@ -18,7 +18,7 @@ There are some additional options you can configure for each context:
 - Close Finder windows
 - Don't quit frontmost application 
 
-Additionally you can always protect the frontmost application with `⌘↩`, even if you have not set it as the default behavior for the context.
+Additionally you can always protect the frontmost application with <kbd>⌘</kbd> + <kbd>↩</kbd> , even if you have not set it as the default behavior for the context.
 
 ## Download & Update
 

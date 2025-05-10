@@ -14,12 +14,12 @@ Simply run the action and select the area with the text you want to capture. Don
 <img src="textcopied.jpg" width="400"/> 
 
 **2) Capture & Select:**
-Hold `⌘` while running the action to select the captured text in LaunchBar. 
+Hold <kbd>⌘</kbd> while running the action to select the captured text in LaunchBar. 
 
 <img src="selected.jpg" width="400"/> 
 
 **3) Capture & Open:** 
-Hold `⇧` while running the action to automatically open captured links, email addresses or phone numbers.
+Hold <kbd>⇧</kbd> while running the action to automatically open captured links, email addresses or phone numbers.
 
 <img src="email.jpg" width="400"/> 
 
