@@ -31,8 +31,8 @@ fi
 
 # Get accounts data
 accounts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
-    SELECT 
-        accounts.id, 
+    SELECT
+        accounts.id,
         accounts.name,
         accounts.sort_order,
         COALESCE((
@@ -43,8 +43,8 @@ accounts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
             AND t.is_child = 0
         ), 0) as balance
     FROM accounts
-    WHERE accounts.tombstone = 0 
-    AND accounts.closed = 0 
+    WHERE accounts.tombstone = 0
+    AND accounts.closed = 0
     AND accounts.offbudget = 0
     ORDER BY accounts.sort_order;" 2>&1)
 if [ $? -ne 0 ]; then
@@ -54,7 +54,7 @@ fi
 
 # Get ALL transactions data (no date filter)
 transactions=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
-    SELECT 
+    SELECT
         t.id,
         t.amount,
         t.date,
@@ -90,15 +90,15 @@ payees=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     WITH active_accounts AS (
         SELECT id, name
         FROM accounts
-        WHERE tombstone = 0 
-        AND closed = 0 
+        WHERE tombstone = 0
+        AND closed = 0
         AND offbudget = 0
     ),
     transfer_payees AS (
         SELECT p.id, a.name, p.transfer_acct
         FROM payees p
         JOIN active_accounts a ON p.transfer_acct = a.id
-        WHERE p.tombstone = 0 
+        WHERE p.tombstone = 0
         AND p.transfer_acct IS NOT NULL
     ),
     regular_payees AS (
@@ -121,7 +121,7 @@ fi
 categories=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     WITH RECURSIVE
     category_tree AS (
-        SELECT 
+        SELECT
             c.id,
             c.name,
             c.is_income,
@@ -144,7 +144,7 @@ fi
 
 # Get ALL zero_budgets data (no date filter)
 zero_budgets=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
-    SELECT 
+    SELECT
         z.month,
         z.category,
         z.amount as budgeted,
@@ -199,5 +199,6 @@ echo '{
   "zero_budgets": '"$zero_budgets"',
   "numberFormat": "'"$( echo "$numberFormat" | jq -r '.[0].value // "comma-dot"')"'",
   "dateFormat": "'"$( echo "$dateFormat" | jq -r '.[0].value // "MM-dd-yyyy"')"'",
-  "notes": '"$notes"'
+  "notes": '"$notes"',
+  "hasFullData": true
 }' | jq '.'

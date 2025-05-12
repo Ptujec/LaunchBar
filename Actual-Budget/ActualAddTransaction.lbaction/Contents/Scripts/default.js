@@ -371,13 +371,14 @@ function showNotesOptions() {
       title: 'No Note',
       icon: 'noTemplate.png',
       action: 'setNote',
-      actionArgument: '',
+      actionRunsInBackground: true,
     },
     {
       title: 'Add Note',
       icon: 'newTemplate.png',
       action: 'setNote',
       actionArgument: 'Add Note',
+      actionRunsInBackground: true,
     },
   ];
 }
