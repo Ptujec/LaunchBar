@@ -9,17 +9,17 @@
 	<key>CFBundleName</key>
 	<string>Quit Applications (by Context)</string>
 	<key>CFBundleVersion</key>
-	<string>1.5.2</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>Quits applications by context. (Edit: ⌥⏎)</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Quit-Applications/QuitApplications.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>

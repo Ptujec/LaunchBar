@@ -1,11 +1,11 @@
 ------------------------------------------
 -- Quit Applications (by Context) Action for LaunchBar
--- by Christian Bender (@ptujec) 2022-04-04
+-- by Christian Bender (@ptujec) 2025-05-12
 -- Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 ------------------------------------------
 -- README:
 -- Use this text file to name your contexts. Each line that does not start with "--" counts as a context name. You can have as many as you like. 
--- You can set custom icons by using an emoji e.g. "Work:👨🏻‍💻". (If you are using this it would be fun if you could share a screenshot with me @ptujec)
+-- You can set custom icons by using an emoji e.g. "Work:👨🏻‍💻". 
 ------------------------------------------
 -- Contexts:
 Work:👨🏻‍💻
