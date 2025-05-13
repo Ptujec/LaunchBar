@@ -6,6 +6,8 @@
 
 The purpose of this action is to **limit distractions by quitting apps** that are not needed for what you are currently doing.  
 
+No worries, the action uses non-aggressive termination, so you won't accidentally lose unsaved changes. 
+
 ## Custom Contexts
 
 You can set up **custom contexts** in a **plain text file**, which will open on first launch or if you hold <kbd>Option</kbd>. It's very simple. Choose a name and an emoji that will be displayed as the icon for that context (e.g. `Writing:✍🏻`). 
