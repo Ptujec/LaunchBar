@@ -20,8 +20,8 @@ For each context, you can specify apps that are necessary in that context (toggl
 
 There are some additional options you can configure for each context:  
 - Show alert before quitting (toggle)
-- Close Finder windows (toggle)
 - Don't quit frontmost application (toggle)
+- Close Finder windows (toggle)
 
 Additionally, you can always protect the frontmost application with <kbd>command</kbd> + <kbd>enter</kbd>, even if you have not set it as the default behavior for the context.
 
