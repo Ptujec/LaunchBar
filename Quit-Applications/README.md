@@ -5,18 +5,23 @@
 <img src="01.gif" width="600"/> 
 
 The purpose of this action is to **limit distractions by quitting apps** that are not needed for what you are currently doing.  
-You can set up **custom contexts**, like e.g. "Work", "Meeting", etc., in a plain text file, which will open on first launch or if you hold <kbd>option</kbd>. You can even pick an emoji to be displayed as the icon for your context. 
+
+## Custom Contexts
+
+You can set up **custom contexts** in a **plain text file**, which will open on first launch or if you hold <kbd>Option</kbd>. It's very simple. Choose a name and an emoji that will be displayed as the icon for that context (e.g. `Writing:✍🏻`). 
 
 <img src="02.jpg" width="600"/>   
 
-For each context, you can specify apps that are necessary in that context. The action will quit all other apps. This applies only to apps that show up in the application switcher (<kbd>command</kbd> + <kbd>tab</kbd>). LaunchBar and Finder are also excluded. 
+## Context Configuration
+
+For each context, you can specify apps that are necessary in that context (toggle). The action will quit all other apps. This applies only to apps that show up in the application switcher (<kbd>command</kbd> + <kbd>tab</kbd>). LaunchBar and Finder are also excluded. 
 
 <img src="03.jpg" width="600"/>   
 
 There are some additional options you can configure for each context:  
-- Show alert before quitting  
-- Close Finder windows  
-- Don't quit frontmost application  
+- Show alert before quitting (toggle)
+- Close Finder windows (toggle)
+- Don't quit frontmost application (toggle)
 
 Additionally, you can always protect the frontmost application with <kbd>command</kbd> + <kbd>enter</kbd>, even if you have not set it as the default behavior for the context.
 
