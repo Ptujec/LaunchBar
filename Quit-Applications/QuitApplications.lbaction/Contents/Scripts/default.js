@@ -52,11 +52,13 @@ function run() {
   }
 
   // Show Contexts
+  // TODO: make more flexible
   const names = File.readText(textFilePath).split('\n');
   return names
     .filter((item) => !item.startsWith('--') && item)
     .map((item) => {
-      let [contextTitle, icon] = item.split(':');
+      const contextTitle = item.split(':')[0].trim();
+      const icon = item.split(':')[1].trim();
 
       return {
         title: contextTitle.localize(),
@@ -65,13 +67,13 @@ function run() {
           contextTitle.localize() +
           '". (Edit: ⌥ ⏎)'.localize(),
         icon,
-        action: 'main',
+        action: 'handleQuitContext',
         actionArgument: contextTitle,
       };
     });
 }
 
-function main(contextTitle) {
+function handleQuitContext(contextTitle) {
   const contextJSONFile = `${Action.supportPath}/${contextTitle}.json`;
 
   Action.preferences.contextJSONFile = contextJSONFile;
@@ -285,7 +287,7 @@ function getInfoPlist(path) {
 
 // MARK: - Menu Options
 
-function toggleMenuOption(optionName) {
+function toggleContextSetting(optionName) {
   const contextJSON = File.readJSON(Action.preferences.contextJSONFile);
   // Treat undefined as true initially
   const currentValue = contextJSON[optionName];
@@ -295,15 +297,15 @@ function toggleMenuOption(optionName) {
 }
 
 function toggleAlertOption() {
-  return toggleMenuOption('showAlert');
+  return toggleContextSetting('showAlert');
 }
 
 function toggleCurrentOption() {
-  return toggleMenuOption('keepCurrent');
+  return toggleContextSetting('keepCurrent');
 }
 
 function toggleFinderWindowsOption() {
-  return toggleMenuOption('keepFinderWindowsOption');
+  return toggleContextSetting('keepFinderWindowsOption');
 }
 
 // MARK: - Application Exclusion Management
