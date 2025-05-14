@@ -9,6 +9,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 import Cocoa
+import LinkPresentation
 
 // MARK: - Environment
 
@@ -124,6 +125,18 @@ func copyToClipboard(title: String, url: String) {
         return
     }
     
+    // Create link metadata
+    let metadata = LPLinkMetadata()
+    metadata.originalURL = URL(string: url)
+    metadata.url = URL(string: url)
+    metadata.title = title
+    
+    // Add link presentation metadata to pasteboard
+    if let data = try? NSKeyedArchiver.archivedData(withRootObject: metadata, requiringSecureCoding: true) {
+        pasteboard.setData(data, forType: NSPasteboard.PasteboardType("com.apple.linkpresentation.metadata"))
+    }
+    
+    // Add RTF and markdown fallbacks
     if let rtfData = try? createAttributedString(text: title, url: url).data(
         from: NSMakeRange(0, title.count),
         documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]
