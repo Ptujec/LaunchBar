@@ -69,6 +69,7 @@ function run() {
         icon,
         action: 'handleQuitContext',
         actionArgument: contextTitle,
+        actionRunsInBackground: true,
       };
     });
 }
