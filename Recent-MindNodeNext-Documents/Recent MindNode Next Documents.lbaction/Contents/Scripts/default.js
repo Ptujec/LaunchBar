@@ -13,6 +13,17 @@ const supportDir = `${LaunchBar.homeDirectory}/Library/Containers/com.ideasoncan
 function run() {
   const version = getLatestVersion();
 
+  const darkMode =
+    File.readPlist('~/Library/Preferences/.GlobalPreferences.plist')
+      .AppleInterfaceStyle === 'Dark'; // takes a few seconds to update after changing
+
+  // const darkMode =
+  //   LaunchBar.executeAppleScript(
+  //     'tell application "System Events" to tell appearance preferences to get dark mode'
+  //   ).trim() === 'true'; // more accurate but slower
+
+  const preview = darkMode ? 'darkPreview' : 'lightPreview';
+
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
 
   const snapshotJson =
@@ -26,7 +37,7 @@ function run() {
     .map((obj) => ({
       title: obj.title,
       icon: 'com.ideasoncanvas.mindnode',
-      path: File.pathForFileURL(obj.previewImageFullsizeURL),
+      path: File.pathForFileURL(obj[preview].fullSizeURL),
       action: 'open',
       actionArgument: `https://mindnode.com/document/${obj.id}#${encodeURI(
         obj.title
