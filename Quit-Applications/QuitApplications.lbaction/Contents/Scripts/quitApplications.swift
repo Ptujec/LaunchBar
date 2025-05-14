@@ -93,6 +93,25 @@ class QuitApplicationsManager {
         
         return (appsToQuit, finderWindowCount)
     }
+    
+    func checkTerminationStatus(for apps: [NSRunningApplication]) -> [String] {
+        // Give apps a moment to terminate
+        Thread.sleep(forTimeInterval: 0.2)
+        
+        var nonTerminatedApps: [String] = []
+        
+        for app in apps {
+            if !app.isTerminated {
+                if let name = app.localizedName {
+                    nonTerminatedApps.append(name)
+                    // Activate the app so user can handle unsaved changes
+                    app.activate()
+                }
+            }
+        }
+        
+        return nonTerminatedApps
+    }
 }
 
 // MARK: - Arguments Parsing
@@ -114,7 +133,18 @@ let manager = QuitApplicationsManager(
     keepFinderWindows: keepFinderWindows
 )
 
+// Store the apps we're going to quit
+let appsToQuit = manager.getRunningApps()
 let result = manager.quitApplications(listOnly: listOnly)
+
+// If we actually tried to quit apps (not just listing), check their status
+if !listOnly {
+    let nonTerminatedApps = manager.checkTerminationStatus(for: appsToQuit)
+    if !nonTerminatedApps.isEmpty {
+        print("Non-terminated apps: " + nonTerminatedApps.joined(separator: ", "))
+    }
+}
+
 let output = [
     result.appsToQuit.joined(separator: ", "),
     String(result.finderWindowCount)
