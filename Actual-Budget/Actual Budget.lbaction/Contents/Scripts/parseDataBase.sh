@@ -179,15 +179,49 @@ if [ "$FETCH_MODE" = "full" ]; then
       notes="[]"
     fi
 
+    # Get payees data
+    payees=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
+        WITH active_accounts AS (
+            SELECT id, name
+            FROM accounts
+            WHERE tombstone = 0
+            AND closed = 0
+            AND offbudget = 0
+        ),
+        transfer_payees AS (
+            SELECT p.id, a.name, p.transfer_acct
+            FROM payees p
+            JOIN active_accounts a ON p.transfer_acct = a.id
+            WHERE p.tombstone = 0
+            AND p.transfer_acct IS NOT NULL
+        ),
+        regular_payees AS (
+            SELECT id, name, transfer_acct
+            FROM payees
+            WHERE tombstone = 0
+            AND transfer_acct IS NULL
+            AND name != ''
+        )
+        SELECT * FROM transfer_payees
+        UNION ALL
+        SELECT * FROM regular_payees
+        ORDER BY name ASC;" 2>&1)
+    if [ $? -ne 0 ]; then
+      echo "Error querying payees: $payees" >&2
+      payees="[]"
+    fi
+
     # Add full data to output
     output=$(echo "$output" | jq \
         --argjson cats "$categories" \
         --argjson budgets "$zero_budgets" \
         --argjson notes "$notes" \
+        --argjson payees "$payees" \
         '. + {
             categories: $cats,
             zero_budgets: $budgets,
             notes: $notes,
+            payees: $payees,
             hasFullData: true
         }')
 fi

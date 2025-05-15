@@ -11,6 +11,14 @@ const globalStorePath =
 
 const actualFileURL = File.fileURLForPath('/Applications/Actual.app');
 
+const addActionExists = File.exists(
+  '~/Library/Application Support/LaunchBar/Actions/ActualAddTransaction.lbaction'
+);
+
+const fullDataActionSupportPath = addActionExists
+  ? `${LaunchBar.homeDirectory}/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.ActualAddTransaction`
+  : Action.supportPath;
+
 // MARK: - Core Configuration and State Management
 
 function getBudgetInfo() {
@@ -56,13 +64,18 @@ function getDatabaseData(
     getBudgetInfo();
   const databasePath = customDatabasePath || defaultDatabasePath;
   const budgetID = customBudgetID || defaultBudgetID;
-  const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
+
+  const basicCacheFilePath = `${Action.supportPath}/db-cache-${budgetID}-basic.json`;
+  const fullCacheFilePath = `${fullDataActionSupportPath}/db-cache-${budgetID}.json`;
+  const cacheFilePath = requireFullData
+    ? fullCacheFilePath
+    : basicCacheFilePath;
 
   const fetchMode = requireFullData ? 'full' : 'basic';
 
   let hasFullData = false;
-  if (File.exists(cacheFilePath)) {
-    const cachedData = File.readJSON(cacheFilePath);
+  if (requireFullData && File.exists(fullCacheFilePath)) {
+    const cachedData = File.readJSON(fullCacheFilePath);
     hasFullData = cachedData.hasFullData || false;
   }
 
@@ -82,31 +95,77 @@ function getDatabaseData(
 
   try {
     const data = JSON.parse(result);
-    LaunchBar.log('Using cache:', data.useCache); // TODO: remove later
-
     if (data.useCache) return File.readJSON(cacheFilePath);
-
-    if (requireFullData) {
-      File.writeJSON(data, cacheFilePath);
-      return data;
+    if (!requireFullData) {
+      const finalData = createBasicData(data);
+      File.writeJSON(finalData, basicCacheFilePath);
+      return finalData;
     }
-
-
-    const finalData = {
-      accounts: data.accounts,
-      transactions: data.transactions.sort((a, b) => b.date - a.date),
-      numberFormat: data.numberFormat,
-      dateFormat: data.dateFormat,
-      // Always false for basic mode since we don't have categories
-      hasFullData: false,
-    };
-
-    File.writeJSON(finalData, cacheFilePath);
-    return finalData;
+    File.writeJSON(data, fullCacheFilePath);
+    return data;
   } catch (error) {
     LaunchBar.alert('Error parsing database:', error.message);
     return;
   }
+}
+
+// MARK: - Cache Management
+
+function createBasicData(data) {
+  return {
+    accounts: data.accounts,
+    transactions: getRecentTransactions(data.transactions),
+    numberFormat: data.numberFormat,
+    dateFormat: data.dateFormat,
+    hasFullData: false,
+  };
+}
+
+function getCachedDatabaseData(options = {}) {
+  const {
+    customDatabasePath = null,
+    customBudgetID = null,
+    requireFullData = false,
+    checkForEntity = null, // { id: string, field: string } to check if entity exists in basic data
+    alternateKeyPressed = false,
+  } = options;
+
+  const { budgetID: defaultBudgetID } = getBudgetInfo();
+  const budgetID = customBudgetID || defaultBudgetID;
+  const basicCacheFilePath = `${Action.supportPath}/db-cache-${budgetID}-basic.json`;
+  const fullCacheFilePath = `${fullDataActionSupportPath}/db-cache-${budgetID}.json`;
+
+  let data;
+
+  if (File.exists(basicCacheFilePath)) {
+    data = File.readJSON(basicCacheFilePath);
+
+    const needsFullData =
+      alternateKeyPressed ||
+      requireFullData ||
+      (checkForEntity &&
+        !data.transactions.some(
+          (t) => t[checkForEntity.field] === checkForEntity.id
+        ));
+
+    if (needsFullData) {
+      if (File.exists(fullCacheFilePath)) {
+        data = File.readJSON(fullCacheFilePath);
+        const basicData = createBasicData(data);
+        File.writeJSON(basicData, basicCacheFilePath);
+      } else {
+        data = getDatabaseData(customDatabasePath, customBudgetID, true);
+      }
+    }
+  } else if (File.exists(fullCacheFilePath)) {
+    data = File.readJSON(fullCacheFilePath);
+    const basicData = createBasicData(data);
+    File.writeJSON(basicData, basicCacheFilePath);
+  } else {
+    data = getDatabaseData(customDatabasePath, customBudgetID, requireFullData);
+  }
+
+  return data;
 }
 
 // MARK: - Budget Management
@@ -146,8 +205,8 @@ function showBudgets() {
       a.isDefaultBudget
         ? -1
         : b.isDefaultBudget
-          ? 1
-          : a.title.localeCompare(b.title)
+        ? 1
+        : a.title.localeCompare(b.title)
     );
 }
 
@@ -186,12 +245,10 @@ function formatDate(dateString, format) {
 
 // MARK: - Category Balance Calculation
 
-// Helper function to pre-process transactions and budgets for faster category balance calculations
 function preprocessCategoryData(transactions, zero_budgets) {
   const transactionsByCategory = new Map();
   const budgetsByCategory = new Map();
 
-  // Group transactions by category and month
   for (const t of transactions) {
     if (!t.category_id || (t.is_parent && !t.is_child)) continue;
 
@@ -209,7 +266,6 @@ function preprocessCategoryData(transactions, zero_budgets) {
     categoryMonths.set(month, categoryMonths.get(month) + t.amount);
   }
 
-  // Group budgets by category
   for (const budget of zero_budgets) {
     if (!budgetsByCategory.has(budget.category)) {
       budgetsByCategory.set(budget.category, new Map());
@@ -225,7 +281,6 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
   const currentMonth =
     currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1);
 
-  // Get cached data or create it if not exists
   if (!getCategoryBalance.cache) {
     getCategoryBalance.cache = preprocessCategoryData(
       transactions,
@@ -233,27 +288,22 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
     );
   }
 
-  // Special handling for income categories
   if (category.is_income) {
     const { transactionsByCategory } = getCategoryBalance.cache;
 
-    // For income, only return current month's transactions
     const categoryTransactions = transactionsByCategory.get(categoryId);
     return categoryTransactions
       ? categoryTransactions.get(currentMonth) || 0
       : 0;
   }
 
-  // Regular category handling
   const { transactionsByCategory, budgetsByCategory } =
     getCategoryBalance.cache;
 
-  // Get category-specific data
   const categoryTransactions =
     transactionsByCategory.get(categoryId) || new Map();
   const categoryBudgets = budgetsByCategory.get(categoryId) || new Map();
 
-  // Get all relevant months sorted
   const months = [
     ...new Set([...categoryTransactions.keys(), ...categoryBudgets.keys()]),
   ]
@@ -262,7 +312,6 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
 
   let runningBalance = 0;
 
-  // Process each month's budget and transactions
   for (const month of months) {
     const budget = categoryBudgets.get(month) || { budgeted: 0, carryover: 0 };
     const monthActivity = categoryTransactions.get(month) || 0;

@@ -23,10 +23,14 @@ function run() {
     return LaunchBar.alert('Database not found');
   }
 
+  if (LaunchBar.options.shiftKey) return showPayees();
+
   return LaunchBar.options.commandKey
     ? showCategories()
     : showAccountsAndTransactions();
 }
+
+// MARK: - Budget Selection (Optional)
 
 function handleBudgetSelection(arg) {
   const { databasePath, budgetID } = arg;
@@ -34,7 +38,8 @@ function handleBudgetSelection(arg) {
     return LaunchBar.alert('Database not found');
   }
 
-  // Use the selected budget's data directly without changing the default
+  if (LaunchBar.options.shiftKey) return showPayees(databasePath, budgetID);
+
   return LaunchBar.options.commandKey
     ? showCategories(databasePath, budgetID)
     : showAccountsAndTransactions(databasePath, budgetID);
@@ -52,8 +57,14 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
     .filter((account) => !account.closed && !account.offbudget)
     .map((account) => ({
       title: `${account.name}: ${formatAmount(account.balance, numberFormat)}`,
-      url: actualFileURL,
       icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
+      action: 'showAccountTransactions',
+      actionArgument: {
+        accountId: account.id,
+        customDatabasePath,
+        customBudgetID,
+      },
+      actionReturnsItems: true,
     }));
 
   const recentTransactions = transactions
@@ -78,6 +89,40 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
     });
 
   return [...accountResults, ...recentTransactions];
+}
+
+// MARK: - Account Actions
+
+function showAccountTransactions({
+  accountId,
+  customDatabasePath,
+  customBudgetID,
+}) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.hide();
+    LaunchBar.openURL(actualFileURL);
+    return;
+  }
+
+  const data = getCachedDatabaseData({
+    customDatabasePath,
+    customBudgetID,
+    checkForEntity: { id: accountId, field: 'account_id' },
+    alternateKeyPressed: LaunchBar.options.alternateKey,
+  });
+
+  if (!data) return [];
+
+  const { transactions, numberFormat, dateFormat } = data;
+
+  const accountTransactions = transactions
+    .filter((t) => t.account_id === accountId)
+    .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+
+  return accountTransactions.length > 0
+    ? accountTransactions
+    : [{ title: 'No transactions found', icon: 'alert' }];
 }
 
 // MARK: - Category Display
@@ -148,7 +193,7 @@ function showCategories(customDatabasePath, customBudgetID) {
       const subtitle =
         cat.group_is_income === 0
           ? displayCarryover +
-            [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
+            [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
           : undefined;
 
       const icon =
@@ -178,6 +223,27 @@ function showCategories(customDatabasePath, customBudgetID) {
     .sort((a, b) => (a.balance < 0 ? -1 : 1) - (b.balance < 0 ? -1 : 1));
 }
 
+// MARK: - Payee Display
+
+function showPayees(customDatabasePath, customBudgetID) {
+  const data = getDatabaseData(customDatabasePath, customBudgetID, true);
+  if (!data || !data.payees || !data.payees.length) {
+    return [{ title: 'No payees found', icon: 'alert' }];
+  }
+
+  return data.payees.map((payee) => ({
+    title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
+    icon: 'payeeTemplate',
+    action: 'showPayeeTransactions',
+    actionArgument: {
+      payeeName: payee.id,
+      customDatabasePath,
+      customBudgetID,
+    },
+    actionReturnsItems: true,
+  }));
+}
+
 // MARK: - Item Actions
 
 function handleCategoryAction({
@@ -186,13 +252,11 @@ function handleCategoryAction({
   dateFormat,
   noteText,
 }) {
-  // if (
-  //   LaunchBar.options.commandKey ||
-  //   (categoryTransactions.length === 0 && !noteText)
-  // ) {
-  //   LaunchBar.hide();
-  //   return LaunchBar.openURL(actualFileURL);
-  // }
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.hide();
+    LaunchBar.openURL(actualFileURL);
+    return;
+  }
 
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
@@ -209,17 +273,20 @@ function handleTransactionAction({
   formattedDate,
   messageUrl,
 }) {
-  if (messageUrl && LaunchBar.options.commandKey) {
-    LaunchBar.openURL(messageUrl);
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.openURL(
+      messageUrl && !LaunchBar.options.alternateKey ? messageUrl : actualFileURL
+    );
     return;
   }
 
   if (t.transfer_id) return;
 
   if (t.is_parent) {
-    const { budgetID } = getBudgetInfo();
-    const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
-    const data = File.readJSON(cacheFilePath);
+    const data = getCachedDatabaseData({
+      checkForEntity: { id: t.id, field: 'parent_id' },
+    });
+
     if (!data) return [];
 
     const { transactions, numberFormat, dateFormat } = data;
@@ -232,7 +299,9 @@ function handleTransactionAction({
       : [{ title: 'No child transactions found', icon: 'alert' }];
   }
 
-  const displayNotes = t.notes ? t.notes.replace(/message:\/\/[^\s]*/, '') : '';
+  const displayNotes = t.notes
+    ? t.notes.replace(/message:\/\/[^\s]*/, '').trim()
+    : '';
 
   return [
     {
@@ -247,11 +316,20 @@ function handleTransactionAction({
     {
       title: t.category_name,
       icon: 'categoryTemplate',
-      // TODO: implement show category transactions … not just for the current month
+      action: 'showCategoryTransactions',
+      actionArgument: {
+        categoryId: t.category_id,
+      },
+      actionReturnsItems: true,
     },
     {
       title: t.account_name,
       icon: 'creditcardTemplate',
+      action: 'showAccountTransactions',
+      actionArgument: {
+        accountId: t.account_id,
+      },
+      actionReturnsItems: true,
     },
     {
       title: formattedAmount,
@@ -260,13 +338,17 @@ function handleTransactionAction({
     {
       title: formattedDate,
       icon: 'calTemplate',
+      action: 'showTransactionsByDate',
+      actionArgument: {
+        date: t.date,
+      },
+      actionReturnsItems: true,
     },
     {
-      title: displayNotes,
+      title: t.notes && !displayNotes ? '(Mail URL)' : displayNotes,
       icon: 'noteTemplate',
       url: messageUrl ? messageUrl : undefined,
       label: messageUrl ? '􀉣' : undefined,
-      badge: messageUrl ? 'Link' : undefined,
     },
   ];
 }
@@ -278,27 +360,68 @@ function showPayeeTransactions(
   customDatabasePath,
   customBudgetID
 ) {
-  const { budgetID: defaultBudgetID } = getBudgetInfo();
-  const budgetID = customBudgetID || defaultBudgetID;
-  const cacheFilePath = `${Action.supportPath}/db-cache-${budgetID}.json`;
-
-  let data;
-  if (LaunchBar.options.commandKey || !File.exists(cacheFilePath)) {
-    data = getDatabaseData(customDatabasePath, customBudgetID, true);
-  } else {
-    data = File.readJSON(cacheFilePath);
-  }
+  const data = getCachedDatabaseData({
+    customDatabasePath,
+    customBudgetID,
+    checkForEntity: { id: payeeId, field: 'payee_id' },
+    alternateKeyPressed: LaunchBar.options.alternateKey,
+  });
 
   if (!data) return [];
+
   const { transactions, numberFormat, dateFormat } = data;
 
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
-    .slice(0, LaunchBar.options.commandKey ? undefined : 50)
+    .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat));
 
   return payeeTransactions.length > 0
     ? payeeTransactions
+    : [{ title: 'No transactions found', icon: 'alert' }];
+}
+
+function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
+  const data = getCachedDatabaseData({
+    customDatabasePath,
+    customBudgetID,
+  });
+
+  if (!data) return [];
+
+  const { transactions, numberFormat, dateFormat } = data;
+  const dateTransactions = transactions
+    .filter((t) => t.date === date)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+
+  return dateTransactions.length > 0
+    ? dateTransactions
+    : [{ title: 'No transactions found for this date', icon: 'alert' }];
+}
+
+function showCategoryTransactions({ categoryId }) {
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.hide();
+    LaunchBar.openURL(actualFileURL);
+    return;
+  }
+
+  const data = getCachedDatabaseData({
+    checkForEntity: { id: categoryId, field: 'category_id' },
+    alternateKeyPressed: LaunchBar.options.alternateKey,
+  });
+
+  if (!data) return [];
+
+  const { transactions, numberFormat, dateFormat } = data;
+
+  const categoryTransactions = transactions
+    .filter((t) => t.category_id === categoryId)
+    .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+
+  return categoryTransactions.length > 0
+    ? categoryTransactions
     : [{ title: 'No transactions found', icon: 'alert' }];
 }
 
@@ -337,7 +460,7 @@ function formatTransaction(t, numberFormat, dateFormat) {
       displayNotes.length > remainingSpace
         ? displayNotes.slice(0, remainingSpace - 1) + '…'
         : displayNotes;
-    subtitle += ` ⋅ ${truncatedNotes}`;
+    subtitle += truncatedNotes.trim() ? ` ⋅ ${truncatedNotes}` : '';
   }
 
   return {
@@ -369,4 +492,10 @@ function formatTransaction(t, numberFormat, dateFormat) {
 function getTransactionIcon(isReconciliation, amount) {
   if (isReconciliation) return 'plusminusTemplate';
   return amount >= 0 ? 'incomingTemplate' : 'cartTemplate';
+}
+
+// MARK: - Helper Functions
+
+function getRecentTransactions(transactions, limit = 150) {
+  return transactions.filter((t) => !t.is_child).slice(0, limit);
 }
