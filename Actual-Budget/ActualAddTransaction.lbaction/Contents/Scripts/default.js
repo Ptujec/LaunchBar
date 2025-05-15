@@ -371,6 +371,7 @@ function showNotesOptions() {
       title: 'No Note',
       icon: 'noTemplate.png',
       action: 'setNote',
+      actionArgument: '',
       actionRunsInBackground: true,
     },
     {
