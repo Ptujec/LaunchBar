@@ -133,6 +133,7 @@ let manager = QuitApplicationsManager(
     keepFinderWindows: keepFinderWindows
 )
 
+// Store the apps we're going to quit
 let appsToQuit = manager.getRunningApps()
 let result = manager.quitApplications(listOnly: listOnly)
 
@@ -144,5 +145,8 @@ if !listOnly {
     }
 }
 
-print(result.appsToQuit.joined(separator: ", "))
-print(result.finderWindowCount)
+let output = [
+    result.appsToQuit.joined(separator: ", "),
+    String(result.finderWindowCount)
+].joined(separator: "|")
+print(output) 

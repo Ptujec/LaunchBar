@@ -4,7 +4,7 @@
 "Planning" = "Planen";
 "Coding" = "Coden";
 "Chill" = "Chillen";
-"Confirmation" = "Bestätigung";
+"Alert" = "Hinweis";
 "showing" = "wird angezeigt";
 "not showing" = "wird nicht angezeigt";
 "keeping" = "behalten";
@@ -12,6 +12,7 @@
 "closing" = "schließen";
 "Show alert before quitting." = "Hinweis vor dem Beenden anzeigen.";
 "Frontmost Application" = "Programm im Vordergrund";
+"Don't quit the frontmost application." = "Programm im Vordergrund nicht beenden.";
 "Quits applications not in \"" = "Beendet Programme, die nicht zu \"";
 "\". (Edit: ⌥ ⏎)" = "\" zählen. (Bearbeiten: ⌥ ⏎)";
 "Quit " = "";
@@ -20,9 +21,12 @@
 "Finder Windows" = "Finder Fenster";
 "Close " = "";
 " Finder Window(s)." = " Finder Fenster schließen.";
+"Keep Finder Windows." = "Finder Fenster nicht schließen.";
 "Windows will not be closed in this context" = "In diesem Kontext werden keine Fenster geschlossen";
+" will keep running" = " wird nicht beendet";
 "No Application to hide, no window to close." = "Kein Programm zum Beenden, kein Fenster zum Schließen.";
 "No Application to hide." = "Kein Programm zum Beenden.";
 "Add Unlisted Application…" = "Programm zur Liste hinzufügen…";
+"Add application missing in this list." = "Progamme, die in der Liste fehlen hinzufügen.";
 "Activate Application" = "Programm anzeigen";
 "Activate Appliction before closing." = "Programm vor dem Schließen anzeigen";
