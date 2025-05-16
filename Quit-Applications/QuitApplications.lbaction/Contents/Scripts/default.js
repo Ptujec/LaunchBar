@@ -52,7 +52,6 @@ function run() {
   }
 
   // Show Contexts
-  // TODO: make more flexible
   const names = File.readText(textFilePath).split('\n');
   return names
     .filter((item) => !item.startsWith('--') && item)
@@ -110,7 +109,7 @@ function showOptions() {
 
   const menuItems = [
     {
-      title: 'Alert'.localize(),
+      title: 'Confirmation'.localize(),
       subtitle: 'Show alert before quitting.'.localize(),
       action: 'toggleAlertOption',
       icon: 'alertTemplate',
@@ -121,7 +120,6 @@ function showOptions() {
     },
     {
       title: 'Frontmost Application'.localize(),
-      subtitle: "Don't quit the frontmost application.".localize(),
       action: 'toggleCurrentOption',
       icon: 'currentTemplate',
       label:
@@ -131,7 +129,6 @@ function showOptions() {
     },
     {
       title: 'Finder Windows'.localize(),
-      subtitle: 'Keep Finder Windows.'.localize(),
       action: 'toggleFinderWindowsOption',
       icon: 'windowStackTemplate',
       label:
@@ -141,10 +138,8 @@ function showOptions() {
     },
     {
       title: 'Add Unlisted Application…'.localize(),
-      subtitle: 'Add application missing in this list.'.localize(),
       icon: 'addTemplate',
       action: 'addApplication',
-      // actionRunsInBackground: true,
     },
   ];
 
@@ -160,7 +155,6 @@ function showOptions() {
           ...acc.excludedApps,
           {
             title,
-            subtitle: title + ' will keep running'.localize(),
             path: item.path,
             icon: item.id,
             action: 'toggleExclude',
@@ -350,7 +344,7 @@ function showQuitConfirmationAlert(exclusions) {
     listOnly
   )
     .trim()
-    .split('|');
+    .split('\n');
 
   const finderWindowCount = parseInt(finderWindowCountStr);
 
@@ -391,13 +385,15 @@ function quitApplications(exclusions) {
   const { commandArray, keepCurrentString, keepFinderWindowsOption, listOnly } =
     prepareQuitCommand(exclusions, false);
 
-  LaunchBar.execute(
+  const result = LaunchBar.execute(
     ...commandArray,
     exclusions.join(','),
     keepCurrentString,
     keepFinderWindowsOption,
     listOnly
   );
+
+  LaunchBar.log(result); // nonTerminatedApps (if exists), appsToQuit, finderWindowCount
 }
 
 // MARK: - Helper Functions
