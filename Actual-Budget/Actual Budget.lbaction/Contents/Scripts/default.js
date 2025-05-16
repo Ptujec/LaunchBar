@@ -248,7 +248,7 @@ function handleCategoryAction({
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
   const transactionItems = categoryTransactions.map((t) =>
-    formatTransaction(t, numberFormat, dateFormat, transactions)
+    formatTransaction(t, numberFormat, dateFormat, categoryTransactions)
   );
 
   return [...noteItem, ...transactionItems];
