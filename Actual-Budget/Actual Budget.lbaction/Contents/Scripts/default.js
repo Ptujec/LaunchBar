@@ -71,22 +71,7 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
     .filter((t) => !t.is_child)
     .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
     .slice(0, 150)
-    .map((t) => {
-      const item = formatTransaction(t, numberFormat, dateFormat);
-
-      if (t.transfer_id) {
-        const relatedTransfer = transactions.find(
-          (tr) => tr.id === t.transfer_id
-        );
-        if (relatedTransfer) {
-          item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
-          item.icon = 'transferTemplate';
-          item.title = item.title.replace('-', '');
-        }
-      }
-
-      return item;
-    });
+    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return [...accountResults, ...recentTransactions];
 }
@@ -118,7 +103,9 @@ function showAccountTransactions({
   const accountTransactions = transactions
     .filter((t) => t.account_id === accountId)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+    .map((t) =>
+      formatTransaction(t, numberFormat, dateFormat, transactions, accountId)
+    );
 
   return accountTransactions.length > 0
     ? accountTransactions
@@ -261,7 +248,7 @@ function handleCategoryAction({
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
   const transactionItems = categoryTransactions.map((t) =>
-    formatTransaction(t, numberFormat, dateFormat)
+    formatTransaction(t, numberFormat, dateFormat, transactions)
   );
 
   return [...noteItem, ...transactionItems];
@@ -280,7 +267,58 @@ function handleTransactionAction({
     return;
   }
 
-  if (t.transfer_id) return;
+  // For transfers, show source account, target account, amount and date
+  if (t.transfer_id) {
+    const data = getCachedDatabaseData({
+      checkForEntity: { id: t.transfer_id, field: 'id' },
+    });
+
+    if (!data) return [];
+
+    const { transactions } = data;
+    const relatedTransfer = transactions.find((tr) => tr.id === t.transfer_id);
+
+    if (!relatedTransfer) return [];
+
+    const sourceAccount =
+      t.amount < 0 ? t.account_name : relatedTransfer.account_name;
+    const targetAccount =
+      t.amount < 0 ? relatedTransfer.account_name : t.account_name;
+
+    return [
+      {
+        title: `${sourceAccount} →`,
+        icon: 'creditcardTemplate',
+        action: 'showAccountTransactions',
+        actionArgument: {
+          accountId: t.amount < 0 ? t.account_id : relatedTransfer.account_id,
+        },
+        actionReturnsItems: true,
+      },
+      {
+        title: targetAccount,
+        icon: 'creditcardTemplate',
+        action: 'showAccountTransactions',
+        actionArgument: {
+          accountId: t.amount < 0 ? relatedTransfer.account_id : t.account_id,
+        },
+        actionReturnsItems: true,
+      },
+      {
+        title: formattedAmount.replace('-', ''),
+        icon: 'transferTemplate',
+      },
+      {
+        title: formattedDate,
+        icon: 'calTemplate',
+        action: 'showTransactionsByDate',
+        actionArgument: {
+          date: t.date,
+        },
+        actionReturnsItems: true,
+      },
+    ];
+  }
 
   if (t.is_parent) {
     const data = getCachedDatabaseData({
@@ -292,7 +330,9 @@ function handleTransactionAction({
     const { transactions, numberFormat, dateFormat } = data;
     const childTransactions = transactions
       .filter((ct) => ct.parent_id === t.id)
-      .map((ct) => formatTransaction(ct, numberFormat, dateFormat));
+      .map((ct) =>
+        formatTransaction(ct, numberFormat, dateFormat, transactions)
+      );
 
     return childTransactions.length > 0
       ? childTransactions
@@ -374,7 +414,7 @@ function showPayeeTransactions(
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return payeeTransactions.length > 0
     ? payeeTransactions
@@ -392,7 +432,9 @@ function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
   const { transactions, numberFormat, dateFormat } = data;
   const dateTransactions = transactions
     .filter((t) => t.date === date)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+    .filter((t) => !t.is_child)
+    .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
+    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return dateTransactions.length > 0
     ? dateTransactions
@@ -418,7 +460,7 @@ function showCategoryTransactions({ categoryId }) {
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat));
+    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return categoryTransactions.length > 0
     ? categoryTransactions
@@ -427,7 +469,20 @@ function showCategoryTransactions({ categoryId }) {
 
 // MARK: - Transaction Formatting
 
-function formatTransaction(t, numberFormat, dateFormat) {
+function createTransferMap(transactions) {
+  return transactions.reduce((map, t) => {
+    if (t.transfer_id) {
+      map[t.id] = t;
+    }
+    return map;
+  }, {});
+}
+
+function formatTransfer(sourceAccount, targetAccount) {
+  return `${sourceAccount} → ${targetAccount}`;
+}
+
+function formatTransaction(t, numberFormat, dateFormat, transactions) {
   const isTransfer = t.transfer_id != null;
   const isReconciliation =
     !t.payee_name && t.notes === 'Reconciliation balance adjustment';
@@ -435,13 +490,36 @@ function formatTransaction(t, numberFormat, dateFormat) {
 
   const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
 
-  const title = [
+  let title = [
     isTransfer ? 'Transfer' : t.payee_name,
     formattedAmount,
     !t.cleared && '(uncleared)',
   ]
     .filter(Boolean)
     .join(t.cleared ? ': ' : ' ');
+
+  let icon = getTransactionIcon(isReconciliation, t.amount);
+  let badge = t.account_name;
+
+  // Handle transfer display
+  if (isTransfer && transactions) {
+    // Create transfer map if it doesn't exist
+    if (!transactions._transferMap) {
+      transactions._transferMap = createTransferMap(transactions);
+    }
+    const relatedTransfer = transactions._transferMap[t.transfer_id];
+    if (relatedTransfer) {
+      const sourceAccount =
+        t.amount < 0 ? t.account_name : relatedTransfer.account_name;
+      const targetAccount =
+        t.amount < 0 ? relatedTransfer.account_name : t.account_name;
+      badge = formatTransfer(sourceAccount, targetAccount);
+      icon = 'transferTemplate';
+      if (t.amount < 0) {
+        title = title.replace('-', '');
+      }
+    }
+  }
 
   const formattedDate = formatDate(t.date, dateFormat);
 
@@ -464,12 +542,12 @@ function formatTransaction(t, numberFormat, dateFormat) {
   }
 
   return {
-    icon: getTransactionIcon(isReconciliation, t.amount),
+    icon,
     title,
     subtitle,
     alwaysShowsSubtitle: true,
     label: t.is_parent ? '􀙠' : messageUrl ? '􀉣' : undefined,
-    badge: t.account_name,
+    badge,
     action: 'handleTransactionAction',
     actionArgument: {
       t,
@@ -477,7 +555,7 @@ function formatTransaction(t, numberFormat, dateFormat) {
       formattedDate,
       messageUrl,
     },
-    actionReturnsItems: isTransfer ? false : true,
+    actionReturnsItems: true,
     transferItem: isTransfer
       ? {
           id: t.id,

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Actual Budget</string>
 	<key>CFBundleVersion</key>
-	<string>1.5</string>
+	<string>1.5.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.actualbudget.actual</string>
 	<key>LBDescription</key>
