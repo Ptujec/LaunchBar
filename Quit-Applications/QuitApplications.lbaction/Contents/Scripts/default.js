@@ -52,7 +52,6 @@ function run() {
   }
 
   // Show Contexts
-  // TODO: make more flexible
   const names = File.readText(textFilePath).split('\n');
   return names
     .filter((item) => !item.startsWith('--') && item)
@@ -110,8 +109,7 @@ function showOptions() {
 
   const menuItems = [
     {
-      title: 'Alert'.localize(),
-      subtitle: 'Show alert before quitting.'.localize(),
+      title: 'Confirmation'.localize(),
       action: 'toggleAlertOption',
       icon: 'alertTemplate',
       label:
@@ -121,7 +119,6 @@ function showOptions() {
     },
     {
       title: 'Frontmost Application'.localize(),
-      subtitle: "Don't quit the frontmost application.".localize(),
       action: 'toggleCurrentOption',
       icon: 'currentTemplate',
       label:
@@ -131,7 +128,6 @@ function showOptions() {
     },
     {
       title: 'Finder Windows'.localize(),
-      subtitle: 'Keep Finder Windows.'.localize(),
       action: 'toggleFinderWindowsOption',
       icon: 'windowStackTemplate',
       label:
@@ -141,10 +137,8 @@ function showOptions() {
     },
     {
       title: 'Add Unlisted Application…'.localize(),
-      subtitle: 'Add application missing in this list.'.localize(),
       icon: 'addTemplate',
       action: 'addApplication',
-      // actionRunsInBackground: true,
     },
   ];
 
@@ -160,7 +154,6 @@ function showOptions() {
           ...acc.excludedApps,
           {
             title,
-            subtitle: title + ' will keep running'.localize(),
             path: item.path,
             icon: item.id,
             action: 'toggleExclude',
@@ -342,26 +335,25 @@ function showQuitConfirmationAlert(exclusions) {
   const { commandArray, keepCurrentString, keepFinderWindowsOption, listOnly } =
     prepareQuitCommand(exclusions, true);
 
-  const [appsToQuit, finderWindowCountStr] = LaunchBar.execute(
+  const result = LaunchBar.execute(
     ...commandArray,
     exclusions.join(','),
     keepCurrentString,
     keepFinderWindowsOption,
     listOnly
-  )
-    .trim()
-    .split('|');
+  ).split('\n');
 
-  const finderWindowCount = parseInt(finderWindowCountStr);
+  const appsToQuit = result[0];
+  const finderWindowCount = parseInt(result[1] || '0');
 
   if (!appsToQuit && keepFinderWindowsOption === 'true') {
-    LaunchBar.alert('No Application to hide.'.localize());
+    LaunchBar.alert('No Application to quit.'.localize());
     LaunchBar.hide();
     return;
   }
 
   if (!appsToQuit && finderWindowCount === 0) {
-    LaunchBar.alert('No Application to hide, no window to close.'.localize());
+    LaunchBar.alert('No Application to quit, no window to close.'.localize());
     LaunchBar.hide();
     return;
   }
@@ -391,13 +383,15 @@ function quitApplications(exclusions) {
   const { commandArray, keepCurrentString, keepFinderWindowsOption, listOnly } =
     prepareQuitCommand(exclusions, false);
 
-  LaunchBar.execute(
+  const result = LaunchBar.execute(
     ...commandArray,
     exclusions.join(','),
     keepCurrentString,
     keepFinderWindowsOption,
     listOnly
   );
+
+  LaunchBar.log(result); // non-terminated apps (if any), appsToQuit, finderWindowCount
 }
 
 // MARK: - Helper Functions
@@ -441,13 +435,22 @@ function buildDialogMessage(
     appsToQuit &&
     finderWindowCount > 0
   ) {
-    return `Quit ${appsToQuit} and close ${finderWindowCount} Finder windows.`.localize();
+    return (
+      'Quit '.localize() +
+      appsToQuit +
+      ' and close '.localize() +
+      finderWindowCount +
+      ' Finder windows.'.localize()
+    );
   }
   if (appsToQuit) {
-    return appsToQuit;
+    return 'Quit '.localize() + appsToQuit;
   }
+
   if (finderWindowCount > 0) {
-    return `Close ${finderWindowCount} Finder Window(s).`.localize();
+    return (
+      'Close '.localize() + finderWindowCount + ' Finder Window(s).'.localize()
+    );
   }
   return '';
 }

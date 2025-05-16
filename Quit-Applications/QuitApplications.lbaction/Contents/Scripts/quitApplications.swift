@@ -141,12 +141,9 @@ let result = manager.quitApplications(listOnly: listOnly)
 if !listOnly {
     let nonTerminatedApps = manager.checkTerminationStatus(for: appsToQuit)
     if !nonTerminatedApps.isEmpty {
-        print("Non-terminated apps: " + nonTerminatedApps.joined(separator: ", "))
+        print(nonTerminatedApps.joined(separator: ", "))
     }
 }
 
-let output = [
-    result.appsToQuit.joined(separator: ", "),
-    String(result.finderWindowCount)
-].joined(separator: "|")
-print(output) 
+print(result.appsToQuit.joined(separator: ", "))
+print(result.finderWindowCount)
