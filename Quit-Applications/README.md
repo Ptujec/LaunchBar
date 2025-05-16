@@ -21,7 +21,7 @@ For each context, you can specify apps that are necessary in that context (toggl
 <img src="03.jpg" width="600"/>   
 
 There are some additional options you can configure for each context:  
-- Show alert before quitting (toggle)
+- Show confirmation dialog before quitting (toggle)
 - Don't quit frontmost application (toggle)
 - Close Finder windows (toggle)
 
