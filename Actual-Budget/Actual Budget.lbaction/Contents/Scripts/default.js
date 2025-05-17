@@ -425,6 +425,7 @@ function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
   const data = getCachedDatabaseData({
     customDatabasePath,
     customBudgetID,
+    checkForEntity: { id: date, field: 'date' },
   });
 
   if (!data) return [];
