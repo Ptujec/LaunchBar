@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <style>
+        :root {
+            --icon-color: rgb(244,62,56);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --icon-color: rgb(255,255,255);
+            }
+        }
+    </style>
+    <g transform="matrix(1.75,0,0,1.75,4,4)">
+        <path d="M16,32C7.163,32 0,24.837 0,16C0,7.163 7.163,0 16,0C24.837,0 32,7.163 32,16C32,24.837 24.837,32 16,32ZM16,23.429L16,20.571C13.477,20.571 11.429,18.523 11.429,16C11.429,13.477 13.477,11.429 16,11.429C18.523,11.429 20.571,13.477 20.571,16L23.429,16C23.429,11.9 20.1,8.571 16,8.571C11.9,8.571 8.571,11.9 8.571,16C8.571,20.1 11.9,23.429 16,23.429ZM16,28.571L16,25.714C10.639,25.714 6.286,21.361 6.286,16C6.286,10.639 10.639,6.286 16,6.286C21.361,6.286 25.714,10.639 25.714,16L28.571,16C28.571,9.062 22.938,3.429 16,3.429C9.062,3.429 3.429,9.062 3.429,16C3.429,22.938 9.062,28.571 16,28.571Z" style="fill:var(--icon-color);"/>
+    </g>
+</svg>
