@@ -10,7 +10,7 @@ Let's you run actions of the most recent notification (group).
  
 ## Action: Show/Dismiss Notifications
 
-This will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them along with a few other options. 
+This will dismiss all notifications unless there is a group of notifications. If there is a group of notifications, it will show them as well as offer a few action options. 
 
 <img src="noti_show_dismiss.png" width="800"/> 
 
