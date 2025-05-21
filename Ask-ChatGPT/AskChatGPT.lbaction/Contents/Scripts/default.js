@@ -18,11 +18,12 @@ TODO:
 - localization (German)
 */
 
-String.prototype.localizationTable = 'default'; // For potential localization later
+String.prototype.localizationTable = 'default';
 
 include('browser.js');
 include('editors.js');
 
+const recommendedModel = 'gpt-4.1-mini';
 const apiKey = Action.preferences.apiKey;
 const recentTimeStamp = Action.preferences.recentTimeStamp;
 const chatsFolder = Action.supportPath + '/chats/';
@@ -335,7 +336,7 @@ function ask(dict) {
   }
 
   // MODEL
-  var model = Action.preferences.model ?? 'gpt-4o-mini';
+  var model = Action.preferences.model ?? recommendedModel;
 
   // PERSONA
   // GET DEFAULT
@@ -599,7 +600,7 @@ function settings() {
     {
       title: 'Choose model'.localize(),
       icon: 'gearTemplate',
-      badge: Action.preferences.model ?? 'gpt-4o-mini',
+      badge: Action.preferences.model ?? recommendedModel,
       action: 'showModels',
     },
     {
@@ -633,7 +634,7 @@ function setPersona(dict) {
 }
 
 function showModels() {
-  const currentModel = Action.preferences.model || 'gpt-4o-mini';
+  const currentModel = Action.preferences.model || recommendedModel;
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
@@ -666,7 +667,8 @@ function showModels() {
           currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
         action: 'setModel',
         actionArgument: item.id,
-        badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
+        badge:
+          item.id === recommendedModel ? 'Recommended'.localize() : undefined,
       }))
   );
 }

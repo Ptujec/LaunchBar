@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Ask ChatGPT</string>
 	<key>CFBundleVersion</key>
-	<string>2.4.2</string>
+	<string>2.4.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
