@@ -21,6 +21,8 @@
 "full" = "vollständig";
 "us_short" = "US Kurz";
 "iso_full" = "ISO vollständig";
+"iso_datetime" = "ISO Datum/Uhrzeit";
+"unix_timestamp" = "Unix Timestamp";
 "First" = "Erster";
 "Second" = "Zweiter";
 "Third" = "Dritter";

@@ -36,11 +36,13 @@ function styleOptions(mode, date, currentStyle, dateString) {
   const styles = [
     'iso',
     'iso_full',
+    'iso_datetime',
     'short',
     'medium',
     'long',
     'full',
     'us_short',
+    'unix_timestamp',
   ];
 
   const config =

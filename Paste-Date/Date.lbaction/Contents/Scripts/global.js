@@ -103,11 +103,21 @@ function formatISODate(date, includeTZ = false) {
     : adjustedDate.toISOString().split('T')[0];
 }
 
+function formatISODateTime(date) {
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  const adjustedDate = new Date(date.getTime() - tzOffset);
+  return adjustedDate.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 function formatUSShort(date) {
   const year = date.toLocaleString('default', { year: 'numeric' });
   const month = date.toLocaleString('default', { month: '2-digit' });
   const day = date.toLocaleString('default', { day: '2-digit' });
   return `${month}/${day}/${year}`;
+}
+
+function formatUnixTimestamp(date) {
+    return Math.floor(date / 1000).toString()
 }
 
 function format(dateString, dateStyle) {
@@ -118,8 +128,12 @@ function format(dateString, dateStyle) {
       return formatISODate(date, false);
     case 'iso_full':
       return formatISODate(date, true);
+    case 'iso_datetime':
+      return formatISODateTime(date);
     case 'us_short':
       return formatUSShort(date);
+    case 'unix_timestamp':
+      return formatUnixTimestamp(date);
     default:
       return LaunchBar.formatDate(date, {
         timeStyle: 'none',
