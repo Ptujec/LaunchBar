@@ -19,9 +19,3 @@ If you hold <kbd>command</kbd> when confirming to download a transcript, it will
 ## Download & Update
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
-
----
-Anmerkungen: 0,1110 SHA-256 44e1a04772d0270739e280e4d8bb3ae3  
-&ChatGPT: 436  
-@Christian: 20,21 380,2  
-...
