@@ -13,14 +13,6 @@ const logFile = '/tmp/youtube_transcript_debug.log';
 const mode = Action.preferences.mode || 'short'; // full, short, none
 const maxAttempts = 2;
 
-const supportedBrowsers = [
-  'com.apple.Safari',
-  'com.brave.Browser',
-  'com.google.Chrome',
-  'com.vivaldi.Vivaldi',
-  'company.thebrowser.Browser', // this browser is abandoned but maybe still used
-];
-
 // MARK: - Run
 
 function run(argument) {
@@ -41,7 +33,7 @@ function run(argument) {
 
     url = argument;
   } else {
-    const browser = getActiveBrowser();
+    const browser = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
 
     if (!browser) {
       return {
@@ -324,14 +316,6 @@ function formatTime(seconds) {
 }
 
 // MARK: - Browser Handling
-
-function getActiveBrowser() {
-  return LaunchBar.execute(
-    '/bin/bash',
-    './appInfo.sh',
-    supportedBrowsers
-  ).trim();
-}
 
 function getBrowserInfo(browser) {
   let script;

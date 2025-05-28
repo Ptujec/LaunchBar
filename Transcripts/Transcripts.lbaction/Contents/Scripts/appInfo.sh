@@ -11,20 +11,29 @@
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 # 
 
+supported_browsers=(
+    "com.apple.Safari"
+    "com.brave.Browser"
+    "com.google.Chrome"
+    "com.vivaldi.Vivaldi"
+    "company.thebrowser.Browser" # this browser is abandoned but maybe still used
+)
+
 frontmost=$(lsappinfo info -only bundleid `lsappinfo front` | cut -d'"' -f4)
 
-supported=$1
+# Check if frontmost app is in supported browsers
+for browser in "${supported_browsers[@]}"; do
+    if [[ "$browser" == "$frontmost" ]]; then
+        echo "$frontmost"
+        exit 0
+    fi
+done
 
-if [[ "$supported" == *"$frontmost"* ]]; then
-    echo "$frontmost"
-    exit 0
-fi
-
-IFS=',' read -ra SUPPORTED_APPS <<< "$supported"
-for app in "${SUPPORTED_APPS[@]}"; do
-    result=$(lsappinfo find "bundleid=$app")
+# If frontmost is not a supported browser, check which supported browsers are running
+for browser in "${supported_browsers[@]}"; do
+    result=$(lsappinfo find "bundleid=$browser")
     if [[ ! -z "$result" ]]; then
-        echo "$app"
+        echo "$browser"
         exit 0
     fi
 done
