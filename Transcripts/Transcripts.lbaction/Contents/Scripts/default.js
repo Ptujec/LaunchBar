@@ -176,7 +176,7 @@ function downloadTranscript({ baseUrl, title, url }) {
   if (baseUrl.includes('&exp=xpe')) {
     // Remove "&exp=xpe" parameter that might cause issues
     baseUrl = baseUrl.replace(/&exp=xpe/, '');
-    LaunchBar.log('Removed "exp=xpe" parameter from base URL');
+    writeDebugLog('Removed "exp=xpe" parameter from base URL');
   }
 
   const options = {
@@ -193,14 +193,13 @@ function downloadTranscript({ baseUrl, title, url }) {
   if (!captionResponse?.data) {
     writeDebugLog(
       'Empty data received from caption request',
-      'Caption Request Error',
-      'Base URL: ' + baseUrl
+      'Caption Request Error'
     );
 
     LaunchBar.displayNotification({
       title: 'Failed to download transcript',
       string: 'No data received',
-      url: baseUrl,
+      url: File.fileURLForPath(logFile),
     });
 
     // TODO: add a retry mechanism ?
