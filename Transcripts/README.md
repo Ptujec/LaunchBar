@@ -8,7 +8,7 @@ Then choose the desired transcription from the list of languages.
 
 <img src="01.jpg" width="600"/>
 
-NOTE: Some videos don’t provide transcriptions. 
+NOTE: Some videos don’t provide transcriptions. Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
 
 ## Settings
 
