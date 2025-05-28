@@ -6,7 +6,7 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-const downloadsPath = `${LaunchBar.homeDirectory}/Desktop`;
+const downloadsPath = '/tmp';
 const logFile = '/tmp/youtube_transcript_debug.log';
 const mode = Action.preferences.mode || 'short'; // full, short, none
 
@@ -15,7 +15,7 @@ const supportedBrowsers = [
   'com.brave.Browser',
   'com.google.Chrome',
   'com.vivaldi.Vivaldi',
-  'company.thebrowser.Browser',
+  'company.thebrowser.Browser', // this browser is abandoned but maybe still used
 ];
 
 // MARK: - Run
@@ -39,9 +39,6 @@ function run(argument) {
     url = argument;
   } else {
     const browser = getActiveBrowser();
-
-    // DEBUG: uncomment for debugging
-    // LaunchBar.log('Browser bundle ID:', browser);
 
     if (!browser) {
       return {
@@ -140,9 +137,6 @@ function getVideoTranscript(videoId, info) {
     videoTitle = videoDetails?.[0]?.match(/"title":"([^"]+)"/)?.[1];
   }
 
-  // DEBUG: uncomment for debugging
-  // LaunchBar.log('Video Title: ', videoTitle);
-
   let tracks;
   try {
     tracks = JSON.parse(tracksMatch[1]);
@@ -179,6 +173,12 @@ function getVideoTranscript(videoId, info) {
 function downloadTranscript({ baseUrl, title, url }) {
   LaunchBar.hide();
 
+  if (baseUrl.includes('&exp=xpe')) {
+    // Remove "&exp=xpe" parameter that might cause issues
+    baseUrl = baseUrl.replace(/&exp=xpe/, '');
+    LaunchBar.log('Removed "exp=xpe" parameter from base URL');
+  }
+
   const options = {
     method: 'GET',
     headerFields: {
@@ -190,12 +190,20 @@ function downloadTranscript({ baseUrl, title, url }) {
 
   const captionResponse = HTTP.loadRequest(baseUrl, options);
 
-  if (!captionResponse) {
+  if (!captionResponse?.data) {
     writeDebugLog(
-      'No response received from caption request',
-      'Caption Request Error'
+      'Empty data received from caption request',
+      'Caption Request Error',
+      'Base URL: ' + baseUrl
     );
-    LaunchBar.alert('Failed to download transcript - No response received');
+
+    LaunchBar.displayNotification({
+      title: 'Failed to download transcript',
+      string: 'No data received',
+      url: baseUrl,
+    });
+
+    // TODO: add a retry mechanism ?
     return;
   }
 
@@ -335,10 +343,6 @@ function getBrowserInfo(browser) {
 
   const [url, title] = result.split('\n').map((s) => s.trim());
 
-  // DEBUG: uncomment for debugging
-  // LaunchBar.log('Browser returned URL:', url);
-  // LaunchBar.log('Browser returned title:', title);
-
   return {
     url,
     title: cleanTitle(title),
@@ -355,16 +359,6 @@ function cleanTitle(title) {
   return title.trim();
 }
 
-// MARK: - Debug Logging
-
-function writeDebugLog(data, label = '') {
-  // DEBUG: uncomment for debugging
-  // const timestamp = new Date().toISOString();
-  // const entry = `\n[${timestamp}] ${label}\n${JSON.stringify(data, null, 2)}\n`;
-  // const existingContent = File.exists(logFile) ? File.readText(logFile) : '';
-  // File.writeText(existingContent + entry, logFile);
-}
-
 // MARK: - Mode Settings
 
 const options = {
@@ -379,6 +373,7 @@ function settings() {
   return Object.keys(options).map((option) => ({
     title: options[option],
     icon: option === currentOption ? 'checkTemplate' : 'circleTemplate',
+    badge: option === currentOption ? 'selected' : undefined,
     action: 'setOption',
     actionArgument: option,
   }));
@@ -387,4 +382,14 @@ function settings() {
 function setOption(option) {
   Action.preferences.mode = option;
   return settings();
+}
+
+// MARK: - Debug Logging
+
+function writeDebugLog(data, label = '') {
+  // DEBUG: uncomment for debugging
+  const timestamp = new Date().toISOString();
+  const entry = `\n[${timestamp}] ${label}\n${JSON.stringify(data, null, 2)}\n`;
+  const existingContent = File.exists(logFile) ? File.readText(logFile) : '';
+  File.writeText(existingContent + entry, logFile);
 }
