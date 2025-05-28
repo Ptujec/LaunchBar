@@ -8,13 +8,15 @@ Then choose the desired transcription from the list of languages.
 
 <img src="01.jpg" width="600"/>
 
-NOTE: Some videos don’t provide transcriptions. Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
-
 ## Settings
 
 When holding <kbd>option</kbd> while pressing <kbd>enter</kbd>, you can decide if you want to include time markers and links or not by default.
 
 If you hold <kbd>command</kbd> when confirming to download a transcript, it will use just the text with no markers or links.
+
+## Good to Know
+
+Some videos don’t provide transcriptions. This action works best with Safari because we save a load request. Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
 
 ## Download & Update
 

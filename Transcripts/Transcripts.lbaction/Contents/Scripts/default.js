@@ -18,6 +18,7 @@ const maxAttempts = 2;
 function run(argument) {
   let url;
   let title;
+  let source;
 
   if (LaunchBar.options.alternateKey) {
     return settings();
@@ -53,6 +54,7 @@ function run(argument) {
 
     url = info.url;
     title = info.title;
+    source = browser === 'com.apple.Safari' ? info.source : null;
   }
 
   const videoId = extractVideoId(url);
@@ -64,7 +66,7 @@ function run(argument) {
     };
   }
 
-  return getVideoTranscript(videoId, { url, title });
+  return getVideoTranscript(videoId, { url, title, source });
 }
 
 // MARK: - URL Handling
@@ -96,7 +98,7 @@ function getVideoTranscript(videoId, info) {
     },
   };
 
-  const result = getCaptionTracks(videoId, options);
+  const result = getCaptionTracks(videoId, info.source, options);
   if (!result) {
     return {
       title: 'No transcripts available',
@@ -128,14 +130,21 @@ function getVideoTranscript(videoId, info) {
   }));
 }
 
-function getCaptionTracks(videoId, options) {
+function getCaptionTracks(videoId, pageSource, options) {
   const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
   writeDebugLog(watchUrl, 'Requesting watch URL');
 
-  const watchResponse = HTTP.loadRequest(watchUrl, options);
-  if (!watchResponse?.data) return null;
+  let pageData;
+  if (pageSource) {
+    pageData = pageSource;
+    writeDebugLog('Using Safari page source', 'Source Info');
+  } else {
+    const watchResponse = HTTP.loadRequest(watchUrl, options);
+    if (!watchResponse?.data) return null;
+    pageData = watchResponse.data;
+  }
 
-  const tracksMatch = watchResponse.data.match(
+  const tracksMatch = pageData.match(
     /{"captionTracks":(\[.*?\])(?=,\s*"audioTracks")/
   );
   if (!tracksMatch?.[1]) return null;
@@ -146,7 +155,7 @@ function getCaptionTracks(videoId, options) {
     writeDebugLog(tracks, 'Parsed caption tracks');
     return {
       tracks,
-      videoTitle: watchResponse.data
+      videoTitle: pageData
         .match(
           /"videoDetails":\s*{\s*"videoId":[^}]*"lengthSeconds":"[^"]*"/
         )?.[0]
@@ -202,7 +211,7 @@ function downloadTranscript({ baseUrl, title, url, videoId, track }) {
 }
 
 function getFreshTrackUrl(videoId, track, options) {
-  const result = getCaptionTracks(videoId, options);
+  const result = getCaptionTracks(videoId, null, options);
   if (!result) return null;
 
   const { tracks } = result;
@@ -324,7 +333,8 @@ function getBrowserInfo(browser) {
       tell application id "${browser}"
         set _url to URL of front document
         set _name to name of front document
-        return _url & "\n" & _name
+        set _source to source of front document
+        return _url & "\n" & _name & "\n" & _source
       end tell
     `;
   } else {
@@ -341,22 +351,25 @@ function getBrowserInfo(browser) {
 
   if (!result.trim()) return;
 
-  const [url, title] = result.split('\n').map((s) => s.trim());
+  const parts = result.split('\n');
+  const url = parts[0].trim();
+  const title = cleanTitle(parts[1].trim());
+  const source =
+    browser === 'com.apple.Safari' ? parts.slice(2).join('\n') : null;
 
   return {
     url,
-    title: cleanTitle(title),
+    title,
+    source,
   };
 }
 
 function cleanTitle(title) {
-  // Remove YouTube notification count at start
-  title = title.replace(/^\(\d+\)\s*/, '');
-
-  // Remove " - YouTube" at the end
-  title = title.replace(/\s*-\s*YouTube$/, '');
-
-  return title.trim();
+  return title
+    .replace(/^\(\d+\)\s*/, '') // Remove YouTube notification count at start
+    .replace(/\//g, '') // Remove slashes
+    .replace(/\s*-\s*YouTube$/, '') // Remove " - YouTube" at end
+    .trim();
 }
 
 // MARK: - Mode Settings
