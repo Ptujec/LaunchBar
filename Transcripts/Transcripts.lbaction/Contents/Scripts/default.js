@@ -6,9 +6,12 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
+// MARK: - Configuration
+
 const downloadsPath = '/tmp';
 const logFile = '/tmp/youtube_transcript_debug.log';
 const mode = Action.preferences.mode || 'short'; // full, short, none
+const maxAttempts = 2;
 
 const supportedBrowsers = [
   'com.apple.Safari',
@@ -92,9 +95,6 @@ function extractVideoId(url) {
 // MARK: - Get Transcript Data
 
 function getVideoTranscript(videoId, info) {
-  const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  writeDebugLog(watchUrl, 'Requesting watch URL');
-
   const options = {
     method: 'GET',
     headerFields: {
@@ -104,51 +104,15 @@ function getVideoTranscript(videoId, info) {
     },
   };
 
-  const watchResponse = HTTP.loadRequest(watchUrl, options);
-
-  if (!watchResponse?.data) {
+  const result = getCaptionTracks(videoId, options);
+  if (!result) {
     return {
       title: 'No transcripts available',
       icon: 'alert',
     };
   }
 
-  // DEBUG: uncomment for debugging
-  // File.writeText(watchResponse.data, Action.supportPath + '/test.html');
-
-  // Extract caption tracks
-  const tracksMatch = watchResponse.data.match(
-    /{"captionTracks":(\[.*?\])(?=,\s*"audioTracks")/
-  );
-  if (!tracksMatch?.[1]) {
-    return {
-      title: 'No transcripts available',
-      icon: 'alert',
-    };
-  }
-
-  let videoTitle = info?.title;
-
-  if (!videoTitle) {
-    const videoDetails = watchResponse.data.match(
-      /"videoDetails":\s*{\s*"videoId":[^}]*"lengthSeconds":"[^"]*"/
-    );
-
-    videoTitle = videoDetails?.[0]?.match(/"title":"([^"]+)"/)?.[1];
-  }
-
-  let tracks;
-  try {
-    tracks = JSON.parse(tracksMatch[1]);
-    writeDebugLog(tracks, 'Parsed caption tracks');
-  } catch (e) {
-    return {
-      title: 'Error parsing transcript tracks',
-      subtitle: e,
-      alwaysShowsSubtitle: true,
-      icon: 'alert',
-    };
-  }
+  const { tracks, videoTitle } = result;
 
   if (tracks.length === 0) {
     return {
@@ -163,21 +127,47 @@ function getVideoTranscript(videoId, info) {
     action: 'downloadTranscript',
     actionArgument: {
       baseUrl: track.baseUrl,
-      title: videoTitle,
+      title: info?.title || videoTitle,
       url: info?.url,
+      videoId: videoId,
+      track: track,
     },
     actionRunsInBackground: true,
   }));
 }
 
-function downloadTranscript({ baseUrl, title, url }) {
-  LaunchBar.hide();
+function getCaptionTracks(videoId, options) {
+  const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  writeDebugLog(watchUrl, 'Requesting watch URL');
 
-  if (baseUrl.includes('&exp=xpe')) {
-    // Remove "&exp=xpe" parameter that might cause issues
-    baseUrl = baseUrl.replace(/&exp=xpe/, '');
-    writeDebugLog('Removed "exp=xpe" parameter from base URL');
+  const watchResponse = HTTP.loadRequest(watchUrl, options);
+  if (!watchResponse?.data) return null;
+
+  const tracksMatch = watchResponse.data.match(
+    /{"captionTracks":(\[.*?\])(?=,\s*"audioTracks")/
+  );
+  if (!tracksMatch?.[1]) return null;
+
+  let tracks;
+  try {
+    tracks = JSON.parse(tracksMatch[1]);
+    writeDebugLog(tracks, 'Parsed caption tracks');
+    return {
+      tracks,
+      videoTitle: watchResponse.data
+        .match(
+          /"videoDetails":\s*{\s*"videoId":[^}]*"lengthSeconds":"[^"]*"/
+        )?.[0]
+        ?.match(/"title":"([^"]+)"/)?.[1],
+    };
+  } catch (e) {
+    writeDebugLog(e, 'Error parsing caption tracks');
+    return null;
   }
+}
+
+function downloadTranscript({ baseUrl, title, url, videoId, track }) {
+  LaunchBar.hide();
 
   const options = {
     method: 'GET',
@@ -188,32 +178,58 @@ function downloadTranscript({ baseUrl, title, url }) {
     },
   };
 
-  const captionResponse = HTTP.loadRequest(baseUrl, options);
+  if (tryDownloadTranscript(baseUrl, url, title, options)) return;
 
-  if (!captionResponse?.data) {
+  writeDebugLog(
+    'Empty data received from caption request',
+    'Caption Request Error'
+  );
+
+  // If original URL failed, try with fresh URLs
+  let attempt = 1;
+
+  while (attempt < maxAttempts) {
+    attempt++;
+
+    const freshUrl = getFreshTrackUrl(videoId, track, options);
+    if (!freshUrl) continue;
+
+    if (tryDownloadTranscript(freshUrl, url, title, options)) return;
+
     writeDebugLog(
-      'Empty data received from caption request',
+      `Empty data received from caption request (Attempt ${attempt}/${maxAttempts})`,
       'Caption Request Error'
     );
-
-    LaunchBar.displayNotification({
-      title: 'Failed to download transcript',
-      string: 'No data received',
-      url: File.fileURLForPath(logFile),
-    });
-
-    // TODO: add a retry mechanism ?
-    return;
   }
 
-  // DEBUG: uncomment for debugging
-  // File.writeText(captionResponse.data, Action.supportPath + '/test.xml');
+  LaunchBar.displayNotification({
+    title: 'Failed to download transcript',
+    string: 'No data received after multiple attempts',
+    url: File.fileURLForPath(logFile),
+  });
+}
+
+function getFreshTrackUrl(videoId, track, options) {
+  const result = getCaptionTracks(videoId, options);
+  if (!result) return null;
+
+  const { tracks } = result;
+
+  const freshTrack = tracks.find(
+    (t) =>
+      t.name?.simpleText === track.name?.simpleText &&
+      t.languageCode === track.languageCode
+  );
+
+  return freshTrack?.baseUrl;
+}
+
+function tryDownloadTranscript(captionUrl, url, title, options) {
+  const captionResponse = HTTP.loadRequest(captionUrl, options);
+  if (captionResponse?.data === '') return false;
 
   const transcript = parseTranscriptXML(captionResponse.data, url);
-  if (!transcript) {
-    LaunchBar.alert('Failed to parse transcript');
-    return;
-  }
+  if (!transcript) return false;
 
   const text = `# ${title} (Transcript)\n\n→ ${url}\n\n${transcript}`;
   const filename = `${downloadsPath}/${title} (Transcript).md`;
@@ -226,6 +242,7 @@ function downloadTranscript({ baseUrl, title, url }) {
   );
 
   LaunchBar.openURL(File.fileURLForPath(filename));
+  return true;
 }
 
 // MARK: - Transcript Parsing
