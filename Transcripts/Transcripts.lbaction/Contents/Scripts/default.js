@@ -277,20 +277,10 @@ function parseTranscriptXML(xmlString, videoUrl) {
     .map(([, start, dur, text]) => format(start, dur, text))
     .join('\n\n');
 
-  const entitiesMap = File.readPlist(
-    '/Applications/LaunchBar.app/Contents/Resources/HTMLEntities.plist'
-  );
-
   let decodedText = textContent
     .replace(/&amp;/g, '&')
-    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
-    .replace(/&#x([0-9a-f]+);/gi, (match, hex) =>
-      String.fromCharCode(parseInt(hex, 16))
-    )
-    .replace(/&([^;]+);/g, (match, entity) => {
-      const codePoint = entitiesMap[entity];
-      return codePoint ? String.fromCharCode(codePoint) : match;
-    })
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
     .trim();
 
   return decodedText;
