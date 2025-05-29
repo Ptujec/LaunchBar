@@ -26,24 +26,38 @@ struct UserConfig: Codable {
     var globalMenuExclusions: [String]
     var appMenuExclusions: [String: [String]]
     var includeAppleMenu: Bool
+    var menuInclusions: [String: [[Int]]]
 }
 
 struct Config {
     private static let preferences = Preferences.load()
-    private static let userConfig = preferences.config ?? UserConfig(
+    static let defaultConfig = UserConfig(
         globalMenuExclusions: [
             "Open Recent", "Benutzte Dokumente", "Services", "Dienste", "History", "Verlauf",
         ],
         appMenuExclusions: ["org.mozilla.firefox": ["Chronik"]],
-        includeAppleMenu: false
+        includeAppleMenu: false,
+        menuInclusions: [:]
     )
+    private static let userConfig = preferences.config ?? defaultConfig
 
     static let globalExclusions = userConfig.globalMenuExclusions
     static let appExclusions = userConfig.appMenuExclusions.mapValues(Set.init)
     static let includeAppleMenu = userConfig.includeAppleMenu
+    static let menuInclusions = userConfig.menuInclusions
 
-    static func isPathExcluded(_ path: [String], for bundleId: String?) -> Bool {
-        path.contains { item in
+    static func isPathExcluded(_ path: [String], for bundleId: String?, currentIndices: [Int]) -> Bool {
+        if let bundleId = bundleId,
+           let inclusions = menuInclusions[bundleId],
+           inclusions.lazy.contains(where: { inclusionPath in
+               let isExactMatch = inclusionPath.count == currentIndices.count && inclusionPath == currentIndices
+               let isOnPath = currentIndices.count < inclusionPath.count && Array(inclusionPath.prefix(currentIndices.count)) == currentIndices
+               return isExactMatch || isOnPath
+           }) {
+            return false
+        }
+        
+        return path.contains { item in
             globalExclusions.contains(item) ||
                 bundleId.flatMap { appExclusions[$0]?.contains(item) } ?? false
         }
@@ -52,7 +66,7 @@ struct Config {
     static func openConfigInEditor() {
         if preferences.config == nil {
             var prefs = preferences
-            prefs.config = userConfig
+            prefs.config = defaultConfig
             Preferences.save(prefs)
         }
         NSWorkspace.shared.open(URL(fileURLWithPath: Environment.preferencesPlistPath))
@@ -150,17 +164,18 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
                   !title.isEmpty else { continue }
 
             let path = currentPath + [title]
-            guard !Config.isPathExcluded(path, for: bundleId) else { continue }
+            let indices = currentIndices + [index]
+
+            guard !Config.isPathExcluded(path, for: bundleId, currentIndices: indices) else { continue }
 
             let isEnabled = attrs[kAXEnabledAttribute as String] as? Bool ?? false
             let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement]
             let hasSubmenu = submenu?.isEmpty == false
 
             if hasSubmenu, let firstSubmenu = submenu?.first {
-                let submenuItems = processSubmenu(firstSubmenu, currentPath: path, currentIndices: currentIndices + [index], recursive: true)
+                let submenuItems = processSubmenu(firstSubmenu, currentPath: path, currentIndices: indices, recursive: true)
                 if !submenuItems.isEmpty {
                     hasEnabledItems = true
-                    let indices = currentIndices + [index]
                     items.append(createMenuItem(title: title, path: path, indices: indices, attrs: attrs, hasSubmenu: true))
 
                     if recursive {
@@ -169,7 +184,6 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
                 }
             } else if isEnabled {
                 hasEnabledItems = true
-                let indices = currentIndices + [index]
                 items.append(createMenuItem(title: title, path: path, indices: indices, attrs: attrs, hasSubmenu: false))
             }
         }
@@ -182,7 +196,7 @@ final class MenuBarAccess: MenuItemProvider, MenuItemInteractor {
         
         guard let title = attrs[kAXTitleAttribute as String] as? String,
               !title.isEmpty,
-              !Config.isPathExcluded([title], for: bundleId),
+              !Config.isPathExcluded([title], for: bundleId, currentIndices: []),
               let submenu = attrs[kAXChildrenAttribute as String] as? [AXUIElement],
               !submenu.isEmpty else {
             return nil
@@ -291,12 +305,14 @@ private func getMultipleAttributes(element: AXUIElement, names: [String]) -> [St
     }
 
     // Fall back to individual retrieval for failed attributes
-    return names.reduce(into: [:]) { dict, name in
+    var dict = Dictionary<String, Any>(minimumCapacity: names.count)
+    for name in names {
         var value: CFTypeRef?
         if AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success {
             dict[name] = value
         }
     }
+    return dict
 }
 
 private func getAttribute(element: AXUIElement, name: String) -> CFTypeRef? {
@@ -410,6 +426,7 @@ struct Preferences: Codable {
 
     init() {
         recentItems = []
+        config = Config.defaultConfig
     }
 
     static func load() -> Preferences {

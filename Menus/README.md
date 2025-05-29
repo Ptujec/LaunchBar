@@ -40,12 +40,26 @@ Just hold <kbd>command</kbd> while launching the action. This automatically open
 			<string>Services</string>
 			<string>History</string>
 		</array>
+		<key>includeAppleMenu</key>
+		<false/>
+		<key>menuInclusions</key>
+		<dict>
+			<key>com.apple.Safari</key>
+			<array>
+				<array>
+					<integer>5</integer>
+					<integer>0</integer>
+				</array>
+			</array>
+		</dict>
 	</dict>
 	<key>recentItems</key>
 	<array/>
 </dict>
 </plist>
 ```
+
+`menuInclusions` are used in case you want to exclude a menu but still keep specific items. E.g., in Safari, you may want to exclude the "History" menu tree but still access "Show All History". To maintain performance, those entries need the indices — in this case, `5` & `0`. (The first is the parent menu, always counting from 0). 
 
 ## Nitty Gritty Details
 
