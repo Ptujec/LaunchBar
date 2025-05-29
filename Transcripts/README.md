@@ -16,7 +16,11 @@ If you hold <kbd>command</kbd> when confirming to download a transcript, it will
 
 ## Good to Know
 
-Some videos don’t provide transcriptions. This action works best with Safari because we save a load request. Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
+1) Some videos don’t provide transcriptions. 
+
+2) This action works best with Safari because we save a load request. 
+
+3) Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
 
 ## Download & Update
 
