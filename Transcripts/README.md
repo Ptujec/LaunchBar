@@ -6,7 +6,7 @@ This action allows you to download transcriptions from YouTube videos. You can p
 
 Then choose the desired transcription from the list of languages.
 
-<img src="01.jpg" width="600"/>
+<img src="01.jpg" width="584"/>
 
 ## Settings
 
