@@ -4,6 +4,9 @@ by Christian Bender (@ptujec)
 2025-05-28
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+TODO: 
+- find out if there is a way to don't reload the page if you click a link in the transcript
 */
 
 // MARK: - Configuration
@@ -74,7 +77,7 @@ function run(argument) {
 function extractVideoId(url) {
   const patterns = [
     /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?(?:[^&]*&)*v=([a-zA-Z0-9_-]+)/,
     /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/,
   ];
 
@@ -83,7 +86,7 @@ function extractVideoId(url) {
     if (match && match[1]) return match[1];
   }
 
-  LaunchBar.log('No video ID found in URL');
+  writeDebugLog('No video ID found in URL', 'URL Parsing Error');
   return;
 }
 
