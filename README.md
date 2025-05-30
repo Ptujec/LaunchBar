@@ -16,6 +16,4 @@ Most of my actions also support [Action Updates](https://renaghan.com/launchbar/
 
 ## Support
 
-If you like what I am doing, please spread the word. You can also **sponsor** my LaunchBar projects via [Buy me a coffee](https://www.buymeacoffee.com/ptujec) or [PayPal](https://www.paypal.com/donate/?business=J3RS8S74NDJPU&no_recurring=0&currency_code=EUR). Thanks! ♥️
-
-<a href="https://www.buymeacoffee.com/ptujec" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+If you like what I am doing, please spread the word. You can also **sponsor** my LaunchBar projects via [PayPal](https://www.paypal.com/donate/?business=J3RS8S74NDJPU&no_recurring=0&currency_code=EUR). Thanks! ♥️
