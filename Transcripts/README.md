@@ -8,6 +8,8 @@ Then choose the desired transcription from the list of languages.
 
 <img src="01.jpg" width="584"/>
 
+The action will create and open a plain text file with the selected transcript in Markdown format.
+
 ## Settings
 
 When holding <kbd>option</kbd> while pressing <kbd>enter</kbd>, you can decide if you want to include time markers and links or not by default.
