@@ -279,8 +279,7 @@ function parseTranscriptXML(xmlString, videoUrl) {
 
   const textContent = matches
     .map(([, start, dur, text]) => format(start, dur, text))
-    .join(LaunchBar.options.commandKey || mode === 'none' ? ' ' : '\n\n')
-    .replace(/\s+/g, ' ');
+    .join(LaunchBar.options.commandKey || mode === 'none' ? ' ' : '\n\n');
 
   let decodedText = textContent
     .replace(/&amp;/g, '&')
