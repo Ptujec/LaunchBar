@@ -117,7 +117,7 @@ function formatUSShort(date) {
 }
 
 function formatUnixTimestamp(date) {
-    return Math.floor(date / 1000).toString()
+  return Math.floor(date / 1000).toString();
 }
 
 function format(dateString, dateStyle) {
@@ -211,7 +211,7 @@ function processArgument(argument, date) {
 
     if (dayIndex !== -1) {
       const targetDate = new Date(date);
-      if (isNextMonth) targetDate.setMonth(targetDate.getMonth() + 1);
+      if (isNextMonth) targetDate.setMonth(targetDate.getMonth() + 1, 1);
       return getNthWeekdayOfMonth(targetDate, ordinalMap[ordinal], dayIndex);
     }
   }
