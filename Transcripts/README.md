@@ -22,7 +22,7 @@ If you hold <kbd>command</kbd> when confirming to download a transcript, it will
 
 2) This action works best with Safari because we save a load request. 
 
-3) Also, this action is not using an official API, so it might break. Let me know if you run into any issues.
+3) Also, this action is not using an official API, so it might break. [Let me know if you run into any issues](https://github.com/Ptujec/LaunchBar/issues/new).
 
 ## Download & Update
 
