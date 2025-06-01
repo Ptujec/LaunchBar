@@ -9,20 +9,22 @@
 	<key>CFBundleName</key>
 	<string>Open in Firefox</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.2</string>
+	<string>2.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBSummary</key>
-		<string>Opens current browser tab or window in Firefox. ⇧↩ = Settings</string>
+		<string>Opens current browser tab or window in Firefox. ⌥↩ = Settings</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://ptujec.github.io/launchbar</string>
+		<string></string>
 		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Firefox.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Firefox.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions#readme</string>
 	</dict>
+	<key>LBRequiredApplication</key>
+	<string>org.mozilla.firefox</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>

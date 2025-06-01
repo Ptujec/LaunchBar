@@ -1,5 +1,5 @@
 /* 
-Open in Arc Browser Action for LaunchBar
+Open in Zen Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-06-02
 
@@ -8,7 +8,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 String.prototype.localizationTable = 'default';
 
-const target = 'company.thebrowser.Browser';
+const target = 'app.zen-browser.zen';
 
 function run() {
   if (LaunchBar.options.alternateKey) return settings();

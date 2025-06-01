@@ -5,26 +5,26 @@
 	<key>CFBundleIconFile</key>
 	<string>iconTemplate.png</string>
 	<key>CFBundleIdentifier</key>
-	<string>ptujec.LaunchBar.action.OpeninVivaldi</string>
+	<string>ptujec.LaunchBar.action.OpeninZen</string>
 	<key>CFBundleName</key>
-	<string>Open in Vivaldi</string>
+	<string>Open in Zen</string>
 	<key>CFBundleVersion</key>
-	<string>1.1</string>
+	<string>1.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBSummary</key>
-		<string>Opens current browser tab or window in Vivaldi. ⌥↩ = Settings</string>
+		<string>Opens current browser tab or window in Zen. ⌥↩ = Settings</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
-		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Vivaldi.lbaction/Contents/Info.plist</string>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Browser-Actions/Open%20in%20Zen.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Browser-Actions#readme</string>
 	</dict>
 	<key>LBRequiredApplication</key>
-	<string>com.vivaldi.Vivaldi</string>
+	<string>app.zen-browser.zen</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>

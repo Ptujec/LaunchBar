@@ -13,13 +13,13 @@ Supported browsers:
 - Firefox 
 - Chrome
 - Vivaldi
+- Zen
 
-You can also close the site in the browser you came from with <kbd>⌘</kbd> + <kbd>↩</kbd>  (cmd-return). Set default behavior in settings <kbd>⇧</kbd> + <kbd>↩</kbd>  (shift-return). 
+You can also close the site in the browser you came from with <kbd>⌘</kbd> + <kbd>↩</kbd>  (cmd-return). Set default behavior in settings <kbd>⌥</kbd> + <kbd>↩</kbd>  (shift-return). 
 
 ### Good to know
-- If you use the close option be aware that Firefox can not close individual tabs, just windows! 
-- Getting an URL from Firefox might be buggy, because it lacks sufficient AppleScript support! If it's not working properly it might help to [increase delay times](https://github.com/Ptujec/LaunchBar/blob/1c6609e474f8916d9d65f83793f48ffbdc277f74/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Scripts/default.js#L171).
-- If you can, avoid using Chrome. [It's bad](https://chromeisbad.com). Brave seems like a good replacement.
+- If you use the close option be aware that Firefox (and Zen) cannot close individual tabs, just windows! 
+- Getting an URL from Firefox (and Zen) might be buggy, because it lacks sufficient AppleScript support! If it's not working properly it might help to [increase delay times](https://github.com/Ptujec/LaunchBar/blob/1c6609e474f8916d9d65f83793f48ffbdc277f74/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Scripts/default.js#L171).
 
 ## Download & Update
 
