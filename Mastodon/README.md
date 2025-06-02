@@ -36,7 +36,7 @@ There are a couple of settings, that you can access with <kbd>⇧</kbd> + <kbd>�
 
 This action opens the current post or profile on your home instance. It is inspired by Jeff Johnsons [Homecoming Safari extension](https://underpassapp.com/news/2023-1-19homecoming.html) and [Federico Viticcis shortcut](https://www.macstories.net/ios/masto-redirect-a-mastodon-shortcut-to-redirect-profiles-and-posts-to-your-own-instance/). 
 
-There are a couple of settings, that you can access with <kbd>⇧</kbd> + <kbd>↩</kbd> :
+There are a couple of settings, that you can access with <kbd>⌥</kbd> + <kbd>↩</kbd> :
 - Close Original Site
 - Redirect to your favorite client (e.g. Elk or Ice Cubes)
 - Set Instance

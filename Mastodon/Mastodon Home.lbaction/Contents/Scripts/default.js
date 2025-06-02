@@ -1,7 +1,7 @@
 /* 
 Mastodon Home Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-01-11
+2025-06-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -14,13 +14,6 @@ Test: https://mstdn.plus/@lapcatsoftware/109718227833446585
 */
 String.prototype.localizationTable = 'default';
 
-const SUPPORTED_BROWSERS = [
-  'Brave Browser',
-  'Google Chrome',
-  'Arc',
-  'Vivaldi',
-  'Safari',
-];
 const URL_SCHEMES = {
   ivory: 'ivory://',
   mammoth: 'mammoth://',
@@ -28,52 +21,26 @@ const URL_SCHEMES = {
   web: 'https://',
 };
 
-function getBrowserUrlScript(browser) {
-  return browser === 'Safari'
-    ? 'tell application "Safari" to set _url to URL of front document'
-    : `tell application "${browser}" to set _url to URL of active tab of front window`;
-}
-
-function validateUrl(url) {
-  if (url === 'missing value' || url === 'favorites://' || url === '') {
-    LaunchBar.alert('No current website found!'.localize());
-    LaunchBar.hide();
-    return null;
-  }
-
-  if (!url.includes('@')) {
-    LaunchBar.alert('Seems to be no valid account or post!'.localize());
-    LaunchBar.hide();
-    return null;
-  }
-
-  const parts = url.split('/');
-  return {
-    instance: parts[2],
-    user: parts[3],
-    unknown: parts[4],
-  };
-}
-
 function run() {
   const apiToken = Action.preferences.apiToken;
   const server = Action.preferences.server;
   const closeOption = Action.preferences.closeOption;
 
   if (!server) return setInstance(server);
-  if (LaunchBar.options.shiftKey) return settings(server, apiToken);
+  if (LaunchBar.options.alternateKey) return settings(server, apiToken);
 
-  const frontmost = LaunchBar.executeAppleScript(
-    'tell application "System Events" to set _frontmoste to name of application processes whose frontmost is true as string'
-  ).trim();
+  LaunchBar.hide();
 
-  if (!SUPPORTED_BROWSERS.includes(frontmost)) {
-    LaunchBar.alert(frontmost + ' is not a supported browser!'.localize());
+  const appInfo = LaunchBar.execute('/bin/bash', './appInfo.sh').split('\n');
+  const [frontmostID, frontmostName, isSupported] = appInfo;
+
+  if (isSupported !== 'true') {
+    LaunchBar.alert(frontmostName + ' is not a supported browser!'.localize());
     return;
   }
 
   const url = LaunchBar.executeAppleScript(
-    getBrowserUrlScript(frontmost)
+    getBrowserUrlScript(frontmostID)
   ).trim();
   const urlComponents = validateUrl(url);
   if (!urlComponents) return;
@@ -90,7 +57,7 @@ function run() {
 
   if (urlscheme === URL_SCHEMES.ivory) {
     LaunchBar.openURL(urlscheme + 'acct/openURL?url=' + url);
-    if (closeOption === 'true') closeURL(url, frontmost);
+    if (closeOption === 'true') closeURL(url, frontmostID);
     return;
   }
 
@@ -98,21 +65,28 @@ function run() {
   const isPostId = !isNaN(parseInt(urlComponents.unknown));
 
   if (isPostId) {
-    handlePostUrl(homeURL, server, apiToken, url, frontmost, closeOption);
+    handlePostUrl(homeURL, server, apiToken, url, frontmostID, closeOption);
   } else {
     handleAccountUrl(
       homeURL,
       server,
       apiToken,
       url,
-      frontmost,
+      frontmostID,
       closeOption,
       urlscheme
     );
   }
 }
 
-function handlePostUrl(homeURL, server, apiToken, url, frontmost, closeOption) {
+function handlePostUrl(
+  homeURL,
+  server,
+  apiToken,
+  url,
+  frontmostID,
+  closeOption
+) {
   const statusData = HTTP.getJSON(
     `https://${server}/api/v2/search?q=${url}&type=statuses&resolve=true`,
     {
@@ -129,10 +103,9 @@ function handlePostUrl(homeURL, server, apiToken, url, frontmost, closeOption) {
   }
 
   const finalUrl = `${homeURL}/${statusData.data.statuses[0].id}`;
-  LaunchBar.hide();
-  LaunchBar.openURL(finalUrl, frontmost);
+  LaunchBar.openURL(finalUrl, frontmostID);
 
-  if (closeOption === 'true') closeURL(url, frontmost);
+  if (closeOption === 'true') closeURL(url, frontmostID);
 }
 
 function handleAccountUrl(
@@ -140,22 +113,20 @@ function handleAccountUrl(
   server,
   apiToken,
   url,
-  frontmost,
+  frontmostID,
   closeOption,
   urlscheme
 ) {
-  LaunchBar.hide();
-
   if (urlscheme === URL_SCHEMES.mammoth) {
     LaunchBar.openURL(url.replace('https://', urlscheme));
-    if (closeOption === 'true') closeURL(url, frontmost);
+    if (closeOption === 'true') closeURL(url, frontmostID);
     return;
   }
 
-  LaunchBar.openURL(homeURL, frontmost);
+  LaunchBar.openURL(homeURL, frontmostID);
 
   if (urlscheme === URL_SCHEMES.icecubes) {
-    if (closeOption === 'true') closeURL(url, frontmost);
+    if (closeOption === 'true') closeURL(url, frontmostID);
     return;
   }
 
@@ -180,12 +151,69 @@ function handleAccountUrl(
   const homeURLAPI = `${urlscheme}${server}/@${acct}`;
 
   if (homeURL !== homeURLAPI) {
-    LaunchBar.openURL(homeURLAPI, frontmost);
-    closeURL(homeURL, frontmost);
+    LaunchBar.openURL(homeURLAPI, frontmostID);
+    closeURL(homeURL, frontmostID);
   }
 
-  if (closeOption === 'true') closeURL(url, frontmost);
+  if (closeOption === 'true') closeURL(url, frontmostID);
 }
+
+function getBrowserUrlScript(frontmostID) {
+  return frontmostID === 'com.apple.Safari'
+    ? `tell application id "${frontmostID}" to set _url to URL of front document`
+    : `tell application id "${frontmostID}" to set _url to URL of active tab of front window`;
+}
+
+function validateUrl(url) {
+  if (url === 'missing value' || url === 'favorites://' || url === '') {
+    LaunchBar.alert('No current website found!'.localize());
+    LaunchBar.hide();
+    return null;
+  }
+
+  if (!url.includes('@')) {
+    LaunchBar.alert('Seems to be no valid account or post!'.localize());
+    LaunchBar.hide();
+    return null;
+  }
+
+  const parts = url.split('/');
+  return {
+    instance: parts[2],
+    user: parts[3],
+    unknown: parts[4],
+  };
+}
+
+function closeURL(url, frontmostID) {
+  const script =
+    frontmostID === 'com.apple.Safari'
+      ? `tell application id "${frontmostID}"
+        repeat with _window in windows
+          set _tabs to tabs of _window
+          repeat with _tab in _tabs
+            if URL of _tab is "${url}" then
+              set _tabtoclose to _tab
+              exit repeat
+            end if
+          end repeat
+        end repeat
+        try
+          close _tabtoclose
+        end try
+      end tell`
+      : `tell application id "${frontmostID}"
+        repeat with _window in windows
+          tell _window
+            close (every tab whose URL is "${url}")
+          end tell
+        end repeat
+      end tell`;
+
+  LaunchBar.executeAppleScript(script);
+}
+
+// MARK: - Settings
 
 function settings() {
   const server = Action.preferences.server;
@@ -234,34 +262,6 @@ function settings() {
 function closeOriginalToggle(xArg) {
   Action.preferences.closeOption = xArg;
   return settings();
-}
-
-function closeURL(url, browser) {
-  const script =
-    browser === 'Safari'
-      ? `tell application "Safari"
-        repeat with _window in windows
-          set _tabs to tabs of _window
-          repeat with _tab in _tabs
-            if URL of _tab is "${url}" then
-              set _tabtoclose to _tab
-              exit repeat
-            end if
-          end repeat
-        end repeat
-        try
-          close _tabtoclose
-        end try
-      end tell`
-      : `tell application "${browser}"
-        repeat with _window in windows
-          tell _window
-            close (every tab whose URL is "${url}")
-          end tell
-        end repeat
-      end tell`;
-
-  LaunchBar.executeAppleScript(script);
 }
 
 function openSetting() {
