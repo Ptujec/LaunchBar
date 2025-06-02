@@ -1,7 +1,7 @@
 /* 
 Elk (the Mastodon client) Action for LaunchBar including Search and redirect
 by Christian Bender (@ptujec)
-2023-01-23
+2025-06-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -17,7 +17,7 @@ const apiToken = Action.preferences.apiToken;
 
 function run(argument) {
   // Settings
-  if (LaunchBar.options.shiftKey) return settings(server, apiToken);
+  if (LaunchBar.options.alternateKey) return settings(server, apiToken);
 
   if (argument == undefined) {
     LaunchBar.hide();
