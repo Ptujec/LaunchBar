@@ -1,25 +1,25 @@
-// The 'run' function is called by LaunchBar when the user opens the action.
+/* 
+Google Search Action for LaunchBar (with extended functionality)
+by Christian Bender (@ptujec)
+2025-06-04
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
+
 function run(argument) {
-    // Return a single item that describes the argument
-    if (LaunchBar.options.shiftKey) {
-        LaunchBar.paste([argument])
-    } else if (LaunchBar.options.commandKey) {
-        return [argument];
-    } else if (LaunchBar.options.alternateKey) {
-        if (argument != undefined && argument.length > 0) {
-            // Googles Feeling Lucky doesn't work anymore so I am using DuckDuckGo for this part
-            LaunchBar.openURL('https://duckduckgo.com/?q=!ducky+' + encodeURIComponent(argument));
-        } else {
-            // No argument passed, just open the website:
-            LaunchBar.openURL('https://www.google.com');
-        }
-    } else {
-        if (argument != undefined && argument.length > 0) {
-            // If there is an argument, search for it:
-            LaunchBar.openURL('http://www.google.com/search?q=' + encodeURIComponent(argument));
-        } else {
-            // No argument passed, just open the website:
-            LaunchBar.openURL('https://www.google.com');
-        }
-    }
+  if (LaunchBar.options.shiftKey) return LaunchBar.paste(argument);
+  if (LaunchBar.options.commandKey) return argument;
+
+  const baseURL = 'https://www.google.com';
+
+  if (!argument) {
+    LaunchBar.openURL(baseURL);
+    return;
+  }
+
+  const url = LaunchBar.options.alternateKey
+    ? 'https://duckduckgo.com/?q=!ducky+' + encodeURIComponent(argument)
+    : baseURL + '/search?q=' + encodeURIComponent(argument);
+
+  LaunchBar.openURL(url);
 }

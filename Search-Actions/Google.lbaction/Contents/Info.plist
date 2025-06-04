@@ -3,28 +3,30 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>Google_Icon.pdf</string>
+	<string>icon.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.google</string>
 	<key>CFBundleName</key>
 	<string>Google</string>
 	<key>CFBundleVersion</key>
-	<string>2021-03</string>
+	<string>2025.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBRequirements</key>
 		<string>Requires an active internet connection.</string>
 		<key>LBSummary</key>
 		<string>⇧⏎ = Paste suggestion, ⌘⏎ = Select suggestion, ⌥⏎ = Feeling Lucky (using DuckDuckGo)
 Alternative version to the built in Google action. I made this to get more out of Google suggestions. And I use DuckDuckGo for the "lucky" feature. Because it works better.</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/Search-Actions/Google.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Search-Actions</string>
 	</dict>
 	<key>LBRequirements</key>
 	<string>Requires an active internet connection.</string>
