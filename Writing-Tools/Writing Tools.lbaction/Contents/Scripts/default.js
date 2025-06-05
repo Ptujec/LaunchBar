@@ -39,7 +39,13 @@ function run(argument) {
   // SHOW SETTINGS
   if (LaunchBar.options.alternateKey) return settings();
 
-  const frontmostAppID = LaunchBar.executeAppleScript(getFrontmostAS).trim(); // TODO: Faster method? … slow especially when no argument … and exAS is used twice … maybe combine?
+  const frontmostAppID = LaunchBar.execute(
+    '/bin/sh',
+    '-c',
+    'lsappinfo info -only bundleid $(/usr/bin/lsappinfo front)'
+  )
+    .split('=')[1]
+    .split('"')[1];
 
   const contentAS =
     frontmostAppID === 'pro.writer.mac'
@@ -122,10 +128,8 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
 
   // ERROR HANDLING
   if (!result.response) {
-    LaunchBar.alert(
-      result.error || 'Unknown error occurred'
-    );
-    return
+    LaunchBar.alert(result.error || 'Unknown error occurred');
+    return;
   }
 
   if (result.response.status != 200) {
@@ -187,7 +191,7 @@ function pasteAnswerInWriter({ answer, hasArgument }) {
 
   const markAllAS = !hasArgument
     ? // ? 'delay 0.2\nkeystroke "a" using command down\n'
-    'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
+      'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
     : '';
   const authorName = prefs.iaAuthor;
 

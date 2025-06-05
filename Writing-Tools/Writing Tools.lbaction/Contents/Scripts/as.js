@@ -4,9 +4,6 @@ by Christian Bender (@ptujec)
 2024-12-18
 */
 
-const getFrontmostAS =
-  'tell application "System Events" to set _frontmoste to bundle identifier of application processes whose frontmost is true as string';
-
 const getWriterContentAs = `
   try
     tell application "iA Writer"
