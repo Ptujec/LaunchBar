@@ -18,7 +18,8 @@ function run() {
 
   LaunchBar.displayNotification({
     title: 'Speedtest',
-    string: 'Test started … may take a few seconds',
+    string:
+      'Test started … may take a few seconds.\nHold commmand key to open Terminal instead!',
   });
 
   const output = LaunchBar.execute('/usr/bin/networkQuality', '-c').trim();
@@ -27,9 +28,9 @@ function run() {
   if (json.error_code) {
     LaunchBar.displayNotification({
       title: 'Speedtest',
-      string: `Error ${json.error_code}: Could not run the speed test.\nTry again holding down the command key!`
+      string: `Error ${json.error_code}: Could not run the speed test.\nTry again holding down the command key!`,
     });
-    return
+    return;
   }
 
   const startDate = new Date(json.start_date);
