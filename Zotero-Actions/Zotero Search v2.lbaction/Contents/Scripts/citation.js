@@ -37,9 +37,12 @@ function pasteCitation(dict) {
     return;
   }
 
+  // TODO: Support more styles, including ACS … might need to in Zotero Paste Helper
   if (citationFormat == 'richText') {
-    if (isBibliography)
-      text = text.match(/<div class="csl-entry">(.*?)<\/div>/)[1];
+    if (isBibliography) {
+      const match = text.match(/<div class="csl-entry">(.*?)<\/div>/);
+      text = match ? match[1] : text;
+    }
 
     if (pasteHelperInstalled) {
       Action.preferences.pasteHelperContent = {
@@ -58,13 +61,12 @@ function pasteCitation(dict) {
     return;
   }
 
+  text = text.decodeHTMLEntities();
+
   if (isBibliography) {
-    text = text
-      .match(/<div class="csl-entry">(.*?)<\/div>/)[1]
-      .replace(/<\/?i>/g, '*')
-      .replace(/&amp;/g, '&');
-  } else {
-    text = text.replace(/&#38;/g, '&');
+    const match = text.match(/<div class="csl-entry">(.*?)<\/div>/);
+    text = match ? match[1] : text;
+    text = text.replace(/<\/?i>/g, '*');
   }
 
   if (citationFormat == 'markdown') {

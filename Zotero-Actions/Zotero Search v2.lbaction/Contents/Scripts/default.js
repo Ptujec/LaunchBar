@@ -13,59 +13,15 @@ function run(argument) {
   // Show Settings
   if (LaunchBar.options.alternateKey) return settings();
 
-  // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
-
-  let updateJSON = false;
-
-  if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
-    updateJSON = true;
-    Action.preferences.lastUsedActionVersion = Action.version;
-  }
-
-  if (!File.exists(dataPath)) updateJSON = true;
-
-  const output = LaunchBar.execute(
-    '/bin/bash',
-    './data.sh',
-    zoteroDirectory + 'zotero.sqlite',
-    updateJSON
-  );
-
-  if (output) File.writeText(output, dataPath);
-
-  const data = File.readJSON(dataPath);
-
-  // Create itemType, field and creatorType variables
-  if (updateJSON) {
-    const itemTypes = data.itemTypes.reduce((acc, curr) => {
-      acc[curr.typeName] = curr.itemTypeID;
-      return acc;
-    }, {});
-
-    Action.preferences.itemTypes = itemTypes;
-
-    const fields = data.fields.reduce((acc, curr) => {
-      acc[curr.fieldName] = curr.fieldID;
-      return acc;
-    }, {});
-
-    Action.preferences.fields = fields;
-
-    const creatorTypes = data.creatorTypes.reduce((acc, curr) => {
-      acc[curr.creatorType] = curr.creatorTypeID;
-      return acc;
-    }, {});
-
-    Action.preferences.creatorTypes = creatorTypes;
-  }
-
-  if (argument != undefined) return search(argument, data);
-  return browse(data);
+  if (!argument) return browse();
+  return search(argument);
 }
 
 // SEARCH
 
-function search(argument, data) {
+function search(argument) {
+  const data = getData();
+
   argument = argument.toLowerCase();
 
   const getLowerCaseCreatorName = (item) =>
@@ -126,11 +82,11 @@ function search(argument, data) {
   ]);
 
   if (allReversedItemIDs.size === 0 || LaunchBar.options.commandKey) {
-    allReversedItemIDs.add(...searchInStorageDir(argument, data));
+    allReversedItemIDs.add(...searchInStorageDir(argument));
   }
 
   // return showEntries(Array.from(allReversedItemIDs), data);
-  const result = showEntries(allReversedItemIDs, data);
+  const result = showEntries(Array.from(allReversedItemIDs));
 
   if (result.length === 0) {
     return [
@@ -147,7 +103,7 @@ function search(argument, data) {
   return result;
 }
 
-function searchInStorageDir(argument, data) {
+function searchInStorageDir(argument) {
   const output = LaunchBar.execute(
     '/usr/bin/mdfind',
     '-onlyin',
@@ -156,6 +112,12 @@ function searchInStorageDir(argument, data) {
   )
     .trim()
     .split('\n');
+
+  if (output.length === 0 || output[0] === '') {
+    return [];
+  }
+
+  const data = getData();
 
   const attachmentMap = new Map();
   for (const item of data.itemAttachments) {
@@ -173,9 +135,11 @@ function searchInStorageDir(argument, data) {
 }
 
 // BROWSE
-function browse(data) {
+function browse() {
+  const data = getData();
+
   const result = Action.preferences.recentItems
-    ? showEntries(Action.preferences.recentItems || [], data).reverse()
+    ? showEntries(Action.preferences.recentItems || []).reverse()
     : [];
 
   result.push(
@@ -233,7 +197,7 @@ function showItemsWithTag(tagIDString) {
     []
   );
 
-  return showEntries(itemIDs.reverse(), data);
+  return showEntries(itemIDs.reverse());
 }
 
 function showCreators() {
@@ -274,7 +238,7 @@ function showItemsWithCreator(creatorIDString) {
     return acc;
   }, []);
 
-  return showEntries(itemIDs.reverse(), data);
+  return showEntries(itemIDs.reverse());
 }
 
 function showCollections() {
@@ -304,7 +268,7 @@ function showItemsWithCollection({ collectionID }) {
     )
     .reverse();
 
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs);
 }
 
 function showAllItems() {
@@ -323,14 +287,16 @@ function showAllItems() {
     return acc;
   }, new Set());
 
-  return showEntries([...itemIDs].reverse(), data);
+  return showEntries([...itemIDs].reverse());
 }
 
-function showEntries(itemIDs, data) {
+function showEntries(itemIDs) {
   const prefs = Action.preferences;
   const itemTypes = prefs.itemTypes;
   const fields = prefs.fields;
   const creatorTypes = prefs.creatorTypes;
+
+  const data = getData();
 
   let attachmentItemIDs = {};
   const itemsMap = data.items.reduce((map, item) => {
@@ -950,7 +916,7 @@ function showItemsByField(fieldID, value) {
     )
     .map((item) => item.itemID);
 
-  return showEntries(itemIDs, data);
+  return showEntries(itemIDs);
 }
 
 function showBookSections(bookTitle) {
@@ -985,7 +951,7 @@ function showJournalArticles(journalTitle) {
     return acc;
   }, new Set());
 
-  return showEntries(Array.from(itemIDs), data);
+  return showEntries(Array.from(itemIDs));
 }
 
 function showItemCreatorIDs({ creatorsArr }) {
@@ -1087,16 +1053,4 @@ function saveRecent(itemID) {
   }
 
   Action.preferences.recentItems = recentItems;
-}
-
-function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
-  const lastUsedParts = lastUsedActionVersion.split('.');
-  const currentParts = currentActionVersion.split('.');
-  for (let i = 0; i < currentParts.length; i++) {
-    const a = ~~currentParts[i]; // parse int
-    const b = ~~lastUsedParts[i]; // parse int
-    if (a > b) return true;
-    if (a < b) return false;
-  }
-  return false;
 }

@@ -10,7 +10,89 @@ const dataPath = `${Action.supportPath}/data.json`;
 const currentActionVersion = Action.version;
 const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
 
-// ZOTERO PREFERENCES
+// MARK: Data Management
+
+function getData() {
+  // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
+
+  let updateJSON = false;
+
+  if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
+    updateJSON = true;
+    Action.preferences.lastUsedActionVersion = Action.version;
+  }
+
+  if (!File.exists(dataPath)) updateJSON = true;
+
+  const original = `${zoteroDirectory}zotero.sqlite`;
+  const copy = `${original}.launchbar`;
+
+  const originalModificationDate = File.modificationDate(original);
+
+  const copyModificationDate = File.modificationDate(copy);
+
+  if (originalModificationDate > copyModificationDate) updateJSON = true;
+
+  LaunchBar.log(
+    'updateJSON: ' +
+      updateJSON +
+      ', File check: ' +
+      (originalModificationDate > copyModificationDate)
+  );
+
+  if (updateJSON) {
+    const output = LaunchBar.execute(
+      '/bin/bash',
+      './data.sh',
+      zoteroDirectory + 'zotero.sqlite',
+      updateJSON
+    );
+
+    if (output) File.writeText(output, dataPath);
+  }
+
+  const data = File.readJSON(dataPath);
+
+  // Create itemType, field and creatorType variables
+  if (updateJSON) {
+    const itemTypes = data.itemTypes.reduce((acc, curr) => {
+      acc[curr.typeName] = curr.itemTypeID;
+      return acc;
+    }, {});
+
+    Action.preferences.itemTypes = itemTypes;
+
+    const fields = data.fields.reduce((acc, curr) => {
+      acc[curr.fieldName] = curr.fieldID;
+      return acc;
+    }, {});
+
+    Action.preferences.fields = fields;
+
+    const creatorTypes = data.creatorTypes.reduce((acc, curr) => {
+      acc[curr.creatorType] = curr.creatorTypeID;
+      return acc;
+    }, {});
+
+    Action.preferences.creatorTypes = creatorTypes;
+  }
+
+  return data;
+}
+
+function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+  for (let i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i]; // parse int
+    const b = ~~lastUsedParts[i]; // parse int
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
+}
+
+// MARK: Zotero Settings
 
 const zoteroPrefs = getZoteroPrefs();
 const zoteroDirectory = `${zoteroPrefs['extensions.zotero.dataDir']}/`;
@@ -39,7 +121,7 @@ function getZoteroPrefs() {
   }, {});
 }
 
-// ACTION SETTINGS
+// MARK: Action Settings
 
 const lastUsedStyleInZotero = zoteroPrefs['extensions.zotero.export.lastStyle'];
 const fallbackStyle = lastUsedStyleInZotero || 'apa';

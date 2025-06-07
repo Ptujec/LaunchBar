@@ -16,7 +16,7 @@ function runWithString(string) {
   if (string != undefined && string.trim().length == 0) return;
   string = string.toLowerCase();
 
-  const data = File.readJSON(dataPath);
+  const data = getData();
   const icon = 'icon';
 
   // Tag suggestions
