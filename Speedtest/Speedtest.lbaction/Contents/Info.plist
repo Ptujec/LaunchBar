@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Speedtest</string>
 	<key>CFBundleVersion</key>
-	<string>1.3</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -29,9 +29,11 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
+			<key>LBKeepWindowActive</key>
+			<true/>
 			<key>LBResultType</key>
 			<string>unknown</string>
-			<key>LBRunInBackground</key>
+			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
 			<string>default.js</string>

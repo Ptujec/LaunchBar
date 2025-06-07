@@ -1,20 +1,24 @@
 # LaunchBar Action: Speedtest
 
-<img src="screenshots.png" width="800"/> 
+<img src="01.png" width="881"/> 
+
+This action runs the `networkQuality` command in the background and sends a notification with the results when done.
+
+Alternatively, you can hold <kbd>command</kbd> (<kbd>⌘</kbd>) to run the test in the Terminal app. This way you can follow the progress as the action is running.
+
+## History
+
+The action also displays a history of past tests.
+
+These reports are stored in the action’s support path: `~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Speedtest`.
+
+You can view a report’s details by pressing <kbd>→</kbd> or <kbd>space</kbd>, or open the report’s source file by holding <kbd>command</kbd>.
+
+**Note:** Reports are not saved if you run the test in the Terminal app.
 
 ## Requirements 
 
 This action requires macOS 12 (Monterey).
-
-## Features
-
-**1) Show Notification** 
-
-It can take a bit for the notification to show up. There will be also a sound so you don't miss it. 
-
-**2) Run in Terminal**
-
-Hold option (⌥) while launching the action to run it in the Terminal. This way you will not only see the summary, but also the progress as the action is running.
 
 ## Download & Update
 
