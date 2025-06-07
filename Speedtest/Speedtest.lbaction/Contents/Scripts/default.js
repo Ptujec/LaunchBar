@@ -182,11 +182,6 @@ function showDetails({ json, file }) {
       label: 'Connection Type',
       icon: 'connectedTemplate',
     },
-    {
-      title: json.interface_name || 'N/A',
-      label: 'Network Interface',
-      icon: 'connectedTemplate',
-    },
     json.wifi_name
       ? {
           title: json.wifi_name,
@@ -194,6 +189,11 @@ function showDetails({ json, file }) {
           icon: 'connectedTemplate',
         }
       : {},
+    {
+      title: json.interface_name || 'N/A',
+      label: 'Network Interface',
+      icon: 'connectedTemplate',
+    },
     {
       title: json.test_endpoint || 'N/A',
       label: 'Test Server',

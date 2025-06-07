@@ -4,11 +4,9 @@
 
 This action runs the `networkQuality` command in the background and sends a notification with the results when done.
 
-Alternatively, you can hold <kbd>command</kbd> (<kbd>⌘</kbd>) to run the test in the Terminal app. This way you can follow the progress as the action is running.
+Alternatively, you can hold <kbd>command</kbd> (<kbd>⌘</kbd>) to run the test in the Terminal app. This way you can follow the progress as the test is running.
 
-## History
-
-The action also displays a history of past tests.
+The action also displays a **history** of past tests.
 
 These reports are stored in the action’s support path: `~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.Speedtest`.
 
