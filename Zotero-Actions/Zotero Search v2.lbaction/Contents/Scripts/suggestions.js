@@ -12,11 +12,11 @@ const itemTypes = Action.preferences.itemTypes;
 const fields = Action.preferences.fields;
 
 function runWithString(string) {
-  if (!File.exists(dataPath)) return; // Won't show suggestions if data.json doesn't exist
   if (string != undefined && string.trim().length == 0) return;
   string = string.toLowerCase();
 
   const data = getData();
+
   const icon = 'icon';
 
   // Tag suggestions
