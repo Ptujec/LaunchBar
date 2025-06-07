@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>1.7.5</string>
+	<string>1.7.6</string>
 	<key>LBAssociatedApplication</key>
 	<string>org.zotero.zotero</string>
 	<key>LBDescription</key>

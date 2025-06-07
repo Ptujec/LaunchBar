@@ -33,13 +33,6 @@ function getData() {
 
   if (originalModificationDate > copyModificationDate) updateJSON = true;
 
-  LaunchBar.log(
-    'updateJSON: ' +
-      updateJSON +
-      ', File check: ' +
-      (originalModificationDate > copyModificationDate)
-  );
-
   if (updateJSON) {
     const output = LaunchBar.execute(
       '/bin/bash',
