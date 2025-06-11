@@ -14,6 +14,11 @@ Documentation:
 include('global.js');
 
 function run() {
+  if (LaunchBar.options.controlKey) {
+    LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
+    return;
+  }
+
   if (LaunchBar.options.alternateKey) {
     return showBudgets();
   }
@@ -198,6 +203,7 @@ function showCategories(customDatabasePath, customBudgetID) {
         icon,
         action: 'handleCategoryAction',
         actionArgument: {
+          categoryId: cat.id,
           categoryTransactions,
           numberFormat,
           dateFormat,
@@ -234,6 +240,7 @@ function showPayees(customDatabasePath, customBudgetID) {
 // MARK: - Item Actions
 
 function handleCategoryAction({
+  categoryId,
   categoryTransactions,
   numberFormat,
   dateFormat,
@@ -243,6 +250,10 @@ function handleCategoryAction({
     LaunchBar.hide();
     LaunchBar.openURL(actualFileURL);
     return;
+  }
+
+  if (LaunchBar.options.alternateKey) {
+    return showCategoryTransactions({ categoryId });
   }
 
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];

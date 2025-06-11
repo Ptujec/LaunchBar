@@ -11,23 +11,7 @@ set -euo pipefail # Enhanced error handling
 IFS=$'\n\t'
 
 DB_PATH="$1"
-CACHE_FILE="$2"
-FETCH_MODE="${3:-full}"  # Default to full if not specified
-HAS_FULL_DATA="${4:-false}"  # Whether cache has full data, defaults to false
-
-# Cache validation - check if DB is newer and if we have the required data
-if [ -f "$CACHE_FILE" ]; then
-  DB_MOD=$(stat -f %m "$DB_PATH")
-  CACHE_MOD=$(stat -f %m "$CACHE_FILE")
-  
-  # If database is NOT newer than cache, check if we have required data
-  if [ $DB_MOD -lt $CACHE_MOD ]; then
-    if [ "$FETCH_MODE" = "basic" ] || { [ "$FETCH_MODE" = "full" ] && [ "$HAS_FULL_DATA" = "true" ]; }; then
-      echo "{\"useCache\": true}"
-      exit 0
-    fi
-  fi
-fi
+FETCH_MODE="${2:-full}"  # Default to full if not specified
 
 if [ ! -r "$DB_PATH" ]; then
   echo "Error: Cannot read database at $DB_PATH" >&2

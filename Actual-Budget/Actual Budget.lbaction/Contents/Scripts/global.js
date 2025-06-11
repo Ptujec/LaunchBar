@@ -71,21 +71,31 @@ function getDatabaseData(
     ? fullCacheFilePath
     : basicCacheFilePath;
 
-  const fetchMode = requireFullData ? 'full' : 'basic';
+  // Check if cache is valid
+  if (File.exists(cacheFilePath)) {
+    const dbModDate = File.modificationDate(databasePath);
+    const cacheModDate = File.modificationDate(cacheFilePath);
 
-  let hasFullData = false;
-  if (requireFullData && File.exists(fullCacheFilePath)) {
-    const cachedData = File.readJSON(fullCacheFilePath);
-    hasFullData = cachedData.hasFullData || false;
+    // If database is NOT newer than cache, check if we have required data
+    if (dbModDate < cacheModDate) {
+      if (requireFullData) {
+        const cachedData = File.readJSON(cacheFilePath);
+        if (cachedData.hasFullData) {
+          return cachedData;
+        }
+      } else {
+        return File.readJSON(cacheFilePath);
+      }
+    }
   }
+
+  const fetchMode = requireFullData ? 'full' : 'basic';
 
   const result = LaunchBar.execute(
     '/bin/bash',
     './parseDataBase.sh',
     databasePath,
-    cacheFilePath,
-    fetchMode,
-    hasFullData.toString()
+    fetchMode
   );
 
   if (!result) {
@@ -95,7 +105,6 @@ function getDatabaseData(
 
   try {
     const data = JSON.parse(result);
-    if (data.useCache) return File.readJSON(cacheFilePath);
     if (!requireFullData) {
       const finalData = createBasicData(data);
       File.writeJSON(finalData, basicCacheFilePath);
