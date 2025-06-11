@@ -1,6 +1,6 @@
 # LaunchBar Action: LaunchBar Developer Documentation
 
-This action gives quick access to sections in the LaunchBar Developer Documentation.
+This action gives quick access to sections in the [LaunchBar Developer Documentation](https://developer.obdev.at/resources/documentation/launchbar-developer-documentation/#/welcome).
 
 <img src="01.jpg" width="638"/>
 
