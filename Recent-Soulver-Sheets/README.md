@@ -1,6 +1,6 @@
 # LaunchBar Action: Recent Soulver Sheets
 
-This action displays [Soulver](https://soulver.app/features/) sheets sorted by their modification date.
+This action displays [Soulver](https://soulver.app/) sheets sorted by their modification date.
 
 <img src="01.jpg" width="604"/>
 
