@@ -50,8 +50,9 @@ function run() {
     : URL_SCHEMES.web;
 
   if (url.includes(server)) {
-    LaunchBar.alert('Your are already at home!'.localize());
-    LaunchBar.hide();
+    LaunchBar.openURL(urlscheme + url, frontmostID);
+    // LaunchBar.alert('Your are already at home!'.localize());
+    // LaunchBar.hide();
     return;
   }
 
