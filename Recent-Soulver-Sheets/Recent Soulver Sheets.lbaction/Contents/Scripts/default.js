@@ -4,9 +4,6 @@ by Christian Bender (@ptujec)
 2025-06-11
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: 
-- readme … new documents only when focus changed frontmost
 */
 
 String.prototype.localizationTable = 'default';
@@ -44,7 +41,7 @@ function run() {
 
   const defaultSheetbookData = File.readJSON(defaultSheetbookPath);
 
-  const sheets = defaultSheetbookData.store.folders
+  return (sheets = defaultSheetbookData.store.folders
     .filter((folder) => folder.name !== 'SV_TRASH')
     .flatMap((folder) =>
       folder.sheets.map((sheet) => {
@@ -82,9 +79,7 @@ function run() {
         };
       })
     )
-    .sort((a, b) => b.date - a.date); // Sort by modification date, newest first
-
-  return sheets;
+    .sort((a, b) => b.date - a.date));
 }
 
 function open(id) {
@@ -96,7 +91,10 @@ function getDefaultSheetbookPath() {
   if (File.exists(Action.preferences.defaultSheetbookPath)) {
     return Action.preferences.defaultSheetbookPath;
   }
-  const root = LaunchBar.execute('/usr/bin/swift', './getRoot.swift').trim();
+  const root = File.exists('./getRoot')
+    ? LaunchBar.execute('/bin/bash', './getRoot')?.trim()
+    : LaunchBar.execute('/usr/bin/swift', './getRoot.swift').trim();
+
   Action.preferences.defaultSheetbookPath = `${root}/Default.sheetbook`;
   return `${root}/Default.sheetbook`;
 }
