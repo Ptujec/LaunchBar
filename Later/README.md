@@ -16,7 +16,7 @@ You can access the list at any time with `Space` or `Enter`. To remove items fro
 
 - You can also add items to the list by sending a URL to the action. Select the URL, press `Tab`, select the action, then press `Enter`.
 - The action will add the **current time marker** to **YouTube** video URLs automatically. However, for this to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu. Otherwise, the URL will still be saved, but without the time marker.
-- Paste a link in the text field with `Shift` + `Enter`.
+- Paste a selected link from the list into the frontmost text field with `Shift` + `Enter`.
 - Hold `Option` in addition to `Command` to prevent closing the current tab while saving a link.
 
 ## Settings
