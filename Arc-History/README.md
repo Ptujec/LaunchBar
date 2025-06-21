@@ -4,7 +4,7 @@
 
 <img src="https://github.com/Ptujec/LaunchBar/blob/master/Brave-History/01.jpg?raw=true" width="802"/>
 
-This is a simple action that displays your browser history for [Arc](https://arc.net/). You can use it by simply selecting Arc in LaunchBar and pressing <kbd>space</kbd>. As always, you can type to narrow down results to what you are looking for. 
+This is a simple action that displays your browser history for [Arc](https://arc.net/). You can use it by simply selecting Arc in LaunchBar and pressing `space`. As always, you can type to narrow down results to what you are looking for. 
 
 ## Download & Update
 

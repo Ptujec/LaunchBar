@@ -6,11 +6,11 @@ Per default this action generates a random 12 character long password with lower
 
 <img src="01.jpg" width="600"/> 
 
-You can change the length with <kbd>␣</kbd> (space).
+You can change the length with `␣` (space).
 
 <img src="02.jpg" width="596"/>
 
-With <kbd>⇧</kbd> + <kbd>↩</kbd>  (shift-return) you can change defaults for numbers and symbols, that is if they should be included or not.
+With `⇧` + `↩`  (shift-return) you can change defaults for numbers and symbols, that is if they should be included or not.
 
 <img src="03.jpg" width="600"/>
 

@@ -4,7 +4,7 @@ This action displays [Soulver](https://soulver.app/) sheets sorted by their modi
 
 <img src="01.jpg" width="604"/>
 
-You can preview the sheet's contents by pressing <kbd>Space</kbd> or <kbd>Command</kbd> + <kbd>Y</kbd>.
+You can preview the sheet's contents by pressing `Space` or `Command` + `Y`.
 
 **Note:** New sheets appear when Soulver saves to `Default.sheetbook`. This usually happens when another application is in focus.
 

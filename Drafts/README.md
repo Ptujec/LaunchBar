@@ -7,7 +7,7 @@ A simple action to show recent drafts and open them in the app.
 
 <img src="01.jpg" width="726"/>
 
-The action is associated with [Drafts](https://getdrafts.com/), so you can simply select Drafts and press <kbd>space</kbd> to show your notes. Narrow down the results by typing as usual.
+The action is associated with [Drafts](https://getdrafts.com/), so you can simply select Drafts and press `space` to show your notes. Narrow down the results by typing as usual.
 
 
 ## Search Drafts

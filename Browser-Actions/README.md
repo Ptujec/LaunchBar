@@ -15,7 +15,7 @@ Supported browsers:
 - Vivaldi
 - Zen
 
-You can also close the site in the browser you came from with <kbd>⌘</kbd> + <kbd>↩</kbd>  (cmd-return). Set default behavior in settings <kbd>⌥</kbd> + <kbd>↩</kbd>  (shift-return). 
+You can also close the site in the browser you came from with `⌘` + `↩`  (cmd-return). Set default behavior in settings `⌥` + `↩`  (shift-return). 
 
 ### Good to know
 - If you use the close option be aware that Firefox (and Zen) cannot close individual tabs, just windows! 

@@ -4,19 +4,19 @@
 
 This action lets you use linguee.com with LaunchBar. 
 
-Set your preferred language combination with <kbd>enter</kbd>. Supported languages are German, English, French, Spanish, Portuguese, and Russian. 
+Set your preferred language combination with `enter`. Supported languages are German, English, French, Spanish, Portuguese, and Russian. 
 
 <img src="01.png" width="680"/> 
 
-Enter the word you want to translate with <kbd>space</kbd>. You should see suggestions as you type, including some translation items for each suggestion in the subtitle.
+Enter the word you want to translate with `space`. You should see suggestions as you type, including some translation items for each suggestion in the subtitle.
 
 <img src="02.png" width="680"/> 
 
-Show all translation results with <kbd>enter</kbd> … 
+Show all translation results with `enter` … 
 
 <img src="03.png" width="680"/> 
 
-… or paste the selected word with <kbd>shift</kbd> <kbd>enter</kbd>. Pasting works for both suggestions and results. 
+… or paste the selected word with `shift` `enter`. Pasting works for both suggestions and results. 
 
 ## Note
 

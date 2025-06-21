@@ -67,7 +67,7 @@ If you complete your entry with `⌘ ⏎` (command + return), you can select a p
 
 <img src="07.jpg" width="726"/> 
 
-Select a project, section, or label using the arrow keys or by typing its name. Confirm your selection by pressing <kbd>↩</kbd>. To add labels, you need to select them before selecting a project or section. You can add multiple labels, one at a time.
+Select a project, section, or label using the arrow keys or by typing its name. Confirm your selection by pressing `↩`. To add labels, you need to select them before selecting a project or section. You can add multiple labels, one at a time.
 
 I also built some smart into it. Projects, sections and labels you use frequently will rank higher in the list. The same is true if a project, section or label name is part of your entered task. Additionally the action will store used words by project/section/label. If what you type matches one or more previously used words of a project/section/label, that project/section/label will also be ranked higher. 
 

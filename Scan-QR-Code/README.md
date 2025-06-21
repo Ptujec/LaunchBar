@@ -16,7 +16,7 @@ Instead of selecting an area, you can also select the entire window that contain
 
 <img src="03.jpg" width="205"/> 
 
-If there is just one QR code visible on your screen, you can hold <kbd>command</kbd> while launching the action to capture the entire screen for scanning the QR code.
+If there is just one QR code visible on your screen, you can hold `command` while launching the action to capture the entire screen for scanning the QR code.
 
 ## Setup (IMPORTANT!)
 

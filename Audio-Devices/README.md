@@ -8,15 +8,15 @@ This action allows you to switch between audio devices.
 
 Devices are **intentionally sorted** in a way that makes it easy to toggle between two output devices. 
 
-**Exclude selected devices** with <kbd>control</kbd> + <kbd>enter</kbd>. Virtual devices (e.g. Microsoft Teams Audio) are excluded automatically. You can show all devices, including excluded devices, with <kbd>command</kbd> + <kbd>enter</kbd>.
+**Exclude selected devices** with `control` + `enter`. Virtual devices (e.g. Microsoft Teams Audio) are excluded automatically. You can show all devices, including excluded devices, with `command` + `enter`.
 
-By default, **sound effects** (e.g. system alerts) will play on the new output device. You can prevent that by pressing <kbd>option</kbd> + <kbd>enter</kbd> on a selected output device.
+By default, **sound effects** (e.g. system alerts) will play on the new output device. You can prevent that by pressing `option` + `enter` on a selected output device.
 
-If you hold <kbd>command</kbd> when switching to a new output device, the list will be filtered by only input devices next, or vice versa.
+If you hold `command` when switching to a new output device, the list will be filtered by only input devices next, or vice versa.
 
 ## Note About AirPlay Devices
 
-AirPlay support is not ideal yet. This is because CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding <kbd>shift</kbd>. This is a compromise to keep the action as responsive as possible while allowing AirPlay devices to be included. **Listing and activating AirPlay devices usually involves GUI scripting. This means the action will open System Preferences.** 
+AirPlay support is not ideal yet. This is because CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `shift`. This is a compromise to keep the action as responsive as possible while allowing AirPlay devices to be included. **Listing and activating AirPlay devices usually involves GUI scripting. This means the action will open System Preferences.** 
 
 I tried to implement this as gracefully as possible, but there may be some hiccups, e.g., the device showing only a generic "AirPlay" name instead of its real name. This usually occurs if you activated an AirPlay device without using the action.
 

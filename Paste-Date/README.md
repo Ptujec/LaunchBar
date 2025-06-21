@@ -2,9 +2,9 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This is a simple action that lets you paste the date in an active text field. If you hit <kbd>enter</kbd>, the date will be the **current date**. 
+This is a simple action that lets you paste the date in an active text field. If you hit `enter`, the date will be the **current date**. 
 
-But you can **modify** the date when you hit <kbd>space</kbd> instead. One way you can modify the date is to **enter a number** to get the current date plus the number of days. This can also be a negative number.
+But you can **modify** the date when you hit `space` instead. One way you can modify the date is to **enter a number** to get the current date plus the number of days. This can also be a negative number.
 
 <img src="01.jpg" width="634"/>
 
@@ -16,13 +16,13 @@ Another way to modify the date is to **specify a day** by its name. You will be 
 
 ## Format settings
 
-In settings (<kbd>shift</kbd> + <kbd>enter</kbd>), you can set a default (primary) and an alternative format style for your dates.
+In settings (`shift` + `enter`), you can set a default (primary) and an alternative format style for your dates.
 
 <img src="03.jpg" width="634"/>
 
 You can choose from different local date format styles (short, medium, long, and full) as well as ISO 8601 (yyyy-MM-dd). 
 
-When you use the action, you can access the alternative format with <kbd>option</kbd> + <kbd>enter</kbd>. Or you can choose from all the available styles with <kbd>command</kbd> + <kbd>enter</kbd>.
+When you use the action, you can access the alternative format with `option` + `enter`. Or you can choose from all the available styles with `command` + `enter`.
 
 **Note:** Local date format styles are defined by the system. As of macOS Ventura, the only style you can modify seems to be "short" (`System Settings → Language & Region → Date format`). 
 You can try [tweaking the others in the Terminal](https://www.caseyliss.com/2022/11/14/ventura-date-formats). 

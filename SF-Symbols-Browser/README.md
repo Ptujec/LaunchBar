@@ -2,11 +2,11 @@
 
 If you know what SF-Symbols are you probably have the [app installed](https://developer.apple.com/sf-symbols/) along with the [fonts](https://developer.apple.com/fonts/).
 
-This action enables you to browse through them without opening the app. If you have the app installed you can simply select it and press space  <kbd>␣</kbd>.
+This action enables you to browse through them without opening the app. If you have the app installed you can simply select it and press space  `␣`.
 
 <img src="sfs.jpg" width="706"/> 
 
-You can then either paste the symbol <kbd>↩</kbd> or the name <kbd>⌥</kbd> + <kbd>↩</kbd> . 
+You can then either paste the symbol `↩` or the name `⌥` + `↩` . 
 
 ## Download & Update
 

@@ -2,7 +2,7 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
-This action allows you to download transcriptions from YouTube videos. You can pass a URL to the action, or simply press <kbd>enter</kbd> to let the action retrieve the URL from your browser.
+This action allows you to download transcriptions from YouTube videos. You can pass a URL to the action, or simply press `enter` to let the action retrieve the URL from your browser.
 
 Then choose the desired transcription from the list of languages.
 
@@ -12,9 +12,9 @@ The action will create and open a plain text file with the selected transcript i
 
 ## Settings
 
-When holding <kbd>option</kbd> while pressing <kbd>enter</kbd>, you can decide if you want to include time markers and links or not by default.
+When holding `option` while pressing `enter`, you can decide if you want to include time markers and links or not by default.
 
-If you hold <kbd>command</kbd> when confirming to download a transcript, it will use just the text with no markers or links.
+If you hold `command` when confirming to download a transcript, it will use just the text with no markers or links.
 
 ## Good to Know
 

@@ -2,7 +2,7 @@
 
 This action shows the most recent message of your recent chats. 
 
-The action is associated with the Messages app, so you can simply select the app and press <kbd>space</kbd> to view your recent messages. 
+The action is associated with the Messages app, so you can simply select the app and press `space` to view your recent messages. 
 
 <img src="01.png" width="616"/> 
 
@@ -14,7 +14,7 @@ Type to narrow down results.
 
 Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
 
-This action also requires **contact access**. You will be prompted for it. You can also get to the respective privacy settings when you hit <kbd>enter</kbd> on the alert message in the LaunchBar interface.
+This action also requires **contact access**. You will be prompted for it. You can also get to the respective privacy settings when you hit `enter` on the alert message in the LaunchBar interface.
 
 Let me know if you need help. 
 
@@ -50,7 +50,7 @@ There are also limitations due to how LaunchBar actions work. Items don't automa
 
 The performance may vary a little. Getting names takes a while. We try to compensate that with caching. But on the initial run the action might take a second.
 
-If you want to renew cached names hold <kbd>command</kbd> when running the action.  
+If you want to renew cached names hold `command` when running the action.  
 
 Cached data is stored in the actions support path (`~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.RecentMessages`).
 

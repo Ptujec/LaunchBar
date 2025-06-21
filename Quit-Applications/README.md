@@ -10,13 +10,13 @@ No worries, the action uses non-aggressive termination, so you won't accidentall
 
 ## Custom Contexts
 
-You can set up **custom contexts** in a **plain text file**, which will open on first launch or if you hold <kbd>Option</kbd>. It's very simple. Choose a name and an emoji that will be displayed as the icon for that context (e.g. `Writing:✍🏻`). 
+You can set up **custom contexts** in a **plain text file**, which will open on first launch or if you hold `Option`. It's very simple. Choose a name and an emoji that will be displayed as the icon for that context (e.g. `Writing:✍🏻`). 
 
 <img src="02.jpg" width="600"/>   
 
 ## Context Configuration
 
-For each context, you can specify apps that are necessary in that context (toggle). The action will quit all other apps. This applies only to apps that show up in the application switcher (<kbd>command</kbd> + <kbd>tab</kbd>). LaunchBar and Finder are also excluded. 
+For each context, you can specify apps that are necessary in that context (toggle). The action will quit all other apps. This applies only to apps that show up in the application switcher (`command` + `tab`). LaunchBar and Finder are also excluded. 
 
 <img src="03.jpg" width="600"/>   
 
@@ -25,7 +25,7 @@ There are some additional options you can configure for each context:
 - Don't quit frontmost application (toggle)
 - Close Finder windows (toggle)
 
-Additionally, you can always protect the frontmost application with <kbd>command</kbd> + <kbd>enter</kbd>, even if you have not set it as the default behavior for the context.
+Additionally, you can always protect the frontmost application with `command` + `enter`, even if you have not set it as the default behavior for the context.
 
 ## Installation & Requirements (IMPORTANT!)
 

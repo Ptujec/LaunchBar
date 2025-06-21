@@ -12,15 +12,15 @@ The following actions are trying to improve the experience a little.
 
 This action displays account balances and the most recent transactions.
 
-You can show category balances and budgets with <kbd>command</kbd> + <kbd>enter</kbd>. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
+You can show category balances and budgets with `command` + `enter`. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
 
-If you have multiple budgets, you can select them with <kbd>option</kbd> + <kbd>enter</kbd>.
+If you have multiple budgets, you can select them with `option` + `enter`.
 
 **Note:** This action is using [SF Symbols](https://developer.apple.com/sf-symbols/) to indicate and split transactions and mail links in the `label` item. Those will not show correctly if SF Symbols is not installed. 
 
 ## Add Transaction
 
-This action lets you add transactions. Start by pressing <kbd>space</kbd> to enter the amount.
+This action lets you add transactions. Start by pressing `space` to enter the amount.
 
 **Note:** While the other action only reads data, this action writes directly to the database, which could lead to issues. Before doing so, it will close the app and always create a backup, which can be restored using the desktop app if needed. In addition, the action currently deletes the cache of the desktop app after creating a new transaction to ensure proper display of budgets. This will slow down the performance of the desktop app a little.
 

@@ -10,7 +10,7 @@ Or you can select the action and type the contacts name.
 
 Unfortunately, in order to run smoothly, actions written in Swift need to be both "unquarantined" and compiled. I made [a dedicated action that does both](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#readme). Run the `.lbaction` bundle of this action through the compile action before you start using it.
 
-This action also requires **contact access**. You will be prompted for it. You can also get to the respective privacy settings when you hit <kbd>enter</kbd> on the alert message in the LaunchBar interface.
+This action also requires **contact access**. You will be prompted for it. You can also get to the respective privacy settings when you hit `enter` on the alert message in the LaunchBar interface.
 
 Let me know if you need help. 
 

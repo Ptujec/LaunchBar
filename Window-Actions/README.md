@@ -12,7 +12,7 @@ This action arranges 2-4 windows evenly on the screen. 2 windows is the default.
 
 <img src="01.jpg" width="623"/> 
 
-For more options press <kbd>space</kbd> or <kbd>⌘</kbd> + <kbd>↩</kbd> .
+For more options press `space` or `⌘` + `↩` .
 
 <img src="02.jpg" width="623"/> 
 
