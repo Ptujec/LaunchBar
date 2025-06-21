@@ -2,18 +2,20 @@
 
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)*
 
-It’s a familiar situation: you come across something interesting on the internet, but now is not the right time to look into it. That's where this action comes in. Open the action in LaunchBar and press `Command` + `Enter`. The distraction is gone.
+Maybe this sounds familiar: somehow, you ended up in the middle of a YouTube video — but you should be doing something else. That’s where this action comes in. Open the action in LaunchBar and press `Command` + `Enter`. Problem solved.
 
-What happened? The action closed the active tab and saved its URL in a list for you to revisit later.
+How? The action closes the active tab and saves its URL in a list for you to revisit later.
 
 <img src="01.jpg" width="600"/>
+
+Obviously, you can save more than just YouTube videos. 
 
 You can access the list at any time with `Space` or `Enter`. To remove items from the list, use `Command` + `Enter`, just as you did to add them.
 
 ## Additional Functionality
 
-- You can also add items to the list by sending a URL to the action. Select the URL, press `TAB`, select the action.
-- The action will add the **current time marker** to **YouTube** video URLs automatically. However, for this to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu.
+- You can also add items to the list by sending a URL to the action. Select the URL, press `Tab`, select the action, then press `Enter`.
+- The action will add the **current time marker** to **YouTube** video URLs automatically. However, for this to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu. Otherwise, the URL will still be saved, but without the time marker.
 - Paste a link in the text field with `Shift` + `Enter`.
 - Hold `Option` in addition to `Command` to prevent closing the current tab while saving a link.
 
