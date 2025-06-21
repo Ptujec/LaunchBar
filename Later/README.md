@@ -27,15 +27,15 @@ There are some settings that can further tailor the action to your liking. You c
 
 ### Open Behavior
 
-By default, items are removed from the list when you open them. You can change that with a simple toggle.
+By default, items are removed from the list when you open them. If you prefer to remove them manually, you can change that with a simple toggle.
 
 **Note**: If an item is opened and removed, it won't automatically disappear from LaunchBar's interface. To see the updated list, run the action again.
 
 ### Archive Behavior
 
-Items will be moved to an archive list after 14 days by default. You can change that as well.
+By default, items will be moved to an archive list after 14 days. You can change this setting if you prefer. This process applies only when your list contains more than 20 items.
 
-Options to restore items from the archive or to delete the archive will show up in settings once there is an archive.
+Options to restore items from the archive or delete the archive will appear in settings once an archive exists.
 
 To view archived items hold `Option` when running the action.
 
