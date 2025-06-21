@@ -435,7 +435,7 @@ function settings() {
       : undefined,
     {
       title: 'Choose List Location',
-      subtitle: storageDirectory,
+      subtitle: storageDirectory.replace(LaunchBar.homeDirectory, '~'),
       alwaysShowsSubtitle: true,
       icon: 'folderTemplate',
       action: 'chooseDirectory',
