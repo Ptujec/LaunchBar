@@ -442,7 +442,7 @@ function settings() {
     },
     hasBackups
       ? {
-          title: 'Restore from Backup',
+          title: 'Restore From Backup',
           subtitle: 'Choose a backup to restore from.',
           alwaysShowsSubtitle: true,
           icon: 'restoreTemplate',
