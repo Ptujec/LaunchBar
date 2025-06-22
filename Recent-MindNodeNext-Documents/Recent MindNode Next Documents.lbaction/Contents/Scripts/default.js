@@ -4,8 +4,6 @@ by Christian Bender (@ptujec)
 2024-12-11
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: update readme (jetzt tatsächlich viewed nicht changed) … publish when out of beta
 */
 
 const supportDir = `${LaunchBar.homeDirectory}/Library/Containers/com.ideasoncanvas.mindnode/Data/Library/Application Support/MindNode Next`;
@@ -34,16 +32,26 @@ function run() {
   return snapshotJson
     .filter((obj) => !obj.isTrashed && obj.title)
     .sort((a, b) => b.lastViewedDate - a.lastViewedDate)
-    .map((obj) => ({
-      title: obj.title,
-      icon: 'com.ideasoncanvas.mindnode',
-      path: File.pathForFileURL(obj[preview].fullSizeURL),
-      action: 'open',
-      actionArgument: `https://mindnode.com/document/${obj.id}#${encodeURI(
-        obj.title
-      )}`,
-      actionRunsInBackground: true,
-    }));
+    .map((obj) => {
+      let previewPath = File.pathForFileURL(obj[preview].fullSizeURL);
+
+      if (!File.exists(previewPath)) {
+        const altPreview = darkMode ? 'lightPreview' : 'darkPreview';
+        previewPath = File.pathForFileURL(obj[altPreview].fullSizeURL);
+        if (!File.exists(previewPath)) previewPath = undefined;
+      }
+
+      return {
+        title: obj.title,
+        icon: 'com.ideasoncanvas.mindnode',
+        path: previewPath,
+        action: 'open',
+        actionArgument: `https://mindnode.com/document/${obj.id}#${encodeURI(
+          obj.title
+        )}`,
+        actionRunsInBackground: true,
+      };
+    });
 }
 
 function open(url) {
