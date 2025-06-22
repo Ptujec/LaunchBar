@@ -24,6 +24,16 @@ if [ "$1" ]; then
 fi
 
 history_path="${HOME}/Library/Application Support/BraveSoftware/Brave-Browser/Default/History"
+tmp_history="/tmp/brave_history_$$"
+
+# Check if original history exists
+if [ ! -f "${history_path}" ]; then
+    echo '{"icon": "alert", "title": "Brave history file not found"}'
+    exit 1
+fi
+
+# Create a copy of the database
+cp "${history_path}" "${tmp_history}"
 
 query="SELECT DISTINCT u.title, u.url, u.last_visit_time
 FROM urls u
@@ -37,7 +47,8 @@ GROUP BY u.id
 ORDER BY u.last_visit_time DESC
 LIMIT 1000;"
 
-sqlite3 -readonly -json "${history_path}" "${query}" | jq 'map({
+# Read from the temporary copy
+sqlite3 -readonly -json "${tmp_history}" "${query}" | jq 'map({
     title: (if .title == null or .title == "" then .url else .title end),
     url: .url,
     subtitle: .url,
@@ -47,3 +58,6 @@ sqlite3 -readonly -json "${history_path}" "${query}" | jq 'map({
     actionRunsInBackground: true,
     icon: "URLTemplate"
 })'
+
+# Clean up the temporary file
+rm -f "${tmp_history}"
