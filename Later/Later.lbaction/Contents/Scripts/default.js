@@ -32,6 +32,8 @@ const shortcutURLAddToLater =
   'https://www.icloud.com/shortcuts/9a64a6c48e4d4ad7aa7cfee0694c36a9';
 const shortcutURLShowLater =
   'https://www.icloud.com/shortcuts/cedf5b879dd94cdd8b142d9e09585388';
+const shortcutURLAddToLaterMac =
+  'https://www.icloud.com/shortcuts/60264ed63f484f0fbd98c76c4ddbb748';
 
 // MARK: - Main
 
@@ -470,11 +472,19 @@ function settings() {
       action: 'importReadingList',
       icon: 'importTemplate',
     },
+    {
+      title: 'Install "Add To Later (via LaunchBar)" Shortcut',
+      subtitle:
+        'This shortcut lets you add links via the context menu on macOS.',
+      alwaysShowsSubtitle: true,
+      url: shortcutURLAddToLaterMac,
+      icon: 'shortcutsTemplate',
+    },
     storageDirectory === defaultStorageDirectory
       ? {
           title: 'Install "Add to Later" Shortcut',
           subtitle:
-            'This shortcut lets you add items via the share sheet on iOS.',
+            'This shortcut lets you add links via the share sheet on iOS.',
           alwaysShowsSubtitle: true,
           url: shortcutURLAddToLater,
           icon: 'shortcutsTemplate',
