@@ -1,5 +1,7 @@
 # LaunchBar Action: Transcripts (YouTube)
 
+**IMPORTANT NOTE: Unfortunately, YouTube seems to have changed something that prevents the subtitle URLs from returning any data. I will try to fix this if possible. If you have any ideas, feel free to help.**
+
 *[→ See a list of all my actions here.](https://ptujec.github.io/launchbar)* 
 
 This action allows you to download transcriptions from YouTube videos. You can pass a URL to the action, or simply press `enter` to let the action retrieve the URL from your browser.
