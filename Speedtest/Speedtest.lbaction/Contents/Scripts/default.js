@@ -83,10 +83,7 @@ function runInTerminal() {
 function getHistory() {
   const files = File.getDirectoryContents(`${Action.supportPath}/`);
 
-  if (files.length === 0) {
-    LaunchBar.alert('No speed test history found.');
-    return [];
-  }
+  if (files.length === 0) return [];
 
   return files
     .filter(
