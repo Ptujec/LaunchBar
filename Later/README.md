@@ -10,7 +10,7 @@ How? The action closes the active tab and saves its URL in a list for you to rev
 
 Obviously, you can save more than just YouTube videos. 
 
-You can access the list at any time with `Space` or `Enter`. To remove items from the list, use `Command` + `Enter`, just as you did to add them.
+You can access the list at any time with either `→`, `Enter` or `Space`. To remove items from the list, use `Command` + `Enter`, just as you did to add them.
 
 ## Additional Functionality
 
