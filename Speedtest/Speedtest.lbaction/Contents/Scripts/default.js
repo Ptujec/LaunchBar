@@ -85,7 +85,7 @@ function getHistory() {
 
   if (files.length === 0) {
     LaunchBar.alert('No speed test history found.');
-    return;
+    return [];
   }
 
   return files
