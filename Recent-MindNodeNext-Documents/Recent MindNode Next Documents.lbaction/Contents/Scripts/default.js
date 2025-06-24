@@ -6,6 +6,8 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
+String.prototype.localizationTable = 'default';
+
 const supportDir = `${LaunchBar.homeDirectory}/Library/Containers/com.ideasoncanvas.mindnode/Data/Library/Application Support/MindNode Next`;
 
 function run() {
@@ -41,8 +43,19 @@ function run() {
         if (!File.exists(previewPath)) previewPath = undefined;
       }
 
+      const lastModifiedDate = LaunchBar.formatDate(
+        new Date((obj.lastModifiedDate + 978307200) * 1000),
+        {
+          relativeDateFormatting: true,
+          timeStyle: 'short',
+          dateStyle: 'short',
+        }
+      );
+
       return {
         title: obj.title,
+        subtitle: lastModifiedDate,
+        alwaysShowsSubtitle: true,
         icon: 'com.ideasoncanvas.mindnode',
         path: previewPath,
         action: 'open',
