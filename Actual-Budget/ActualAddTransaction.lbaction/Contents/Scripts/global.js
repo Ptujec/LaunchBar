@@ -141,11 +141,20 @@ function parseDataBase({ databasePath }) {
 
   if (Action.preferences.skipFileCheck) return File.readJSON(cacheFilePath); // return early when we already have fresh data
 
+  // Check if cache is valid
+  if (File.exists(cacheFilePath)) {
+    const dbModDate = File.modificationDate(databasePath);
+    const cacheModDate = File.modificationDate(cacheFilePath);
+
+    if (dbModDate < cacheModDate) {
+      return File.readJSON(cacheFilePath);
+    }
+  }
+
   const result = LaunchBar.execute(
     '/bin/bash',
     './parseDataBase.sh',
-    databasePath,
-    cacheFilePath
+    databasePath
   );
 
   if (!result) {
@@ -155,7 +164,6 @@ function parseDataBase({ databasePath }) {
 
   try {
     const data = JSON.parse(result);
-    if (data.useCache) return File.readJSON(cacheFilePath);
     File.writeJSON(data, cacheFilePath);
     return data;
   } catch (error) {

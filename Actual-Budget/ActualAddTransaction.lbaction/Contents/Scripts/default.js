@@ -147,24 +147,26 @@ function handlePayeeAction({ payeeId }) {
       (t.transfer_id && t.amount < 0) // For transfers, keep only outgoing ones
   );
 
-  return filteredTransactions.map((t) => {
-    const item = formatTransaction(t, data.numberFormat, data.dateFormat);
+  return filteredTransactions.length > 0
+    ? filteredTransactions.map((t) => {
+        const item = formatTransaction(t, data.numberFormat, data.dateFormat);
 
-    // For transfers, update the badge to show direction
-    if (t.transfer_id) {
-      const relatedTransfer = data.transactions.find(
-        (tr) => tr.id === t.transfer_id
-      );
-      if (relatedTransfer) {
-        item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
-        item.icon = 'transferTemplate';
-        item.title = item.title.replace('-', '');
-        // item.title = `Transfer: ${formatAmount(Math.abs(t.amount), data.numberFormat)}`;
-      }
-    }
+        // For transfers, update the badge to show direction
+        if (t.transfer_id) {
+          const relatedTransfer = data.transactions.find(
+            (tr) => tr.id === t.transfer_id
+          );
+          if (relatedTransfer) {
+            item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
+            item.icon = 'transferTemplate';
+            item.title = item.title.replace('-', '');
+            // item.title = `Transfer: ${formatAmount(Math.abs(t.amount), data.numberFormat)}`;
+          }
+        }
 
-    return item;
-  });
+        return item;
+      })
+    : [{ title: 'No recent transactions', icon: 'alert' }];
 }
 
 function showCategories() {
@@ -291,7 +293,9 @@ function handleCategoryAction({
     formatTransaction(t, numberFormat, dateFormat)
   );
 
-  return [...noteItem, ...transactionItems];
+  return transactionItems.length > 0
+    ? [...noteItem, ...transactionItems]
+    : [{ title: 'No transactions found for this category', icon: 'alert' }];
 }
 
 function showAccounts() {
@@ -361,8 +365,27 @@ function showDates() {
 }
 
 function setDate(dateString) {
-  recentPrefs.set('date', parseInt(dateString, 10));
+  const date = parseInt(dateString, 10);
+
+  if (LaunchBar.options.commandKey) return handleDateAction(date);
+
+  recentPrefs.set('date', date);
   return showNotesOptions();
+}
+
+function handleDateAction(date) {
+  const data = getDatabaseData();
+  if (!data) return [{ title: 'No entries', icon: 'alert' }];
+
+  const dateTransactions = data.transactions
+    .filter((t) => t.date === date)
+    .filter((t) => !t.is_child)
+    .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
+    .map((t) => formatTransaction(t, data.numberFormat, data.dateFormat));
+
+  return dateTransactions.length > 0
+    ? dateTransactions
+    : [{ title: 'No transactions found for this date', icon: 'alert' }];
 }
 
 function showNotesOptions() {

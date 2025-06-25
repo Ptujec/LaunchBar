@@ -11,18 +11,6 @@ set -euo pipefail # Enhanced error handling
 IFS=$'\n\t'
 
 DB_PATH="$1"
-CACHE_FILE="$2"
-
-# If cache file exists, compare modification times
-if [ -f "$CACHE_FILE" ]; then
-  DB_MOD=$(stat -f %m "$DB_PATH")
-  CACHE_MOD=$(stat -f %m "$CACHE_FILE")
-  if [ $CACHE_MOD -gt $DB_MOD ]; then
-    # Cache is newer than database, tell JavaScript to use cache
-    echo '{"useCache": true}'
-    exit 0
-  fi
-fi
 
 if [ ! -r "$DB_PATH" ]; then
   echo "Error: Cannot read database at $DB_PATH" >&2
@@ -190,7 +178,6 @@ fi
 
 # Output JSON
 echo '{
-  "useCache": false,
   "timestamp": "'$(date "+%Y-%m-%d %H:%M:%S")'",
   "accounts": '"$accounts"',
   "transactions": '"$transactions"',
