@@ -95,7 +95,13 @@ function getZoteroPrefs() {
   const profilesDir = '~/Library/Application Support/Zotero/Profiles';
   const profile = File.getDirectoryContents(profilesDir)[0];
   const prefsPath = `${profilesDir}/${profile}/prefs.js`;
-  const prefsContent = File.readText(prefsPath);
+
+  let prefsContent = '';
+  try {
+    prefsContent = File.readText(prefsPath);
+  } catch (error) {
+    prefsContent = File.readText(prefsPath, 'ISO 8859-1');
+  }
 
   return prefsContent.split('\n').reduce((preferences, line) => {
     const match = line.match(/user_pref\("([^"]+)",\s*(.+)\);/);
