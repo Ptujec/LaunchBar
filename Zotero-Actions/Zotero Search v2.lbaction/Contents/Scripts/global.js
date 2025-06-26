@@ -105,17 +105,29 @@ function getZoteroPrefs() {
   } catch (error) {
     LaunchBar.log(
       error,
-      'Trying again after reading the text encoding of "prefs.js" with xattr.'
+      'Trying again after reading the text encoding of "prefs.js".'
     );
 
-    const textEncodingPrefs = LaunchBar.execute(
-      '/usr/bin/xattr',
-      '-p',
-      'com.apple.TextEncoding',
+    let textEncodingPrefs;
+
+    textEncodingPrefs = LaunchBar.execute(
+      '/usr/bin/file',
+      '--mime-encoding',
       prefsPath
     )
-      .split(';')?.[0]
+      .split(':')?.[1]
       .trim();
+
+    if (textEncodingPrefs === 'binary') {
+      textEncodingPrefs = LaunchBar.execute(
+        '/usr/bin/xattr',
+        '-p',
+        'com.apple.TextEncoding',
+        prefsPath
+      )
+        .split(';')?.[0]
+        .trim();
+    }
 
     prefsContent = File.readText(prefsPath, textEncodingPrefs);
 
