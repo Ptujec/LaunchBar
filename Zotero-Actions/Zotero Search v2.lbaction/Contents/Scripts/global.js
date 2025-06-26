@@ -92,15 +92,34 @@ const zoteroDirectory = `${zoteroPrefs['extensions.zotero.dataDir']}/`;
 const storageDirectory = zoteroDirectory + 'storage/';
 
 function getZoteroPrefs() {
-  const profilesDir = '~/Library/Application Support/Zotero/Profiles';
+  const profilesDir = `${LaunchBar.homeDirectory}/Library/Application Support/Zotero/Profiles`;
   const profile = File.getDirectoryContents(profilesDir)[0];
   const prefsPath = `${profilesDir}/${profile}/prefs.js`;
 
-  let prefsContent = '';
+  let prefsContent;
   try {
-    prefsContent = File.readText(prefsPath);
+    prefsContent = File.readText(
+      prefsPath,
+      Action.preferences.textEncodingPrefs || 'UTF-8'
+    );
   } catch (error) {
-    prefsContent = File.readText(prefsPath, 'ISO 8859-1');
+    LaunchBar.log(
+      error,
+      'Trying again after reading the text encoding of "prefs.js" with xattr.'
+    );
+
+    const textEncodingPrefs = LaunchBar.execute(
+      '/usr/bin/xattr',
+      '-p',
+      'com.apple.TextEncoding',
+      prefsPath
+    )
+      .split(';')?.[0]
+      .trim();
+
+    prefsContent = File.readText(prefsPath, textEncodingPrefs);
+
+    Action.preferences.textEncodingPrefs = textEncodingPrefs;
   }
 
   return prefsContent.split('\n').reduce((preferences, line) => {
