@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# # Get the modification timestamps of both files
-# file1_modified=$(stat -f "%m" "$1")
-# file2_modified=$(stat -f "%m" "$1.launchbar")
-
-# # Compare the timestamps and exit if zotero.sqlite is not newer and if the passed argument is not true (It might be true if there is a new version of the action or if the JSON file has been removed)
-
-# if [ $2 != "true" ] && [ "$file1_modified" -le "$file2_modified" ]; then
-#   exit 0
-# fi
-
 cp "$1" "$1.launchbar"
 database_path="$1.launchbar"
 
@@ -101,7 +91,10 @@ if [ -z "${itemCreators}" ]; then
 fi
 
 collections=$(sqlite3 -json "${database_path}" "
-SELECT collections.collectionID, collections.collectionName FROM collections")
+SELECT collections.collectionID, collections.collectionName 
+FROM collections
+LEFT JOIN deletedCollections ON collections.collectionID = deletedCollections.collectionID 
+WHERE deletedCollections.collectionID IS NULL")
 if [ -z "${collections}" ]; then
   collections="[]"
 fi
