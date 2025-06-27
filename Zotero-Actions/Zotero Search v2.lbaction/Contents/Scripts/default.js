@@ -457,6 +457,7 @@ function showItemDetails(dict) {
   const prefs = Action.preferences;
   const fields = prefs.fields;
   const creatorTypes = prefs.creatorTypes;
+  const includeZoteroLink = prefs.includeZoteroLink ?? true;
 
   const itemID = dict.itemID;
   const data = File.readJSON(dataPath);
@@ -822,15 +823,17 @@ function showItemDetails(dict) {
   details = [
     ...details,
     {
-      title: 'Paste & Link Citation',
-      icon: 'citeTemplate',
+      title: includeZoteroLink ? 'Paste & Link Citation' : 'Paste Citation',
+      icon: 'pasteCitationTemplate',
       action: 'pasteCitation',
       actionArgument: dict,
       actionRunsInBackground: true,
     },
     {
-      title: 'Paste & Link Bibliography',
-      icon: 'citeTemplate',
+      title: includeZoteroLink
+        ? 'Paste & Link Bibliography'
+        : 'Paste Bibliography',
+      icon: 'pasteBibTemplate',
       action: 'pasteCitation',
       actionArgument: { ...dict, isBibliography: true },
       actionRunsInBackground: true,

@@ -182,7 +182,7 @@ function settings() {
       title: 'Paste Format',
       subtitle: formatDisplayName(citationFormat),
       alwaysShowsSubtitle: true,
-      icon: 'pasteTemplate',
+      icon: 'pasteFormatTemplate',
       children: listFormats(),
     },
     {
