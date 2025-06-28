@@ -6,7 +6,7 @@ Search, browse, and act on items from your local [Zotero](https://www.zotero.org
 
 ## Search 
 
-<img src="01.jpg" width="806"/> 
+<img src="01.jpg" width="700"/> 
 
 As you begin your search, helpful suggestions will appear, including creator names, tags, and titles.
 
@@ -19,7 +19,7 @@ You can also directly search both the database and your local attachments with `
 
 ## Browse
 
-<img src="02.jpg" width="806"/> 
+<img src="02.jpg" width="700"/> 
 
 If you press `enter` instead of `space`, you can [browse your database](https://ptujec.github.io/the-unique-power-of-browsing-in-launchbar/) by creators, tags, collections, or all items. 
 
@@ -27,13 +27,13 @@ Additionally, you have quick access to your three most recently used items.
 
 ## Details & Actions
 
-<img src="03.jpg" width="806"/> 
+<img src="03.jpg" width="700"/> 
 
 If you hit `enter` on a particular item, you can see more details such as tags, publications, links, or attachments. 
 
 Many of the details also offer further functionality. For instance, you can quickly look inside an attached PDF.
 
-<img src="04.jpg" width="806"/>  
+<img src="04.jpg" width="700"/>  
 
 Here is a list of possible actions: 
 
