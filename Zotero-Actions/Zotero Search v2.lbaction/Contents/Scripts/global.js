@@ -250,7 +250,9 @@ function listFormats() {
     },
     {
       id: 'richText',
-      title: 'Rich Text',
+      title: pasteHelperInstalled
+        ? 'Rich Text (with fallback to Markdown)'
+        : 'Rich Text',
     },
     {
       id: 'markdown',
@@ -280,7 +282,9 @@ function listFormats() {
 function formatDisplayName(format) {
   const names = {
     plain: 'Plain Text',
-    richText: 'Rich Text',
+    richText: pasteHelperInstalled
+      ? 'Rich Text (with fallback to Markdown)'
+      : 'Rich Text',
     markdown: 'Markdown',
     html: 'HTML',
   };
