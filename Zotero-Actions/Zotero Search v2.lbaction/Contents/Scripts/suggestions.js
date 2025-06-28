@@ -31,8 +31,7 @@ function runWithString(string) {
   const itemIDs = data.items.reduce((acc, item) => {
     if (
       item.itemTypeID !== itemTypes.note &&
-      item.itemTypeID !== itemTypes.attachment &&
-      item.itemTypeID !== itemTypes.annotation
+      item.itemTypeID !== itemTypes.attachment
     ) {
       acc.add(item.itemID);
     }

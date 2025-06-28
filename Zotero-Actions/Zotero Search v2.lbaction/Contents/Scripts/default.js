@@ -302,8 +302,7 @@ function showEntries(itemIDs) {
   const itemsMap = data.items.reduce((map, item) => {
     if (
       item.itemTypeID == itemTypes.attachment ||
-      item.itemTypeID == itemTypes.note ||
-      item.itemTypeID == itemTypes.annotation
+      item.itemTypeID == itemTypes.note
     ) {
       attachmentItemIDs[item.itemID] = true;
     }
@@ -359,7 +358,6 @@ function showEntries(itemIDs) {
     'videoRecording',
     'radioBroadcast',
     'podcast',
-    'annotation',
     'attachment',
   ]);
 
