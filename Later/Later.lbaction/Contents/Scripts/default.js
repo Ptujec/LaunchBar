@@ -103,7 +103,7 @@ function showList(forceArchive = false) {
 
   if (list?.length === 0 || !list) {
     if (isArchived) {
-      LaunchBar.alert('No items in archive yet');
+      LaunchBar.alert('No items found in archive!');
     } else {
       LaunchBar.alert(
         'No items found!',
