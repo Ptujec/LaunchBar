@@ -82,7 +82,7 @@ function search(argument) {
   ]);
 
   if (allReversedItemIDs.size === 0 || LaunchBar.options.commandKey) {
-    allReversedItemIDs.add(...searchInStorageDir(argument));
+    searchInStorageDir(argument)?.forEach((id) => allReversedItemIDs.add(id));
   }
 
   // return showEntries(Array.from(allReversedItemIDs), data);
