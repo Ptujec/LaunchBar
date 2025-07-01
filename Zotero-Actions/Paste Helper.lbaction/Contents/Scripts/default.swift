@@ -21,31 +21,35 @@ func run() -> String {
         "~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.ZoteroSearchV2/Preferences.plist"
     ).expandingTildeInPath
 
-    guard let dict = NSDictionary(contentsOfFile: prefsPath) else {
-        NSLog("Error: Could not read preferences file")
-        exit(1)
-    }
-
-    guard let pasteHelper = dict["pasteHelperContent"] as? [String: String],
+    guard let dict = NSDictionary(contentsOfFile: prefsPath),
+          let pasteHelper = dict["pasteHelperContent"] as? [String: String],
           let rawText = pasteHelper["text"]
     else {
-        NSLog("Error: Invalid preferences data")
+        NSLog("Error: Could not read preferences file or invalid data")
         exit(1)
     }
 
     let text = decodeHTMLEntities(rawText)
     let url = pasteHelper["url"]?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+    let annotation = pasteHelper["annotation"] ?? ""
 
     let markdownItalics = text.replacingOccurrences(of: "</?i>", with: "*", options: .regularExpression)
-
+    
+    // MARK: 1. Plain text (in markdown format)
+    let markdownText = [
+        annotation.isEmpty ? nil : "\"\(annotation)\"",
+        url.isEmpty ? markdownItalics : "[\(markdownItalics)](\(url))"
+    ].compactMap { $0 }.joined(separator: " ")
+    
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
-
-    // MARK: 1. Plain text (in markdown format)
-    let markdownText = url.isEmpty ? markdownItalics : "[\(markdownItalics)](\(url))"
     
     // MARK: 2. Create attributed string for RTF
-    let attributedString = createAttributedString(text: text, url: url)
+    let attributedString = createAttributedString(
+        text: text,
+        url: url,
+        annotation: annotation
+    )
     
     guard let rtfData = try? attributedString.data(
         from: NSRange(location: 0, length: attributedString.length),
@@ -56,16 +60,13 @@ func run() -> String {
     }
 
     // MARK: 3. Set all formats at once
-    let success = pasteboard.setString(markdownText, forType: .string) &&
-                 pasteboard.setString(text, forType: .html) &&
-                 pasteboard.setData(rtfData, forType: .rtf)
-    
-    guard success else {
+    guard pasteboard.setString(markdownText, forType: .string) &&
+          pasteboard.setString(text, forType: .html) &&
+          pasteboard.setData(rtfData, forType: .rtf)
+    else {
         NSLog("Error: Failed to set pasteboard data")
         exit(1)
     }
-
-    // Thread.sleep(forTimeInterval: 0.01)
 
     let script = """
         tell application "System Events" to keystroke "v" using command down
@@ -84,17 +85,27 @@ func run() -> String {
     return text
 }
 
-func createAttributedString(text: String, url: String = "") -> NSAttributedString {
+func createAttributedString(text: String, url: String, annotation: String) -> NSAttributedString {
     let regularFont = NSFont(name: "Helvetica Neue", size: 14) ?? NSFont.systemFont(ofSize: 14)
     let italicFont = NSFont(name: "Helvetica Neue Italic", size: 14) 
         ?? NSFontManager.shared.convert(regularFont, toHaveTrait: .italicFontMask)
 
-    // MARK: 1. Split text into segments and process
-    let segments = text.components(separatedBy: "<i>")
     let attributedString = NSMutableAttributedString()
     
-    // MARK: 2. Add first segment (non-italic)
-    attributedString.append(NSAttributedString(string: segments[0], attributes: [.font: regularFont]))
+    // MARK: 1. Add annotation if present
+    if !annotation.isEmpty {
+        attributedString.append(NSAttributedString(
+            string: "\"\(annotation)\" ",
+            attributes: [.font: regularFont]
+        ))
+    }
+    
+    // MARK: 2. Split text into segments and process
+    let segments = text.components(separatedBy: "<i>")
+    attributedString.append(NSAttributedString(
+        string: segments[0],
+        attributes: [.font: regularFont]
+    ))
     
     // MARK: 3. Process remaining segments (alternating italic/non-italic)
     for segment in segments.dropFirst() {
@@ -103,12 +114,32 @@ func createAttributedString(text: String, url: String = "") -> NSAttributedStrin
         let italicText = String(segment[..<endIndex])
         let remainingText = String(segment[segment.index(endIndex, offsetBy: 4)...])
         
-        attributedString.append(NSAttributedString(string: italicText, attributes: [.font: italicFont]))
-        attributedString.append(NSAttributedString(string: remainingText, attributes: [.font: regularFont]))
+        attributedString.append(NSAttributedString(
+            string: italicText,
+            attributes: [.font: italicFont]
+        ))
+        attributedString.append(NSAttributedString(
+            string: remainingText,
+            attributes: [.font: regularFont]
+        ))
     }
     
+    // MARK: 4. Add link to citation part only
     if !url.isEmpty {
-        attributedString.addAttribute(.link, value: url, range: NSRange(location: 0, length: attributedString.length))
+        let annotationPrefix = "\"\(annotation)\" "
+        let location: Int
+        let length: Int
+        
+        if !annotation.isEmpty {
+            location = annotationPrefix.count
+            length = attributedString.length - location
+        } else {
+            location = 0
+            length = attributedString.length
+        }
+        
+        let citationRange = NSRange(location: location, length: length)
+        attributedString.addAttribute(.link, value: url, range: citationRange)
     }
     
     return attributedString
