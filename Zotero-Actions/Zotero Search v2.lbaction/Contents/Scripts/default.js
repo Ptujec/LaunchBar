@@ -285,7 +285,7 @@ function showItemsWithCollection({ collectionID }) {
     }
   }
 
-  return showEntries(itemIDs);
+  return showEntries(itemIDs.reverse());
 }
 
 function showAllItems() {
