@@ -29,7 +29,7 @@ Additionally, you have quick access to your three most recently used items.
 
 <img src="03.jpg" width="700"/> 
 
-If you hit `enter` on a particular item, you can see more details such as tags, publications, links, or attachments. 
+If you hit `enter` (or `space` or `→`) on a particular item, you can see more details such as tags, links, attachments, annotations and notes. 
 
 Many of the details also offer further functionality. For instance, you can quickly look inside an attached PDF.
 
@@ -39,7 +39,7 @@ Here is a list of possible actions:
 
 #### 1) More Browsing
 
-You can browse and display related items that are part of the same collection, publication, or book, have the same tag, or are written by the same author.
+You can [browse](https://ptujec.github.io/the-unique-power-of-browsing-in-launchbar/) and display related items that are part of the same collection, publication, or book, have the same tag, or are written by the same author.
 
 #### 2) Interact with Attachments
 
@@ -69,7 +69,11 @@ This feature will use the last used style from the Zotero preferences by default
 
 *"***Zotero Paste Helper**" is a companion action written in Swift that is **not required** but largely improves pasting rich text. If available the Zotero action will utilize it automatically. It includes a fallback to Markdown for apps that can't handle rich text.* *[It needs to be compiled to run properly](https://github.com/Ptujec/LaunchBar/tree/master/Compile-Swift-Action#launchbar-action-compile-swift-action).*
 
-#### 6) 🪄 The Magic Title Item
+#### 6) View, Open, or Paste Annotations
+
+If there are annotations linked to an item (like highlighted or underlined text), you can view them, open them, or paste them into a text field using the usual modifier keys (see "Shortcuts" below). When you paste an annotation, a citation reference (see 5) is included automatically.
+
+#### 7) 🪄 The Magic Title Item
 
 As this LaunchBar action is primarily tailored to give you quick access to the content of your Zotero database, the title item has kind of "superpowers". If a PDF is attached, you can open the PDF right from that item using Quick Look. If there is no PDF, but there is a link, you can open that instead. If none of these options are available, pressing `enter` will reveal the item in Zotero.
 

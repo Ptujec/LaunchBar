@@ -15,33 +15,35 @@ function runWithString(string) {
   if (string != undefined && string.trim().length == 0) return;
   string = string.toLowerCase();
 
-  const data = getData();
+  const { wasUpdated, data: updatedData } = checkAndUpdateData();
+  const data = updatedData || loadData();
 
   const icon = 'icon';
 
   // Tag suggestions
-  const tagSuggestions = data.tags.reduce((acc, item) => {
+  const tagSuggestions = new Set();
+  for (const item of data.tags) {
     if (item.title.toLowerCase().includes(string)) {
-      acc.add({ title: item.title, icon: icon });
+      tagSuggestions.add({ title: item.title, icon: icon });
     }
-    return acc;
-  }, new Set());
+  }
 
   // Title & Series suggestions
-  const itemIDs = data.items.reduce((acc, item) => {
+  const itemIDs = new Set();
+  for (const item of data.items) {
     if (
       item.itemTypeID !== itemTypes.note &&
       item.itemTypeID !== itemTypes.attachment
     ) {
-      acc.add(item.itemID);
+      itemIDs.add(item.itemID);
     }
-    return acc;
-  }, new Set());
+  }
 
   const words = string.split(' ');
   const wordMap = new Map(words.map((word) => [word, true]));
 
-  const titleSuggestions = data.meta.reduce((acc, item) => {
+  const titleSuggestions = new Set();
+  for (const item of data.meta) {
     if (
       (item.fieldID == fields.title ||
         item.fieldID == fields.encyclopediaTitle ||
@@ -56,34 +58,30 @@ function runWithString(string) {
       let match = [...wordMap.keys()].every((word) => value.includes(word));
 
       if (match) {
-        acc.add({ title: item.value, icon: icon });
+        titleSuggestions.add({ title: item.value, icon: icon });
       }
     }
+  }
 
-    return acc;
-  }, new Set());
-
-  const creatorSuggestions = data.itemCreators.reduce((acc, item) => {
-    const match = item.lastName.toLowerCase().includes(string);
-    if (match) {
-      acc.add({
+  const creatorSuggestions = new Set();
+  for (const item of data.itemCreators) {
+    if (item.lastName.toLowerCase().includes(string)) {
+      creatorSuggestions.add({
         title: item.lastName,
         icon: icon,
       });
     }
-    return acc;
-  }, new Set());
+  }
 
-  const collectionSuggestions = data.collectionItems.reduce((acc, item) => {
-    const match = item.collectionName.toLowerCase().includes(string);
-    if (match) {
-      acc.add({
+  const collectionSuggestions = new Set();
+  for (const item of data.collectionItems) {
+    if (item.collectionName.toLowerCase().includes(string)) {
+      collectionSuggestions.add({
         title: item.collectionName,
         icon: icon,
       });
     }
-    return acc;
-  }, new Set());
+  }
 
   // Combine suggestions and remove duplicates
   const combinedSuggestions = [

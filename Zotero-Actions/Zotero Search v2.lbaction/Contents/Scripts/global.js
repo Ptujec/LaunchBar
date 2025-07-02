@@ -12,9 +12,7 @@ const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '0.1';
 
 // MARK: Data Management
 
-function getData() {
-  // Create JSON Data from SQL database. It will only do that if the database has been updated or if there is a new action version or if the JSON data has been removed (accidentally)
-
+function checkAndUpdateData() {
   let updateJSON = false;
 
   if (isNewerActionVersion(lastUsedActionVersion, currentActionVersion)) {
@@ -28,7 +26,6 @@ function getData() {
   const copy = `${original}.launchbar`;
 
   const originalModificationDate = File.modificationDate(original);
-
   const copyModificationDate = File.modificationDate(copy);
 
   if (originalModificationDate > copyModificationDate) updateJSON = true;
@@ -41,36 +38,39 @@ function getData() {
       updateJSON
     );
 
-    if (output) File.writeText(output, dataPath);
+    if (output) {
+      File.writeText(output, dataPath);
+
+      // Update type mappings when we get fresh data
+      const data = loadData();
+
+      const itemTypes = {};
+      for (const curr of data.itemTypes) {
+        itemTypes[curr.typeName] = curr.itemTypeID;
+      }
+      Action.preferences.itemTypes = itemTypes;
+
+      const fields = {};
+      for (const curr of data.fields) {
+        fields[curr.fieldName] = curr.fieldID;
+      }
+      Action.preferences.fields = fields;
+
+      const creatorTypes = {};
+      for (const curr of data.creatorTypes) {
+        creatorTypes[curr.creatorType] = curr.creatorTypeID;
+      }
+      Action.preferences.creatorTypes = creatorTypes;
+
+      return { wasUpdated: true, data };
+    }
   }
 
-  const data = File.readJSON(dataPath);
+  return { wasUpdated: false };
+}
 
-  // Create itemType, field and creatorType variables
-  if (updateJSON) {
-    const itemTypes = data.itemTypes.reduce((acc, curr) => {
-      acc[curr.typeName] = curr.itemTypeID;
-      return acc;
-    }, {});
-
-    Action.preferences.itemTypes = itemTypes;
-
-    const fields = data.fields.reduce((acc, curr) => {
-      acc[curr.fieldName] = curr.fieldID;
-      return acc;
-    }, {});
-
-    Action.preferences.fields = fields;
-
-    const creatorTypes = data.creatorTypes.reduce((acc, curr) => {
-      acc[curr.creatorType] = curr.creatorTypeID;
-      return acc;
-    }, {});
-
-    Action.preferences.creatorTypes = creatorTypes;
-  }
-
-  return data;
+function loadData() {
+  return File.readJSON(dataPath);
 }
 
 function isNewerActionVersion(lastUsedActionVersion, currentActionVersion) {
@@ -134,7 +134,8 @@ function getZoteroPrefs() {
     Action.preferences.textEncodingPrefs = textEncodingPrefs;
   }
 
-  return prefsContent.split('\n').reduce((preferences, line) => {
+  const preferences = {};
+  for (const line of prefsContent.split('\n')) {
     const match = line.match(/user_pref\("([^"]+)",\s*(.+)\);/);
     if (match) {
       const [_, prefName, value] = match;
@@ -147,8 +148,8 @@ function getZoteroPrefs() {
           ? parseInt(value)
           : value.replace(/['"]/g, '');
     }
-    return preferences;
-  }, {});
+  }
+  return preferences;
 }
 
 // MARK: Action Settings
@@ -169,7 +170,8 @@ function settings() {
   return [
     {
       title: 'Include Zotero Link',
-      subtitle: 'Include the Zotero link in the citation.',
+      subtitle:
+        'Include a link to the Zotero item or annotation in the citation.',
       alwaysShowsSubtitle: true,
       badge: includeZoteroLink ? 'On' : 'Off',
       icon: includeZoteroLink
@@ -304,4 +306,24 @@ function setStyle(style) {
 function toggleZoteroLink({ includeZoteroLink }) {
   Action.preferences.includeZoteroLink = !includeZoteroLink;
   return settings();
+}
+
+// MARK: Helper Functions
+
+function naturalSort(a, b) {
+  const aName = a.path.split('/').pop();
+  const bName = b.path.split('/').pop();
+
+  const collator = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
+  return collator.compare(aName, bName);
+}
+
+function initializeName(name) {
+  return name
+    .split(' ')
+    .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
+    .join(' ');
 }

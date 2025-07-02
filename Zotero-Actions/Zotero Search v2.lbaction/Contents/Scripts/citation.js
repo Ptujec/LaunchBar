@@ -23,16 +23,29 @@ function pasteCitation(dict) {
   const itemID = dict.itemID;
   saveRecent(itemID);
 
+  const hasAnnotation = dict.annotation;
+  const annotationText = hasAnnotation ? `"${dict.annotation}"` : '';
+
   const isBibliography =
     LaunchBar.options.alternateKey || dict.isBibliography ? true : false;
 
-  let text = isBibliography ? citationJson.bib : citationJson.citation;
+  const citation =
+    dict.pageLabel && citationJson.citation.endsWith(')')
+      ? citationJson.citation.replace(/\)$/, `:${dict.pageLabel})`) // TODO: Make this more flexible in alignment with the style … it is called "locator" in the csl style. There seems to be not support in the API for this yet. Could do by parsing the style? Or separate setting?
+      : citationJson.citation;
+
+  let text = hasAnnotation
+    ? citation
+    : isBibliography
+    ? citationJson.bib
+    : citationJson.citation;
 
   const citationFormat = Action.preferences.citationFormat || fallbackFormat;
 
   const includeZoteroLink = Action.preferences.includeZoteroLink ?? true;
 
   if (citationFormat == 'html') {
+    text = hasAnnotation ? `${annotationText} ${text}` : text;
     LaunchBar.paste(text);
     return;
   }
@@ -47,7 +60,10 @@ function pasteCitation(dict) {
     if (pasteHelperInstalled) {
       Action.preferences.pasteHelperContent = {
         text: text,
-        url: includeZoteroLink ? dict.zoteroSelectURL : '',
+        url: includeZoteroLink
+          ? dict.zoteroAnnotationURL || dict.zoteroSelectURL
+          : '',
+        annotation: hasAnnotation ? dict.annotation : '',
       };
       LaunchBar.performAction('Zotero Paste Helper');
     } else {
@@ -55,7 +71,10 @@ function pasteCitation(dict) {
         '/bin/bash',
         'rt.sh',
         text,
-        includeZoteroLink ? dict.zoteroSelectURL : ''
+        includeZoteroLink
+          ? dict.zoteroAnnotationURL || dict.zoteroSelectURL
+          : '',
+        hasAnnotation ? dict.annotation : ''
       );
     }
     return;
@@ -70,20 +89,32 @@ function pasteCitation(dict) {
   }
 
   if (citationFormat == 'markdown') {
-    text = includeZoteroLink ? `[${text}](${dict.zoteroSelectURL})` : text;
+    if (includeZoteroLink) {
+      text = `[${text}](${dict.zoteroAnnotationURL || dict.zoteroSelectURL})`;
+    }
+    text = hasAnnotation ? `${annotationText} ${text}` : text;
     LaunchBar.paste(text);
     return;
   }
 
   // Default format handling
   text = text.replace(/\*/g, '');
+  text = hasAnnotation ? `${annotationText} ${text}` : text;
 
   if (includeZoteroLink) {
     // LaunchBar.setClipboardString(dict.url) and LaunchBar.paste(text) do not work in this instance for some reason
-    LaunchBar.executeAppleScript(
-      `set the clipboard to "${dict.zoteroSelectURL}"`,
-      `tell application "LaunchBar" to paste in frontmost application "${text}"`
-    );
+
+    // TODO: BUG: currently there seems to be some issue with pasting annotations … maybe remove this option … or at least the link part?
+
+    const url = dict.zoteroAnnotationURL ?? dict.zoteroSelectURL;
+
+    LaunchBar.executeAppleScript(`
+      set the clipboard to "${text}"
+      delay 0.1
+      tell application "System Events" to keystroke "v" using command down
+      delay 0.1
+      set the clipboard to "${url}"
+    `);
   } else {
     LaunchBar.paste(text);
   }

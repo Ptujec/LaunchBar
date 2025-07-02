@@ -20,58 +20,69 @@ function run(argument) {
 // SEARCH
 
 function search(argument) {
-  const data = getData();
+  const data = loadData();
 
   argument = argument.toLowerCase();
 
   const getLowerCaseCreatorName = (item) =>
     `${item.firstName.toLowerCase()} ${item.lastName.toLowerCase()}`;
 
-  const creatorIDs = data.creators.reduce((acc, item) => {
-    if (getLowerCaseCreatorName(item).includes(argument))
-      acc.add(item.creatorID);
-    return acc;
-  }, new Set());
+  const creatorIDs = new Set();
+  for (const item of data.creators) {
+    if (getLowerCaseCreatorName(item).includes(argument)) {
+      creatorIDs.add(item.creatorID);
+    }
+  }
 
-  const itemCreatorsIDs = data.itemCreators.reduce(
-    (acc, item) =>
-      creatorIDs.has(item.creatorID) ? acc.add(item.itemID) : acc,
-    new Set()
-  );
+  const itemCreatorsIDs = new Set();
+  for (const item of data.itemCreators) {
+    if (creatorIDs.has(item.creatorID)) {
+      itemCreatorsIDs.add(item.itemID);
+    }
+  }
 
-  const itemTagsIDs = data.itemTags.reduce((acc, item) => {
+  const itemTagsIDs = new Set();
+  for (const item of data.itemTags) {
     if (item.name.toLowerCase().includes(argument)) {
-      acc.add(item.itemID);
+      itemTagsIDs.add(item.itemID);
     }
-    return acc;
-  }, new Set());
+  }
 
-  const collectionIDs = data.collectionItems.reduce((acc, item) => {
+  const collectionIDs = new Set();
+  for (const item of data.collectionItems) {
     if (item.collectionName.toLowerCase().includes(argument)) {
-      acc.add(item.itemID);
+      collectionIDs.add(item.itemID);
     }
-    return acc;
-  }, new Set());
+  }
 
   // Search all Fields (including title, place, publisher, isbn)
   const words = argument.split(' ');
   const wordMap = new Map(words.map((word) => [word, true]));
 
-  const metaIDs = data.meta.reduce((acc, item) => {
+  const metaIDs = new Set();
+  for (const item of data.meta) {
     const value = item.value.toLowerCase();
     if ([...wordMap.keys()].every((word) => value.includes(word))) {
-      acc.add(item.itemID);
+      metaIDs.add(item.itemID);
     }
-    return acc;
-  }, new Set());
+  }
 
-  const itemNotesIDs = data.itemNotes.reduce((ids, item) => {
-    const note = item.note.replace(/(<([^>]+)>)/g, '').toLowerCase();
+  const itemNotesIDs = new Set();
+  for (const item of data.itemNotes) {
+    const note = item.note.toLowerCase();
     if (note.includes(argument)) {
-      ids.add(item.parentItemID);
+      itemNotesIDs.add(item.parentItemID);
     }
-    return ids;
-  }, new Set());
+  }
+
+  const annotationIDs = new Set();
+  for (const ann of data.annotations) {
+    const text = (ann.text || '').toLowerCase();
+    const comment = (ann.comment || '').toLowerCase();
+    if (text.includes(argument) || comment.includes(argument)) {
+      annotationIDs.add(ann.mainItemID);
+    }
+  }
 
   const allReversedItemIDs = new Set([
     ...[...itemCreatorsIDs].reverse(),
@@ -79,20 +90,23 @@ function search(argument) {
     ...[...collectionIDs].reverse(),
     ...[...metaIDs].reverse(),
     ...[...itemNotesIDs].reverse(),
+    ...[...annotationIDs].reverse(),
   ]);
 
   if (allReversedItemIDs.size === 0 || LaunchBar.options.commandKey) {
-    searchInStorageDir(argument)?.forEach((id) => allReversedItemIDs.add(id));
+    const storageResults = searchInStorageDir(argument) || [];
+    for (const id of storageResults) {
+      allReversedItemIDs.add(id);
+    }
   }
 
-  // return showEntries(Array.from(allReversedItemIDs), data);
   const result = showEntries(Array.from(allReversedItemIDs));
 
   if (result.length === 0) {
     return [
       {
         title: 'No results. Press enter to browse all items.',
-        icon: 'greyTemplate',
+        icon: 'alert',
         action: 'browse',
         actionArgument: data,
         actionReturnsItems: true,
@@ -117,7 +131,7 @@ function searchInStorageDir(argument) {
     return [];
   }
 
-  const data = getData();
+  const data = loadData();
 
   const attachmentMap = new Map();
   for (const item of data.itemAttachments) {
@@ -128,7 +142,12 @@ function searchInStorageDir(argument) {
   }
 
   const itemIDs = new Set(
-    output.flatMap((path) => attachmentMap.get(path.split('/')[5]) || [])
+    output.flatMap((path) => {
+      // Find the storage key by using the storage directory as reference
+      const relativePath = path.replace(storageDirectory, '');
+      const key = relativePath.split('/')[0];
+      return attachmentMap.get(key) || [];
+    })
   );
 
   return itemIDs;
@@ -136,7 +155,7 @@ function searchInStorageDir(argument) {
 
 // BROWSE
 function browse() {
-  const data = getData();
+  checkAndUpdateData();
 
   const result = Action.preferences.recentItems
     ? showEntries(Action.preferences.recentItems || []).reverse()
@@ -173,8 +192,7 @@ function browse() {
 }
 
 function showTags() {
-  // Get data from JSON
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
   const tags = data.tags.map((item) => {
     return {
@@ -192,16 +210,18 @@ function showItemsWithTag(tagIDString) {
   const tagID = parseInt(tagIDString);
   const data = File.readJSON(dataPath);
 
-  const itemIDs = data.itemTags.reduce(
-    (acc, item) => (item.tagID == tagID ? [...acc, item.itemID] : acc),
-    []
-  );
+  const itemIDs = [];
+  for (const item of data.itemTags) {
+    if (item.tagID == tagID) {
+      itemIDs.push(item.itemID);
+    }
+  }
 
   return showEntries(itemIDs.reverse());
 }
 
 function showCreators() {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
   const creatorsMap = data.itemCreators.reduce(
     (acc, { firstName, lastName, creatorID }) => {
@@ -227,22 +247,20 @@ function showCreators() {
 
 function showItemsWithCreator(creatorIDString) {
   const creatorID = parseInt(creatorIDString);
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
-  const itemIDs = data.itemCreators.reduce((acc, item) => {
-    if (item.creatorID === creatorID) {
-      if (!acc.includes(item.itemID)) {
-        acc.push(item.itemID);
-      }
+  const itemIDs = [];
+  for (const item of data.itemCreators) {
+    if (item.creatorID === creatorID && !itemIDs.includes(item.itemID)) {
+      itemIDs.push(item.itemID);
     }
-    return acc;
-  }, []);
+  }
 
   return showEntries(itemIDs.reverse());
 }
 
 function showCollections() {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
   return data.collections
     .map(({ collectionName, collectionID }) => ({
@@ -258,34 +276,33 @@ function showCollections() {
 }
 
 function showItemsWithCollection({ collectionID }) {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
-  const itemIDs = data.collectionItems
-    .reduce(
-      (acc, item) =>
-        item.collectionID == collectionID ? [...acc, item.itemID] : acc,
-      []
-    )
-    .reverse();
+  const itemIDs = [];
+  for (const item of data.collectionItems) {
+    if (item.collectionID == collectionID) {
+      itemIDs.push(item.itemID);
+    }
+  }
 
   return showEntries(itemIDs);
 }
 
 function showAllItems() {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
   const fields = Action.preferences.fields;
 
-  const itemIDs = data.meta.reduce((acc, item) => {
+  const itemIDs = new Set();
+  for (const item of data.meta) {
     if (
       item.fieldID == fields.title ||
       item.fieldID == fields.caseName ||
       item.fieldID == fields.nameOfAct ||
       item.fieldID == fields.subject
     ) {
-      acc.add(item.itemID);
+      itemIDs.add(item.itemID);
     }
-    return acc;
-  }, new Set());
+  }
 
   return showEntries([...itemIDs].reverse());
 }
@@ -296,57 +313,62 @@ function showEntries(itemIDs) {
   const fields = prefs.fields;
   const creatorTypes = prefs.creatorTypes;
 
-  const data = getData();
+  const data = loadData();
 
-  let attachmentItemIDs = {};
-  const itemsMap = data.items.reduce((map, item) => {
+  const itemsMap = new Map();
+  const attachmentItemIDs = new Set();
+  for (const item of data.items) {
     if (
       item.itemTypeID == itemTypes.attachment ||
       item.itemTypeID == itemTypes.note
     ) {
-      attachmentItemIDs[item.itemID] = true;
+      attachmentItemIDs.add(item.itemID);
+    } else {
+      itemsMap.set(item.itemID, {
+        zoteroSelectURL: `zotero://select/items/${item.libraryID}_${item.key}`,
+        itemKey: item.key,
+        typeName: item.typeName,
+      });
     }
-    map[item.itemID] = {
-      zoteroSelectURL: `zotero://select/items/${item.libraryID}_${item.key}`,
-      itemKey: item.key,
-      typeName: item.typeName,
-    };
-    return map;
-  }, {});
+  }
 
-  const itemCreatorsMap = data.itemCreators.reduce((map, itemCreator) => {
-    map[itemCreator.itemID] = map[itemCreator.itemID] || [];
-    map[itemCreator.itemID].push({
-      name: [itemCreator.lastName, initializeName(itemCreator.firstName)]
+  const itemCreatorsMap = new Map();
+  for (const {
+    itemID,
+    lastName,
+    firstName,
+    creatorTypeID,
+    creatorID,
+  } of data.itemCreators) {
+    if (!itemCreatorsMap.has(itemID)) {
+      itemCreatorsMap.set(itemID, []);
+    }
+    itemCreatorsMap.get(itemID).push({
+      name: [lastName, firstName ? initializeName(firstName) : '']
         .filter(Boolean)
         .join(', '),
-      lastName: itemCreator.lastName,
-      typeID: itemCreator.creatorTypeID,
-      creatorID: itemCreator.creatorID,
+      lastName,
+      typeID: creatorTypeID,
+      creatorID,
     });
-    return map;
-  }, {});
+  }
 
-  const metaMap = data.meta.reduce(
-    (map, meta) => {
-      if (
-        meta.fieldID == fields.title ||
-        meta.fieldID == fields.caseName ||
-        meta.fieldID == fields.nameOfAct ||
-        meta.fieldID == fields.subject
-      ) {
-        map.title[meta.itemID] = meta.value;
-      }
+  const titleMap = new Map();
+  const dateMap = new Map();
+  for (const { itemID, fieldID, value } of data.meta) {
+    if (
+      fieldID == fields.title ||
+      fieldID == fields.caseName ||
+      fieldID == fields.nameOfAct ||
+      fieldID == fields.subject
+    ) {
+      titleMap.set(itemID, value);
+    } else if (fieldID == fields.date) {
+      dateMap.set(itemID, value.split('-')[0]);
+    }
+  }
 
-      if (meta.fieldID == fields.date) {
-        map.date[meta.itemID] = meta.value;
-      }
-
-      return map;
-    },
-    { title: {}, date: {} }
-  );
-
+  // Pre-define template icons set
   const templateIcons = new Set([
     'interview',
     'film',
@@ -361,82 +383,60 @@ function showEntries(itemIDs) {
     'attachment',
   ]);
 
-  let result = [];
-
-  for (const itemID of itemIDs) {
-    if (itemID in itemsMap && !attachmentItemIDs[itemID]) {
-      const iconBase = itemsMap[itemID]?.typeName || 'document';
+  return itemIDs
+    .filter((itemID) => itemsMap.has(itemID) && !attachmentItemIDs.has(itemID))
+    .map((itemID) => {
+      const itemData = itemsMap.get(itemID);
+      const iconBase = itemData.typeName || 'document';
       const icon = templateIcons.has(iconBase)
-        ? iconBase + 'Template'
+        ? `${iconBase}Template`
         : iconBase;
 
-      const creators = itemCreatorsMap[itemID]
-        ? (() => {
-            const type1Exists = itemCreatorsMap[itemID].some(
-              (c) => c.typeID === creatorTypes.author
-            );
-            const type3Exists = itemCreatorsMap[itemID].some(
-              (c) => c.typeID === creatorTypes.editor
-            );
+      const creators = itemCreatorsMap.get(itemID) || [];
+      const hasAuthor = creators.some((c) => c.typeID === creatorTypes.author);
+      const hasEditor = creators.some((c) => c.typeID === creatorTypes.editor);
 
-            return itemCreatorsMap[itemID].reduce((acc, creator) => {
-              type1Exists
-                ? creator.typeID === creatorTypes.author && acc.push(creator)
-                : type3Exists
-                ? creator.typeID === creatorTypes.editor && acc.push(creator)
-                : acc.push(creator);
-
-              return acc;
-            }, []);
-          })()
-        : '';
+      const filteredCreators = creators.filter((creator) =>
+        hasAuthor
+          ? creator.typeID === creatorTypes.author
+          : hasEditor
+          ? creator.typeID === creatorTypes.editor
+          : true
+      );
 
       const creatorString =
-        creators.length > 3
-          ? `${creators[0].lastName} et al.`
-          : creators.length === 3
-          ? `${creators[0].lastName}, ${creators[1].lastName} & ${creators[2].lastName}`
-          : creators.length === 2
-          ? creators.map((creator) => creator.lastName).join(' & ')
-          : creators.length === 1
-          ? creators[0].name
+        filteredCreators.length > 3
+          ? `${filteredCreators[0].lastName} et al.`
+          : filteredCreators.length === 3
+          ? `${filteredCreators[0].lastName}, ${filteredCreators[1].lastName} & ${filteredCreators[2].lastName}`
+          : filteredCreators.length === 2
+          ? filteredCreators.map((c) => c.lastName).join(' & ')
+          : filteredCreators.length === 1
+          ? filteredCreators[0].name
           : '';
 
-      const date = metaMap.date[itemID]
-        ? metaMap.date[itemID].split('-')[0]
-        : '';
-
-      const title = metaMap.title[itemID];
+      const title = titleMap.get(itemID);
+      const date = dateMap.get(itemID) || '';
       const subtitle = (creatorString ? creatorString + ' ' : '') + date;
 
-      result.push({
+      return {
         title: title || subtitle || '[Untitled]',
         subtitle: title ? subtitle : '',
-        icon: icon,
+        icon,
         action: 'itemActions',
         actionArgument: {
-          zoteroSelectURL: itemsMap[itemID]?.zoteroSelectURL,
+          zoteroSelectURL: itemData.zoteroSelectURL,
           itemID,
-          itemKey: itemsMap[itemID]?.itemKey,
-          creators,
+          itemKey: itemData.itemKey,
+          creators: filteredCreators,
           date,
           title,
           icon,
         },
         actionReturnsItems: true,
         alwaysShowsSubtitle: true,
-      });
-    }
-  }
-
-  return result;
-}
-
-function initializeName(name) {
-  return name
-    .split(' ')
-    .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
-    .join(' ');
+      };
+    });
 }
 
 // ITEM ACTIONS
@@ -458,187 +458,38 @@ function showItemDetails(dict) {
   const includeZoteroLink = prefs.includeZoteroLink ?? true;
 
   const itemID = dict.itemID;
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
-  let journalTitle, bookTitle, seriesTitle, dictionaryTitle, encyclopediaTitle;
+  const attachmentsWithPath = data.itemAttachments
+    .filter((item) => itemID == item.parentItemID && item.path)
+    .map((item) => {
+      const fullPath = item.path.replace(
+        'storage:',
+        `${storageDirectory}${item.key}/`
+      );
+      const title = fullPath.split('/').pop();
+      return {
+        path: fullPath,
+        title,
+        type: item.contentType,
+        key: item.key,
+        itemID: item.itemID,
+        parentItemID: item.parentItemID,
+      };
+    })
+    .sort(naturalSort);
 
-  const attachedUrlsItemIDs = [];
-
-  const attachmentsWithPath = data.itemAttachments.reduce((acc, item) => {
-    if (itemID == item.parentItemID) {
-      if (item.path) {
-        acc.push({
-          path: item.path.replace(
-            'storage:',
-            storageDirectory + item.key + '/'
-          ),
-          type: item.contentType,
-          key: item.key,
-        });
-      } else if (
+  const attachedUrlsItemIDs = data.itemAttachments
+    .filter(
+      (item) =>
+        itemID == item.parentItemID &&
         !item.path &&
         (item.contentType == 'text/html' || item.contentType == null)
-      ) {
-        attachedUrlsItemIDs.push(item.itemID);
-      }
-    }
-    return acc;
-  }, []);
+    )
+    .map((item) => item.itemID);
 
   const attachedUrlsItems = [];
   let urls = [];
-
-  for (const item of data.meta) {
-    if (item.itemID == itemID) {
-      if (item.fieldID == fields.url) {
-        urls.push({
-          title: item.value,
-          url: item.value,
-          icon: 'linkTemplate',
-          action: 'openURL',
-          actionArgument: {
-            itemID,
-            url: item.value,
-          },
-        });
-      }
-      if (item.fieldID == fields.series) {
-        seriesTitle = item.value;
-      }
-      if (item.fieldID == fields.publicationTitle) {
-        journalTitle = item.value;
-      }
-      if (item.fieldID == fields.bookTitle) {
-        bookTitle = item.value;
-      }
-      if (item.fieldID == fields.dictionaryTitle) {
-        dictionaryTitle = item.value;
-      }
-      if (item.fieldID == fields.encyclopediaTitle) {
-        encyclopediaTitle = item.value;
-      }
-    }
-
-    if (
-      attachedUrlsItemIDs.includes(item.itemID) &&
-      (item.fieldID == fields.url || item.fieldID == fields.title)
-    ) {
-      attachedUrlsItems.push(item);
-    }
-  }
-
-  const attachedUrls = attachedUrlsItems.reduce((acc, entry) => {
-    let existingItem = acc.find((item) => item.itemID === entry.itemID);
-
-    if (!existingItem) {
-      existingItem = { itemID: entry.itemID };
-      acc.push(existingItem);
-    }
-
-    if (entry.fieldID === fields.url) {
-      existingItem.url = entry.value;
-    } else if (entry.fieldID === fields.title) {
-      existingItem.title = entry.value;
-    }
-
-    return acc;
-  }, []);
-
-  urls = [
-    ...urls,
-    ...attachedUrls.map((item) => ({
-      title: item.title,
-      url: item.url,
-      icon: 'linkTemplate',
-      action: 'openURL',
-      actionArgument: {
-        itemID,
-        url: item.url,
-      },
-    })),
-  ];
-
-  // Creator IDs
-  const itemCreators = dict.creators || [];
-  const creatorIDs = itemCreators.reduce(
-    (acc, item) => {
-      if (item.creatorTypeID === creatorTypes.author) {
-        acc.authorIDs.push(item.creatorID);
-      } else if (item.creatorTypeID === creatorTypes.editor) {
-        acc.editorIDs.push(item.creatorID);
-      } else {
-        acc.otherIDs.push(item.creatorID);
-      }
-
-      return acc;
-    },
-    {
-      authorIDs: [],
-      editorIDs: [],
-      otherIDs: [],
-    }
-  );
-
-  const creatorsArr =
-    creatorIDs.authorIDs.length > 0
-      ? creatorIDs.authorIDs
-      : creatorIDs.editorIDs.length > 0
-      ? creatorIDs.editorIDs
-      : creatorIDs.otherIDs;
-
-  // Collections
-  const collections = data.collectionItems.reduce(
-    (acc, item) => {
-      if (item.itemID === itemID) {
-        acc.collectionNames.push(item.collectionName);
-        acc.collectionsArr.push({
-          collectionName: item.collectionName,
-          collectionID: item.collectionID,
-        });
-      }
-      return acc;
-    },
-    { collectionNames: [], collectionsArr: [] }
-  );
-  const collectionNames = collections.collectionNames;
-  const collectionsArr = collections.collectionsArr;
-
-  // Tags
-  const tags = data.itemTags.reduce(
-    (acc, item) => {
-      if (item.itemID === itemID) {
-        acc.tagNames.push(item.name);
-        acc.tagsArr.push({
-          name: item.name,
-          tagID: item.tagID,
-        });
-      }
-      return acc;
-    },
-    { tagNames: [], tagsArr: [] }
-  );
-  const tagNames = tags.tagNames;
-  const tagsArr = tags.tagsArr;
-
-  // Notes
-  const notes = data.itemNotes.reduce((acc, item) => {
-    if (itemID == item.parentItemID) {
-      acc.push({
-        title: item.title,
-        icon: 'noteTemplate',
-        action: 'openNote',
-        actionArgument: {
-          itemID: item.itemID,
-          parentItemID: item.parentItemID,
-        },
-      });
-    }
-    return acc;
-  }, []);
-
-  dict.url = urls[0] ? urls[0].url : '';
-
-  // DETAILS ARRAY CONSTRUCTION
 
   let details = [
     {
@@ -648,6 +499,133 @@ function showItemDetails(dict) {
       actionArgument: dict,
     },
   ];
+
+  // Single pass over meta data
+  const metaFields = {};
+  for (const item of data.meta) {
+    if (item.itemID === itemID) {
+      if (item.fieldID === fields.url) {
+        urls.push({
+          title: item.value,
+          url: item.value,
+          icon: 'linkTemplate',
+          action: 'openURL',
+          actionArgument: { itemID, url: item.value },
+        });
+      } else {
+        // Map other fields in one pass
+        metaFields[item.fieldID] = item.value;
+      }
+    }
+
+    if (
+      attachedUrlsItemIDs.includes(item.itemID) &&
+      (item.fieldID === fields.url || item.fieldID === fields.title)
+    ) {
+      attachedUrlsItems.push(item);
+    }
+  }
+
+  // Use mapped fields
+  const journalTitle = metaFields[fields.publicationTitle];
+  const bookTitle = metaFields[fields.bookTitle];
+  const seriesTitle = metaFields[fields.series];
+  const dictionaryTitle = metaFields[fields.dictionaryTitle];
+  const encyclopediaTitle = metaFields[fields.encyclopediaTitle];
+
+  // Attached URLs
+  const attachedUrls = [];
+  const urlMap = new Map();
+
+  for (const entry of attachedUrlsItems) {
+    const id = entry.itemID;
+    if (!urlMap.has(id)) {
+      urlMap.set(id, { itemID: id });
+    }
+    const item = urlMap.get(id);
+
+    if (entry.fieldID === fields.url) {
+      item.url = entry.value;
+    } else if (entry.fieldID === fields.title) {
+      item.title = entry.value;
+    }
+
+    if (item.url && item.title) {
+      attachedUrls.push(item);
+      urlMap.delete(id); // Clean up map once we have both url and title
+    }
+  }
+
+  // Add attached URLs to the existing urls array
+  for (const item of attachedUrls) {
+    urls.push({
+      title: item.title,
+      url: item.url,
+      icon: 'linkTemplate',
+      action: 'openURL',
+      actionArgument: {
+        itemID,
+        url: item.url,
+      },
+    });
+  }
+
+  // Creator IDs
+  const itemCreators = dict.creators || [];
+  const authorIDs = [];
+  const editorIDs = [];
+  const otherIDs = [];
+
+  for (const item of itemCreators) {
+    if (item.creatorTypeID === creatorTypes.author) {
+      authorIDs.push(item.creatorID);
+    } else if (item.creatorTypeID === creatorTypes.editor) {
+      editorIDs.push(item.creatorID);
+    } else {
+      otherIDs.push(item.creatorID);
+    }
+  }
+
+  const creatorsArr =
+    authorIDs.length > 0
+      ? authorIDs
+      : editorIDs.length > 0
+      ? editorIDs
+      : otherIDs;
+
+  // Collections
+  const collectionsArr = data.collectionItems
+    .filter((item) => item.itemID === itemID)
+    .map((item) => ({
+      collectionName: item.collectionName,
+      collectionID: item.collectionID,
+    }));
+  const collectionNames = collectionsArr.map((item) => item.collectionName);
+
+  // Tags
+  const relevantTags = data.itemTags.filter((item) => item.itemID === itemID);
+  const tagNames = relevantTags.map((item) => item.name);
+  const tagsArr = relevantTags.map((item) => ({
+    name: item.name,
+    tagID: item.tagID,
+  }));
+
+  // Notes
+  const notes = data.itemNotes
+    .filter((item) => itemID === item.parentItemID)
+    .map((item) => ({
+      title: item.title,
+      icon: 'noteTemplate',
+      action: 'openNote',
+      actionArgument: {
+        itemID: item.itemID,
+        parentItemID: item.parentItemID,
+      },
+    }));
+
+  dict.url = urls[0] ? urls[0].url : '';
+
+  // MARK: DETAILS ARRAY CONSTRUCTION
 
   if (creatorsArr.length > 0) {
     const creatorsLength = itemCreators.length;
@@ -665,126 +643,120 @@ function showItemDetails(dict) {
             .join(', ')} & ${itemCreators[lastIndex].lastName}`
         : '';
 
-    details = [
-      ...details,
-      {
-        title: creatorString,
-        icon: 'creatorTemplate',
-        action: 'showItemCreatorIDs',
-        actionArgument: {
-          creatorsArr,
-        },
-        actionReturnsItems: true,
+    details.push({
+      title: creatorString,
+      icon: 'creatorTemplate',
+      action: 'showItemCreatorIDs',
+      actionArgument: {
+        creatorsArr,
       },
-    ];
+      actionReturnsItems: true,
+    });
   }
 
-  details = [
-    ...details,
-    {
-      title: dict.date,
-      icon: 'calTemplate',
+  details.push({
+    title: dict.date,
+    icon: 'calTemplate',
+  });
+
+  // Publication metadata
+  const publicationMetadata = [
+    journalTitle && {
+      title: journalTitle,
+      icon: dict.icon + 'Template',
+      action: 'showJournalArticles',
+      actionArgument: journalTitle,
+      actionReturnsItems: true,
     },
-  ];
+    bookTitle && {
+      title: bookTitle,
+      icon: 'bookTemplate',
+      action: 'showBookSections',
+      actionArgument: bookTitle,
+      actionReturnsItems: true,
+    },
+    dictionaryTitle && {
+      title: dictionaryTitle,
+      icon: 'dictionaryTemplate',
+      action: 'showDictionaryEntry',
+      actionArgument: dictionaryTitle,
+      actionReturnsItems: true,
+    },
+    encyclopediaTitle && {
+      title: encyclopediaTitle,
+      icon: 'encyclopediaTemplate',
+      action: 'showEncyclopediaArticles',
+      actionArgument: encyclopediaTitle,
+      actionReturnsItems: true,
+    },
+    seriesTitle && {
+      title: seriesTitle,
+      icon: 'seriesTemplate',
+      action: 'showSeriesItems',
+      actionArgument: seriesTitle,
+      actionReturnsItems: true,
+    },
+  ].filter(Boolean);
 
-  if (journalTitle) {
-    details = [
-      ...details,
-      {
-        title: journalTitle,
-        icon: dict.icon + 'Template',
-        action: 'showJournalArticles',
-        actionArgument: journalTitle,
-        actionReturnsItems: true,
-      },
-    ];
-  }
-
-  if (bookTitle) {
-    details = [
-      ...details,
-      {
-        title: bookTitle,
-        icon: 'bookTemplate',
-        action: 'showBookSections',
-        actionArgument: bookTitle,
-        actionReturnsItems: true,
-      },
-    ];
-  }
-
-  if (dictionaryTitle) {
-    details = [
-      ...details,
-      {
-        title: dictionaryTitle,
-        icon: 'dictionaryTemplate',
-        action: 'showDictionaryEntry',
-        actionArgument: dictionaryTitle,
-        actionReturnsItems: true,
-      },
-    ];
-  }
-
-  if (encyclopediaTitle) {
-    details = [
-      ...details,
-      {
-        title: encyclopediaTitle,
-        icon: 'encyclopediaTemplate',
-        action: 'showEncyclopediaArticles',
-        actionArgument: encyclopediaTitle,
-        actionReturnsItems: true,
-      },
-    ];
-  }
-
-  if (seriesTitle) {
-    details = [
-      ...details,
-      {
-        title: seriesTitle,
-        icon: 'seriesTemplate',
-        action: 'showSeriesItems',
-        actionArgument: seriesTitle,
-        actionReturnsItems: true,
-      },
-    ];
-  }
+  details.push(...publicationMetadata);
 
   if (collectionNames.length > 0) {
-    details = [
-      ...details,
-      {
-        title: collectionNames.join(', '),
-        icon: 'collectionTemplate',
-        action: 'showItemCollections',
-        actionArgument: {
-          collectionsArr,
-        },
-        actionReturnsItems: true,
+    details.push({
+      title: collectionNames.join(', '),
+      icon: 'collectionTemplate',
+      action: 'showItemCollections',
+      actionArgument: {
+        collectionsArr,
       },
-    ];
+      actionReturnsItems: true,
+    });
   }
 
   // Tags
   if (tagNames.length > 0) {
-    details = [
-      ...details,
-      {
-        title: tagNames.join(', '),
-        icon: 'tagTemplate',
-        action: 'showItemTags',
-        actionArgument: {
-          tagsArr,
-        },
-        actionReturnsItems: true,
+    details.push({
+      title: tagNames.join(', '),
+      icon: 'tagTemplate',
+      action: 'showItemTags',
+      actionArgument: {
+        tagsArr,
       },
-    ];
+      actionReturnsItems: true,
+    });
   }
 
-  // Notes & URLs
-  details = [...details, ...notes, ...urls];
+  // Annotations
+  const annotations = data.annotations.filter(
+    (ann) => ann.mainItemID === itemID
+  );
+
+  const annotationsItems =
+    annotations.length === 0
+      ? []
+      : annotations.length === 1
+      ? showAnnotations({
+          itemID,
+          annotations,
+          attachments: attachmentsWithPath,
+          dict,
+        })
+      : [
+          {
+            title: 'Annotations',
+            badge: annotations.length.toString(),
+            icon: 'annotationsTemplate',
+            action: 'showAnnotations',
+            actionArgument: {
+              itemID,
+              annotations,
+              attachments: attachmentsWithPath,
+              dict,
+            },
+            actionReturnsItems: true,
+          },
+        ];
+
+  details.push(...notes, ...annotationsItems, ...urls);
 
   // Add Storage paths
   if (attachmentsWithPath.length > 0) {
@@ -793,7 +765,8 @@ function showItemDetails(dict) {
       if (
         !found &&
         (item.type === 'application/pdf' ||
-          item.type === 'application/epub+zip')
+          item.type === 'application/epub+zip' ||
+          item.type === 'text/html')
       ) {
         details[0].subtitle = '';
         details[0].path = item.path;
@@ -818,8 +791,7 @@ function showItemDetails(dict) {
     }
   }
 
-  details = [
-    ...details,
+  details.push(
     {
       title: includeZoteroLink ? 'Paste & Link Citation' : 'Paste Citation',
       icon: 'pasteCitationTemplate',
@@ -842,8 +814,8 @@ function showItemDetails(dict) {
       url: dict.zoteroSelectURL,
       action: 'selectInZotero',
       actionArgument: dict,
-    },
-  ];
+    }
+  );
 
   return details;
 }
@@ -907,7 +879,7 @@ function itemDetailActions(dict) {
 }
 
 function showItemsByField(fieldID, value) {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
   const itemIDs = data.meta
     .filter(
@@ -943,21 +915,23 @@ function showSeriesItems(seriesTitle) {
 }
 
 function showJournalArticles(journalTitle) {
-  const data = File.readJSON(dataPath);
+  const data = loadData();
 
-  const itemIDs = data.meta.reduce((acc, item) => {
-    if (item.value.toLowerCase() === journalTitle.toLowerCase()) {
-      acc.add(item.itemID);
-    }
-    return acc;
-  }, new Set());
+  const itemIDs = [
+    ...new Set(
+      data.meta
+        .filter(
+          (item) => item.value.toLowerCase() === journalTitle.toLowerCase()
+        )
+        .map((item) => item.itemID)
+    ),
+  ];
 
-  return showEntries(Array.from(itemIDs));
+  return showEntries(itemIDs);
 }
 
 function showItemCreatorIDs({ creatorsArr }) {
-  // Get data from JSON
-  let data = File.readJSON(dataPath);
+  const data = loadData();
 
   if (creatorsArr.length == 1) {
     return showItemsWithCreator(creatorsArr[0]);
@@ -1007,6 +981,150 @@ function showItemTags({ tagsArr }) {
     actionArgument: item.tagID.toString(),
     actionReturnsItems: true,
   }));
+}
+
+function showAnnotations({ itemID, annotations, attachments, dict }) {
+  const attOrder = new Map(attachments.map((a, i) => [a.itemID, i]));
+
+  // Pre-parse sortIndex values to avoid repeated parsing
+  const sortedAnnotations = annotations
+    .map((ann) => ({
+      ...ann,
+      attachmentIDNum: parseInt(ann.attachmentID),
+      attachmentOrder:
+        attOrder.get(parseInt(ann.attachmentID)) ?? Number.MAX_SAFE_INTEGER,
+    }))
+    .sort((a, b) => {
+      if (a.attachmentOrder !== b.attachmentOrder) {
+        return a.attachmentOrder - b.attachmentOrder;
+      }
+      return a.sortIndex.localeCompare(b.sortIndex);
+    });
+
+  return sortedAnnotations
+    .map((ann) => {
+      const attachment = attachments.find(
+        (att) => att.itemID === ann.attachmentIDNum
+      );
+      if (!attachment) return null;
+
+      const title = ann.text || ann.comment || 'No text';
+      const subtitle = ann.text && ann.comment ? ann.comment : '';
+      let annotationURL = `zotero://open-pdf/library/items/${ann.attachmentKey}?annotation=${ann.annotationKey}`;
+
+      if (ann.position) {
+        try {
+          const position = JSON.parse(ann.position);
+          position.value &&
+            (annotationURL += `&sel=${encodeURIComponent(position.value)}`);
+        } catch (e) {} // Ignore JSON parse errors
+      }
+
+      const hasCommentAndText = ann.text && ann.comment;
+
+      const icon = (() => {
+        switch (ann.type) {
+          case 1: // Highlight
+            return ann.text
+              ? hasCommentAndText
+                ? 'annotationsTemplate'
+                : 'highlightTemplate'
+              : 'annotationTemplate';
+          case 5: // Underline
+            return 'underlinedTemplate';
+          case 6: // Text
+            return 'textTemplate';
+          default:
+            return 'annotationTemplate';
+        }
+      })();
+
+      return {
+        title,
+        subtitle,
+        alwaysShowsSubtitle: true,
+        icon,
+        action: 'annotationAction',
+        actionArgument: {
+          itemID,
+          url: annotationURL,
+          title,
+          hasCommentAndText,
+          text: ann.text,
+          comment: ann.comment,
+          pageLabel: ann.pageLabel,
+          dict,
+        },
+        actionReturnsItems: hasCommentAndText ? true : false,
+      };
+    })
+    .filter(Boolean); // Remove null entries
+}
+
+function annotationAction({
+  itemID,
+  url,
+  title,
+  hasCommentAndText,
+  text,
+  comment,
+  pageLabel,
+  dict,
+}) {
+  if (hasCommentAndText && !LaunchBar.options.commandKey) {
+    return [
+      {
+        title: text,
+        icon: 'highlightTemplate',
+        action: 'annotationAction',
+        actionArgument: {
+          itemID,
+          url,
+          title,
+          hasCommentAndText: false,
+          text,
+          comment,
+          pageLabel,
+          dict,
+        },
+      },
+      {
+        title: comment,
+        icon: 'annotationTemplate',
+        action: 'annotationAction',
+        actionArgument: {
+          itemID,
+          url,
+          title,
+          hasCommentAndText: false,
+          text,
+          comment,
+          pageLabel,
+          dict,
+        },
+      },
+    ];
+  }
+
+  LaunchBar.hide();
+
+  if (LaunchBar.options.shiftKey) {
+    const addCitationToAnnotation =
+      Action.preferences.addCitationToAnnotation ?? true; // TODO: Add to preferences
+
+    if (addCitationToAnnotation) {
+      dict.annotation = title;
+      dict.zoteroAnnotationURL = url;
+      dict.pageLabel = pageLabel;
+      pasteCitation(dict);
+    } else {
+      LaunchBar.paste(title);
+    }
+    return;
+  }
+
+  saveRecent(itemID);
+  LaunchBar.openURL(url);
 }
 
 function openURL({ itemID, url }) {
