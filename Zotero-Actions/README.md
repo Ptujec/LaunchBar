@@ -1,4 +1,4 @@
-# LaunchBar Action for Zotero
+# Search Zotero Action
 
 Search, browse, and act on items from your local [Zotero](https://www.zotero.org) database. 
 
@@ -89,6 +89,31 @@ There are also some shortcuts (modifier keys) that work with any selected Zotero
 
 Those even work on the top level. So you don't need to go into details to use them.
 
-## Download & Update
+# RIS Cleanup Action
+
+This action helps to clean up and remove unnecessary tags before importing a RIS file. Send the RIS file to the action, choose the tag you want to remove and confirm with `enter`. When everything looks fine choose the `Add to Zotero` option on top. 
+
+You can find some more options when you press `command` + `enter`, including setting up a custom ignore list that excludes certain RIS tags automatically.
+
+If you run the action without any input, it will select a copy of your last used RIS file.
+
+BTW, you can set up a [folder action](https://www.macosxautomation.com/automator/folder-action/) to monitor your downloads folder for RIS files so the action runs automatically. This script will do the job:
+
+```
+on run {input, parameters}
+	set s to input as string
+	if s ends with ".ris" then
+		do shell script "afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf"
+		tell application "LaunchBar"
+			activate
+			perform action "RIS Cleanup" with string input
+		end tell
+	end if
+end run
+```
+
+**Note:** If you use this in a Chromium-based browser with the Zotero Connector extension, you need to turn off the automatic import option.
+
+# Download & Update
 
 [Click here](https://github.com/Ptujec/LaunchBar/archive/refs/heads/master.zip) to download this LaunchBar action along with all the others. Or simply use [LaunchBar Repo Updates](https://github.com/Ptujec/LaunchBar/tree/master/LB-Repo-Updates#launchbar-repo-updates-action)! It helps automate updating existing and installing new actions.
