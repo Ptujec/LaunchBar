@@ -113,8 +113,8 @@ function editFile() {
 function deleteFile() {
   LaunchBar.executeAppleScript(`
     tell application "Finder"
-    set _file to POSIX file "${Action.preferences.originalPath}"
-    delete _file
+      set _file to POSIX file "${Action.preferences.originalPath}"
+      delete _file
     end tell
     `);
 }
@@ -282,7 +282,7 @@ function settings() {
     },
     {
       title: 'Format Authors',
-      subtitle: 'Split multiple authors and standardize name format',
+      subtitle: 'Ensure last name, first name format',
       alwaysShowsSubtitle: true,
       icon: autoFormatAuthors ? 'checkTemplate' : 'circleTemplate',
       action: 'autoFormatAuthorsToggle',
