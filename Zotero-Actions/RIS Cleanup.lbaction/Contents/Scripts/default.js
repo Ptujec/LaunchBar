@@ -199,11 +199,7 @@ function formatAuthor(item) {
 }
 
 function formatDate(item) {
-  if (!Action.preferences.autoFormatDates) return item;
-
-  if (item.startsWith('Y1')) {
-    return item.replace(/^Y1/g, 'PY');
-  }
+  if (item.startsWith('Y1')) return item.replace(/^Y1/g, 'DA');
   return item;
 }
 
@@ -260,7 +256,6 @@ function getCustomtagsToRemove() {
 function settings() {
   const customTags = getCustomtagsToRemove();
   const autoFormatAuthors = Action.preferences.autoFormatAuthors || false;
-  const autoFormatDates = Action.preferences.autoFormatDates || false;
   const autoFormatTitles = Action.preferences.autoFormatTitles || false;
   const autoRemoveTags = Action.preferences.autoRemoveTags !== false;
   const autoCloseEmptyTabs = Action.preferences.autoCloseEmptyTabs !== false;
@@ -288,14 +283,7 @@ function settings() {
       action: 'autoFormatAuthorsToggle',
       badge: autoFormatAuthors ? 'On' : undefined,
     },
-    {
-      title: 'Change Dates Tag',
-      subtitle: 'Change Y1 to PY (Year of Publication)',
-      alwaysShowsSubtitle: true,
-      icon: autoFormatDates ? 'checkTemplate' : 'circleTemplate',
-      action: 'autoFormatDatesToggle',
-      badge: autoFormatDates ? 'On' : undefined,
-    },
+
     customTags.length > 0
       ? {
           title: 'Remove Tags',
@@ -336,11 +324,6 @@ function autoFormatTitlesToggle() {
 
 function autoFormatAuthorsToggle() {
   Action.preferences.autoFormatAuthors = !Action.preferences.autoFormatAuthors;
-  return settings();
-}
-
-function autoFormatDatesToggle() {
-  Action.preferences.autoFormatDates = !Action.preferences.autoFormatDates;
   return settings();
 }
 
