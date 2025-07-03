@@ -308,8 +308,8 @@ function settings() {
       : undefined,
     {
       title: File.exists(TAGS_TO_IGNORE_FILE)
-        ? 'Manage Custom Tags to Ignore'
-        : 'Add Custom Tags to Ignore',
+        ? 'Manage Tags to Ignore'
+        : 'Add Tags to Ignore',
       icon: 'editTemplate',
       action: 'editIgnoreList',
     },
