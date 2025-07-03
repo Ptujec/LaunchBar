@@ -13,7 +13,7 @@ Documentation:
 
 const TEMP_PATH = '/private/tmp/temp.ris';
 const ORIGINAL_TEMP_PATH = '/private/tmp/original.ris';
-const TAGS_TO_IGNORE_FILE = `${Action.supportPath}/tagsToIgnore.txt`;
+const TAGS_TO_REMOVE_FILE = `${Action.supportPath}/tagsToRemove.txt`;
 const EDITOR_ID = 'com.apple.TextEdit';
 const EDITOR_NAME = 'TextEdit';
 
@@ -151,7 +151,7 @@ function filterTags(item, hasVolumeTag) {
   if (!hasVolumeTag && item.startsWith('NV')) return false;
 
   if (Action.preferences.autoRemoveTags !== false) {
-    const customTags = getCustomTagsToIgnore();
+    const customTags = getCustomtagsToRemove();
     if (
       customTags.length > 0 &&
       customTags.some((tag) => item.startsWith(tag))
@@ -231,19 +231,19 @@ function romanToNumber(str) {
 }
 
 function initializeTagsFile() {
-  if (!File.exists(TAGS_TO_IGNORE_FILE)) {
-    const templatePath = `${Action.path}/Contents/Resources/tagsToIgnore.txt`;
+  if (!File.exists(TAGS_TO_REMOVE_FILE)) {
+    const templatePath = `${Action.path}/Contents/Resources/tagsToRemove.txt`;
     if (File.exists(templatePath)) {
       const templateContent = File.readText(templatePath);
-      File.writeText(templateContent, TAGS_TO_IGNORE_FILE);
+      File.writeText(templateContent, TAGS_TO_REMOVE_FILE);
     }
   }
 }
 
-function getCustomTagsToIgnore() {
-  if (!File.exists(TAGS_TO_IGNORE_FILE)) return [];
+function getCustomtagsToRemove() {
+  if (!File.exists(TAGS_TO_REMOVE_FILE)) return [];
 
-  const content = File.readText(TAGS_TO_IGNORE_FILE);
+  const content = File.readText(TAGS_TO_REMOVE_FILE);
   const tags = content
     .split('\n')
     .filter((line) => line.trim() && !line.startsWith('--')) // Skip empty lines and comments
@@ -258,7 +258,7 @@ function getCustomTagsToIgnore() {
 //  MARK: - Settings
 
 function settings() {
-  const customTags = getCustomTagsToIgnore();
+  const customTags = getCustomtagsToRemove();
   const autoFormatAuthors = Action.preferences.autoFormatAuthors || false;
   const autoFormatDates = Action.preferences.autoFormatDates || false;
   const autoFormatTitles = Action.preferences.autoFormatTitles || false;
@@ -298,8 +298,8 @@ function settings() {
     },
     customTags.length > 0
       ? {
-          title: 'Remove Custom Tags',
-          subtitle: `Remove tags: ${customTags.join(', ')}`,
+          title: 'Remove Tags',
+          subtitle: customTags.join(', '),
           alwaysShowsSubtitle: true,
           icon: autoRemoveTags ? 'checkTemplate' : 'circleTemplate',
           action: 'autoRemoveTagsToggle',
@@ -307,11 +307,11 @@ function settings() {
         }
       : undefined,
     {
-      title: File.exists(TAGS_TO_IGNORE_FILE)
-        ? 'Manage Tags to Ignore'
-        : 'Add Tags to Ignore',
+      title: File.exists(TAGS_TO_REMOVE_FILE)
+        ? 'Manage Tags to Remove'
+        : 'Add Tags to Remove',
       icon: 'editTemplate',
-      action: 'editIgnoreList',
+      action: 'editTagList',
     },
   ];
 }
@@ -344,7 +344,7 @@ function autoFormatDatesToggle() {
   return settings();
 }
 
-function editIgnoreList() {
+function editTagList() {
   LaunchBar.hide();
-  LaunchBar.openURL(File.fileURLForPath(TAGS_TO_IGNORE_FILE), EDITOR_ID);
+  LaunchBar.openURL(File.fileURLForPath(TAGS_TO_REMOVE_FILE), EDITOR_ID);
 }

@@ -93,7 +93,7 @@ Those even work on the top level. So you don't need to go into details to use th
 
 This action helps to clean up and remove unnecessary tags before importing a RIS file. Send the RIS file to the action, choose the tag you want to remove and confirm with `enter`. When everything looks fine choose the `Add to Zotero` option on top. 
 
-You can find some more options when you press `command` + `enter`, including setting up a custom ignore list that excludes certain RIS tags automatically.
+You can find more options when you press `command` + `enter`, including setting up a list with RIS tags to be removed automatically.
 
 If you run the action without any input, it will select a copy of your last used RIS file.
 
