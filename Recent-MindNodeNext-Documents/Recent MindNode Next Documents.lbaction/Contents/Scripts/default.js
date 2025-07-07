@@ -26,12 +26,11 @@ function run() {
 
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
 
-  const snapshotJson =
-    File.readJSON(
-      `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`
-    ) || [];
+  const snapshotData = File.readJSON(
+    `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`
+  ) || { documents: {} };
 
-  return snapshotJson
+  return Object.values(snapshotData.documents)
     .filter((obj) => !obj.isTrashed && obj.title)
     .sort((a, b) => b.lastViewedDate - a.lastViewedDate)
     .map((obj) => {
