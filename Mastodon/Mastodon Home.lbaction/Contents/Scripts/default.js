@@ -19,6 +19,7 @@ const URL_SCHEMES = {
   mammoth: 'mammoth://',
   icecubes: 'icecubesapp://',
   web: 'https://',
+  phanpy: 'https://phanpy.social/#/',
 };
 
 function run() {
@@ -51,6 +52,7 @@ function run() {
 
   if (url.includes(server)) {
     LaunchBar.openURL(urlscheme + url, frontmostID);
+    if (closeOption === 'true') closeURL(url, frontmostID);
     // LaunchBar.alert('Your are already at home!'.localize());
     // LaunchBar.hide();
     return;
@@ -103,6 +105,15 @@ function handlePostUrl(
     return;
   }
 
+  if (homeURL.startsWith(URL_SCHEMES.phanpy)) {
+    LaunchBar.openURL(
+      `${URL_SCHEMES.phanpy}${server}/s/${statusData.data.statuses[0].id}`,
+      frontmostID
+    );
+    if (closeOption === 'true') closeURL(url, frontmostID);
+    return;
+  }
+
   const finalUrl = `${homeURL}/${statusData.data.statuses[0].id}`;
   LaunchBar.openURL(finalUrl, frontmostID);
 
@@ -124,9 +135,8 @@ function handleAccountUrl(
     return;
   }
 
-  LaunchBar.openURL(homeURL, frontmostID);
-
   if (urlscheme === URL_SCHEMES.icecubes) {
+    LaunchBar.openURL(homeURL, frontmostID);
     if (closeOption === 'true') closeURL(url, frontmostID);
     return;
   }
@@ -148,6 +158,13 @@ function handleAccountUrl(
     return;
   }
 
+  if (urlscheme === URL_SCHEMES.phanpy) {
+    const id = accountData.data.accounts[0].id;
+    LaunchBar.openURL(`${urlscheme}${server}/a/${id}`, frontmostID);
+    if (closeOption === 'true') closeURL(url, frontmostID);
+    return;
+  }
+
   const acct = accountData.data.accounts[0].acct;
   const homeURLAPI = `${urlscheme}${server}/@${acct}`;
 
@@ -155,6 +172,8 @@ function handleAccountUrl(
     LaunchBar.openURL(homeURLAPI, frontmostID);
     closeURL(homeURL, frontmostID);
   }
+
+  LaunchBar.openURL(homeURL, frontmostID);
 
   if (closeOption === 'true') closeURL(url, frontmostID);
 }
@@ -316,6 +335,16 @@ function openSetting() {
         icon: 'icecubesTemplate',
       },
       icon: 'icecubesTemplate',
+    },
+    {
+      title: 'Open: Phanpy'.localize(),
+      action: 'openIn',
+      actionArgument: {
+        urlscheme: 'https://phanpy.social/#/',
+        name: 'Phanpy',
+        icon: 'phanpyTemplate',
+      },
+      icon: 'phanpyTemplate',
     },
     {
       title: 'Open: Website'.localize(),
