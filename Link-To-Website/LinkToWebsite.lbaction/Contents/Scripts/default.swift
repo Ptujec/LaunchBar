@@ -9,7 +9,6 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 import Cocoa
-import LinkPresentation
 
 // MARK: - Environment
 
@@ -125,18 +124,6 @@ func copyToClipboard(title: String, url: String) {
         return
     }
     
-    // Create link metadata
-    let metadata = LPLinkMetadata()
-    metadata.originalURL = URL(string: url)
-    metadata.url = URL(string: url)
-    metadata.title = title
-    
-    // Add link presentation metadata to pasteboard
-    if let data = try? NSKeyedArchiver.archivedData(withRootObject: metadata, requiringSecureCoding: true) {
-        pasteboard.setData(data, forType: NSPasteboard.PasteboardType("com.apple.linkpresentation.metadata"))
-    }
-    
-    // Add RTF and markdown fallbacks
     if let rtfData = try? createAttributedString(text: title, url: url).data(
         from: NSMakeRange(0, title.count),
         documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]
@@ -149,9 +136,19 @@ func copyToClipboard(title: String, url: String) {
 // MARK: - Paste Execution
 
 func executePaste() {
-    let script = """
+    let workspace = NSWorkspace.shared
+    let frontmostApp = workspace.frontmostApplication
+    
+    let script: String
+    if frontmostApp?.bundleIdentifier == "com.ideasoncanvas.mindnode" && !Environment.isCommandKeyPressed {
+        script = """
+        tell application "System Events" to keystroke "v" using {command down, option down, shift down}
+        """
+    } else {
+        script = """
         tell application "System Events" to keystroke "v" using command down
-    """
+        """
+    }
     
     if let appleScript = NSAppleScript(source: script) {
         var error: NSDictionary?
