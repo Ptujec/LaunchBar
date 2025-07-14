@@ -174,8 +174,9 @@ function parseDataBase({ databasePath }) {
 
 // MARK: - Amount and Date Formatting
 
+// TODO: außer wenn man es schon ensprechend eingibt 30.00 sollte nicht 30,00 werden
+
 function parseAmount(input) {
-  // TODO: außer wenn man es schon ensprechend eingibt 30.00 sollte nicht 30,00 werden
   let numberFormat = numberFormatPrefs.get();
   if (!numberFormat) {
     const data = getDatabaseData();
@@ -183,18 +184,39 @@ function parseAmount(input) {
     numberFormatPrefs.set(numberFormat);
   }
 
-  const separatorMap = {
-    dot: '.',
-    comma: ',',
-  };
-  const separator = separatorMap[numberFormat.split('-')[1]] || '.';
+  // Check for calculation first
+  if (/\d+[,.]?\d*\s*[+-]\s*\d+/.test(input)) {
+    const result = parseCalculation(input, numberFormat);
+    if (result) return result;
+  }
 
+  // Fall back to single number parsing
+  const singleResult = parseSingleAmount(input, numberFormat);
+  return singleResult.success
+    ? formatAmountResult(singleResult.value, numberFormat)
+    : { success: false };
+}
+
+function parseCalculation(input, numberFormat) {
+  const numbers = input
+    .split(/[+-]/)
+    .map((n) => parseSingleAmount(n.trim(), numberFormat)?.value);
+  if (numbers.includes(undefined)) return null;
+
+  const operators = input.match(/[+-]/g) || [];
+  return formatAmountResult(
+    numbers.reduce((sum, num, i) =>
+      i === 0 ? num : operators[i - 1] === '+' ? sum + num : sum - num
+    ),
+    numberFormat
+  );
+}
+
+function parseSingleAmount(input, numberFormat) {
   const income = input.includes('+');
   const cleanedInput = input.replace(/[+€$]|[^\d,.]/g, '').trim();
 
-  if (!cleanedInput) {
-    return { success: false };
-  }
+  if (!cleanedInput) return { success: false };
 
   let amount;
   if (cleanedInput.includes(',') || cleanedInput.includes('.')) {
@@ -205,17 +227,32 @@ function parseAmount(input) {
       cleanedInput.length <= 2 ? cleanedInput.padStart(2, '0') : cleanedInput;
   }
 
-  const displayWhole = amount.slice(0, -2) || '0';
-  const displayDecimals = amount.slice(-2);
+  return {
+    success: true,
+    value: parseInt(income ? amount : `-${amount}`),
+  };
+}
+
+function formatAmountResult(value, numberFormat) {
+  const separatorMap = {
+    dot: '.',
+    comma: ',',
+  };
+  const separator = separatorMap[numberFormat.split('-')[1]] || '.';
+
+  const isPositive = value >= 0;
+  const absResult = Math.abs(value).toString().padStart(2, '0');
+  const displayWhole = absResult.slice(0, -2) || '0';
+  const displayDecimals = absResult.slice(-2);
 
   return {
     success: true,
-    income,
-    amount,
+    income: isPositive,
+    amount: absResult,
     displayAmount: `${
-      income ? '+' : '-'
+      isPositive ? '+' : '-'
     }${displayWhole}${separator}${displayDecimals}`,
-    value: parseInt(income ? amount : `-${amount}`),
+    value: value,
   };
 }
 
