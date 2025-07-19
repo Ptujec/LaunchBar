@@ -31,6 +31,8 @@ CJVT tools are provided under a Creative Commons Attribution-NonCommercial-Share
 
 SSKJ data is from [fran.si](https://www.fran.si/133/sskj2-slovar-slovenskega-knjiznega-jezika-2)
 
+Press `space` to view truncated results. Press `enter` to open the website.
+
 
 ## Cobiss search with suggestions
 
