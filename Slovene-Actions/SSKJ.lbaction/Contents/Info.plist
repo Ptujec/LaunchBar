@@ -9,19 +9,19 @@
 	<key>CFBundleName</key>
 	<string>SSKJ²</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>Slovar slovenskega knjižnega jezika
 druga, dopolnjena in deloma prenovljena izdaja: tiskana izdaja 2014, spletna izdaja 2014. Slovar v 97.669 sestavkih prinaša celovit opis besedja slovenskega knjižnega jezika iz obdobja od slovenskih klasikov 19. stoletja do leta 2013.
 https://www.fran.si/133/sskj2-slovar-slovenskega-knjiznega-jezika-2</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Slovene-Actions</string>
 		<key>LBUpdateURL</key>
