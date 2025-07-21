@@ -391,56 +391,33 @@ function handleDateAction(date) {
 function showNotesOptions() {
   return [
     {
-      title: 'No Note',
-      icon: 'noTemplate.png',
+      title: 'Complete',
+      icon: 'checkTemplate',
       action: 'setNote',
-      actionArgument: '',
       actionRunsInBackground: true,
     },
     {
       title: 'Add Note',
-      icon: 'newTemplate.png',
+      icon: 'newTemplate',
       action: 'setNote',
-      actionArgument: 'Add Note',
+      actionArgument: { addNote: true },
       actionRunsInBackground: true,
     },
   ];
 }
 
-function setNote(note) {
-  if (note == 'Add Note') {
+function setNote({ addNote }) {
+  let note = '';
+
+  if (addNote === true) {
     LaunchBar.hide();
-
-    const [mailLinkRaw, subjectRaw] = LaunchBar.executeAppleScriptFile(
-      './mail.applescript'
-    )
-      .trim()
-      .split('\n');
-
-    let defaultAnswer = '';
-
-    if (mailLinkRaw && subjectRaw) {
-      const mailLink = encodeURI(decodeURI(mailLinkRaw));
-      let subject = subjectRaw.replace(/fwd: |aw: |wtr: |re: |fw: /gi, '');
-
-      const maxLength = 199 - mailLink.length;
-      if (subject.length > maxLength) {
-        subject = `${subject.substring(0, maxLength - 1)}…`;
-      }
-
-      defaultAnswer = `${subject} ${mailLink}`;
-    }
-
-    note = LaunchBar.executeAppleScript(
-      `set result to display dialog "Notes" with title "Notes" default answer "${defaultAnswer}"`,
-      'set result to text returned of result'
-    ).trim();
-
-    if (!note) return; // If a user cancels
+    note = getNote();
+    if (!note) return; // If a user cancels AppleScript dialog
   }
 
   recentPrefs.set('note', note);
   LaunchBar.hide();
+
   return postTransaction();
 }
 

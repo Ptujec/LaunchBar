@@ -9,6 +9,8 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 const globalStorePath =
   '~/Library/Application Support/Actual/global-store.json';
 
+const maxNoteLength = 199; // Maximum length for note including URL/link
+
 // MARK: - Core Configuration and State Management
 
 const budgetPrefs = {
@@ -453,6 +455,99 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
   }
 
   return runningBalance;
+}
+
+// MARK: - Note Management
+
+function getNote() {
+  let defaultAnswer = '';
+
+  const [appID, isSupported, mailRunning] = LaunchBar.execute(
+    '/bin/bash',
+    './appInfo.sh'
+  )
+    .trim()
+    .split('\n');
+
+  if (isSupported === 'true') {
+    defaultAnswer = getNoteFromBrowser(appID);
+  } else if (mailRunning !== undefined) {
+    defaultAnswer = getNoteFromMail();
+  }
+
+  return LaunchBar.executeAppleScript(
+    `set result to display dialog "Note:" with title "Add Note & Complete" default answer "${defaultAnswer}"`,
+    'set result to text returned of result'
+  ).trim();
+}
+
+function getNoteFromBrowser(appID) {
+  LaunchBar.log(appID);
+
+  if (appID === 'org.mozilla.firefox' || appID === 'app.zen-browser.zen') {
+    LaunchBar.executeAppleScript(`
+        tell application id "${appID}" to activate
+        delay 0.2
+        tell application "System Events"
+          keystroke "l" using {command down}
+          delay 0.2
+          keystroke "c" using {command down}
+          delay 0.2
+          key code 53
+        end tell
+        delay 0.2
+      `);
+    return LaunchBar.getClipboardString();
+  }
+
+  const script =
+    appID == 'com.apple.Safari'
+      ? `
+      tell application id "${appID}"
+          set _url to URL of front document
+          set _name to name of front document
+          return _name & "\n" & _url
+      end tell`
+      : `
+      tell application id "${appID}"
+          set _url to URL of active tab of front window
+          set _name to title of active tab of front window
+          return _name & "\n" & _url
+      end tell`;
+
+  const [name, url] = LaunchBar.executeAppleScript(script).split('\n');
+  const maxLength = maxNoteLength - url.length;
+  let truncatedName = name;
+
+  if (truncatedName.length > maxLength) {
+    truncatedName = `${truncatedName.substring(0, maxLength - 1)}…`;
+  }
+
+  const note = `${truncatedName} ${url}`;
+  LaunchBar.log('Note: ' + note);
+  return note;
+}
+
+function getNoteFromMail() {
+  const [mailLinkRaw, subjectRaw] = LaunchBar.executeAppleScriptFile(
+    './mail.applescript'
+  )
+    .trim()
+    .split('\n');
+
+  if (mailLinkRaw && subjectRaw) {
+    const mailLink = encodeURI(decodeURI(mailLinkRaw));
+    let subject = subjectRaw.replace(/fwd: |aw: |wtr: |re: |fw: /gi, '');
+
+    const maxLength = maxNoteLength - mailLink.length;
+    if (subject.length > maxLength) {
+      subject = `${subject.substring(0, maxLength - 1)}…`;
+    }
+
+    return `${subject} ${mailLink}`;
+  }
+
+  return '';
 }
 
 // MARK: - Interface Item Actions
