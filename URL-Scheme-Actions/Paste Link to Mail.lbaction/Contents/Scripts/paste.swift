@@ -44,19 +44,9 @@ func copyToClipboard(title: String, url: String) {
 }
 
 func executePaste() {
-    let workspace = NSWorkspace.shared
-    let frontmostApp = workspace.frontmostApplication
-    
-    let script: String
-    if frontmostApp?.bundleIdentifier == "com.ideasoncanvas.mindnode" {
-        script = """
-        tell application "System Events" to keystroke "v" using {command down, option down, shift down}
-        """
-    } else {
-        script = """
+    let script = """
         tell application "System Events" to keystroke "v" using command down
-        """
-    }
+    """
     
     if let appleScript = NSAppleScript(source: script) {
         var error: NSDictionary?
