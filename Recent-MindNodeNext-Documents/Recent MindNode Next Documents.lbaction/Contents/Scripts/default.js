@@ -17,11 +17,6 @@ function run() {
     File.readPlist('~/Library/Preferences/.GlobalPreferences.plist')
       .AppleInterfaceStyle === 'Dark'; // takes a few seconds to update after changing
 
-  // const darkMode =
-  //   LaunchBar.executeAppleScript(
-  //     'tell application "System Events" to tell appearance preferences to get dark mode'
-  //   ).trim() === 'true'; // more accurate but slower
-
   const preview = darkMode ? 'darkPreview' : 'lightPreview';
 
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
@@ -32,7 +27,10 @@ function run() {
 
   return Object.values(snapshotData.documents)
     .filter((obj) => !obj.isTrashed && obj.title)
-    .sort((a, b) => b.lastViewedDate - a.lastViewedDate)
+    .sort(
+      (a, b) =>
+        (b.lastViewedDate ?? -Infinity) - (a.lastViewedDate ?? -Infinity)
+    )
     .map((obj) => {
       let previewPath = File.pathForFileURL(obj[preview].fullSizeURL);
 
@@ -58,17 +56,38 @@ function run() {
         icon: 'com.ideasoncanvas.mindnode',
         path: previewPath,
         action: 'open',
-        actionArgument: `https://mindnode.com/document/${obj.id}#${encodeURI(
-          obj.title
-        )}`,
+        actionArgument: {
+          url: `https://mindnode.com/document/${obj.id}#${encodeURI(
+            obj.title
+          )}`,
+          title: obj.title,
+        },
         actionRunsInBackground: true,
       };
     });
 }
 
-function open(url) {
+function open({ url, title }) {
   LaunchBar.hide();
   if (LaunchBar.options.shiftKey) return LaunchBar.paste(url);
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.executeAppleScript(`
+        tell application "MindNode Next" to activate
+        delay 0.6
+        tell application "System Events" 
+          keystroke "o" using {command down}
+          delay 0.4
+          keystroke "f" using {command down}
+          delay 0.2
+          keystroke "a" using {command down}
+        end tell
+
+	      delay 0.2
+        tell application "LaunchBar" to perform action "Copy and Paste" with string "${title}"
+      `);
+
+    return;
+  }
   LaunchBar.openURL(url);
 }
 
