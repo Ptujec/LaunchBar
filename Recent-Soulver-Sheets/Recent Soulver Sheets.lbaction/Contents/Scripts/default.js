@@ -56,7 +56,10 @@ function run() {
         });
 
         const title =
-          sheet.preview?.shortPreview.split('\n')[0] || 'Empty'.localize();
+          sheet.preview?.shortPreview
+            .split('\n')[0]
+            .replace(/^#\s*/, '')
+            .replace(/:$/, '') || 'Empty'.localize();
 
         badge =
           defaultSheetbookData.store.folders.length > 2
