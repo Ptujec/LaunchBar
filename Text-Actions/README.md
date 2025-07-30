@@ -18,6 +18,7 @@
 - Markdown Links to Rich Text Format (Convert text with Markdown links into proper Rich Text. If no argument is entered, it will convert the clipboard content.)
 - Replace Commas with Linebreaks
 - Remove Duplicate Email Addresses
+- Strikethrough
 
 ## Download & Update
 
