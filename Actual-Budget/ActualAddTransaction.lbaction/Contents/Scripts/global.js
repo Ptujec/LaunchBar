@@ -516,6 +516,9 @@ function getNoteFromBrowser(appID) {
       end tell`;
 
   const [name, url] = LaunchBar.executeAppleScript(script).split('\n');
+
+  if (!url) return '';
+
   const maxLength = maxNoteLength - url.length;
   let truncatedName = name;
 
