@@ -57,7 +57,7 @@ function run(argument) {
   let content = argument?.trim();
 
   if (!argument) {
-    if (!prefs.excludedApps.map((app) => app.appID).includes(frontmostAppID)) {
+    if (!prefs.excludedApps?.map((app) => app.appID).includes(frontmostAppID)) {
       if (confirmationDialog() === false) {
         // if user canceled
         LaunchBar.hide();
