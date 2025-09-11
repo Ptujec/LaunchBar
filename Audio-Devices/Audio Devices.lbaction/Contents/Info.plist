@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Audio Devices</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -32,7 +32,7 @@ More shortcuts for a selected device:
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Audio-Devices#readme</string>
 	</dict>
 	<key>LBRequirements</key>
-	<string>AirPlay support requires macOS 15.2 or higher</string>
+	<string>AirPlay requires macOS 15.2 or higher</string>
 	<key>LBScripts</key>
 	<dict>
 		<key>LBDefaultScript</key>

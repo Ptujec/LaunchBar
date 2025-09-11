@@ -14,6 +14,10 @@ By default, **sound effects** (e.g. system alerts) will play on the new output d
 
 If you hold `command` when switching to a new output device, the list will be filtered by only input devices next, or vice versa.
 
+## Settings
+
+By default, LaunchBar stays active after selecting a device. You can change that behavior if you hold `option` while running the initial action. Instead of listing devices, this will show a toggle menu where you can decide to hide the interface after selecting a device.
+
 ## Note About AirPlay Devices
 
 AirPlay support is not ideal yet. This is because CoreAudio does not list AirPlay devices consistently. You can try to add or update AirPlay devices by holding `shift`. This is a compromise to keep the action as responsive as possible while allowing AirPlay devices to be included. **Listing and activating AirPlay devices usually involves GUI scripting. This means the action will open System Preferences.** 

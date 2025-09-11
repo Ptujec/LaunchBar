@@ -43,6 +43,19 @@ struct Utils {
             ? scriptName
             : "\(scriptName).swift"
     }
+    
+    static func hideLaunchBar() {
+        let script = """
+        tell application "LaunchBar" to hide
+        """
+        if let appleScript = NSAppleScript(source: script) {
+            var error: NSDictionary?
+            appleScript.executeAndReturnError(&error)
+            if let error = error {
+                NSLog("Failed to hide LaunchBar: \(error)")
+            }
+        }
+    }
 }
 
 struct AirPlayDevice: Codable, Hashable {
@@ -61,11 +74,13 @@ struct Preferences: Codable {
     var excludedDevices: Set<String>
     var noSoundEffectsSyncDevices: Set<String>
     var airPlayDevices: Set<AirPlayDevice>
-
+    var hideAfterSelection: Bool
+    
     init() {
         excludedDevices = []
         noSoundEffectsSyncDevices = []
         airPlayDevices = []
+        hideAfterSelection = false // Default to old behavior
     }
 
     mutating func toggleExcludedDevice(_ deviceUID: String) {
@@ -319,6 +334,15 @@ struct CoreAudioUtils {
 // MARK: - AppleScript Part
 
 struct AudioDevicesAction {
+    private static func getSettingsMenuItem(preferences: Preferences) -> [String: Any] {
+        return [
+            "title": preferences.hideAfterSelection ? "Hiding LB after selection" : "Keeping LB active after selection",
+            "icon": preferences.hideAfterSelection ? "hideTemplate" : "showTemplate",
+            "action": Utils.getActionScriptName(),
+            "actionArgument": ["toggleSetting": "true"]
+        ]
+    }
+
     private static func getAirPlayDevicesAndActivate(deviceToActivate: String? = nil) -> [String] {
         let script = """
           on run
@@ -460,6 +484,9 @@ struct AudioDevicesAction {
                     NSLog("Failed to sync sound effects output")
                 }
             }
+            if preferences.hideAfterSelection {
+                Utils.hideLaunchBar()
+            }
         } else {
             NSLog("Failed to set device as default")
         }
@@ -469,6 +496,11 @@ struct AudioDevicesAction {
         let arguments = Array(CommandLine.arguments.dropFirst())
         var preferences = loadPreferences()
         var preferencesChanged = false
+        
+        // Show settings menu when Alt key is pressed with no arguments
+        if Environment.isAlternateKeyPressed && arguments.isEmpty {
+            return [getSettingsMenuItem(preferences: preferences)]
+        }
 
         if Environment.isShiftKeyPressed {
             if updateAirPlayDevices(preferences: &preferences) {
@@ -483,6 +515,14 @@ struct AudioDevicesAction {
         if let firstArg = arguments.first,
            let dict = try? JSONSerialization.jsonObject(with: firstArg.data(using: .utf8)!)
            as? [String: String] {
+            // Handle settings toggle
+            if dict["toggleSetting"] == "true" {
+                preferences.hideAfterSelection.toggle()
+                savePreferences(preferences)
+                // Return settings menu again to show the updated state
+                return [getSettingsMenuItem(preferences: preferences)]
+            }
+            
             if let deviceName = dict["airPlayName"] {
                 if Environment.isControlKeyPressed {
                     // Handle excluding AirPlay device
@@ -513,6 +553,9 @@ struct AudioDevicesAction {
                             var history = loadDeviceHistory()
                             history.addUsage(deviceUID: device.uid, type: "output")
                             saveDeviceHistory(history)
+                            if preferences.hideAfterSelection {
+                                Utils.hideLaunchBar()
+                            }
                         }
                         // No sound effects sync here because it does not work for AirPlay devices
                     } else {
@@ -651,8 +694,7 @@ struct AudioDevicesAction {
         let lastUsedOutputUID = history.lastUsedDevice(
             type: "output", excluding: activeOutputUID, preferences: preferences)
 
-        // Log device lists for debugging TODO: remove when not needed anymore x
-        NSLog("Output Devices:")
+        // MARK: Log device lists for debugging
         for device in filteredOutputDevices {
             let uid = CoreAudioUtils.getDeviceUID(deviceID: device.id) ?? "unknown"
             NSLog(
@@ -714,6 +756,7 @@ struct AudioDevicesAction {
                         "deviceID": String(device.id),
                         "deviceType": type,
                     ],
+                    "actionRunsInBackground": preferences.hideAfterSelection ? true : false
                 ]
             }
         }
@@ -745,7 +788,7 @@ struct AudioDevicesAction {
                     "actionArgument": [
                         "airPlayName": device.name,
                     ],
-                    "actionRunsInBackground": true,
+                    "actionRunsInBackground": preferences.hideAfterSelection ? true : false,
                 ]
             }
 
