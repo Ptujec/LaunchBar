@@ -18,7 +18,7 @@ function runWithString(string) {
   const { wasUpdated, data: updatedData } = checkAndUpdateData();
   const data = updatedData || loadData();
 
-  const icon = 'icon';
+  const icon = 'actionIcon';
 
   // Tag suggestions
   const tagSuggestions = new Set();
