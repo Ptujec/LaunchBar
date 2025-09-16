@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>icon</string>
+	<string>actionIcon.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.ZoteroSearchV2</string>
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>1.9.2</string>
+	<string>1.9.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>org.zotero.zotero</string>
 	<key>LBDescription</key>
