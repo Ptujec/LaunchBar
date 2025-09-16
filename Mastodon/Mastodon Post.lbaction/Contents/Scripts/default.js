@@ -1,7 +1,7 @@
 /* 
 Mastodon Post (Toot) Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-01-11
+2025-06-02
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -188,6 +188,11 @@ function openSetting() {
   const { server } = Action.preferences;
 
   const clients = [
+    {
+      name: 'Phanpy',
+      url: 'https://phanpy.social',
+      icon: 'phanpyTemplate',
+    },
     {
       name: 'Elk',
       url: 'https://elk.zone/home',
