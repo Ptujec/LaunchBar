@@ -14,6 +14,8 @@ You can view a report’s details by pressing `→` or `space`, or open the repo
 
 **Note:** Reports are not saved if you run the test in the Terminal app.
 
+**Note about Wi-Fi name:** If the name is only shown as "<redacted>", you can fix this by entering the following line in the Terminal: `sudo ipconfig setverbose 1`. 
+
 ## Requirements 
 
 This action requires macOS 12 (Monterey).
