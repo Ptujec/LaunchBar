@@ -50,7 +50,7 @@ There are also limitations due to how LaunchBar actions work. Items don't automa
 
 The performance may vary a little. Getting names takes a while. We try to compensate that with caching. But on the initial run the action might take a second.
 
-**If you want to renew cached names hold `command` when running the action.  
-**
+**If you want to renew cached names hold `command` when running the action.**
+
 Cached data is stored in the actions support path (`~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.RecentMessages`).
 
