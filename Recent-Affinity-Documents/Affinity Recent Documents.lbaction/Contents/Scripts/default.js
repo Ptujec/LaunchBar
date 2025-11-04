@@ -20,16 +20,29 @@ function run(argument) {
       return {
         title: File.displayName(path),
         path,
+        subtitle: path,
         action: 'open',
-        actionArgument: fileURL,
+        actionArgument: {
+          fileURL,
+          path,
+        },
         actionRunsInBackground: true,
-        // alwaysShowsSubtitle: true,
       };
     }
   });
 }
 
-function open(fileURL) {
+function open({ fileURL, path }) {
   LaunchBar.hide();
-  LaunchBar.openURL(fileURL, 'com.canva.affinity');
+
+  if (LaunchBar.options.commandKey) {
+    LaunchBar.executeAppleScript(
+      `tell application "Finder" 
+        reveal POSIX file "${path}"
+        activate
+      end tell`
+    );
+  } else {
+    LaunchBar.openURL(fileURL, 'com.canva.affinity');
+  }
 }
