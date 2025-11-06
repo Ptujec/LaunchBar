@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>com.seriflabs.affinitydesigner2</string>
+	<string>com.canva.affinity</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.AffinityRecentDocuments</string>
 	<key>CFBundleName</key>
 	<string>Affinity Recent Documents</string>
 	<key>CFBundleVersion</key>
-	<string>1.1</string>
+	<string>1.1.1</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.canva.affinity</string>
 	<key>LBDescription</key>
