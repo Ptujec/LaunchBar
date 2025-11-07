@@ -12,9 +12,13 @@ The following actions are trying to improve the experience a little.
 
 This action displays account balances and the most recent transactions.
 
-You can show category balances and budgets with `command` + `enter`. Depending on your database size, it may take a little, because right now it needs all transaction and budget data to calculate balances correctly.
+Additionally, you can show category balances and budgets with `shift` + `enter`. (Depending on your database size, it may take a little while, because right now it needs all transaction and budget data to calculate balances correctly.)
 
-If you have multiple budgets, you can select them with `option` + `enter`.
+Show all payees with `option` + `enter`.
+
+If you have multiple budgets, you can select them with `control` + `enter`. The default one matches the setting in the Actual Budget app.
+
+`command` + `enter` opens the Actual Budget app. If you have a transaction selected that has a link in the memo, this will open the link instead.
 
 **Note:** This action is using [SF Symbols](https://developer.apple.com/sf-symbols/) to indicate and split transactions and mail links in the `label` item. Those will not show correctly if SF Symbols is not installed. 
 

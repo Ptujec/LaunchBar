@@ -14,12 +14,12 @@ Documentation:
 include('global.js');
 
 function run() {
-  if (LaunchBar.options.controlKey) {
+  if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
     return;
   }
 
-  if (LaunchBar.options.alternateKey) {
+  if (LaunchBar.options.controlKey) {
     return showBudgets();
   }
 
@@ -28,9 +28,9 @@ function run() {
     return LaunchBar.alert('Database not found');
   }
 
-  if (LaunchBar.options.shiftKey) return showPayees();
+  if (LaunchBar.options.alternateKey) return showPayees();
 
-  return LaunchBar.options.commandKey
+  return LaunchBar.options.shiftKey
     ? showCategories()
     : showAccountsAndTransactions();
 }
@@ -272,6 +272,7 @@ function handleTransactionAction({
   messageUrl,
 }) {
   if (LaunchBar.options.commandKey) {
+    LaunchBar.hide();
     LaunchBar.openURL(
       messageUrl && !LaunchBar.options.alternateKey ? messageUrl : actualFileURL
     );
@@ -355,15 +356,17 @@ function handleTransactionAction({
     : '';
 
   return [
-    {
-      title: t.payee_name,
-      icon: 'payeeTemplate',
-      action: 'showPayeeTransactions',
-      actionArgument: {
-        payeeName: t.payee_id,
-      },
-      actionReturnsItems: true,
-    },
+    t.payee_name
+      ? {
+          title: t.payee_name,
+          icon: 'payeeTemplate',
+          action: 'showPayeeTransactions',
+          actionArgument: {
+            payeeName: t.payee_id,
+          },
+          actionReturnsItems: true,
+        }
+      : undefined,
     {
       title: t.category_name,
       icon: 'categoryTemplate',
@@ -497,7 +500,7 @@ function formatTransfer(sourceAccount, targetAccount) {
 function formatTransaction(t, numberFormat, dateFormat, transactions) {
   const isTransfer = t.transfer_id != null;
   const isReconciliation =
-    !t.payee_name && t.notes === 'Reconciliation balance adjustment';
+    !t.payee_name && t.notes.startsWith('Reconciliation balance adjustment');
   const formattedAmount = formatAmount(t.amount, numberFormat);
 
   const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
