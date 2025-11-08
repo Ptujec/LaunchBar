@@ -475,6 +475,9 @@ function getNote() {
     defaultAnswer = getNoteFromMail();
   }
 
+  // Clean up default answer
+  defaultAnswer = defaultAnswer.replace(/"/g, '\\"').trim();
+
   return LaunchBar.executeAppleScript(
     `set result to display dialog "Note:" with title "Add Note & Complete" default answer "${defaultAnswer}"`,
     'set result to text returned of result'
