@@ -52,7 +52,7 @@ function run() {
       return {
         title: obj.title,
         subtitle: lastModifiedDate,
-        alwaysShowsSubtitle: true,
+        // alwaysShowsSubtitle: true,
         icon: 'com.ideasoncanvas.mindnode',
         path: previewPath,
         action: 'open',
@@ -69,6 +69,9 @@ function run() {
 
 function open({ url, title }) {
   LaunchBar.hide();
+  if (LaunchBar.options.alternateKey) {
+    return LaunchBar.paste(`[${title}](${url})`);
+  }
   if (LaunchBar.options.shiftKey) return LaunchBar.paste(url);
   if (LaunchBar.options.commandKey) {
     LaunchBar.executeAppleScript(`
