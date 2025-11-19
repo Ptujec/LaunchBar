@@ -4,7 +4,7 @@
 
 <img src="01.jpg" width="798"/>
 
-This is a simple action that displays all your cards from the [StudyCards](https://apps.apple.com/app/studycards-karteikarten/id1534325530) app. This allows you to quickly check whether you have already added a card. Both questions and answers are shown.
+This is a simple action that displays all your cards from the [StudyCards](https://apps.apple.com/app/studycards-karteikarten/id1534325530) app by @[cameronshemilt](https://github.com/cameronshemilt). This allows you to quickly check whether you have already added a card. Both questions and answers are shown.
 
 ## Requirements
 
