@@ -44,6 +44,8 @@ on addToPlaylist(_name)
 	tell application "LaunchBar" to hide
 	tell application "System Events"
 		set _frontmost to item 1 of (get name of processes whose frontmost is true)
+    
+    tell application "Music" to activate
 		
 		# Localizations
 		set edit_lang to name of menu bar item 4 of menu bar 1 of application process "Music"
