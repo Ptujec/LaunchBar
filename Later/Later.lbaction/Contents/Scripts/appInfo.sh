@@ -14,6 +14,7 @@
 supported_browsers=(
     "com.apple.Safari"
     "com.brave.Browser"
+    "com.kagi.kagimacOS"
     "com.google.Chrome"
     "com.vivaldi.Vivaldi"
     "company.thebrowser.Browser" # this browser is abandoned but maybe still used

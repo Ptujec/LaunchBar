@@ -97,6 +97,8 @@ function showList(forceArchive = false) {
   const isArchived = forceArchive || LaunchBar.options.alternateKey;
   const jsonFilePathToUse = isArchived ? archiveFilePath : jsonFilePath;
 
+  LaunchBar.log(`jsonFilePathToUse: ${jsonFilePathToUse}`);
+
   const list = File.exists(jsonFilePathToUse)
     ? File.readJSON(jsonFilePathToUse).data
     : [];
@@ -246,7 +248,7 @@ function getInfoFromBrowser(appID) {
   }
 
   const script =
-    appID == 'com.apple.Safari'
+    appID == 'com.apple.Safari' || appID == 'com.kagi.kagimacOS'
       ? `
     tell application id "${appID}"
         set _url to URL of front document
