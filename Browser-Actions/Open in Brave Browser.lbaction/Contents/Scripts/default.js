@@ -47,12 +47,15 @@ function run() {
     if (closeSetting == true || LaunchBar.options.commandKey) {
       closeChromium(frontmost);
     }
-  } else if (frontmost === 'com.apple.Safari') {
-    const url = getURLSafari();
+  } else if (
+    frontmost === 'com.apple.Safari' ||
+    frontmost === 'com.kagi.kagimacOS'
+  ) {
+    const url = getURLSafari(frontmost);
     LaunchBar.openURL(url, target);
 
     if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeSafari();
+      closeSafari(frontmost);
     }
   } else if (
     frontmost === 'org.mozilla.firefox' ||
@@ -99,10 +102,10 @@ function closeToggle({ close }) {
 
 // MARK: - AppleScript
 
-function getURLSafari() {
+function getURLSafari(frontmost) {
   return LaunchBar.executeAppleScript(
     `
-    tell application id "com.apple.Safari"
+    tell application id "${frontmost}"
       if exists URL of current tab of window 1 then
         set vURL to URL of current tab of window 1
       end if
@@ -139,13 +142,13 @@ function getURLChromium(frontmost) {
   )?.trim();
 }
 
-function closeSafari() {
+function closeSafari(frontmost) {
   LaunchBar.executeAppleScript(`
-    tell application id "com.apple.Safari"
+    tell application id "${frontmost}"
       close current tab of window 1
       delay 0.1
       if (count documents) = 0 then
-        quit application "Safari"
+        quit application id "${frontmost}"
       end if
     end tell
   `);
