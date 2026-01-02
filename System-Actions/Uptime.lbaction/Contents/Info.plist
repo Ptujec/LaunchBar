@@ -3,23 +3,25 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>SanduhrTemplate.png</string>
+	<string>symbol:clock</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.Uptime</string>
 	<key>CFBundleName</key>
 	<string>Uptime</string>
 	<key>CFBundleVersion</key>
-	<string>2021.1</string>
+	<string>2025.1</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar</string>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/System-Actions</string>
+    <key>LBUpdateURL</key>
+    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/refs/heads/master/System-Actions/Uptime.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBScripts</key>
 	<dict>
@@ -27,8 +29,6 @@
 		<dict>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
