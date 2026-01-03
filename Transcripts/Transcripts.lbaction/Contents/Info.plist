@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Transcripts</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.5</string>
+	<string>2.0</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -35,8 +35,6 @@
 			</array>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
