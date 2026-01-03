@@ -12,10 +12,9 @@ Documentation:
 
 TODO: 
 - Batch option (supported by API) ?
-- More options e.g. proper srt, json
-- cleanup (e.g. debug logs)
+- More options e.g. srt, json (which I already store)
 - setting icons (key, format)
-- update README
+- cleanup (e.g. debug logs)
 */
 
 // MARK: - Configuration
@@ -23,7 +22,7 @@ TODO:
 const downloadsPath = '/tmp';
 const logFile = '/tmp/youtube_transcript_debug.log';
 const apiToken = Action.preferences.apiToken;
-const options = {
+const formatOptions = {
   full: 'Include Time Markers With Links',
   short: 'Include Time Markers',
   plain: 'Text Only',
@@ -170,14 +169,21 @@ function getCaptionTracks(videoId, pageSource, options) {
     pageData = pageSource;
     writeDebugLog('Using Safari page source', 'Source Info');
   } else {
-    const watchResponse = HTTP.loadRequest(watchUrl, options);
-    if (!watchResponse?.data) return null;
-    pageData = watchResponse.data;
+    pageData = tracksLoadRequest(watchUrl, options);
   }
 
-  const tracksMatch = pageData.match(
+  let tracksMatch = pageData.match(
     /{"captionTracks":(\[.*?\])(?=,\s*"audioTracks")/
   );
+
+  // Fallback
+  if (!tracksMatch?.[1] && pageSource) {
+    pageData = tracksLoadRequest(watchUrl, options);
+    tracksMatch = pageData.match(
+      /{"captionTracks":(\[.*?\])(?=,\s*"audioTracks")/
+    );
+  }
+
   if (!tracksMatch?.[1]) return null;
 
   let tracks;
@@ -197,6 +203,15 @@ function getCaptionTracks(videoId, pageSource, options) {
     writeDebugLog(e, 'Error parsing caption tracks');
     return null;
   }
+}
+
+function tracksLoadRequest(watchUrl, options) {
+  const watchResponse = HTTP.loadRequest(watchUrl, options);
+  if (!watchResponse?.data) return null;
+  pageData = watchResponse.data;
+
+  writeDebugLog('Using Load Request', 'Source Info');
+  return pageData;
 }
 
 function downloadTranscript({ title, url, videoId, track }) {
@@ -391,7 +406,7 @@ function settings() {
   return [
     {
       title: 'Format',
-      badge: options[currentOption],
+      badge: formatOptions[currentOption],
       icon: 'symbol:textformat',
       action: 'showFormatSettings',
       actionReturnsItems: true,
@@ -407,8 +422,8 @@ function settings() {
 function showFormatSettings() {
   const currentOption = Action.preferences.format || 'short';
 
-  return Object.keys(options).map((option) => ({
-    title: options[option],
+  return Object.keys(formatOptions).map((option) => ({
+    title: formatOptions[option],
     icon: option === currentOption ? 'checkTemplate' : 'circleTemplate',
     badge: option === currentOption ? 'selected' : undefined,
     action: 'setOption',
