@@ -432,7 +432,7 @@ function setApiKey() {
   switch (response) {
     case 0:
       LaunchBar.openURL(
-        'https://rapidapi.com/nikzeferis/api/youtube-captions-transcript-subtitles-video-combiner/playground/apiendpoint_dccbec3e-efe7-4016-ba37-3f5e45b49999'
+        'https://rapidapi.com/nikzeferis/api/youtube-captions-transcript-subtitles-video-combiner'
       );
       LaunchBar.hide();
       break;
