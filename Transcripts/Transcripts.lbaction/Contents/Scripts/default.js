@@ -12,20 +12,19 @@ Documentation:
 
 TODO: 
 - Batch option (supported by API) ?
-- More options e.g. srt, json (which I already store)
-- setting icons (key, format)
-- cleanup (e.g. debug logs)
 */
 
 // MARK: - Configuration
 
-const downloadsPath = '/tmp';
+const downloadsPath = Action.preferences.downloadsPath || '/tmp';
 const logFile = '/tmp/youtube_transcript_debug.log';
 const apiToken = Action.preferences.apiToken;
 const formatOptions = {
-  full: 'Include Time Markers With Links',
-  short: 'Include Time Markers',
   plain: 'Text Only',
+  short: 'Text With Time Markers',
+  full: 'Text With Linked Time Markers',
+  srt: 'SubRip Text (SRT)',
+  json: 'Raw (JSON)',
 };
 
 // MARK: - Run
@@ -76,6 +75,8 @@ function run(argument) {
   if (!videoId) {
     return {
       title: 'Invalid YouTube URL',
+      subtitle: url,
+      alwaysShowsSubtitle: true,
       icon: 'alert',
     };
   }
@@ -137,11 +138,10 @@ function getVideoTranscript(videoId, info) {
     action: 'downloadTranscript',
     actionArgument: {
       title: info?.title || videoTitle,
-      url: info?.url,
       videoId: videoId,
       track: track,
     },
-    actionRunsInBackground: true,
+    // actionRunsInBackground: true,
   }));
 }
 
@@ -214,7 +214,10 @@ function tracksLoadRequest(watchUrl, options) {
   return pageData;
 }
 
-function downloadTranscript({ title, url, videoId, track }) {
+function downloadTranscript(
+  { title, videoId, track },
+  format = Action.preferences.format || 'plain'
+) {
   /*
   Example track object:
   "baseUrl": "https://www.youtube.com/api/timedtext?…",
@@ -230,9 +233,11 @@ function downloadTranscript({ title, url, videoId, track }) {
   NOTE: The API may not differentiate between manually created and auto-generated captions.
   */
 
-  // TODO: Implement with API
-
   if (!apiToken) return setApiKey();
+
+  if (LaunchBar.options.commandKey) {
+    return showFormatOptions(false, { title, videoId, track });
+  }
 
   LaunchBar.hide();
 
@@ -269,6 +274,11 @@ function downloadTranscript({ title, url, videoId, track }) {
     data = File.readJSON(jsonFilename);
   }
 
+  if (format === 'json') {
+    LaunchBar.openURL(File.fileURLForPath(jsonFilename));
+    return [];
+  }
+
   if (data.response.status !== 200) {
     LaunchBar.alert(
       `Error fetching transcript (${data?.response?.status})`,
@@ -278,13 +288,16 @@ function downloadTranscript({ title, url, videoId, track }) {
   }
 
   const name = `${title} (${track.name.simpleText})`;
-  const filename = `${downloadsPath}/${name}.md`;
+  const filename = `${downloadsPath}/${name}${
+    format === 'srt' ? '.srt' : '.md'
+  }`;
 
   const transcriptData = data.data;
   const formattedTranscript = formatTranscriptData(
     transcriptData,
     videoId,
-    name
+    name,
+    format
   );
 
   File.writeText(formattedTranscript, filename);
@@ -292,8 +305,7 @@ function downloadTranscript({ title, url, videoId, track }) {
   LaunchBar.openURL(File.fileURLForPath(filename));
 }
 
-function formatTranscriptData(transcriptData, videoId, name) {
-  const format = Action.preferences.format || 'short';
+function formatTranscriptData(transcriptData, videoId, name, format) {
   const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
   const header = `# ${name}\n\nSource: ${videoUrl}\n\n`;
 
@@ -348,11 +360,38 @@ function formatTranscriptData(transcriptData, videoId, name) {
         .trim()
     );
   }
+
+  if (format === 'srt') {
+    const formatSRTTime = (s) => {
+      const t = Math.floor(parseFloat(s));
+      const h = String(Math.floor(t / 3600)).padStart(2, '0');
+      const m = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+      const sec = String(t % 60).padStart(2, '0');
+      const ms = String(Math.round((parseFloat(s) % 1) * 1000)).padStart(
+        3,
+        '0'
+      );
+      return `${h}:${m}:${sec},${ms}`;
+    };
+
+    return transcriptData
+      .map((entry, i) => {
+        const start = formatSRTTime(entry.start);
+        const end = formatSRTTime(
+          (parseFloat(entry.start) + parseFloat(entry.dur)).toString()
+        );
+        const text = entry.text.decodeHTMLEntities();
+        return `${i + 1}\n${start} --> ${end}\n${text}`;
+      })
+      .join('\n\n');
+  }
 }
 
 // MARK: - Browser Handling
 
 function getBrowserInfo(browser) {
+  writeDebugLog(browser, 'Browser Info');
+
   let script;
   if (browser === 'com.apple.Safari') {
     script = `
@@ -401,38 +440,67 @@ function cleanTitle(title) {
 // MARK: - Settings
 
 function settings() {
-  const currentOption = Action.preferences.format || 'short';
+  const currentOption = Action.preferences.format || 'plain';
+  const downloadsPath = Action.preferences.downloadsPath || '/tmp';
 
   return [
     {
       title: 'Format',
       badge: formatOptions[currentOption],
-      icon: 'symbol:textformat',
-      action: 'showFormatSettings',
+      icon: 'formatTemplate',
+      action: 'showFormatOptions',
       actionReturnsItems: true,
     },
     {
-      title: 'Reset API-Token',
-      icon: 'symbol:key.fill',
+      title: 'Choose Download Location',
+      badge: downloadsPath,
+      icon: 'folderTemplate',
+      action: 'chooseDirectory',
+    },
+    {
+      title: 'Set API-Token',
+      icon: 'keyTemplate',
       action: 'setApiKey',
     },
   ];
 }
 
-function showFormatSettings() {
-  const currentOption = Action.preferences.format || 'short';
+function showFormatOptions(setDefault = true, info = {}) {
+  const currentFormat = Action.preferences.format || 'plain';
 
-  return Object.keys(formatOptions).map((option) => ({
-    title: formatOptions[option],
-    icon: option === currentOption ? 'checkTemplate' : 'circleTemplate',
-    badge: option === currentOption ? 'selected' : undefined,
-    action: 'setOption',
-    actionArgument: option,
+  return Object.keys(formatOptions).map((format) => ({
+    title: formatOptions[format],
+    icon: format === currentFormat ? 'checkTemplate' : 'circleTemplate',
+    badge: format === currentFormat ? 'default' : undefined,
+    action: 'setFormat',
+    actionArgument: { format, setDefault, info },
   }));
 }
 
-function setOption(option) {
-  Action.preferences.format = option;
+function setFormat({ format, setDefault, info }) {
+  if (setDefault) {
+    Action.preferences.format = format;
+    return settings();
+  }
+  downloadTranscript(info, format);
+}
+
+function chooseDirectory() {
+  LaunchBar.hide();
+
+  const path = LaunchBar.executeAppleScript(
+    `
+    tell application "System Events" 
+      activate
+      set theFolder to choose folder with prompt "Choose a directory in which transcripts and logs should be stored" default location "${downloadsPath}"
+      return POSIX path of theFolder
+    end tell
+    `
+  )?.trim();
+
+  if (!path) return settings();
+
+  Action.preferences.downloadsPath = path;
   return settings();
 }
 
