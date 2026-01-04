@@ -134,6 +134,7 @@ function getVideoTranscript(videoId, info) {
 
   return tracks.map((track) => ({
     title: track.name?.simpleText,
+    subtitle: info?.title,
     icon: 'iconTemplate',
     action: 'downloadTranscript',
     actionArgument: {
