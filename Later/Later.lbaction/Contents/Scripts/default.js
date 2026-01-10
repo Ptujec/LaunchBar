@@ -40,8 +40,9 @@ const shortcutURLAddToLaterMac =
 function runWithURL(url) {
   LaunchBar.hide();
 
-  let ytId, time;
+  let ytId, twitchId, time;
   if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
+  if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
 
   let title = LaunchBar.execute('/bin/bash', './getTitle.sh', url).trim();
 
@@ -49,7 +50,7 @@ function runWithURL(url) {
 
   if (!title || title === '') title = url;
 
-  addLink({ url, title, ytId });
+  addLink({ url, title, ytId, twitchId });
 }
 
 function run() {
@@ -83,12 +84,15 @@ function run() {
     return;
   }
 
-  let ytId;
+  let ytId, twitchId;
   if (url.includes('youtu')) {
     [url, ytId] = handleYoutubeUrl(url, time);
   }
+  if (url.includes('twitch.tv')) {
+    [url, twitchId] = handleTwitchUrl(url, time);
+  }
 
-  addLink({ url, title, ytId });
+  addLink({ url, title, ytId, twitchId });
 }
 
 // MARK: - Show List
@@ -197,7 +201,7 @@ function handleListItem({ index, url, jsonFilePathToUse }) {
 
 // MARK: - Add Items
 
-function addLink({ url, title, ytId }) {
+function addLink({ url, title, ytId, twitchId }) {
   const now = new Date().toLocaleString('sv').replace(' ', 'T');
 
   createBackup(jsonFilePath);
@@ -210,6 +214,7 @@ function addLink({ url, title, ytId }) {
 
   jsonData.data = jsonData.data.filter((item) => {
     if (ytId) return !item.url.includes(ytId);
+    if (twitchId) return !item.url.includes(twitchId);
     return item.url !== url;
   });
 
@@ -254,7 +259,7 @@ function getInfoFromBrowser(appID) {
         set _url to URL of front document
         set _name to name of front document
         set _time to ""
-        if _url contains "youtube.com" then
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
           try
               set _time to (do JavaScript "Math.round(document.querySelector('video').currentTime)" in front document) as string
           on error e
@@ -271,7 +276,7 @@ function getInfoFromBrowser(appID) {
         set _url to URL of active tab of front window
         set _name to title of active tab of front window
         set _time to ""
-        if _url contains "youtube.com" then
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
           try
             set _time to (execute active tab of front window javascript "Math.round(document.querySelector('video').currentTime)") as string
           on error e
@@ -369,6 +374,45 @@ function handleYoutubeUrl(url, time) {
   }
 
   return [url, ytId];
+}
+
+function handleTwitchUrl(url, time) {
+  LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
+
+  const videoIdMatch = url.match(/\/videos\/(\d+)/);
+  if (!videoIdMatch) return [url, null];
+
+  const videoId = videoIdMatch[1];
+  const baseUrl = `https://www.twitch.tv/videos/${videoId}`;
+
+  // Check if URL already has a time parameter
+  const hasTimeParam = url.includes('?t=');
+
+  if (hasTimeParam && time) {
+    // Update the time parameter
+    url = url.replace(/\?t=[^&]*/, `?t=${convertSecondsToTwitchFormat(time)}`);
+  } else if (time && parseFloat(time) > 10) {
+    // Add time parameter if it doesn't exist
+    url = `${baseUrl}?t=${convertSecondsToTwitchFormat(time)}`;
+  } else if (!hasTimeParam) {
+    url = baseUrl;
+  }
+
+  return [url, videoId];
+}
+
+function convertSecondsToTwitchFormat(seconds) {
+  const sec = parseInt(seconds);
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  const secs = sec % 60;
+
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0) parts.push(`${secs}s`);
+
+  return parts.join('') || '0s';
 }
 
 function cleanupTitle(title) {
