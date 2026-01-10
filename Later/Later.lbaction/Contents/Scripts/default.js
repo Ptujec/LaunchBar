@@ -101,7 +101,7 @@ function showList(forceArchive = false) {
   const isArchived = forceArchive || LaunchBar.options.alternateKey;
   const jsonFilePathToUse = isArchived ? archiveFilePath : jsonFilePath;
 
-  LaunchBar.log(`jsonFilePathToUse: ${jsonFilePathToUse}`);
+  // LaunchBar.log(`jsonFilePathToUse: ${jsonFilePathToUse}`);
 
   const list = File.exists(jsonFilePathToUse)
     ? File.readJSON(jsonFilePathToUse).data
@@ -261,7 +261,7 @@ function getInfoFromBrowser(appID) {
         set _time to ""
         if (_url contains "youtube.com") or (_url contains "twitch.tv") then
           try
-              set _time to (do JavaScript "Math.round(document.querySelector('video').currentTime)" in front document) as string
+              set _time to (do JavaScript "String(Math.round(document.querySelector('video').currentTime))" in front document) as string
           on error e
               -- do nothing
           end try
@@ -278,7 +278,7 @@ function getInfoFromBrowser(appID) {
         set _time to ""
         if (_url contains "youtube.com") or (_url contains "twitch.tv") then
           try
-            set _time to (execute active tab of front window javascript "Math.round(document.querySelector('video').currentTime)") as string
+            set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video').currentTime))")
           on error e
             -- do nothing
           end try
@@ -350,7 +350,7 @@ function cleanupList(jsonData) {
 // MARK: - Helper Functions
 
 function handleYoutubeUrl(url, time) {
-  LaunchBar.log(`Handling YouTube URL: ${url} with time: ${time}`);
+  // LaunchBar.log(`Handling YouTube URL: ${url} with time: ${time}`);
 
   const baseUrl = 'https://www.youtube.com/watch?v=';
 
@@ -362,7 +362,7 @@ function handleYoutubeUrl(url, time) {
     ytId = url.split('v=')[1]?.split('&')[0];
   }
 
-  LaunchBar.log(`YouTube ID: ${ytId}`);
+  // LaunchBar.log(`YouTube ID: ${ytId}`);
 
   if (!ytId) return [url, ytId];
 
@@ -377,7 +377,7 @@ function handleYoutubeUrl(url, time) {
 }
 
 function handleTwitchUrl(url, time) {
-  LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
+  // LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
 
   const videoIdMatch = url.match(/\/videos\/(\d+)/);
   if (!videoIdMatch) return [url, null];
