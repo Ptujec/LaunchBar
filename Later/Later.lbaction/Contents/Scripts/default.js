@@ -1,7 +1,7 @@
 /*
 Later Action for LaunchBar Test
 by Christian Bender (@ptujec)
-2023-02-09
+2026-01-11
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -362,16 +362,11 @@ function handleYoutubeUrl(url, time) {
     ytId = url.split('v=')[1]?.split('&')[0];
   }
 
-  // LaunchBar.log(`YouTube ID: ${ytId}`);
-
   if (!ytId) return [url, ytId];
 
-  url = `${baseUrl}${ytId}`;
-
-  if (time && parseFloat(time) > 10) {
-    const timeInt = parseInt(time);
-    url = `${url}&t=${timeInt}s`;
-  }
+  url =
+    `${baseUrl}${ytId}` +
+    ((time && parseFloat(time)) > 10 ? `&t=${time}s` : '');
 
   return [url, ytId];
 }
@@ -379,40 +374,18 @@ function handleYoutubeUrl(url, time) {
 function handleTwitchUrl(url, time) {
   // LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
 
+  const baseUrl = 'https://www.twitch.tv/videos/';
+
   const videoIdMatch = url.match(/\/videos\/(\d+)/);
   if (!videoIdMatch) return [url, null];
 
   const videoId = videoIdMatch[1];
-  const baseUrl = `https://www.twitch.tv/videos/${videoId}`;
 
-  // Check if URL already has a time parameter
-  const hasTimeParam = url.includes('?t=');
-
-  if (hasTimeParam && time) {
-    // Update the time parameter
-    url = url.replace(/\?t=[^&]*/, `?t=${convertSecondsToTwitchFormat(time)}`);
-  } else if (time && parseFloat(time) > 10) {
-    // Add time parameter if it doesn't exist
-    url = `${baseUrl}?t=${convertSecondsToTwitchFormat(time)}`;
-  } else if (!hasTimeParam) {
-    url = baseUrl;
-  }
+  url =
+    `${baseUrl}${videoId}` +
+    ((time && parseFloat(time)) > 10 ? `?t=${time}s` : '');
 
   return [url, videoId];
-}
-
-function convertSecondsToTwitchFormat(seconds) {
-  const sec = parseInt(seconds);
-  const hours = Math.floor(sec / 3600);
-  const minutes = Math.floor((sec % 3600) / 60);
-  const secs = sec % 60;
-
-  const parts = [];
-  if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (secs > 0) parts.push(`${secs}s`);
-
-  return parts.join('') || '0s';
 }
 
 function cleanupTitle(title) {
