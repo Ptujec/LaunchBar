@@ -20,6 +20,7 @@ You can also close the site in the browser you came from with `⌘` + `↩`  (cm
 ### Good to know
 - If you use the close option be aware that Firefox (and Zen) cannot close individual tabs, just windows! 
 - Getting an URL from Firefox (and Zen) might be buggy, because it lacks sufficient AppleScript support! If it's not working properly it might help to [increase delay times](https://github.com/Ptujec/LaunchBar/blob/1c6609e474f8916d9d65f83793f48ffbdc277f74/Browser-Actions/Open%20in%20Safari.lbaction/Contents/Scripts/default.js#L171).
+- The action will add the **current time marker** to **YouTube** and **Twitch** video URLs automatically. However, for this to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu. Otherwise, the URL will still be saved, but without the time marker.
 
 ## Download & Update
 
