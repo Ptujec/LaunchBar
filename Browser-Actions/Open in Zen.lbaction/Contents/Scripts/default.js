@@ -15,16 +15,16 @@ function run() {
 
   const closeSetting = Action.preferences.close || false;
 
-  const appInfo = LaunchBar.execute('/bin/bash', './appInfo.sh')
+  const [frontmost, appName, isSupported] = LaunchBar.execute(
+    '/bin/bash',
+    './appInfo.sh'
+  )
     .trim()
     .split('\n');
 
-  const frontmost = appInfo[0];
-  const appName = appInfo[1];
-  const isSupported = appInfo[2] === 'true';
-
-  if (!isSupported) {
-    LaunchBar.alert(appName + ' is not a supported browser!'.localize());
+  if (isSupported === 'false') {
+    LaunchBar.alert(appName + ' is not a supported browser!');
+    LaunchBar.hide();
     return;
   }
 
@@ -47,12 +47,15 @@ function run() {
     if (closeSetting == true || LaunchBar.options.commandKey) {
       closeChromium(frontmost);
     }
-  } else if (frontmost === 'com.apple.Safari') {
-    const url = getURLSafari();
+  } else if (
+    frontmost === 'com.apple.Safari' ||
+    frontmost === 'com.kagi.kagimacOS'
+  ) {
+    const url = getURLSafari(frontmost);
     LaunchBar.openURL(url, target);
 
     if (closeSetting == true || LaunchBar.options.commandKey) {
-      closeSafari();
+      closeSafari(frontmost);
     }
   } else if (
     frontmost === 'org.mozilla.firefox' ||
@@ -99,16 +102,70 @@ function closeToggle({ close }) {
 
 // MARK: - AppleScript
 
-function getURLSafari() {
-  return LaunchBar.executeAppleScript(
+function getURLSafari(frontmost) {
+  let [url, time] = LaunchBar.executeAppleScript(
     `
-    tell application id "com.apple.Safari"
+    tell application id "${frontmost}"
+      set _url to ""
+      set _time to ""
       if exists URL of current tab of window 1 then
-        set vURL to URL of current tab of window 1
+        set _url to URL of current tab of window 1
       end if
+      if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+		    try
+			    set _time to (do JavaScript "String(Math.round(document.querySelector('video').currentTime))" in front document) as string
+		    on error e
+			    -- do nothing
+		    end try
+	    end if
+      return _url & "\n" & _time
     end tell
   `
-  )?.trim();
+  )?.split('\n');
+
+  url =
+    parseFloat(time) && url.includes('youtu')
+      ? handleYoutubeUrl(url, time)
+      : url;
+  url =
+    parseFloat(time) && url.includes('twitch.tv')
+      ? handleTwitchUrl(url, time)
+      : url;
+
+  return url;
+}
+
+function getURLChromium(frontmost) {
+  let [url, time] = LaunchBar.executeAppleScript(
+    `
+    tell application id "${frontmost}"
+      set _url to ""
+      set _time to ""
+      if (count windows) ≠ 0 then
+        set _url to URL of active tab of window 1
+      end if
+      if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+        try
+          set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video').currentTime))")
+        on error e
+          -- do nothing
+        end try
+      end if
+      return _url & "\n" & _time  
+    end tell
+  `
+  )?.split('\n');
+
+  url =
+    parseFloat(time) && url.includes('youtu')
+      ? handleYoutubeUrl(url, time)
+      : url;
+  url =
+    parseFloat(time) && url.includes('twitch.tv')
+      ? handleTwitchUrl(url, time)
+      : url;
+
+  return url;
 }
 
 function getURLFirefox(frontmost) {
@@ -127,25 +184,13 @@ function getURLFirefox(frontmost) {
   return LaunchBar.getClipboardString();
 }
 
-function getURLChromium(frontmost) {
-  return LaunchBar.executeAppleScript(
-    `
-    tell application id "${frontmost}"
-      if (count windows) ≠ 0 then
-        set vURL to URL of active tab of window 1
-      end if
-    end tell
-  `
-  )?.trim();
-}
-
-function closeSafari() {
+function closeSafari(frontmost) {
   LaunchBar.executeAppleScript(`
-    tell application id "com.apple.Safari"
+    tell application id "${frontmost}"
       close current tab of window 1
       delay 0.1
       if (count documents) = 0 then
-        quit application "Safari"
+        quit application id "${frontmost}"
       end if
     end tell
   `);
@@ -182,4 +227,43 @@ function closeChromium(frontmost) {
       end if
     end tell
   `);
+}
+
+function handleYoutubeUrl(url, time) {
+  // LaunchBar.log(`Handling YouTube URL: ${url} with time: ${time}`);
+
+  const baseUrl = 'https://www.youtube.com/watch?v=';
+
+  let ytId;
+
+  if (url.includes('youtu.be')) {
+    ytId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else {
+    ytId = url.split('v=')[1]?.split('&')[0];
+  }
+
+  if (!ytId) return [url, ytId];
+
+  url =
+    `${baseUrl}${ytId}` +
+    ((time && parseFloat(time)) > 10 ? `&t=${time}s` : '');
+
+  return url;
+}
+
+function handleTwitchUrl(url, time) {
+  // LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
+
+  const baseUrl = 'https://www.twitch.tv/videos/';
+
+  const videoIdMatch = url.match(/\/videos\/(\d+)/);
+  if (!videoIdMatch) return [url, null];
+
+  const videoId = videoIdMatch[1];
+
+  url =
+    `${baseUrl}${videoId}` +
+    ((time && parseFloat(time)) > 10 ? `?t=${time}s` : '');
+
+  return url;
 }
