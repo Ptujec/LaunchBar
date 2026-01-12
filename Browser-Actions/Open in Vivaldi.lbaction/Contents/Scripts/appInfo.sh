@@ -13,6 +13,7 @@
 
 supported_browsers=(
     "com.apple.Safari"
+    "com.kagi.kagimacOS"
     "com.brave.Browser"
     "com.google.Chrome"
     "com.vivaldi.Vivaldi"
