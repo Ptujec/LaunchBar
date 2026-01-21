@@ -47,7 +47,7 @@ function run() {
 
       const pushData = {
         title: title,
-        icon: 'character:' + symbols[i],
+        icon: 'symbol:' + text[i],
         index: i,
         action: 'action',
         actionArgument: {
