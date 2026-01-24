@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Todoist Inbox</string>
 	<key>CFBundleVersion</key>
-	<string>3.3.2</string>
+	<string>3.4</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.todoist.mac.Todoist</string>
 	<key>LBDescription</key>
@@ -39,8 +39,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
@@ -58,8 +56,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>

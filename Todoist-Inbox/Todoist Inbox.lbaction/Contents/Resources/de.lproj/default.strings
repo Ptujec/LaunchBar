@@ -1,7 +1,7 @@
 "Now" = "Jetzt";
 "today" = "heute";
 "hour" = "stunde";
-"Confirmation Notifications" = "Bestätigungsmitteilungen";
+"Open task after creation" = "Aufgabe nach Erstellung öffnen";
 "This task has no content!" = "Die Aufgabe hat keinen Inhalt!";
 "Priority 1" = "Priorität 1";
 "Priority 2" = "Priorität 2";
@@ -10,8 +10,8 @@
 "Reset" = "Zurücksetzen";
 "Last Used" = "Zuletzt benutzt";
 "Prioritized" = "Priorisiert";
-"Hit enter to turn on notifications" = "Eingabetaste drücken, um Mitteilungen anzuschalten.";
-"Hit enter to turn off notifications" = "Eingabetaste drücken, um Mitteilungen auszuschalten.";
+"Hit enter to turn on" = "Eingabetaste drücken, um anzuschalten.";
+"Hit enter to turn off" = "Eingabetaste drücken, um auszuschalten.";
 "Inbox" = "Eingang";
 "Just a second! Local data needs to be updated." = "Einen Moment, bitte! Lokale Daten müssen aktualisiert werden.";
 "Projects, sections and lables will be updated without impacting usage data." = "Projekte, Abschnitte und Etiketten werden aktualisiert. Nutzungsdaten bleiben erhalten.";
@@ -35,3 +35,5 @@
 "Migrating data..." = "Daten werden aktualisiert...";
 "Please wait..." = "Bitte warten...";
 "Click to open log!" = "Klicken, um das Protokoll anzuzeigen!";
+"On" = "An";
+"Off" = "Aus";

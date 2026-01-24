@@ -98,7 +98,7 @@ Another nice bonus feature is the ability to pull in the current clipboard entry
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
-Hit `⇧ ↩` (shift + return) to get to the settings.[^ Shift is not the best choice but the only possible in this action.] You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) and decide wether to always open a newly created task automatically. 
+Hit `⇧ ↩` (shift + return) to get to the settings.[^ Shift is not the best choice but the only possible in this action.] You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) and decide whether to always open a newly created task automatically. 
 
 ## Download & Update
 

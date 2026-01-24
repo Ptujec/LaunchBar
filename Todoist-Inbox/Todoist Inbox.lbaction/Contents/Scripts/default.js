@@ -609,119 +609,10 @@ function processPostResponse(result, sections, projects) {
     const url = `todoist://task?id=${data.id}`;
 
     // Open Task
-    if (LaunchBar.options.commandKey) {
+    if (LaunchBar.options.commandKey || Action.preferences.openTaskOnAdd) {
       LaunchBar.openURL(url);
     }
 
-    // Confirmation notification
-    if (Action.preferences.notifications != 'off') {
-      // Section & Project
-      const project = projects.data.results.find(
-        (p) => p.id === data.project_id
-      );
-
-      const projectName = project ? project.name : '';
-      const projectString = projectName != 'Inbox' ? `#${projectName}` : '';
-
-      if (data.section_id) {
-        const section = sections.data.results.find(
-          (s) => s.id === data.section_id
-        );
-        if (section) {
-          projectString += `/${section.name}`;
-        }
-      }
-
-      // Due
-      const due = data.due;
-      const dueDateTime = due
-        ? due.datetime
-          ? LaunchBar.formatDate(new Date(due.datetime), {
-              relativeDateFormatting: true,
-            })
-          : LaunchBar.formatDate(new Date(due.date), {
-              relativeDateFormatting: true,
-              timeStyle: 'none',
-            })
-        : null;
-
-      const dueString = dueDateTime
-        ? due.is_recurring
-          ? `${'Due'.localize()}: ${dueDateTime}\n${'Recurring'.localize()}: ${
-              due.string
-            }`
-          : `${'Due'.localize()}: ${dueDateTime}`
-        : '';
-
-      // Deadline
-      const deadline = data.deadline;
-      const deadlineDate = deadline?.date
-        ? LaunchBar.formatDate(new Date(deadline.date), {
-            relativeDateFormatting: true,
-            timeStyle: 'none',
-          })
-        : null;
-
-      const deadlineString = deadlineDate
-        ? `\n${'Deadline'.localize()}: ${deadlineDate}`
-        : '';
-
-      // Duration
-      const duration = data.duration;
-
-      const durationString = duration
-        ? `\n${'Duration'.localize()}: ${
-            duration.amount
-          } ${capitalizeFirstLetter(data.duration.unit)}${'(s)'.localize()}`
-        : '';
-
-      let notificationString = dueString
-        ? `${dueString}${deadlineString}${durationString}\n${projectString}`
-        : projectString;
-
-      // Labels
-      const labels = data.labels;
-      if (labels?.length) {
-        notificationString += labels.map((label) => ` @${label}`).join('');
-      }
-
-      // Title & Description
-      let title = data.content;
-
-      if (data.description) {
-        let descriptionString = data.description;
-
-        // truncate
-        if (descriptionString.length > 40) {
-          descriptionString = descriptionString.substring(0, 37) + '…';
-        }
-
-        title += `: ${descriptionString}`;
-      }
-
-      // Priority
-      const priorityEmojis = {
-        4: '🔴',
-        3: '🟠',
-        2: '🔵',
-      };
-
-      if (priorityEmojis.hasOwnProperty(data.priority)) {
-        title += ` ${priorityEmojis[data.priority]}`;
-      }
-
-      // Fallback
-      notificationString = notificationString
-        ? notificationString
-        : 'has been added to Todoist!'.localize();
-
-      // Send Notification
-      LaunchBar.displayNotification({
-        title,
-        string: notificationString,
-        url,
-      });
-    }
     return;
   }
 
@@ -732,24 +623,27 @@ function processPostResponse(result, sections, projects) {
 }
 
 function settings() {
-  let icon, actionArgument, subtitle;
+  let icon, actionArgument, subtitle, badge;
 
-  if (Action.preferences.notifications == 'off') {
-    icon = 'notiOffTemplate';
-    actionArgument = 'on';
-    subtitle = 'Hit enter to turn on notifications'.localize();
-  } else {
-    icon = 'notiTemplate';
+  if (Action.preferences.openTaskOnAdd) {
     actionArgument = 'off';
-    subtitle = 'Hit enter to turn off notifications'.localize();
+    icon = 'openTemplate';
+    subtitle = 'Hit enter to turn off'.localize();
+    badge = 'On'.localize();
+  } else {
+    actionArgument = 'on';
+    icon = 'greyOpenTemplate';
+    subtitle = 'Hit enter to turn on'.localize();
+    badge = 'Off'.localize();
   }
 
   return [
     {
-      title: 'Confirmation Notifications'.localize(),
+      title: 'Open task after creation'.localize(),
       subtitle,
+      badge,
       icon,
-      action: 'notificationSetting',
+      action: 'openTaskSetting',
       actionArgument,
       alwaysShowsSubtitle: true,
     },
@@ -766,11 +660,11 @@ function settings() {
   ];
 }
 
-function notificationSetting(nArgument) {
-  if (nArgument == 'off') {
-    Action.preferences.notifications = 'off';
+function openTaskSetting(argument) {
+  if (argument == 'on') {
+    Action.preferences.openTaskOnAdd = true;
   } else {
-    Action.preferences.notifications = undefined;
+    Action.preferences.openTaskOnAdd = undefined;
   }
   return settings();
 }

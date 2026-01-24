@@ -11,7 +11,7 @@ function update() {
 
   const apiToken = Action.preferences.apiToken;
   const timestamp = new Date().toLocaleString('sv').replace(/[: ]/g, '-');
-  const logPath = `/tmp/todoist_inbox_log_${timestamp}.txt`;
+  const logPath = `/tmp/todoist_inbox_log_${timestamp}.log`;
 
   const fetchResource = (endpoint) =>
     HTTP.getJSON(`https://api.todoist.com/api/v1.0/${endpoint}?limit=200`, {

@@ -1,15 +1,72 @@
-(*  
-Todoist Inbox Action for LaunchBar
-by Christian Bender (@ptujec)
-2024-10-04
+on handleYoutubeUrl(_URL, _time)
+	set baseUrl to "https://www.youtube.com/watch?v="
+	set ytId to ""
+	
+	if _URL contains "youtu.be" then
+		set startPos to (offset of "youtu.be/" in _URL) + 9
+		set ytId to text startPos thru end of _URL
+		set qmarkPos to offset of "?" in ytId
+		if qmarkPos > 0 then
+			set ytId to text 1 thru (qmarkPos - 1) of ytId
+		end if
+	else
+		if _URL contains "v=" then
+			set startPos to (offset of "v=" in _URL) + 2
+			set ytId to text startPos thru end of _URL
+			set ampPos to offset of "&" in ytId
+			if ampPos > 0 then
+				set ytId to text 1 thru (ampPos - 1) of ytId
+			end if
+		end if
+	end if
+	
+	if ytId is "" then
+		return {_URL, ""}
+	end if
+	
+	set newUrl to baseUrl & ytId
+	if _time is not "" then
+		try
+			if (_time as number) > 10 then
+				set newUrl to newUrl & "&t=" & _time & "s"
+			end if
+		end try
+	end if
+	
+	return {newUrl, ytId}
+end handleYoutubeUrl
 
-Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-Helpful:
-- https://www.geeksforgeeks.org/how-to-escape-double-quotes-in-json/
-*)
+on handleTwitchUrl(_URL, _time)
+	set baseUrl to "https://www.twitch.tv/videos/"
+	set videoId to ""
+	
+	if _URL contains "/videos/" then
+		set startPos to (offset of "/videos/" in _URL) + 8
+		set videoId to text startPos thru end of _URL
+		set qmarkPos to offset of "?" in videoId
+		if qmarkPos > 0 then
+			set videoId to text 1 thru (qmarkPos - 1) of videoId
+		end if
+	end if
+	
+	if videoId is "" then
+		return {_URL, ""}
+	end if
+	
+	set newUrl to baseUrl & videoId
+	if _time is not "" then
+		try
+			if (_time as number) > 10 then
+				set newUrl to newUrl & "?t=" & _time & "s"
+			end if
+		end try
+	end if
+	
+	return {newUrl, videoId}
+end handleTwitchUrl
 
 on run
+	set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
 	set _processes to paragraphs of (do shell script "ps -c -U $USER -o command")
 	
 	set _results to {}
@@ -58,8 +115,25 @@ on run
 		try
 			tell application "Safari"
 				set _URL to URL of front document
+				set _time to ""
+				if (_URL contains "youtube.com") or (_URL contains "youtu.be") or (_URL contains "twitch.tv") then
+					try
+						set _time to (do JavaScript "String(Math.round(document.querySelector('video').currentTime))" in front document) as string
+					on error e
+						-- do nothing
+					end try
+				end if
+				
 				set _title to name of front document
 				set _title to do shell script "echo " & quoted form of _title & "| sed 's/[\",]/\\\\&/g'" -- fix quotes to avoid trouble with JSON parsing
+				
+				if _URL contains "youtube.com" or _URL contains "youtu.be" then
+					set urlResult to my handleYoutubeUrl(_URL, _time)
+					set _URL to item 1 of urlResult
+				else if _URL contains "twitch.tv" then
+					set urlResult to my handleTwitchUrl(_URL, _time)
+					set _URL to item 1 of urlResult
+				end if
 			end tell
 			set _title to "[" & _title & "]" & "(" & _URL & ")" as text
 			
