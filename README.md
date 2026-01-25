@@ -3,6 +3,7 @@
 <a href="https://ptujec.github.io/launchbar"><img src="header.jpg" width="640"/></a> 
 
 This is a repository of actions (extensions) for [LaunchBar](https://www.obdev.at/products/launchbar/index.html), the macOS application. 
+
 [→ Go to my website to view a curated list of my actions.](https://ptujec.github.io/launchbar)
 
 ## Installation & Updates
