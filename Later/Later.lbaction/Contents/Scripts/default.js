@@ -61,7 +61,7 @@ function run() {
 
   const [appId, appName, isSupported] = LaunchBar.execute(
     '/bin/bash',
-    './appInfo.sh'
+    './appInfo.sh',
   )
     .trim()
     .split('\n');
@@ -113,7 +113,7 @@ function showList(forceArchive = false) {
     } else {
       LaunchBar.alert(
         'No items found!',
-        'Hold ⌘ to add the current website from your browser! Hold ⌥ to view archived items.'
+        'Hold ⌘ to add the current website from your browser! Hold ⌥ to view archived items.',
       );
     }
     return {
@@ -136,7 +136,7 @@ function showList(forceArchive = false) {
         }
         return map;
       }, new Map())
-      .values()
+      .values(),
   );
 
   if (uniqueList.length !== list.length) {
@@ -147,7 +147,7 @@ function showList(forceArchive = false) {
         source: 'launchbar',
         edited: now,
       },
-      jsonFilePathToUse
+      jsonFilePathToUse,
     );
   }
 
@@ -190,7 +190,12 @@ function handleListItem({ index, url, jsonFilePathToUse }) {
 
   if (!LaunchBar.options.commandKey) {
     LaunchBar.hide();
-    LaunchBar.openURL(url);
+    LaunchBar.openURL(
+      url,
+      LaunchBar.options.alternateKey
+        ? Action.preferences.secondaryBrowser?.appID
+        : undefined,
+    );
     return;
   }
 
@@ -307,16 +312,16 @@ function cleanupList(jsonData) {
 
   const now = new Date();
   const archiveDaysAgo = new Date(
-    now.getTime() - archiveDays * 24 * 60 * 60 * 1000
+    now.getTime() - archiveDays * 24 * 60 * 60 * 1000,
   );
 
   // Filter out items older than archiveDays
   const toArchive = jsonData.data.filter(
-    (item) => item.dateAdded && new Date(item.dateAdded) < archiveDaysAgo
+    (item) => item.dateAdded && new Date(item.dateAdded) < archiveDaysAgo,
   );
 
   jsonData.data = jsonData.data.filter(
-    (item) => !item.dateAdded || new Date(item.dateAdded) >= archiveDaysAgo
+    (item) => !item.dateAdded || new Date(item.dateAdded) >= archiveDaysAgo,
   );
 
   if (toArchive.length > 0) {
@@ -329,7 +334,7 @@ function cleanupList(jsonData) {
 
     // Filter out any items that are already in the archive
     const uniqueToArchive = toArchive.filter(
-      (item) => !existingUrls.has(item.url) && item.url !== ''
+      (item) => !existingUrls.has(item.url) && item.url !== '',
     );
 
     // Update archive data with unique items
@@ -455,6 +460,17 @@ function settings() {
         }
       : undefined,
     {
+      title: 'Choose Secondary Browser',
+      subtitle: Action.preferences.secondaryBrowser
+        ? `Hold option to open an URL in ${Action.preferences.secondaryBrowser.bundleName}`
+        : undefined,
+      alwaysShowsSubtitle: true,
+      badge: Action.preferences.secondaryBrowser?.bundleName ?? undefined,
+      // icon: Action.preferences.secondaryBrowser?.appID ?? 'browserTemplate',
+      icon: 'browserTemplate',
+      children: chooseSecondaryBrowser(),
+    },
+    {
       title: 'Choose List Location',
       subtitle: storageDirectory.replace(LaunchBar.homeDirectory, '~'),
       alwaysShowsSubtitle: true,
@@ -536,7 +552,7 @@ function chooseDirectory() {
        set defaultPath to (POSIX file "${storageDirectory}") as alias
        set selectedFolder to choose folder default location defaultPath
        set selectedPath to POSIX path of selectedFolder
-    end tell`
+    end tell`,
   )
     .trim()
     .replace(/\/$/, '');
@@ -544,6 +560,73 @@ function chooseDirectory() {
   if (directory === '') return;
 
   Action.preferences.storageDirectory = directory;
+}
+
+function chooseSecondaryBrowser() {
+  // List all installed browser (from /Applications/ & Safari) execpt the default browser and the currently chosen browser
+  const secondaryBrowser = Action.preferences.secondaryBrowser?.appID ?? '';
+  const defaultBrowser = getDefaultBrowser();
+
+  let result = [];
+  if (defaultBrowser != 'com.apple.safari') {
+    result.push({
+      title: 'Safari',
+      icon: 'com.apple.Safari',
+      action: 'setSecondaryBrowser',
+      actionArgument: 'com.apple.Safari',
+    });
+  }
+
+  const installedApps = File.getDirectoryContents('/Applications/');
+  // installedApps.forEach(function (item) {
+  for (item of installedApps) {
+    if (item.endsWith('.app')) {
+      const infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+
+      if (File.exists(infoPlistPath)) {
+        const infoPlist = File.readPlist(infoPlistPath);
+        const bundleName = infoPlist.CFBundleName;
+        const appID = infoPlist.CFBundleIdentifier;
+        const activityTypes = infoPlist.NSUserActivityTypes;
+
+        if (
+          activityTypes &&
+          defaultBrowser.toLowerCase() != appID.toLowerCase() &&
+          secondaryBrowser.toLowerCase() != appID.toLowerCase()
+        ) {
+          for (item of activityTypes) {
+            if (item == 'NSUserActivityTypeBrowsingWeb') {
+              result.push({
+                title: bundleName,
+                icon: appID,
+                action: 'setSecondaryBrowser',
+                actionArgument: { appID, bundleName },
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+function getDefaultBrowser() {
+  const plist = File.readPlist(
+    '~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist',
+  );
+
+  const defaultBrowser = plist.LSHandlers.find(
+    (item) => item.LSHandlerURLScheme == 'http',
+  );
+
+  return defaultBrowser ? defaultBrowser.LSHandlerRoleAll.toLowerCase() : '';
+}
+
+function setSecondaryBrowser(info) {
+  Action.preferences.secondaryBrowser = info;
+  return settings();
 }
 
 // MARK: - Archive Management
@@ -574,7 +657,7 @@ function removeArchive() {
     'Remove Archive',
     'Are you sure you want to permanently delete all archived items? This cannot be undone.',
     'Remove',
-    'Cancel'
+    'Cancel',
   );
 
   if (response !== 0) return;
@@ -609,7 +692,7 @@ function restoreFromArchive() {
     }
 The archive file will be deleted after restoring.`,
     'Restore',
-    'Cancel'
+    'Cancel',
   );
 
   if (response !== 0) return;
@@ -657,7 +740,7 @@ function resolveICloudConflicts() {
     : LaunchBar.execute(
         '/usr/bin/swift',
         './resolveConflicts.swift',
-        jsonFilePath
+        jsonFilePath,
       )?.trim();
 
   if (status === 'MERGED') {
@@ -742,7 +825,7 @@ function restoreBackup(backupFile) {
     'Confirm Restore',
     `Are you sure you want to restore the backup from ${date}? This will replace your current list with the backup's content.`,
     'Restore',
-    'Cancel'
+    'Cancel',
   );
 
   if (response !== 0) return;
