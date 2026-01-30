@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Actual - Add Transaction</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.2</string>
+	<string>1.3.3</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -35,8 +35,6 @@
 			</array>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
@@ -54,8 +52,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>

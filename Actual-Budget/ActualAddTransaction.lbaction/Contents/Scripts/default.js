@@ -103,7 +103,7 @@ function setPayee({ id: payeeId, transfer_acct }) {
     LaunchBar.hide();
     const newPayeeName = LaunchBar.executeAppleScript(
       'set result to display dialog "Enter Payee Name:" with title "New Payee" default answer ""',
-      'set result to text returned of result'
+      'set result to text returned of result',
     ).trim();
 
     if (newPayeeName === '') return;
@@ -144,7 +144,7 @@ function handlePayeeAction({ payeeId }) {
   const filteredTransactions = payeeTransactions.filter(
     (t) =>
       !t.transfer_id || // Keep non-transfers
-      (t.transfer_id && t.amount < 0) // For transfers, keep only outgoing ones
+      (t.transfer_id && t.amount < 0), // For transfers, keep only outgoing ones
   );
 
   return filteredTransactions.length > 0
@@ -154,7 +154,7 @@ function handlePayeeAction({ payeeId }) {
         // For transfers, update the badge to show direction
         if (t.transfer_id) {
           const relatedTransfer = data.transactions.find(
-            (tr) => tr.id === t.transfer_id
+            (tr) => tr.id === t.transfer_id,
           );
           if (relatedTransfer) {
             item.badge = `${t.account_name} → ${relatedTransfer.account_name}`;
@@ -180,7 +180,7 @@ function showCategories() {
 
   if (recentPayeeId && data.transactions) {
     const recentTransaction = data.transactions.find(
-      (t) => t.payee_id === recentPayeeId
+      (t) => t.payee_id === recentPayeeId,
     );
     if (recentTransaction) {
       recentCategoryId = recentTransaction.category_id;
@@ -192,7 +192,7 @@ function showCategories() {
     currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1);
 
   const currentMonthTransactions = data.transactions.filter(
-    (t) => Math.floor(t.date / 100) === currentMonth
+    (t) => Math.floor(t.date / 100) === currentMonth,
   );
 
   const sortedCategories = [...data.categories]
@@ -208,15 +208,15 @@ function showCategories() {
       cat.id,
       data.transactions,
       data.zero_budgets,
-      cat
+      cat,
     );
 
     const budgetData = data.zero_budgets.find(
-      (b) => b.month === currentMonth && b.category === cat.id
+      (b) => b.month === currentMonth && b.category === cat.id,
     ) || { budgeted: 0, carryover: 0 };
 
     const categoryTransactions = currentMonthTransactions.filter(
-      (t) => t.category_id === cat.id
+      (t) => t.category_id === cat.id,
     );
 
     const netFlow = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -251,8 +251,8 @@ function showCategories() {
       balance < 0
         ? 'categoryRed'
         : balance === 0
-        ? 'categoryGreyTemplate'
-        : 'categoryTemplate';
+          ? 'categoryGreyTemplate'
+          : 'categoryTemplate';
 
     return {
       title: cat.name,
@@ -290,7 +290,7 @@ function handleCategoryAction({
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
   const transactionItems = categoryTransactions.map((t) =>
-    formatTransaction(t, numberFormat, dateFormat)
+    formatTransaction(t, numberFormat, dateFormat),
   );
 
   return transactionItems.length > 0
@@ -310,7 +310,7 @@ function showAccounts() {
 
   if (recentPayeeId && data.transactions) {
     const recentTransaction = data.transactions.find(
-      (t) => t.payee_id === recentPayeeId
+      (t) => t.payee_id === recentPayeeId,
     );
     if (recentTransaction) {
       recentAccountId = recentTransaction.account_id;
@@ -349,13 +349,19 @@ function showDates() {
     date.setDate(today.getDate() - index);
 
     const isoString = new Date(
-      date.getTime() - date.getTimezoneOffset() * 60000
+      date.getTime() - date.getTimezoneOffset() * 60000,
     )
       .toISOString()
       .split('T')[0];
 
+    const fullDateString = LaunchBar.formatDate(date, {
+      relativeDateFormatting: true,
+      timeStyle: 'none',
+      dateStyle: 'full',
+    });
+
     return {
-      title: isoString,
+      title: fullDateString,
       icon: 'calTemplate',
       action: 'setDate',
       actionArgument: isoString.replace(/-/g, ''), // Store as YYYYMMDD
@@ -446,7 +452,7 @@ function postTransaction() {
     notes,
     date,
     transferAcct || '',
-    payeeName
+    payeeName,
   ).trim();
 
   if (result.startsWith('ERROR:')) {
@@ -478,13 +484,13 @@ function postTransaction() {
       title: 'Transfer added successfully!',
       string: `${account} → ${transferAccount}: ${formattedAmount.replace(
         '-',
-        ''
+        '',
       )}\n${account}: ${formatAmount(
         accountBalance,
-        data.numberFormat
+        data.numberFormat,
       )}\n${transferAccount}: ${formatAmount(
         transferBalance,
-        data.numberFormat
+        data.numberFormat,
       )}`,
       url: File.fileURLForPath('/Applications/Actual.app'),
     });
@@ -503,7 +509,7 @@ function postTransaction() {
     categoryId,
     data.transactions,
     data.zero_budgets,
-    category
+    category,
   );
 
   const formattedDate = LaunchBar.formatDate(
@@ -512,7 +518,7 @@ function postTransaction() {
       relativeDateFormatting: true,
       timeStyle: 'none',
       dateStyle: 'short',
-    }
+    },
   );
 
   LaunchBar.displayNotification({
@@ -521,7 +527,7 @@ function postTransaction() {
       category.name
     }: ${formatAmount(
       categoryBalance,
-      data.numberFormat
+      data.numberFormat,
     )}\n${account}: ${formatAmount(accountBalance, data.numberFormat)}`,
     url: File.fileURLForPath('/Applications/Actual.app'),
   });
