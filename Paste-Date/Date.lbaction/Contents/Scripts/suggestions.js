@@ -1,7 +1,7 @@
 /* 
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-18
+2026-01-30
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -9,8 +9,21 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 include('global.js');
 
 function runWithString(string) {
+  const icon = 'Template';
   const date = new Date();
   string = string.toLowerCase();
+
+  // Handle pure number input directly (offset numbers)
+  if (!isNaN(parseInt(string))) {
+    const dateString = processArgument(string, date);
+    const subtitle = format(dateString, 'full');
+    return {
+      title: string,
+      subtitle,
+      alwaysShowsSubtitle: true,
+      icon,
+    };
+  }
 
   // Get weekdays starting from tomorrow
   const todayIndex = new Date().getDay();
@@ -29,7 +42,7 @@ function runWithString(string) {
   const matches = string
     ? orderedSuggestions.filter(
         (suggestion) =>
-          findFirstMatch(string, [suggestion.toLowerCase()]) !== undefined
+          findFirstMatch(string, [suggestion.toLowerCase()]) !== undefined,
       )
     : orderedSuggestions;
 
@@ -43,8 +56,8 @@ function runWithString(string) {
     return {
       title: suggestion,
       subtitle,
-      icon: 'Template',
       alwaysShowsSubtitle: true,
+      icon,
     };
   });
 }

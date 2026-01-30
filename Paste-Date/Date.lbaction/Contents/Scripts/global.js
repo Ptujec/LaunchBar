@@ -1,7 +1,7 @@
 /* 
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-18
+2026-01-30
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -151,7 +151,7 @@ function processArgument(argument, date) {
 
   // Handle weekdays first
   const weekdayIndex = weekdays.findIndex((day) =>
-    day.localize().toLowerCase().startsWith(argument)
+    day.localize().toLowerCase().startsWith(argument),
   );
 
   if (weekdayIndex !== -1) {
@@ -161,7 +161,7 @@ function processArgument(argument, date) {
   // First and last days of month
   const monthMatch = findFirstMatch(
     argument,
-    monthBoundarySuggestions.map((s) => s.toLowerCase())
+    monthBoundarySuggestions.map((s) => s.toLowerCase()),
   );
   if (monthMatch) {
     switch (monthMatch) {
@@ -197,16 +197,16 @@ function processArgument(argument, date) {
   // nTh weekday matching
   const match = findFirstMatch(
     argument,
-    generateNthWeekdaySuggestions().map((s) => s.toLowerCase())
+    generateNthWeekdaySuggestions().map((s) => s.toLowerCase()),
   );
 
   if (match) {
     const [ordinal, weekday, ...rest] = match.split(' ');
     const isNextMonth = match.includes(
-      'of next month'.localize().toLowerCase()
+      'of next month'.localize().toLowerCase(),
     );
     const dayIndex = weekdays.findIndex(
-      (day) => day.localize().toLowerCase() === weekday
+      (day) => day.localize().toLowerCase() === weekday,
     );
 
     if (dayIndex !== -1) {
@@ -244,6 +244,6 @@ function generateNthWeekdaySuggestions() {
           `${prefix} ${'of this month'.localize()}`,
           `${prefix} ${'of next month'.localize()}`,
         ];
-      })
+      }),
     );
 }

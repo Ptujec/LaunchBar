@@ -1,7 +1,7 @@
 /* 
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-07-18
+2026-01-30
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
