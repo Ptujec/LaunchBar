@@ -28,20 +28,75 @@ function runWithString(string) {
   return main(string);
 }
 
-function getAppLinks() {
-  // Get Markdown Links from Mail and Safari
-  const output = LaunchBar.executeAppleScriptFile(
-    './mdLinks.applescript'
-  ).trim();
+// MARK: - Feature Functions
 
-  if (output == '') {
+function getAppLinks() {
+  const [appId, appName, isSupportedBrowser] = LaunchBar.execute(
+    '/bin/bash',
+    './appInfo.sh',
+  )
+    .trim()
+    .split('\n');
+
+  let output;
+
+  if (appId === 'com.apple.mail') {
+    output = LaunchBar.executeAppleScriptFile('./mail.applescript').trim();
+
+    if (output !== '') {
+      const result = eval(`[${output}]`).sort((a, b) => a.date < b.date);
+
+      if (result.length > 1) {
+        return result;
+      }
+
+      if (result.length === 1) {
+        const subject = cleanupTitle(result[0].subject);
+        const messageURL = result[0].messageURL;
+        pasteLink(`[${subject}](${messageURL})`);
+        return;
+      }
+    }
+
     return {
-      title: 'No links to emails or websites found!'.localize(),
+      title: 'No email selected!'.localize(),
       icon: 'alert',
     };
   }
 
-  return eval(`[${output}]`).sort((a, b) => a.date < b.date);
+  if (isSupportedBrowser === 'true') {
+    const info = getBrowserInfo(appId).trim().split('\n');
+
+    let url = info[0]?.trim();
+    const title = info[1] ? cleanupTitle(info[1]) : url;
+    const time = info[2] ? info[2].trim() : null;
+
+    if (!url || url === '') {
+      return {
+        title: 'No URL found in '.localize() + appName + '!',
+        icon: 'alert',
+      };
+    }
+
+    let ytId, twitchId;
+    if (url.includes('youtu')) {
+      [url, ytId] = handleYoutubeUrl(url, time);
+    }
+    if (url.includes('twitch.tv')) {
+      [url, twitchId] = handleTwitchUrl(url, time);
+    }
+
+    pasteLink(`[${title}](${url})`);
+
+    return;
+  }
+
+  if (!output) {
+    return {
+      title: appName + ' is not a supported application!'.localize(),
+      icon: 'alert',
+    };
+  }
 }
 
 function getClipboard() {
@@ -93,7 +148,7 @@ function handleQuotes(string) {
   const currentClipboard = LaunchBar.getClipboardString() || '';
 
   LaunchBar.setClipboardString(
-    string === '"' ? '""' : `"${string.replace(/"/g, '').trim()}"`
+    string === '"' ? '""' : `"${string.replace(/"/g, '').trim()}"`,
   );
 
   const moveCursor = string === '"' ? 'key code 123' : '';
@@ -135,6 +190,114 @@ function expandCurlyBraces() {
     end tell
   `);
 }
+
+// MARK: - App Links Helper Functions
+
+function getBrowserInfo(appId) {
+  const script =
+    appId == 'com.apple.Safari' || appId == 'com.kagi.kagimacOS'
+      ? `
+    tell application id "${appId}"
+        set _url to URL of front document
+        set _name to name of front document
+        set _time to ""
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+          try
+              set _time to (do JavaScript "String(Math.round(document.querySelector('video').currentTime))" in front document) as string
+          on error e
+              -- do nothing
+          end try
+        end if
+        return _url & "\n" & _name & "\n" & _time
+    end tell`
+      : `
+    tell application id "${appId}"
+        set _url to URL of active tab of front window
+        set _name to title of active tab of front window
+        set _time to ""
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+          try
+            set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video').currentTime))")
+          on error e
+            -- do nothing
+          end try
+        end if
+        return _url & "\n" & _name & "\n" & _time
+    end tell`;
+
+  return LaunchBar.executeAppleScript(script).trim();
+}
+
+function handleYoutubeUrl(url, time) {
+  // LaunchBar.log(`Handling YouTube URL: ${url} with time: ${time}`);
+
+  const baseUrl = 'https://www.youtube.com/watch?v=';
+
+  let ytId;
+
+  if (url.includes('youtu.be')) {
+    ytId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else {
+    ytId = url.split('v=')[1]?.split('&')[0];
+  }
+
+  if (!ytId) return [url, ytId];
+
+  url =
+    `${baseUrl}${ytId}` +
+    ((time && parseFloat(time)) > 10 ? `&t=${time}s` : '');
+
+  return [url, ytId];
+}
+
+function handleTwitchUrl(url, time) {
+  // LaunchBar.log(`Handling Twitch URL: ${url} with time: ${time}`);
+
+  const baseUrl = 'https://www.twitch.tv/videos/';
+
+  const videoIdMatch = url.match(/\/videos\/(\d+)/);
+  if (!videoIdMatch) return [url, null];
+
+  const videoId = videoIdMatch[1];
+
+  url =
+    `${baseUrl}${videoId}` +
+    ((time && parseFloat(time)) > 10 ? `?t=${time}s` : '');
+
+  return [url, videoId];
+}
+
+function cleanupTitle(title) {
+  if (!title) return '';
+  return title
+    .decodeHTMLEntities()
+    .replace(/^\(\d+\)/g, '') // remove tab number prefix like "(1) "
+    .replace(/:/g, '-') // remove tab number prefix like "(1) "
+    .replace(' - YouTube', '')
+    .replace(/\s+/g, ' ') // normalize whitespace
+    .trim();
+}
+
+function pasteLink(mdLink) {
+  let currentClipboard = LaunchBar.getClipboardString();
+
+  LaunchBar.setClipboardString(mdLink);
+
+  const pasteClipboardAS = `
+    tell application "System Events"
+      keystroke "a" using command down
+      delay 0.2
+      keystroke "v" using command down
+      key code 123 using command down
+      key code 124
+    end tell
+    set the clipboard to "${currentClipboard}"
+  `;
+
+  LaunchBar.executeAppleScript(pasteClipboardAS);
+}
+
+// MARK: - Main Function
 
 function main(string) {
   let suggestions = [];

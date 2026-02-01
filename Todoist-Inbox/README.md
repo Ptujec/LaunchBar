@@ -81,17 +81,11 @@ Also, **you can always start over by selecting the parsed title** with arrow dow
 
 ### Bonus
 
-#### URLs From Safari or Mail
-
-You can even add markdown formatted links for the current website in Safari or a selected email in Mail if you start your entry with a period ".".
-
-<img src="md_links.gif" width="726"/> 
-
-#### Clipboard Entry Pull-In
-
-Another nice bonus feature is the ability to pull in the current clipboard entry if you start your entry with a comma ",". Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
+You can even add Markdown-formatted links for the current website in the frontmost browser, or a selected email in the Mail app, if you start your entry with a period (".").
 
 <img src="08.jpg" width="726"/> 
+
+Similarly, you can pull in the current clipboard entry if you start your entry with a comma (","). Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
 
 ## Setup & Settings
 
