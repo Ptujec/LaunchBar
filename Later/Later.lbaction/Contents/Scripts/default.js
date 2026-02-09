@@ -41,6 +41,7 @@ function runWithURL(url) {
   LaunchBar.hide();
 
   let ytId, twitchId, time;
+  if (url.includes('facebook.com')) url = handleFacebookUrl(url);
   if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
   if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
 
@@ -391,6 +392,36 @@ function handleTwitchUrl(url, time) {
     ((time && parseFloat(time)) > 10 ? `?t=${time}s` : '');
 
   return [url, videoId];
+}
+
+function handleFacebookUrl(url) {
+  // LaunchBar.log(`Handling Facebook URL: ${url}`);
+
+  if (!url.includes('facebook.com/l.php')) return url;
+
+  // Extract the 'u' parameter which contains the actual URL
+  const uMatch = url.match(/[?&]u=([^&]+)/);
+  if (!uMatch) return url;
+
+  try {
+    // Decode the URL
+    let actualUrl = decodeURIComponent(uMatch[1]);
+
+    // Remove Facebook tracking parameters (fbclid, etc.)
+    actualUrl = actualUrl.replace(/[?&]fbclid=[^&]*/g, ''); // Remove fbclid parameter
+    actualUrl = actualUrl.replace(/[?&]__tn__=[^&]*/g, ''); // Remove __tn__ parameter
+    actualUrl = actualUrl.replace(/[?&]c\[[0-9]+\]=[^&]*/g, ''); // Remove c[] parameters
+
+    // Clean up any trailing & or ?
+    actualUrl = actualUrl.replace(/[?&]$/, '');
+
+    // If there are multiple ? or &, clean them up
+    actualUrl = actualUrl.replace(/([?&])\1+/g, '$1');
+
+    return actualUrl;
+  } catch (e) {
+    return url;
+  }
 }
 
 function cleanupTitle(title) {
