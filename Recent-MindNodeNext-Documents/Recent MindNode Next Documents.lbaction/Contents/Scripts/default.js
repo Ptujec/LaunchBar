@@ -1,7 +1,7 @@
 /* 
 Recent MindNode Next Documents Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-12-11
+2026-02-09
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -22,14 +22,14 @@ function run() {
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
 
   const snapshotData = File.readJSON(
-    `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`
+    `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`,
   ) || { documents: {} };
 
   return Object.values(snapshotData.documents)
     .filter((obj) => !obj.isTrashed && obj.title)
     .sort(
       (a, b) =>
-        (b.lastViewedDate ?? -Infinity) - (a.lastViewedDate ?? -Infinity)
+        (b.lastViewedDate ?? -Infinity) - (a.lastViewedDate ?? -Infinity),
     )
     .map((obj) => {
       let previewPath = File.pathForFileURL(obj[preview].fullSizeURL);
@@ -46,8 +46,12 @@ function run() {
           relativeDateFormatting: true,
           timeStyle: 'short',
           dateStyle: 'short',
-        }
+        },
       );
+
+      const cloudKitShareID = obj.shareURL?.match(/share\/([^#]+)/)?.[1];
+
+      const aliasString = `{"documentLink":{"documentID":"${obj.id}","cloudKitShareID":"${cloudKitShareID}","documentTitle":"${obj.title}"}}`;
 
       return {
         title: obj.title,
@@ -58,24 +62,32 @@ function run() {
         action: 'open',
         actionArgument: {
           url: `https://mindnode.com/document/${obj.id}#${encodeURI(
-            obj.title
+            obj.title,
           )}`,
           title: obj.title,
+          aliasString,
         },
         actionRunsInBackground: true,
       };
     });
 }
 
-function open({ url, title }) {
+function open({ url, title, aliasString }) {
   LaunchBar.hide();
-  if (LaunchBar.options.alternateKey) {
+  if (LaunchBar.options.alternateKey)
     return LaunchBar.paste(`[${title}](${url})`);
+  if (LaunchBar.options.controlKey) {
+    // LaunchBar.alert(aliasString);
+    // LaunchBar.paste(title);
+    const dir = getDir()?.trim();
+    const fileLocation = `${dir}${title}.mindnodealias`;
+    File.writeText(aliasString, fileLocation);
+    return;
   }
   if (LaunchBar.options.shiftKey) return LaunchBar.paste(url);
   if (LaunchBar.options.commandKey) {
     LaunchBar.executeAppleScript(`
-        tell application "MindNode Next" to activate
+        tell application "MindNode" to activate
         delay 0.6
         tell application "System Events" 
           keystroke "o" using {command down}
@@ -94,11 +106,27 @@ function open({ url, title }) {
   LaunchBar.openURL(url);
 }
 
+// HELPER FUNCTIONS
+
+function getDir() {
+  return LaunchBar.executeAppleScript(`
+      tell application "Finder"
+		    activate
+		    if exists Finder window 1 then
+			    set currentDir to target of Finder window 1 as alias
+		    else
+			    set currentDir to desktop as alias
+		    end if
+	    end tell
+      return POSIX path of currentDir
+    `);
+}
+
 // FUNCTIONS TO DETECT THE LATEST PRODUCTION VERSION
 
 function getLatestVersion() {
   const directories = File.getDirectoryContents(supportDir).filter((dir) =>
-    dir.startsWith('production-v')
+    dir.startsWith('production-v'),
   );
 
   const prodcutionDirsArray = directories.map((directory) => {
@@ -111,7 +139,7 @@ function getLatestVersion() {
       isNewerVersion(current.versionNumber, latest ? latest.versionNumber : '')
         ? current
         : latest,
-    null
+    null,
   )?.directory;
 }
 
