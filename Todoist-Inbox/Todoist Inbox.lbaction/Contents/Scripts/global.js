@@ -15,10 +15,10 @@ const actionPath = Action.path;
 const locale = LaunchBar.currentLocale;
 
 const dueStringsJSON = File.readJSON(
-  `${actionPath}/Contents/Resources/dueStringOptions.json`
+  `${actionPath}/Contents/Resources/dueStringOptions.json`,
 );
 const stopwordsJSON = File.readJSON(
-  `${actionPath}/Contents/Resources/stopwords.json`
+  `${actionPath}/Contents/Resources/stopwords.json`,
 );
 const sectionsPath = `${supportPath}/sections.json`;
 const projectsPath = `${supportPath}/projects.json`;
@@ -43,9 +43,10 @@ function parseDeadlineDate(string) {
     .formatToParts(new Date())
     .reduce(
       (format, part, index) => (
-        part.type !== 'literal' && (format[part.type] = index), format
+        part.type !== 'literal' && (format[part.type] = index),
+        format
       ),
-      {}
+      {},
     );
 
   const dateParts = string.split(/[./-]/).filter(Boolean).map(Number);

@@ -73,6 +73,8 @@ I also built some smart into it. Projects, sections and labels you use frequentl
 
 Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
 
+**Note:** Projects, sections, and labels are stored locally for better performance (in `~/Library/Application Support/LaunchBar/Action Support`). It’s not possible, nor really necessary, to update these fully automatically in the background. However, each time you use `⌘ ⏎` (command + return) to specify a project, section, or label, the next time you enter a task the action will update the data while you enter the new task. This approach should create the least friction while keeping the data fairly up to date in a semi-automatic way.
+
 ### Exclude Text From Being Parsed
 
 You can prevent text from being parsed by putting it in quotation marks. If you add a single quotation mark, your entry will be automatically wrapped in quotation marks. 
@@ -92,7 +94,7 @@ Similarly, you can pull in the current clipboard entry if you start your entry w
 You need an API-Token for this action, which you can find when you scroll all the way to the bottom in Todoists [integration settings](https://todoist.com/app/settings/integrations). 
 You will be prompted to add it on the first run. 
 
-Hit `⇧ ↩` (shift + return) to get to the settings.[^ Shift is not the best choice but the only possible in this action.] You can change the API-Token, refresh preloaded data (stored in `~/Library/Application Support/LaunchBar/Action Support`) and decide whether to always open a newly created task automatically. 
+Hit `⇧ ↩` (shift + return) to get to the settings. You can change the API-Token, refresh/reset preloaded data and decide whether to always open a newly created task automatically. 
 
 ## Download & Update
 

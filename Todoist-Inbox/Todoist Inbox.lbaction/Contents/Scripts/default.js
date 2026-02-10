@@ -6,7 +6,7 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
-- https://todoist.com/api/v1/docs
+- https://developer.todoist.com/api/v1/
 - https://developer.todoist.com/guides/#tasks (URL Scheme)
 - https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
@@ -39,17 +39,7 @@ function run(argument) {
     return;
   }
 
-  // Data migration to new API
-  if (File.exists(projectsPath)) {
-    const projects = File.readJSON(projectsPath);
-    if (!projects.data?.results) {
-      migrateData();
-    }
-  }
-
-  if (LaunchBar.options.shiftKey) {
-    return settings();
-  }
+  if (LaunchBar.options.shiftKey) return settings();
 
   argument += ' '; // The added space is because Launchbar trims the argument (which does not catch if just a priority is entered and will take it as the task name)
 
@@ -166,11 +156,10 @@ function run(argument) {
     advancedData: false,
   };
 
-  if (!argument) {
-    return LaunchBar.alert('This task has no content!'.localize());
-  }
+  if (!argument) return LaunchBar.alert('This task has no content!'.localize());
 
   if (LaunchBar.options.commandKey) {
+    if (LaunchBar.options.controlKey) update(false);
     return advancedOptions(taskDict);
   }
 
@@ -183,24 +172,32 @@ function advancedOptions(taskDict) {
     !File.exists(sectionsPath) ||
     !File.exists(labelsPath)
   ) {
+    Action.preferences.syncToken = undefined;
+    Action.preferences.lastSyncDate = undefined;
+
     LaunchBar.alert(
-      'Just a second! Local data needs to be updated.'.localize()
+      'Just a second! Local data needs to be updated.'.localize(),
     );
-    update();
+    update(false); // false = don't hide LaunchBar
   }
+
+  Action.preferences.updateNow = true;
+
   taskDict.advancedData = true;
 
   const labelDict = taskDict.labelDict || undefined;
   const usedLabels = taskDict.usedLabels || [];
 
-  let labels = File.readJSON(labelsPath).data.results;
+  let labels = File.readJSON(labelsPath).data.results?.filter(
+    (label) => !label.is_archived,
+  );
   let lastUsed, lastUsedCategoryId, lastUsedSectionId;
 
   if (labelDict) {
     taskDict.usedLabels = [...usedLabels, labelDict];
 
     const labelIndex = labels.findIndex(
-      (item) => item.id === labelDict.labelId
+      (item) => item.id === labelDict.labelId,
     );
 
     lastUsed = labels[labelIndex].lastUsed;
@@ -224,7 +221,9 @@ function advancedOptions(taskDict) {
 
   taskDict.words = words;
 
-  const projects = File.readJSON(projectsPath).data.results;
+  const projects = File.readJSON(projectsPath).data.results?.filter(
+    (project) => !project.is_archived,
+  );
 
   // MARK: Projects
 
@@ -262,7 +261,7 @@ function advancedOptions(taskDict) {
     let matchCount = words.includes(project.name.toLowerCase()) ? 2 : 0;
     if (project.usedWords) {
       const additionalMatches = words.filter((word) =>
-        project.usedWords.includes(word)
+        project.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -282,7 +281,9 @@ function advancedOptions(taskDict) {
 
   // MARK: Sections
 
-  const sections = File.readJSON(sectionsPath).data.results;
+  const sections = File.readJSON(sectionsPath).data.results?.filter(
+    (section) => !section.is_archived,
+  );
 
   const sectionResults = sections.map((section, index) => {
     const name = section.name;
@@ -322,7 +323,7 @@ function advancedOptions(taskDict) {
     let matchCount = words.includes(section.name.toLowerCase()) ? 2 : 0;
     if (section.usedWords) {
       const additionalMatches = words.filter((word) =>
-        section.usedWords.includes(word)
+        section.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -365,7 +366,7 @@ function advancedOptions(taskDict) {
     let matchCount = words.includes(label.name.toLowerCase()) ? 2 : 0;
     if (label.usedWords) {
       const additionalMatches = words.filter((word) =>
-        label.usedWords.includes(word)
+        label.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -417,7 +418,7 @@ function advancedOptions(taskDict) {
   return [
     ...resultLastUsed.sort((a, b) => b.usage - a.usage),
     ...resultPrioritized.sort(
-      (a, b) => b.matchCount - a.matchCount || b.usage - a.usage
+      (a, b) => b.matchCount - a.matchCount || b.usage - a.usage,
     ),
     ...resultProjects,
     ...resultSections,
@@ -501,7 +502,7 @@ function processAdvancedData(taskDict, projects, sections) {
       // Remember section used for the label
       const lastLabelId = usedLabels.slice(-1)[0].labelId;
       const lastLabelIndex = labels.data.results.findIndex(
-        (item) => item.id === lastLabelId
+        (item) => item.id === lastLabelId,
       );
 
       labels.data.results[lastLabelIndex].lastUsed = 'section';
@@ -511,7 +512,7 @@ function processAdvancedData(taskDict, projects, sections) {
       for (const usedLabel of usedLabels) {
         const labelId = usedLabel.labelId;
         const labelIndex = labels.data.results.findIndex(
-          (item) => item.id === labelId
+          (item) => item.id === labelId,
         );
 
         // Remember used words
@@ -558,7 +559,7 @@ function processAdvancedData(taskDict, projects, sections) {
     // Remember project used for the label
     const lastLabelId = usedLabels.slice(-1)[0].labelId;
     const lastLabelIndex = labels.data.results.findIndex(
-      (item) => item.id === lastLabelId
+      (item) => item.id === lastLabelId,
     );
     labels.data.results[lastLabelIndex].lastUsed = 'project';
     labels.data.results[lastLabelIndex].lastUsedCategoryId = taskDict.id;
@@ -567,7 +568,7 @@ function processAdvancedData(taskDict, projects, sections) {
     for (const usedLabel of usedLabels) {
       const labelId = usedLabel.labelId;
       const labelIndex = labels.data.results.findIndex(
-        (item) => item.id === labelId
+        (item) => item.id === labelId,
       );
 
       // Remember used words
@@ -648,14 +649,14 @@ function settings() {
       alwaysShowsSubtitle: true,
     },
     {
-      title: 'Reset API-Token'.localize(),
-      icon: 'keyTemplate',
-      action: 'setApiKey',
-    },
-    {
       title: 'Refresh projects, sections & labels.'.localize(),
       icon: 'refreshTemplate',
       children: refreshData(),
+    },
+    {
+      title: 'Reset API-Token'.localize(),
+      icon: 'keyTemplate',
+      action: 'setApiKey',
     },
   ];
 }
@@ -699,7 +700,7 @@ function resetWarning() {
     'Are you sure?'.localize(),
     'Do you really want to reset all your local data?'.localize(),
     'Ok',
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
   switch (response) {
     case 0:

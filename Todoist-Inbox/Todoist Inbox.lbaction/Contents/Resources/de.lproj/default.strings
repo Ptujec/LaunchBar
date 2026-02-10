@@ -18,7 +18,6 @@
 "Update" = "Aktualisieren";
 "A complete reset including usage data." = "Nutzungsdaten werden zurückgesetzt!";
 "Projects, sections & labels reset." = "Projekte, Abschitte & Etiketten wurden zurückgesetzt.";
-"Projects, sections & labels updated." = "Projekte, Abschitte & Etiketten wurden aktualisiert.";
 " change(s)" = " Änderung(en)";
 "Reset API-Token" = "API-Token erneuern";
 "has been added to Todoist!" = "wurde zu Todoist hinzugefügt!";
@@ -39,3 +38,7 @@
 " is not a supported application!" = " ist keine unterstützte Anwendung!";
 "No email selected!" = "Keine E-Mail ausgewählt!";
 "No URL found in " = "Keine URL in ";
+"Todoist Inbox" = "Todoist Eingang";
+"Local Data Update" = "Aktualisierung lokaler Daten";
+"Local Data Reset" = "Zurücksetzen lokaler Daten";
+"No links. " = "Keine Links. ";

@@ -20,6 +20,14 @@ function runWithString(string) {
     setApiKey();
     return;
   }
+
+  if (string && Action.preferences.updateNow) {
+    // this is set to true every time you use command to set a project, label, or section … so the next time this will check once for updates … but initialy it won't … the initial update will be triggered when using command the first time
+    update(false); // false = don't hide LaunchBar
+    Action.preferences.updateNow = false;
+    LaunchBar.log('Updating local data…');
+  }
+
   if (string === '.') return getAppLinks();
   if (string === ',') return getClipboard();
   if (string.split('"').length === 2) return handleQuotes(string);
@@ -93,7 +101,10 @@ function getAppLinks() {
 
   if (!output) {
     return {
-      title: appName + ' is not a supported application!'.localize(),
+      title:
+        'No links. '.localize() +
+        appName +
+        ' is not a supported application!'.localize(),
       icon: 'alert',
     };
   }

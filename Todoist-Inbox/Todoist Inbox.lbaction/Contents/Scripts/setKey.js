@@ -16,12 +16,12 @@ function setApiKey() {
     '1) Go to Settings/Integrations/Developer and copy the API-Token.\n2) Press »Set API-Token«',
     'Open Settings',
     'Set API-Token',
-    'Cancel'
+    'Cancel',
   );
   switch (response) {
     case 0:
       LaunchBar.openURL(
-        'https://todoist.com/app/settings/integrations/developer'
+        'https://app.todoist.com/app/settings/integrations/developer',
       );
       LaunchBar.hide();
       break;
@@ -30,17 +30,25 @@ function setApiKey() {
 
       if (clipboardContent.length == 40) {
         // Test API-Token
-        const projectsOnline = HTTP.getJSON(
-          'https://api.todoist.com/api/v1.0/projects',
-          {
-            headerFields: {
-              Authorization: `Bearer ${clipboardContent}`,
-            },
-          }
-        );
+        const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
+          headerFields: { Authorization: `Bearer ${clipboardContent}` },
+          body: {
+            sync_token: '*',
+            resource_types: '["user"]',
+          },
+        });
 
-        if (projectsOnline.error) {
-          LaunchBar.alert(projectsOnline.error);
+        if (result.error) {
+          LaunchBar.alert(result.error);
+          break;
+        }
+
+        if (!result.response || result.response.status !== 200) {
+          const statusCode = result.response?.status || 'unknown';
+          const errorMessage = result.data
+            ? JSON.parse(result.data).error_message || 'Unknown error'
+            : 'No response data';
+          LaunchBar.alert(`Todoist API Error (${statusCode}): ${errorMessage}`);
           break;
         }
 
@@ -51,7 +59,7 @@ function setApiKey() {
           'Success!',
           'API-Token set to: ' +
             Action.preferences.apiToken +
-            '.\nProjects, sections and labels will be updated next.'
+            '.\nProjects, sections and labels will be updated next.',
         );
 
         // Write or update local data
@@ -61,7 +69,7 @@ function setApiKey() {
 
       LaunchBar.alert(
         'The length of the clipboard content does not match the length of a correct API-Token',
-        'Make sure the API-Token is the most recent item in the clipboard!'
+        'Make sure the API-Token is the most recent item in the clipboard!',
       );
       break;
 
