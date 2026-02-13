@@ -354,14 +354,21 @@ function showDates() {
       .toISOString()
       .split('T')[0];
 
-    const fullDateString = LaunchBar.formatDate(date, {
+    const relativeDateString = LaunchBar.formatDate(date, {
       relativeDateFormatting: true,
       timeStyle: 'none',
       dateStyle: 'full',
     });
 
+    const dateString = LaunchBar.formatDate(date, {
+      timeStyle: 'none',
+      dateStyle: 'full',
+    });
+
     return {
-      title: fullDateString,
+      title: relativeDateString,
+      subtitle: relativeDateString !== dateString ? dateString : undefined,
+      alwaysShowsSubtitle: true,
       icon: 'calTemplate',
       action: 'setDate',
       actionArgument: isoString.replace(/-/g, ''), // Store as YYYYMMDD
