@@ -51,6 +51,13 @@ function run(argument) {
     argument = argument.replace(reQuotedParts, ' ');
   }
 
+  // Reminder
+  reminder = argument.includes(' !') ? argument.match(reReminder)[1] : null;
+
+  argument = argument.includes(' !')
+    ? argument.replace(reReminder, '')
+    : argument;
+
   // Description
   description = argument.includes(': ')
     ? capitalizeFirstLetter(argument.match(reDescription)[1])
@@ -149,29 +156,52 @@ function run(argument) {
     dueString,
     duration,
     durationUnit,
+    reminder,
     prioValue,
     prioText,
     deadline,
-    lang,
+    // lang, // not needed because its global
     advancedData: false,
   };
 
   if (!argument) return LaunchBar.alert('This task has no content!'.localize());
 
-  if (LaunchBar.options.commandKey) {
-    if (LaunchBar.options.controlKey) update(false);
-    return advancedOptions(taskDict);
-  }
+  if (LaunchBar.options.commandKey) return advancedOptions(taskDict);
 
   postTask(taskDict);
 }
 
+function postTask(taskDict) {
+  LaunchBar.hide();
+
+  let body;
+  if (taskDict.advancedData) {
+    body = processAdvancedData(taskDict);
+  } else {
+    body = {
+      content: taskDict.content,
+      description: taskDict.description,
+      due_lang: lang,
+      due_string: taskDict.dueString,
+      priority: taskDict.prioValue,
+      duration: taskDict.duration,
+      duration_unit: taskDict.durationUnit,
+      deadline_date: taskDict.deadline?.date,
+      deadline_lang: taskDict.deadline?.lang,
+    };
+  }
+
+  const result = HTTP.postJSON('https://api.todoist.com/api/v1.0/tasks', {
+    body: body,
+    headerFields: {
+      Authorization: `Bearer ${apiToken}`,
+    },
+  });
+  processPostResponse(result, taskDict.reminder);
+}
+
 function advancedOptions(taskDict) {
-  if (
-    !File.exists(projectsPath) ||
-    !File.exists(sectionsPath) ||
-    !File.exists(labelsPath)
-  ) {
+  if (!File.exists(todoistDataPath)) {
     Action.preferences.syncToken = undefined;
     Action.preferences.lastSyncDate = undefined;
 
@@ -188,22 +218,22 @@ function advancedOptions(taskDict) {
   const labelDict = taskDict.labelDict || undefined;
   const usedLabels = taskDict.usedLabels || [];
 
-  let labels = File.readJSON(labelsPath).data.results?.filter(
-    (label) => !label.is_archived,
-  );
+  const todoistData = getTodoistData();
+  const usageData = getUsageData();
+
+  let labels = todoistData.labels?.filter((label) => !label.is_archived);
   let lastUsed, lastUsedCategoryId, lastUsedSectionId;
 
   if (labelDict) {
     taskDict.usedLabels = [...usedLabels, labelDict];
 
-    const labelIndex = labels.findIndex(
-      (item) => item.id === labelDict.labelId,
-    );
-
-    lastUsed = labels[labelIndex].lastUsed;
-    lastUsedCategoryId = labels[labelIndex].lastUsedCategoryId;
-    lastUsedSectionId = labels[labelIndex].lastUsedSectionId;
-    lastUsedLabelId = labels[labelIndex].lastUsedLabelId;
+    const labelUsageItem = usageData.labels[labelDict.labelId] || {
+      usage: 0,
+      usedWords: [],
+    };
+    lastUsed = labelUsageItem.lastUsed;
+    lastUsedCategoryId = labelUsageItem.lastUsedCategoryId;
+    lastUsedSectionId = labelUsageItem.lastUsedSectionId;
   }
 
   const usedLabelsNames = taskDict.usedLabels
@@ -221,7 +251,7 @@ function advancedOptions(taskDict) {
 
   taskDict.words = words;
 
-  const projects = File.readJSON(projectsPath).data.results?.filter(
+  const projects = todoistData.projects?.filter(
     (project) => !project.is_archived,
   );
 
@@ -230,7 +260,11 @@ function advancedOptions(taskDict) {
   const projectResults = projects.map((project, index) => {
     const title = project.name == 'Inbox' ? 'Inbox'.localize() : project.name;
     const id = project.id;
-    const usage = project.usage || 0;
+    const projectUsageItem = usageData.projects[id] || {
+      usage: 0,
+      usedWords: [],
+    };
+    const usage = projectUsageItem.usage || 0;
 
     const getProjectPath = (proj) => {
       if (!proj.parent_id) return '';
@@ -255,13 +289,14 @@ function advancedOptions(taskDict) {
         index,
       },
       actionRunsInBackground: true,
+      inboxProject: project.inbox_project === true,
     };
 
     // Determine match count for prioritization
     let matchCount = words.includes(project.name.toLowerCase()) ? 2 : 0;
-    if (project.usedWords) {
+    if (projectUsageItem.usedWords) {
       const additionalMatches = words.filter((word) =>
-        project.usedWords.includes(word),
+        projectUsageItem.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -281,7 +316,7 @@ function advancedOptions(taskDict) {
 
   // MARK: Sections
 
-  const sections = File.readJSON(sectionsPath).data.results?.filter(
+  const sections = todoistData.sections?.filter(
     (section) => !section.is_archived,
   );
 
@@ -291,7 +326,11 @@ function advancedOptions(taskDict) {
     const sectionProjectId = section.project_id;
 
     const project = projects.find((item) => item.id === sectionProjectId);
-    const usage = section.usage || 0;
+    const sectionUsageItem = usageData.sections[id] || {
+      usage: 0,
+      usedWords: [],
+    };
+    const usage = sectionUsageItem.usage || 0;
 
     // Get full project hierarchy for the section
     const getFullProjectPath = (proj) => {
@@ -321,9 +360,9 @@ function advancedOptions(taskDict) {
 
     // Determine match count for prioritization
     let matchCount = words.includes(section.name.toLowerCase()) ? 2 : 0;
-    if (section.usedWords) {
+    if (sectionUsageItem.usedWords) {
       const additionalMatches = words.filter((word) =>
-        section.usedWords.includes(word),
+        sectionUsageItem.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -346,7 +385,8 @@ function advancedOptions(taskDict) {
   const labelResults = labels.map((label) => {
     const name = label.name;
     const id = label.id;
-    const usage = label.usage || 0;
+    const labelUsageItem = usageData.labels[id] || { usage: 0, usedWords: [] };
+    const usage = labelUsageItem.usage || 0;
 
     const pushDataLabel = {
       title: name,
@@ -364,9 +404,9 @@ function advancedOptions(taskDict) {
 
     // Determine match count for prioritization
     let matchCount = words.includes(label.name.toLowerCase()) ? 2 : 0;
-    if (label.usedWords) {
+    if (labelUsageItem.usedWords) {
       const additionalMatches = words.filter((word) =>
-        label.usedWords.includes(word),
+        labelUsageItem.usedWords.includes(word),
       ).length;
       matchCount += additionalMatches;
     }
@@ -405,7 +445,8 @@ function advancedOptions(taskDict) {
 
   const resultProjects = projectResults
     .filter((result) => !result.isLastUsed && result.matchCount === 0)
-    .map((result) => result.data);
+    .map((result) => result.data)
+    .sort((a, b) => (b.inboxProject ? 1 : 0) - (a.inboxProject ? 1 : 0));
 
   const resultSections = sectionResults
     .filter((result) => !result.isLastUsed && result.matchCount === 0)
@@ -426,47 +467,21 @@ function advancedOptions(taskDict) {
   ];
 }
 
-function postTask(taskDict) {
-  LaunchBar.hide();
+function processAdvancedData(taskDict) {
+  const todoistData = getTodoistData();
+  const usageData = getUsageData();
 
-  let projects = File.readJSON(projectsPath);
-  let sections = File.readJSON(sectionsPath);
-  let body;
+  const labels = todoistData.labels;
+  const projects = todoistData.projects;
+  const sections = todoistData.sections;
 
-  if (taskDict.advancedData) {
-    body = processAdvancedData(taskDict, projects, sections);
-  } else {
-    body = {
-      content: taskDict.content,
-      description: taskDict.description,
-      due_lang: taskDict.lang,
-      due_string: taskDict.dueString,
-      priority: taskDict.prioValue,
-      duration: taskDict.duration,
-      duration_unit: taskDict.durationUnit,
-      deadline_date: taskDict.deadline?.date,
-      deadline_lang: taskDict.deadline?.lang,
-    };
-  }
-
-  const result = HTTP.postJSON('https://api.todoist.com/api/v1.0/tasks', {
-    body: body,
-    headerFields: {
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
-  processPostResponse(result, sections, projects);
-}
-
-function processAdvancedData(taskDict, projects, sections) {
-  const labels = File.readJSON(labelsPath);
   const usedLabels = taskDict.usedLabels;
   const newWords = taskDict.words.filter((word) => !stopwords.has(word));
 
   let body = {
     content: taskDict.content,
     description: taskDict.description,
-    due_lang: taskDict.lang,
+    due_lang: lang,
     due_string: taskDict.dueString,
     priority: taskDict.prioValue,
     duration: taskDict.duration,
@@ -478,19 +493,20 @@ function processAdvancedData(taskDict, projects, sections) {
 
   // Sections & Section with Labels
   if (taskDict.type.includes('section')) {
-    const sectionIndex = taskDict.index;
+    const sectionId = taskDict.id;
 
     // Remember used words
-    const sectionUsedWords =
-      sections.data.results[sectionIndex].usedWords || [];
-    sections.data.results[sectionIndex].usedWords = [
+    if (!usageData.sections[sectionId]) {
+      usageData.sections[sectionId] = { usage: 0, usedWords: [] };
+    }
+    const sectionUsedWords = usageData.sections[sectionId].usedWords || [];
+    usageData.sections[sectionId].usedWords = [
       ...new Set([...sectionUsedWords, ...newWords]),
     ];
 
     // Count usage
-    sections.data.results[sectionIndex].usage
-      ? sections.data.results[sectionIndex].usage++
-      : (sections.data.results[sectionIndex].usage = 1);
+    usageData.sections[sectionId].usage =
+      (usageData.sections[sectionId].usage || 0) + 1;
 
     body.project_id = taskDict.sectionProjectId;
     body.section_id = taskDict.id;
@@ -501,55 +517,50 @@ function processAdvancedData(taskDict, projects, sections) {
 
       // Remember section used for the label
       const lastLabelId = usedLabels.slice(-1)[0].labelId;
-      const lastLabelIndex = labels.data.results.findIndex(
-        (item) => item.id === lastLabelId,
-      );
+      if (!usageData.labels[lastLabelId]) {
+        usageData.labels[lastLabelId] = { usage: 0, usedWords: [] };
+      }
+      usageData.labels[lastLabelId].lastUsed = 'section';
+      usageData.labels[lastLabelId].lastUsedSectionId = sectionId;
+      delete usageData.labels[lastLabelId].lastUsedCategoryId;
 
-      labels.data.results[lastLabelIndex].lastUsed = 'section';
-      labels.data.results[lastLabelIndex].lastUsedSectionId = taskDict.id;
-
-      // Remember words and count usage
+      // Remember words and count usage for each label
       for (const usedLabel of usedLabels) {
         const labelId = usedLabel.labelId;
-        const labelIndex = labels.data.results.findIndex(
-          (item) => item.id === labelId,
-        );
-
-        // Remember used words
-        const labelUsedWords = labels.data.results[labelIndex].usedWords || [];
-        labels.data.results[labelIndex].usedWords = [
+        if (!usageData.labels[labelId]) {
+          usageData.labels[labelId] = { usage: 0, usedWords: [] };
+        }
+        const labelUsedWords = usageData.labels[labelId].usedWords || [];
+        usageData.labels[labelId].usedWords = [
           ...new Set([...labelUsedWords, ...newWords]),
         ];
-
-        // Count usage
-        labels.data.results[labelIndex].usage
-          ? labels.data.results[labelIndex].usage++
-          : (labels.data.results[labelIndex].usage = 1);
+        usageData.labels[labelId].usage =
+          (usageData.labels[labelId].usage || 0) + 1;
       }
-
-      File.writeJSON(labels, labelsPath);
     }
 
-    File.writeJSON(sections, sectionsPath);
+    saveUsageData(usageData);
     return body;
   }
 
   // Projects & Projects with Labels
-  const projectIndex = taskDict.index;
+  const projectId = taskDict.id;
 
   // Statistics for projects except for Inbox
-  if (projects.data.results[projectIndex].is_inbox_project === false) {
+  const project = projects.find((p) => p.id === projectId);
+  if (project && project.inbox_project !== true) {
     // Remember used words
-    const projectUsedWords =
-      projects.data.results[projectIndex].usedWords || [];
-    projects.data.results[projectIndex].usedWords = [
+    if (!usageData.projects[projectId]) {
+      usageData.projects[projectId] = { usage: 0, usedWords: [] };
+    }
+    const projectUsedWords = usageData.projects[projectId].usedWords || [];
+    usageData.projects[projectId].usedWords = [
       ...new Set([...projectUsedWords, ...newWords]),
     ];
 
     // Count usage
-    projects.data.results[projectIndex].usage
-      ? projects.data.results[projectIndex].usage++
-      : (projects.data.results[projectIndex].usage = 1);
+    usageData.projects[projectId].usage =
+      (usageData.projects[projectId].usage || 0) + 1;
   }
 
   if (taskDict.type == 'projectAndLabel') {
@@ -558,42 +569,36 @@ function processAdvancedData(taskDict, projects, sections) {
 
     // Remember project used for the label
     const lastLabelId = usedLabels.slice(-1)[0].labelId;
-    const lastLabelIndex = labels.data.results.findIndex(
-      (item) => item.id === lastLabelId,
-    );
-    labels.data.results[lastLabelIndex].lastUsed = 'project';
-    labels.data.results[lastLabelIndex].lastUsedCategoryId = taskDict.id;
+    if (!usageData.labels[lastLabelId]) {
+      usageData.labels[lastLabelId] = { usage: 0, usedWords: [] };
+    }
+    usageData.labels[lastLabelId].lastUsed = 'project';
+    usageData.labels[lastLabelId].lastUsedCategoryId = projectId;
+    delete usageData.labels[lastLabelId].lastUsedSectionId;
 
-    // Remember words and count usage
+    // Remember words and count usage for each label
     for (const usedLabel of usedLabels) {
       const labelId = usedLabel.labelId;
-      const labelIndex = labels.data.results.findIndex(
-        (item) => item.id === labelId,
-      );
-
-      // Remember used words
-      const labelUsedWords = labels.data.results[labelIndex].usedWords || [];
-      labels.data.results[labelIndex].usedWords = [
+      if (!usageData.labels[labelId]) {
+        usageData.labels[labelId] = { usage: 0, usedWords: [] };
+      }
+      const labelUsedWords = usageData.labels[labelId].usedWords || [];
+      usageData.labels[labelId].usedWords = [
         ...new Set([...labelUsedWords, ...newWords]),
       ];
-
-      // Count usage
-      labels.data.results[labelIndex].usage
-        ? labels.data.results[labelIndex].usage++
-        : (labels.data.results[labelIndex].usage = 1);
+      usageData.labels[labelId].usage =
+        (usageData.labels[labelId].usage || 0) + 1;
     }
-
-    File.writeJSON(labels, labelsPath);
   }
 
-  File.writeJSON(projects, projectsPath);
+  saveUsageData(usageData);
   return body;
 }
 
-function processPostResponse(result, sections, projects) {
+function processPostResponse(result, reminder) {
   if (!result.error) {
     if (result.response.status != 200) {
-      LaunchBar.log(JSON.stringify(result));
+      // LaunchBar.log(JSON.stringify(result));
       LaunchBar.displayNotification({
         title: 'Todoist Action Error',
         string: `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
@@ -607,11 +612,22 @@ function processPostResponse(result, sections, projects) {
     // MARK: Open Task URL
 
     const data = eval(`[${result.data}]`)[0];
-    const url = `todoist://task?id=${data.id}`;
+    const taskID = data.id;
+    const url = `todoist://task?id=${taskID}`;
 
     // Open Task
     if (LaunchBar.options.commandKey || Action.preferences.openTaskOnAdd) {
       LaunchBar.openURL(url);
+    }
+
+    // Add Reminder
+    if (reminder) {
+      // const dueDate = data.due?.date;
+      // if (dueDate.includes('T') && reminder.includes('vorher')) {
+      //   // TODO: create a regex test depending on language … and count in minutes for minute_offset … but it would be nice if that could be covered by due string … I send feedback about that to Doist
+      // }
+
+      postReminder(taskID, reminder);
     }
 
     return;
@@ -622,6 +638,69 @@ function processPostResponse(result, sections, projects) {
     string: result.error,
   });
 }
+
+function postReminder(taskID, reminder) {
+  const [tempId, uuid] = LaunchBar.execute('/bin/bash', './idGen.sh').split(
+    '\n',
+  );
+
+  const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
+    headerFields: { Authorization: `Bearer ${apiToken}` },
+    body: {
+      commands: [
+        {
+          type: 'reminder_add',
+          temp_id: tempId,
+          uuid,
+          args: {
+            item_id: taskID,
+            due: {
+              string: reminder,
+              lang,
+            },
+            type: 'absolute',
+          },
+        },
+      ],
+    },
+  });
+
+  if (result.error) {
+    LaunchBar.alert(result.error);
+    return;
+  }
+
+  if (!result.response || result.response.status !== 200) {
+    const statusCode = result.response?.status || 'unknown';
+    const errorMessage = result.data
+      ? JSON.parse(result.data).error_message || 'Unknown error'
+      : 'No response data';
+    LaunchBar.alert(`Todoist API Error (${statusCode}): ${errorMessage}`);
+    return;
+  }
+
+  // Check if there are errors in sync_status
+  const parsedData = JSON.parse(result.data);
+  const errorInfo = Object.values(parsedData.sync_status || {})[0];
+
+  if (errorInfo?.error) {
+    const errorTitle = errorInfo.error;
+    const errorExplanation =
+      errorInfo.error_extra?.explanation || 'Unknown error';
+    const errorMessage = `${errorTitle}: ${errorExplanation}`;
+
+    const response = LaunchBar.alert(
+      'Reminder Error',
+      errorMessage,
+      'Open Task'.localize(),
+      'Cancel'.localize(),
+    );
+    if (response === 0) LaunchBar.openURL(`todoist://task?id=${taskID}`);
+    return;
+  }
+}
+
+// MARK: Settings
 
 function settings() {
   let icon, actionArgument, subtitle, badge;
@@ -649,8 +728,8 @@ function settings() {
       alwaysShowsSubtitle: true,
     },
     {
-      title: 'Refresh projects, sections & labels.'.localize(),
-      icon: 'refreshTemplate',
+      title: 'Update'.localize(),
+      icon: 'updateTemplate',
       children: refreshData(),
     },
     {
@@ -677,34 +756,57 @@ function refreshData() {
   }
   return [
     {
-      title: 'Update'.localize(),
+      title: 'Refresh projects, sections & labels.'.localize(),
       subtitle:
-        'Projects, sections and lables will be updated without impacting usage data.'.localize(),
-      icon: 'refreshTemplate',
+        'Local data will be updated without affecting usage statistics.'.localize(),
+      icon: 'updateTemplate',
       action: 'update',
       alwaysShowsSubtitle: true,
       actionRunsInBackground: true,
     },
     {
-      title: 'Reset'.localize(),
-      subtitle: 'A complete reset including usage data.'.localize(),
-      icon: 'refreshTemplate',
-      action: 'resetWarning',
+      title: 'Reset projects, sections & labels.'.localize(),
+      subtitle: 'Replace local data with a full sync.'.localize(),
+      icon: 'resetTemplate',
+      action: 'resetTodoistDataWarning',
+      alwaysShowsSubtitle: true,
+    },
+    {
+      title: 'Reset Usage Data'.localize(),
+      subtitle: 'Clear all usage statistics.'.localize(),
+      icon: 'eraserTemplate',
+      action: 'resetUsageDataWarning',
       alwaysShowsSubtitle: true,
     },
   ];
 }
 
-function resetWarning() {
+function resetTodoistDataWarning() {
   const response = LaunchBar.alert(
     'Are you sure?'.localize(),
-    'Do you really want to reset all your local data?'.localize(),
+    'This will remove all current Todoist data and perform a full sync.'.localize(),
     'Ok',
     'Cancel'.localize(),
   );
   switch (response) {
     case 0:
-      return reset();
+      return resetTodoistData();
+
+    case 1:
+      return;
+  }
+}
+
+function resetUsageDataWarning() {
+  const response = LaunchBar.alert(
+    'Are you sure?'.localize(),
+    'This will clear all usage statistics.'.localize(),
+    'Ok',
+    'Cancel'.localize(),
+  );
+  switch (response) {
+    case 0:
+      return resetUsageData();
 
     case 1:
       return;

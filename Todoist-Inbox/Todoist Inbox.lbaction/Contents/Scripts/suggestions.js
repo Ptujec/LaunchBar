@@ -326,6 +326,22 @@ function main(string) {
     }
   }
 
+  // Reminder
+  if (string.includes(' !')) {
+    show = true;
+    let reminder = string.match(reReminder)[1];
+
+    suggestions = [
+      ...suggestions,
+      {
+        title: reminder,
+        icon: 'reminderTemplate',
+        order: 7,
+      },
+    ];
+    string = string.replace(reReminder, '');
+  }
+
   // Description
   if (string.includes(': ')) {
     show = true;

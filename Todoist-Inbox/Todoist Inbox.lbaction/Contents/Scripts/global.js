@@ -20,13 +20,13 @@ const dueStringsJSON = File.readJSON(
 const stopwordsJSON = File.readJSON(
   `${actionPath}/Contents/Resources/stopwords.json`,
 );
-const sectionsPath = `${supportPath}/sections.json`;
-const projectsPath = `${supportPath}/projects.json`;
-const labelsPath = `${supportPath}/labels.json`;
+const todoistDataPath = `${supportPath}/todoistData.json`;
+const usageDataPath = `${supportPath}/usageData.json`;
 
 const rePrio = /( p[1-3]( |$))|((^| )p[1-3] )/i;
 const reDueStringWithAt = / @(.*?)(p\d|((^| )#($| ))|$)/i;
-const reDescription = /(?:\: )(.*)/;
+const reDescription = /(?:\: )(.*?)(?:\:|$)/;
+const reReminder = /(?: \!)(.*?)(?:\!|$)/;
 const reQuotedParts = /"(.*?)"/g;
 const reDeadline = /{([^}]+)}/;
 
@@ -74,4 +74,38 @@ function parseDeadlineDate(string) {
   } catch {
     return null;
   }
+}
+
+// MARK: Todoist Data File Management
+
+function getTodoistData() {
+  if (!File.exists(todoistDataPath)) {
+    return {
+      projects: [],
+      sections: [],
+      labels: [],
+    };
+  }
+  return File.readJSON(todoistDataPath);
+}
+
+function saveTodoistData(data) {
+  File.writeJSON(data, todoistDataPath);
+}
+
+// MARK: Usage Data File Management
+
+function getUsageData() {
+  if (!File.exists(usageDataPath)) {
+    return {
+      projects: {},
+      sections: {},
+      labels: {},
+    };
+  }
+  return File.readJSON(usageDataPath);
+}
+
+function saveUsageData(data) {
+  File.writeJSON(data, usageDataPath);
 }

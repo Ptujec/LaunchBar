@@ -1,6 +1,7 @@
 # LaunchBar Action: Todoist Inbox
 
 ## Why? 
+
 Todoist has its own [quick add function](https://todoist.com/help/articles/task-quick-add). And it’s really really good! So what’s the benefit of a LaunchBar action?
 
 If you don't mind using global shortcuts, there really is not much of a good reason. Even if you do mind, you could do, what I did for a long time. For a long time, I would use a custom action to either simulate pressing the global shortcut or lately launching it with the URI scheme "todoist://addtask". 
@@ -29,7 +30,7 @@ However, as I enjoyed adding things to Todoist that way, I added a few more feat
 
 ### Descriptions
 
-Simply use a colon to add a description. The description should be at the end of the input.
+Use a colon to add a description. The description should be at the end of the input. Alternatively, you can add another colon to mark the end of the description.
 
 <img src="02.jpg" width="726"/> 
 
@@ -55,11 +56,18 @@ You can add deadlines in curly braces. The deadline has to be in a valid date fo
 
 <img src="05.jpg" width="726"/> 
 
+
 ### Priorities
 
 Add priorities like you would in Todoists interface with p1-3.
 
 <img src="06.jpg" width="726"/> 
+
+### Reminders
+
+Use an exclamation mark to add a reminder. If you want to continue after the reminder, use another exclamation mark to mark the end of the reminder. 
+
+**Note:** Reminders relative to the due date are not supported yet. And of course you need to include a time.
 
 ### Projects, Sections and Labels
 
@@ -81,13 +89,13 @@ You can prevent text from being parsed by putting it in quotation marks. If you 
 
 Also, **you can always start over by selecting the parsed title** with arrow down. 
 
-### Bonus
+### More Goodies
 
-You can even add Markdown-formatted links for the current website in the frontmost browser, or a selected email in the Mail app, if you start your entry with a period (".").
+Start your entry with a period (".") to add the current website from your browser, or to add a selected email from the Mail app as a Markdown-formatted link.
 
 <img src="08.jpg" width="726"/> 
 
-Similarly, you can pull in the current clipboard entry if you start your entry with a comma (","). Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. (MS Teams links are adjusted to open directly in the app.)
+Similarly, you can pull in the current clipboard entry if you start your entry with a comma (","). Links will be converted to markdown format, and the cursor will automatically be placed for you to easily enter a title. MS Teams links are adjusted to open directly in the app.
 
 ## Setup & Settings
 

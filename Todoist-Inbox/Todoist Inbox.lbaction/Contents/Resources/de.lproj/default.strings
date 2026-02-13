@@ -8,13 +8,17 @@
 "Priority 3" = "Priorität 3";
 "Refresh projects, sections & labels." = "Projekte, Abschitte & Etiketten aktualisieren";
 "Reset" = "Zurücksetzen";
+"Reset projects, sections & labels." = "Projekte, Abschitte & Etiketten zurücksetzen";
+"Replace local data with a full sync." = "Lokale Daten werden ersetzt mit Server Daten.";
+"Reset Usage Data" = "Nutzungsdaten zurücksetzen";
+"Clear all usage statistics." = "Löscht alle Nutzungsdaten.";
 "Last Used" = "Zuletzt benutzt";
 "Prioritized" = "Priorisiert";
 "Hit enter to turn on" = "Eingabetaste drücken, um anzuschalten.";
 "Hit enter to turn off" = "Eingabetaste drücken, um auszuschalten.";
 "Inbox" = "Eingang";
 "Just a second! Local data needs to be updated." = "Einen Moment, bitte! Lokale Daten müssen aktualisiert werden.";
-"Projects, sections and lables will be updated without impacting usage data." = "Projekte, Abschnitte und Etiketten werden aktualisiert. Nutzungsdaten bleiben erhalten.";
+"Local data will be updated without affecting usage statistics." = "Lokale Daten werden aktualisiert. Nutzungsdaten bleiben erhalten.";
 "Update" = "Aktualisieren";
 "A complete reset including usage data." = "Nutzungsdaten werden zurückgesetzt!";
 "Projects, sections & labels reset." = "Projekte, Abschitte & Etiketten wurden zurückgesetzt.";
@@ -27,6 +31,8 @@
 "Duration" = "Dauer";
 "Are you sure?" = "Sind Sie sicher?";
 "Do you really want to reset all your local data?" = "Wollen Sie wirklich alle Ihre lokalen Daten zurücksetzen?";
+"This will remove all current Todoist data and perform a full sync." = "Dies entfernt alle lokalen Todoist-Daten und führt eine vollständige Synchronisierung durch.";
+"This will clear all usage statistics." = "Dies löscht alle Nutzungsstatistiken.";
 "Cancel" = "Abbrechen";
 "No clipboard entry found!" = "Kein Eintrag in der Zwischenablage gefunden!";
 "Data structure and IDs updated to conform to the new Todoist API" = "Die Datenstruktur und IDs wurden aktualisiert für die neue Todoist API";
@@ -41,4 +47,8 @@
 "Todoist Inbox" = "Todoist Eingang";
 "Local Data Update" = "Aktualisierung lokaler Daten";
 "Local Data Reset" = "Zurücksetzen lokaler Daten";
+"Todoist Data Reset" = "Zurücksetzen von Todoist-Daten";
+"Usage Data Reset" = "Zurücksetzen von Nutzungsdaten";
+"All usage statistics cleared." = "Alle Nutzungsstatistiken wurden gelöscht.";
 "No links. " = "Keine Links. ";
+"Open Task" = "Aufgabe öffnen";
