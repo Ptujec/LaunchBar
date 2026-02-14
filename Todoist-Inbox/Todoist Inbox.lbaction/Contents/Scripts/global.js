@@ -96,16 +96,50 @@ function saveTodoistData(data) {
 // MARK: Usage Data File Management
 
 function getUsageData() {
+  let usageData;
   if (!File.exists(usageDataPath)) {
-    return {
+    usageData = {
       projects: {},
       sections: {},
       labels: {},
     };
+  } else {
+    usageData = File.readJSON(usageDataPath);
   }
-  return File.readJSON(usageDataPath);
+
+  // Auto-migrate old format to new format (array to frequency object)
+  // usageData = migrateUsageData(usageData); // TODO: Remove after testing
+  // saveUsageData(usageData); // Save migrated data back to file TODO: Remove after testing
+  return usageData;
 }
 
 function saveUsageData(data) {
   File.writeJSON(data, usageDataPath);
+  // TODO: Implement cleanup of old ids
+}
+
+// MARK: Usage Data Migration
+
+function migrateUsageData(usageData) {
+  ['projects', 'sections', 'labels'].forEach((category) => {
+    Object.keys(usageData[category] || {}).forEach((id) => {
+      const item = usageData[category][id];
+      if (!item) return;
+
+      // Convert array to frequency object if needed
+      if (Array.isArray(item.usedWords)) {
+        const frequencyMap = {};
+        item.usedWords.forEach((word) => {
+          frequencyMap[word] = (frequencyMap[word] || 0) + 1;
+        });
+        item.usedWords = frequencyMap;
+      }
+
+      // Remove unused "last used" properties from old data format
+      delete item.lastUsed;
+      delete item.lastUsedCategoryId;
+      delete item.lastUsedSectionId;
+    });
+  });
+  return usageData;
 }

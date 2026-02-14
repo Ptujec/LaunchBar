@@ -191,6 +191,8 @@ function postTask(taskDict) {
     };
   }
 
+  // TEST: add return for testing
+
   const result = HTTP.postJSON('https://api.todoist.com/api/v1.0/tasks', {
     body: body,
     headerFields: {
@@ -211,30 +213,19 @@ function advancedOptions(taskDict) {
     update(false); // false = don't hide LaunchBar
   }
 
-  Action.preferences.updateNow = true;
+  Action.preferences.updateNow = true; // TEST: comment out for testing
 
   taskDict.advancedData = true;
 
-  const labelDict = taskDict.labelDict || undefined;
+  const labelDict = taskDict.labelDict;
   const usedLabels = taskDict.usedLabels || [];
 
   const todoistData = getTodoistData();
   const usageData = getUsageData();
 
   let labels = todoistData.labels?.filter((label) => !label.is_archived);
-  let lastUsed, lastUsedCategoryId, lastUsedSectionId;
 
-  if (labelDict) {
-    taskDict.usedLabels = [...usedLabels, labelDict];
-
-    const labelUsageItem = usageData.labels[labelDict.labelId] || {
-      usage: 0,
-      usedWords: [],
-    };
-    lastUsed = labelUsageItem.lastUsed;
-    lastUsedCategoryId = labelUsageItem.lastUsedCategoryId;
-    lastUsedSectionId = labelUsageItem.lastUsedSectionId;
-  }
+  if (labelDict) taskDict.usedLabels = [...usedLabels, labelDict];
 
   const usedLabelsNames = taskDict.usedLabels
     ? taskDict.usedLabels.map((usedLabel) => usedLabel.labelName)
@@ -262,7 +253,7 @@ function advancedOptions(taskDict) {
     const id = project.id;
     const projectUsageItem = usageData.projects[id] || {
       usage: 0,
-      usedWords: [],
+      usedWords: {},
     };
     const usage = projectUsageItem.usage || 0;
 
@@ -295,9 +286,10 @@ function advancedOptions(taskDict) {
     // Determine match count for prioritization
     let matchCount = words.includes(project.name.toLowerCase()) ? 2 : 0;
     if (projectUsageItem.usedWords) {
-      const additionalMatches = words.filter((word) =>
-        projectUsageItem.usedWords.includes(word),
-      ).length;
+      const additionalMatches = words.reduce((sum, word) => {
+        const frequency = projectUsageItem.usedWords[word] || 0;
+        return sum + frequency;
+      }, 0);
       matchCount += additionalMatches;
     }
 
@@ -310,7 +302,6 @@ function advancedOptions(taskDict) {
     return {
       data: pushDataProject,
       matchCount,
-      isLastUsed: lastUsed === 'project' && lastUsedCategoryId === id,
     };
   });
 
@@ -328,7 +319,7 @@ function advancedOptions(taskDict) {
     const project = projects.find((item) => item.id === sectionProjectId);
     const sectionUsageItem = usageData.sections[id] || {
       usage: 0,
-      usedWords: [],
+      usedWords: {},
     };
     const usage = sectionUsageItem.usage || 0;
 
@@ -361,9 +352,10 @@ function advancedOptions(taskDict) {
     // Determine match count for prioritization
     let matchCount = words.includes(section.name.toLowerCase()) ? 2 : 0;
     if (sectionUsageItem.usedWords) {
-      const additionalMatches = words.filter((word) =>
-        sectionUsageItem.usedWords.includes(word),
-      ).length;
+      const additionalMatches = words.reduce((sum, word) => {
+        const frequency = sectionUsageItem.usedWords[word] || 0;
+        return sum + frequency;
+      }, 0);
       matchCount += additionalMatches;
     }
 
@@ -376,16 +368,20 @@ function advancedOptions(taskDict) {
     return {
       data: pushDataSection,
       matchCount,
-      isLastUsed: lastUsed === 'section' && lastUsedSectionId === id,
+      originalIndex: index,
     };
   });
 
   // MARK: Labels
 
-  const labelResults = labels.map((label) => {
+  const labelResults = labels.map((label, index) => {
     const name = label.name;
     const id = label.id;
-    const labelUsageItem = usageData.labels[id] || { usage: 0, usedWords: [] };
+    const labelUsageItem = usageData.labels[id] || {
+      usage: 0,
+      usedWords: {},
+      projectRelationships: {},
+    };
     const usage = labelUsageItem.usage || 0;
 
     const pushDataLabel = {
@@ -405,75 +401,154 @@ function advancedOptions(taskDict) {
     // Determine match count for prioritization
     let matchCount = words.includes(label.name.toLowerCase()) ? 2 : 0;
     if (labelUsageItem.usedWords) {
-      const additionalMatches = words.filter((word) =>
-        labelUsageItem.usedWords.includes(word),
-      ).length;
+      const additionalMatches = words.reduce((sum, word) => {
+        const frequency = labelUsageItem.usedWords[word] || 0;
+        return sum + frequency;
+      }, 0);
       matchCount += additionalMatches;
+    }
+
+    // Calculate relationship frequency if selected label exists
+    let relationshipFreq = 0;
+    if (labelDict && labelUsageItem.projectRelationships) {
+      const selectedLabelId = labelDict.labelId;
+      const selectedLabelData = usageData.labels[selectedLabelId];
+      if (selectedLabelData?.projectRelationships) {
+        relationshipFreq = selectedLabelData.projectRelationships[id] || 0;
+      }
     }
 
     // Add match count and badge if applicable
     if (matchCount > 0) {
       pushDataLabel.matchCount = matchCount;
       pushDataLabel.badge = 'Prioritized'.localize();
-      return { data: pushDataLabel, isPrioritized: true };
+      return {
+        data: pushDataLabel,
+        matchCount,
+        relationshipFreq,
+        originalIndex: index,
+      };
     }
 
-    return { data: pushDataLabel, isPrioritized: false };
+    return {
+      data: pushDataLabel,
+      matchCount,
+      relationshipFreq,
+      originalIndex: index,
+    };
   });
 
-  // Collect all results
-  const resultLastUsed = [
-    ...projectResults
-      .filter((result) => result.isLastUsed)
-      .map((result) => ({ ...result.data, badge: 'Last Used'.localize() })),
-    ...sectionResults
-      .filter((result) => result.isLastUsed)
-      .map((result) => ({ ...result.data, badge: 'Last Used'.localize() })),
+  // Collect all results into single list with enhanced attributes
+  const allResults = [
+    ...projectResults.map((result) => ({
+      ...result,
+      type: 'project',
+      relationshipFreq: 0,
+    })),
+    ...sectionResults.map((result) => ({
+      ...result,
+      type: 'section',
+      relationshipFreq: 0,
+    })),
+    ...labelResults.map((result) => ({
+      ...result,
+      type: 'label',
+    })),
   ];
 
-  const resultPrioritized = [
-    ...projectResults
-      .filter((result) => !result.isLastUsed && result.matchCount > 0)
-      .map((result) => result.data),
-    ...sectionResults
-      .filter((result) => !result.isLastUsed && result.matchCount > 0)
-      .map((result) => result.data),
-    ...labelResults
-      .filter((result) => result.isPrioritized)
-      .map((result) => result.data),
-  ];
+  // Separate into prioritized (matchCount > 0) and remaining
+  const prioritized = allResults.filter((result) => result.matchCount > 0);
+  const remaining = allResults.filter((result) => result.matchCount === 0);
 
-  const resultProjects = projectResults
-    .filter((result) => !result.isLastUsed && result.matchCount === 0)
-    .map((result) => result.data)
-    .sort((a, b) => (b.inboxProject ? 1 : 0) - (a.inboxProject ? 1 : 0));
+  // Sort prioritized items with three-level sort:
+  // 1. Primary: matchCount (word relevance)
+  // 2. Secondary: relationshipFreq (for labels) or usage (for projects/sections)
+  // 3. Tertiary: usage (final tiebreaker)
+  const sortedPrioritized = prioritized.sort((a, b) => {
+    // Primary: matchCount (word relevance)
+    if (b.matchCount !== a.matchCount) {
+      return b.matchCount - a.matchCount;
+    }
 
-  const resultSections = sectionResults
-    .filter((result) => !result.isLastUsed && result.matchCount === 0)
-    .map((result) => result.data);
+    // Secondary: relationship frequency (for labels) or usage (for projects/sections)
+    const aSecondary =
+      a.relationshipFreq !== undefined && a.relationshipFreq > 0
+        ? a.relationshipFreq
+        : a.data.usage;
+    const bSecondary =
+      b.relationshipFreq !== undefined && b.relationshipFreq > 0
+        ? b.relationshipFreq
+        : b.data.usage;
 
-  const resultLabels = labelResults
-    .filter((result) => !result.isPrioritized)
-    .map((result) => result.data);
+    if (bSecondary !== aSecondary) {
+      return bSecondary - aSecondary;
+    }
 
-  return [
-    ...resultLastUsed.sort((a, b) => b.usage - a.usage),
-    ...resultPrioritized.sort(
-      (a, b) => b.matchCount - a.matchCount || b.usage - a.usage,
+    // Tertiary: general usage count (final tiebreaker)
+    return b.data.usage - a.data.usage;
+  });
+
+  // Limit to top 3 prioritized items
+  const topThreePrioritized = sortedPrioritized.slice(0, 3);
+  const topThreeIds = new Set(
+    topThreePrioritized.map((item) =>
+      item.type === 'label'
+        ? item.data.actionArgument.labelDict.labelId
+        : item.data.actionArgument.id,
     ),
-    ...resultProjects,
-    ...resultSections,
-    ...resultLabels,
+  );
+
+  // Build remaining lists by category, excluding top 3, in original order
+  const remainingProjects = projectResults
+    .filter((result) => !topThreeIds.has(result.data.actionArgument.id))
+    .sort((a, b) => {
+      // Inbox first, then by original index
+      if (a.data.inboxProject !== b.data.inboxProject) {
+        return a.data.inboxProject ? -1 : 1;
+      }
+      return a.data.actionArgument.index - b.data.actionArgument.index;
+    })
+    .map((result) => {
+      const restored = { ...result.data };
+      delete restored.badge;
+      delete restored.matchCount;
+      return restored;
+    });
+
+  const remainingSections = sectionResults
+    .filter((result) => !topThreeIds.has(result.data.actionArgument.id))
+    .sort((a, b) => a.data.actionArgument.index - b.data.actionArgument.index)
+    .map((result) => {
+      const restored = { ...result.data };
+      delete restored.badge;
+      delete restored.matchCount;
+      return restored;
+    });
+
+  const remainingLabels = labelResults
+    .filter(
+      (result) =>
+        !topThreeIds.has(result.data.actionArgument.labelDict.labelId),
+    )
+    .sort((a, b) => a.originalIndex - b.originalIndex)
+    .map((result) => result.data);
+
+  // Build final result list
+  const finalResults = [
+    ...topThreePrioritized.map((result) => result.data),
+    ...remainingProjects,
+    ...remainingSections,
+    ...remainingLabels,
   ];
+
+  return finalResults;
 }
 
 function processAdvancedData(taskDict) {
   const todoistData = getTodoistData();
   const usageData = getUsageData();
 
-  const labels = todoistData.labels;
   const projects = todoistData.projects;
-  const sections = todoistData.sections;
 
   const usedLabels = taskDict.usedLabels;
   const newWords = taskDict.words.filter((word) => !stopwords.has(word));
@@ -495,14 +570,15 @@ function processAdvancedData(taskDict) {
   if (taskDict.type.includes('section')) {
     const sectionId = taskDict.id;
 
-    // Remember used words
+    // Remember used words with frequency tracking
     if (!usageData.sections[sectionId]) {
-      usageData.sections[sectionId] = { usage: 0, usedWords: [] };
+      usageData.sections[sectionId] = { usage: 0, usedWords: {} };
     }
-    const sectionUsedWords = usageData.sections[sectionId].usedWords || [];
-    usageData.sections[sectionId].usedWords = [
-      ...new Set([...sectionUsedWords, ...newWords]),
-    ];
+    const sectionUsedWords = usageData.sections[sectionId].usedWords || {};
+    newWords.forEach((word) => {
+      sectionUsedWords[word] = (sectionUsedWords[word] || 0) + 1;
+    });
+    usageData.sections[sectionId].usedWords = sectionUsedWords;
 
     // Count usage
     usageData.sections[sectionId].usage =
@@ -515,25 +591,39 @@ function processAdvancedData(taskDict) {
       // Add labels to body
       body.labels = usedLabels.map((usedLabel) => usedLabel.labelName);
 
-      // Remember section used for the label
+      // Remember section used for the label & track relationship frequency
       const lastLabelId = usedLabels.slice(-1)[0].labelId;
       if (!usageData.labels[lastLabelId]) {
-        usageData.labels[lastLabelId] = { usage: 0, usedWords: [] };
+        usageData.labels[lastLabelId] = {
+          usage: 0,
+          usedWords: {},
+          projectRelationships: {},
+        };
       }
-      usageData.labels[lastLabelId].lastUsed = 'section';
-      usageData.labels[lastLabelId].lastUsedSectionId = sectionId;
-      delete usageData.labels[lastLabelId].lastUsedCategoryId;
 
-      // Remember words and count usage for each label
+      // Track label + section co-usage
+      if (!usageData.labels[lastLabelId].projectRelationships) {
+        usageData.labels[lastLabelId].projectRelationships = {};
+      }
+      usageData.labels[lastLabelId].projectRelationships[sectionId] =
+        (usageData.labels[lastLabelId].projectRelationships[sectionId] || 0) +
+        1;
+
+      // Remember words and count usage for each label with frequency tracking
       for (const usedLabel of usedLabels) {
         const labelId = usedLabel.labelId;
         if (!usageData.labels[labelId]) {
-          usageData.labels[labelId] = { usage: 0, usedWords: [] };
+          usageData.labels[labelId] = {
+            usage: 0,
+            usedWords: {},
+            projectRelationships: {},
+          };
         }
-        const labelUsedWords = usageData.labels[labelId].usedWords || [];
-        usageData.labels[labelId].usedWords = [
-          ...new Set([...labelUsedWords, ...newWords]),
-        ];
+        const labelUsedWords = usageData.labels[labelId].usedWords || {};
+        newWords.forEach((word) => {
+          labelUsedWords[word] = (labelUsedWords[word] || 0) + 1;
+        });
+        usageData.labels[labelId].usedWords = labelUsedWords;
         usageData.labels[labelId].usage =
           (usageData.labels[labelId].usage || 0) + 1;
       }
@@ -549,14 +639,15 @@ function processAdvancedData(taskDict) {
   // Statistics for projects except for Inbox
   const project = projects.find((p) => p.id === projectId);
   if (project && project.inbox_project !== true) {
-    // Remember used words
+    // Remember used words with frequency tracking
     if (!usageData.projects[projectId]) {
-      usageData.projects[projectId] = { usage: 0, usedWords: [] };
+      usageData.projects[projectId] = { usage: 0, usedWords: {} };
     }
-    const projectUsedWords = usageData.projects[projectId].usedWords || [];
-    usageData.projects[projectId].usedWords = [
-      ...new Set([...projectUsedWords, ...newWords]),
-    ];
+    const projectUsedWords = usageData.projects[projectId].usedWords || {};
+    newWords.forEach((word) => {
+      projectUsedWords[word] = (projectUsedWords[word] || 0) + 1;
+    });
+    usageData.projects[projectId].usedWords = projectUsedWords;
 
     // Count usage
     usageData.projects[projectId].usage =
@@ -567,25 +658,38 @@ function processAdvancedData(taskDict) {
     // Add label to body
     body.labels = usedLabels.map((usedLabel) => usedLabel.labelName);
 
-    // Remember project used for the label
+    // Remember project used for the label & track relationship frequency
     const lastLabelId = usedLabels.slice(-1)[0].labelId;
     if (!usageData.labels[lastLabelId]) {
-      usageData.labels[lastLabelId] = { usage: 0, usedWords: [] };
+      usageData.labels[lastLabelId] = {
+        usage: 0,
+        usedWords: {},
+        projectRelationships: {},
+      };
     }
-    usageData.labels[lastLabelId].lastUsed = 'project';
-    usageData.labels[lastLabelId].lastUsedCategoryId = projectId;
-    delete usageData.labels[lastLabelId].lastUsedSectionId;
 
-    // Remember words and count usage for each label
+    // Track label + project co-usage
+    if (!usageData.labels[lastLabelId].projectRelationships) {
+      usageData.labels[lastLabelId].projectRelationships = {};
+    }
+    usageData.labels[lastLabelId].projectRelationships[projectId] =
+      (usageData.labels[lastLabelId].projectRelationships[projectId] || 0) + 1;
+
+    // Remember words and count usage for each label with frequency tracking
     for (const usedLabel of usedLabels) {
       const labelId = usedLabel.labelId;
       if (!usageData.labels[labelId]) {
-        usageData.labels[labelId] = { usage: 0, usedWords: [] };
+        usageData.labels[labelId] = {
+          usage: 0,
+          usedWords: {},
+          projectRelationships: {},
+        };
       }
-      const labelUsedWords = usageData.labels[labelId].usedWords || [];
-      usageData.labels[labelId].usedWords = [
-        ...new Set([...labelUsedWords, ...newWords]),
-      ];
+      const labelUsedWords = usageData.labels[labelId].usedWords || {};
+      newWords.forEach((word) => {
+        labelUsedWords[word] = (labelUsedWords[word] || 0) + 1;
+      });
+      usageData.labels[labelId].usedWords = labelUsedWords;
       usageData.labels[labelId].usage =
         (usageData.labels[labelId].usage || 0) + 1;
     }

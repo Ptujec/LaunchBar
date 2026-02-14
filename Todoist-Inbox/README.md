@@ -77,9 +77,15 @@ If you complete your entry with `⌘ ⏎` (command + return), you can select a p
 
 Select a project, section, or label using the arrow keys or by typing its name. Confirm your selection by pressing `↩`. To add labels, you need to select them before selecting a project or section. You can add multiple labels, one at a time.
 
-I also built some smart into it. Projects, sections and labels you use frequently will rank higher in the list. The same is true if a project, section or label name is part of your entered task. Additionally the action will store used words by project/section/label. If what you type matches one or more previously used words of a project/section/label, that project/section/label will also be ranked higher. 
+I added some smart sorting to this:
 
-Let's say you frequently add a task containing the word "exercise" to a project named "health". It is very likely that "health" will be on top of the list of projects/section/labels. So all you have to do is hit return. 
+- Projects, sections, and labels you use often move to the top, especially when their names match words in the task you type.
+- The action remembers which words you use with each project, section, and label, and how often.
+- Labels learn which projects and sections they are used with most often.
+
+This is all so the right item is more likely to appear first.
+
+For example, if you repeatedly add tasks with the word “exercise” in them to a project called “health,” the “health” project will be at the top of the list.
 
 **Note:** Projects, sections, and labels are stored locally for better performance (in `~/Library/Application Support/LaunchBar/Action Support`). It’s not possible, nor really necessary, to update these fully automatically in the background. However, each time you use `⌘ ⏎` (command + return) to specify a project, section, or label, the next time you enter a task the action will update the data while you enter the new task. This approach should create the least friction while keeping the data fairly up to date in a semi-automatic way.
 
