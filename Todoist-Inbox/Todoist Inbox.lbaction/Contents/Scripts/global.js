@@ -106,40 +106,36 @@ function getUsageData() {
   } else {
     usageData = File.readJSON(usageDataPath);
   }
-
-  // Auto-migrate old format to new format (array to frequency object)
-  // usageData = migrateUsageData(usageData); // TODO: Remove after testing
-  // saveUsageData(usageData); // Save migrated data back to file TODO: Remove after testing
   return usageData;
 }
 
 function saveUsageData(data) {
-  File.writeJSON(data, usageDataPath);
-  // TODO: Implement cleanup of old ids
+  const cleanedData = cleanupUnusedIds(data);
+  File.writeJSON(cleanedData, usageDataPath);
 }
 
-// MARK: Usage Data Migration
+function cleanupUnusedIds(usageData) {
+  const todoistData = getTodoistData();
+  let changes = 0;
 
-function migrateUsageData(usageData) {
+  // Create sets of valid IDs from todoist data for quick lookup
+  const validIds = {
+    projects: new Set(todoistData.projects.map((p) => p.id)),
+    sections: new Set(todoistData.sections.map((s) => s.id)),
+    labels: new Set(todoistData.labels.map((l) => l.id)),
+  };
+
+  // Clean up each category
   ['projects', 'sections', 'labels'].forEach((category) => {
     Object.keys(usageData[category] || {}).forEach((id) => {
-      const item = usageData[category][id];
-      if (!item) return;
-
-      // Convert array to frequency object if needed
-      if (Array.isArray(item.usedWords)) {
-        const frequencyMap = {};
-        item.usedWords.forEach((word) => {
-          frequencyMap[word] = (frequencyMap[word] || 0) + 1;
-        });
-        item.usedWords = frequencyMap;
+      if (!validIds[category].has(id)) {
+        delete usageData[category][id];
+        changes++;
       }
-
-      // Remove unused "last used" properties from old data format
-      delete item.lastUsed;
-      delete item.lastUsedCategoryId;
-      delete item.lastUsedSectionId;
     });
   });
+
+  LaunchBar.log('Removed old ids from usage data file:', changes);
+
   return usageData;
 }

@@ -192,6 +192,7 @@ function postTask(taskDict) {
   }
 
   // TEST: add return for testing
+  // return;
 
   const result = HTTP.postJSON('https://api.todoist.com/api/v1.0/tasks', {
     body: body,
@@ -242,11 +243,11 @@ function advancedOptions(taskDict) {
 
   taskDict.words = words;
 
+  // MARK: Projects
+
   const projects = todoistData.projects?.filter(
     (project) => !project.is_archived,
   );
-
-  // MARK: Projects
 
   const projectResults = projects.map((project, index) => {
     const title = project.name == 'Inbox' ? 'Inbox'.localize() : project.name;
@@ -456,14 +457,8 @@ function advancedOptions(taskDict) {
     })),
   ];
 
-  // Separate into prioritized (matchCount > 0) and remaining
   const prioritized = allResults.filter((result) => result.matchCount > 0);
-  const remaining = allResults.filter((result) => result.matchCount === 0);
 
-  // Sort prioritized items with three-level sort:
-  // 1. Primary: matchCount (word relevance)
-  // 2. Secondary: relationshipFreq (for labels) or usage (for projects/sections)
-  // 3. Tertiary: usage (final tiebreaker)
   const sortedPrioritized = prioritized.sort((a, b) => {
     // Primary: matchCount (word relevance)
     if (b.matchCount !== a.matchCount) {
@@ -488,7 +483,6 @@ function advancedOptions(taskDict) {
     return b.data.usage - a.data.usage;
   });
 
-  // Limit to top 3 prioritized items
   const topThreePrioritized = sortedPrioritized.slice(0, 3);
   const topThreeIds = new Set(
     topThreePrioritized.map((item) =>
