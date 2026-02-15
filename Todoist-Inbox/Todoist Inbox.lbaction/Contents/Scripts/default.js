@@ -5,11 +5,21 @@ by Christian Bender (@ptujec)
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-Documentation:
+DOCUMENTATION:
+General:
 - https://developer.todoist.com/api/v1/
-- https://developer.todoist.com/guides/#tasks (URL Scheme)
-- https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
+
+Tasks:
+- https://developer.todoist.com/guides/#tasks (URL Scheme)
+
+Reminders:
+  - https://developer.todoist.com/api/v1/#tag/Sync/Reminders/Add-a-reminder
+  - https://www.todoist.com/de/help/articles/introduction-to-reminders
+  - https://www.todoist.com/help/articles/introduction-to-reminders
+
+Due dates:
+  - https://todoist.com/help/articles/set-a-recurring-due-date#some-examples-of-recurring-due-dates
 
 Stopwords:
 - https://github.com/stopwords-iso/stopwords-de
@@ -720,12 +730,8 @@ function processPostResponse(result, reminder) {
 
     // Add Reminder
     if (reminder) {
-      // const dueDate = data.due?.date;
-      // if (dueDate.includes('T') && reminder.includes('vorher')) {
-      //   // TODO: create a regex test depending on language … and count in minutes for minute_offset … but it would be nice if that could be covered by due string … I send feedback about that to Doist
-      // }
-
-      postReminder(taskID, reminder);
+      const dueDate = data.due?.date;
+      postReminder(taskID, reminder, dueDate);
     }
 
     return;
@@ -737,29 +743,38 @@ function processPostResponse(result, reminder) {
   });
 }
 
-function postReminder(taskID, reminder) {
+function postReminder(taskID, reminder, dueDate) {
+  const reminderConfig = parseReminderString(reminder, dueDate);
+  if (!reminderConfig) return;
+
   const [tempId, uuid] = LaunchBar.execute('/bin/bash', './idGen.sh').split(
     '\n',
   );
 
+  const args = {
+    item_id: taskID,
+    type: reminderConfig.type,
+  };
+
+  if (reminderConfig.type === 'relative') {
+    args.minute_offset = reminderConfig.minute_offset;
+  } else {
+    args.due = reminderConfig.due;
+  }
+
+  const commands = [
+    {
+      type: 'reminder_add',
+      temp_id: tempId,
+      uuid,
+      args,
+    },
+  ];
+
   const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
     headerFields: { Authorization: `Bearer ${apiToken}` },
     body: {
-      commands: [
-        {
-          type: 'reminder_add',
-          temp_id: tempId,
-          uuid,
-          args: {
-            item_id: taskID,
-            due: {
-              string: reminder,
-              lang,
-            },
-            type: 'absolute',
-          },
-        },
-      ],
+      commands,
     },
   });
 
@@ -779,12 +794,18 @@ function postReminder(taskID, reminder) {
 
   // Check if there are errors in sync_status
   const parsedData = JSON.parse(result.data);
-  const errorInfo = Object.values(parsedData.sync_status || {})[0];
+  const syncStatus = parsedData.sync_status || {};
 
-  if (errorInfo?.error) {
-    const errorTitle = errorInfo.error;
+  // Find any errors in the sync_status
+  const errors = Object.entries(syncStatus)
+    .filter(([_, status]) => typeof status === 'object' && status.error)
+    .map(([_, status]) => status);
+
+  if (errors.length > 0) {
+    const firstError = errors[0];
+    const errorTitle = firstError.error;
     const errorExplanation =
-      errorInfo.error_extra?.explanation || 'Unknown error';
+      firstError.error_extra?.explanation || 'Unknown error';
     const errorMessage = `${errorTitle}: ${errorExplanation}`;
 
     const response = LaunchBar.alert(
@@ -796,6 +817,147 @@ function postReminder(taskID, reminder) {
     if (response === 0) LaunchBar.openURL(`todoist://task?id=${taskID}`);
     return;
   }
+}
+
+function parseReminderString(reminder, dueDate) {
+  reminder = reminder.trim();
+
+  const hasBeforeKeyword = reBeforeReminder.test(reminder);
+
+  // LaunchBar.log(
+  //   `[Reminder Debug] reminder="${reminder}", dueDate="${dueDate}"`,
+  // ); // DEBUG:
+
+  // Check if it contains only time offset patterns and optional before keywords
+  // Patterns like: 30m, 1h, 1h30m, 1hb, 30m before, 1h vorher, etc.
+  const isTimeOffsetPattern =
+    /^(\d+(?:\s*[hm]\s*)?)+(?:\s*(?:before|b|vorher|v))?$/i.test(reminder);
+
+  // LaunchBar.log(
+  //   `[Reminder Debug] hasBeforeKeyword=${hasBeforeKeyword}, isTimeOffsetPattern=${isTimeOffsetPattern}`,
+  // ); // DEBUG:
+
+  // Use relative (minute_offset) reminder if:
+  // 1. It's a time offset pattern
+  // 2. It has a before keyword (using locale-specific pattern)
+  // 3. Due date exists and has a time component (contains 'T' or has time info)
+  if (
+    isTimeOffsetPattern &&
+    hasBeforeKeyword &&
+    dueDate &&
+    (dueDate.includes('T') || dueDate.includes(' '))
+  ) {
+    // Extract hours and minutes
+    let totalMinutes = 0;
+
+    // Extract all number-unit pairs (e.g., "1h", "30m")
+    const matches = reminder.match(/(\d+)\s*([hm])/gi) || [];
+
+    for (const match of matches) {
+      const numUnitMatch = match.match(/(\d+)\s*([hm])/i);
+      if (numUnitMatch) {
+        const value = parseInt(numUnitMatch[1]);
+        const unit = numUnitMatch[2].toLowerCase();
+
+        if (unit === 'h') {
+          totalMinutes += value * 60;
+        } else if (unit === 'm') {
+          totalMinutes += value;
+        }
+      }
+    }
+
+    // LaunchBar.log(
+    //   `[Reminder Debug] Relative reminder: ${totalMinutes} minutes offset`,
+    // ); // DEBUG:
+    return {
+      type: 'relative',
+      minute_offset: totalMinutes,
+    };
+  }
+
+  // Try to convert time offset patterns (without before keyword) or "later"/"später" to absolute date
+  if (
+    (isTimeOffsetPattern && !hasBeforeKeyword) ||
+    reminder.match(/^(?:later|später)$/i)
+  ) {
+    const reminderConfig = convertTimeOffset(reminder);
+    if (reminderConfig && reminderConfig.date) {
+      // LaunchBar.log(
+      //   `[Reminder Debug] Using absolute reminder with calculated date "${reminderConfig.date}"`,
+      // ); // DEBUG:
+      return {
+        type: 'absolute',
+        due: {
+          date: reminderConfig.date,
+        },
+      };
+    }
+  }
+
+  // For other absolute reminders, use as-is
+  if (!isTimeOffsetPattern && !reminder.match(/^(?:later|später)$/i)) {
+    // LaunchBar.log(
+    //   `[Reminder Debug] Using absolute reminder with string "${reminder}"`,
+    // ); // DEBUG:
+    return {
+      type: 'absolute',
+      due: {
+        string: reminder,
+        lang,
+      },
+    };
+  }
+
+  // If conversion failed, skip reminder
+  LaunchBar.log(
+    `[Reminder Debug] Skipping reminder - could not convert reminder string`,
+  );
+  return null;
+}
+
+function convertTimeOffset(reminder) {
+  reminder = reminder.trim().toLowerCase();
+
+  // Handle "later" / "später" - calculate 4 hours from now, rounded down to the nearest hour
+  if (reminder === 'later' || reminder === 'später') {
+    const now = new Date();
+    const later = new Date(now.getTime() + 4 * 60 * 60 * 1000); // Add 4 hours
+    later.setMinutes(0, 0, 0); // Round down to the nearest hour
+    return {
+      date: later.toISOString(),
+    };
+  }
+
+  // Extract hours and minutes from patterns like "30m", "2h30m", "1h", etc.
+  const matches = reminder.match(/(\d+)\s*([hm])/gi) || [];
+
+  if (matches.length === 0) return null;
+
+  let hours = 0;
+  let minutes = 0;
+
+  for (const match of matches) {
+    const numUnitMatch = match.match(/(\d+)\s*([hm])/i);
+    if (numUnitMatch) {
+      const value = parseInt(numUnitMatch[1]);
+      const unit = numUnitMatch[2].toLowerCase();
+
+      if (unit === 'h') {
+        hours += value;
+      } else if (unit === 'm') {
+        minutes += value;
+      }
+    }
+  }
+
+  // For time offset patterns, calculate the absolute date
+  const totalMinutes = hours * 60 + minutes;
+  const now = new Date();
+  const future = new Date(now.getTime() + totalMinutes * 60 * 1000);
+  return {
+    date: future.toISOString(),
+  };
 }
 
 // MARK: Settings

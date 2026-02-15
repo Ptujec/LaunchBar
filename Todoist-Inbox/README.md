@@ -65,9 +65,8 @@ Add priorities like you would in Todoists interface with p1-3.
 
 ### Reminders
 
-Use an exclamation mark to add a reminder. If you want to continue after the reminder, use another exclamation mark to mark the end of the reminder. 
-
-**Note:** Reminders relative to the due date are not supported yet. And of course you need to include a time.
+Use an exclamation mark to add a reminder. If you want to continue after the reminder, use another exclamation mark to mark the end of the reminder. At the moment the this action only allows one reminder.
+([Read about reminders in Todoist here](https://www.todoist.com/help/articles/introduction-to-reminders-9PezfU#h_01HCCD9RCYCA0WRPVS7YJAGG2Q).)
 
 ### Projects, Sections and Labels
 

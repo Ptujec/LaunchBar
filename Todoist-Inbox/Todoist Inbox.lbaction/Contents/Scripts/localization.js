@@ -6,13 +6,15 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-let lang, dueStringOptions, reDuration, stopwords;
+let lang, dueStringOptions, reDuration, reBeforeReminder, stopwords;
 
 if (locale.startsWith('de')) {
   lang = locale;
   dueStringOptions = dueStringsJSON.de;
   reDuration =
     /(?:für)?(?:\s+|^)(\d+(?:(?:\.|,)\d+)?)(\s+min(?:uten)?|m|h|\s+stunde(?:n)?)/i;
+
+  reBeforeReminder = /(?:vorher|v)/i;
 
   stopwords = new Set([
     ...stopwordsJSON.de,
@@ -25,6 +27,8 @@ if (locale.startsWith('de')) {
   dueStringOptions = dueStringsJSON.en;
   reDuration =
     /(?:for)?(?:\s+|^)(\d+(?:\.\d+)?)(\s+min(?:utes)?|m|h|\s+hour(?:s)?)/i;
+
+  reBeforeReminder = /(?:before|b)/i;
 
   stopwords = new Set([
     ...stopwordsJSON.en,
