@@ -243,16 +243,9 @@ function advancedOptions(task) {
     : [];
   labels = labels.filter((label) => !usedLabelsNames.includes(label.name));
 
-  // Clean up and split used words
+  // Build used words list for relevance matching and prioritization
   const combinedText = `${task.content} ${task.description || ''}`;
-  const words = combinedText
-    .replace(/\[(.+)\]\(.+\)/, '$1') // replace markdown links
-    .replace(/https?\S+/, '') // replace links
-    .replace(/,|\||\(|\)|\[|\]|\\|\/|:|,|\.|\?|\d+/g, '') // replace numbers and other stuff
-    .toLowerCase()
-    .split(' ')
-    .filter((word) => !stopwords.has(word));
-
+  const words = buildWordsList(combinedText);
   task.words = words;
 
   // MARK: Projects
@@ -1031,6 +1024,7 @@ function refreshData() {
       icon: 'resetTemplate',
       action: 'resetTodoistDataWarning',
       alwaysShowsSubtitle: true,
+      actionRunsInBackground: true,
     },
     {
       title: 'Reset Usage Data'.localize(),
@@ -1038,6 +1032,14 @@ function refreshData() {
       icon: 'eraserTemplate',
       action: 'resetUsageDataWarning',
       alwaysShowsSubtitle: true,
+    },
+    {
+      title: 'Clean Up Used Words'.localize(),
+      subtitle: 'Reapply stopwords filtering to used words list.'.localize(),
+      alwaysShowsSubtitle: true,
+      icon: 'cleanTemplate',
+      action: 'cleanStopwordsUsedWordsList',
+      actionRunsInBackground: true,
     },
   ];
 }

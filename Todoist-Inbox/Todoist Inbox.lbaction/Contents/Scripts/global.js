@@ -17,9 +17,8 @@ const locale = LaunchBar.currentLocale;
 const dueStringsJSON = File.readJSON(
   `${actionPath}/Contents/Resources/dueStringOptions.json`,
 );
-const stopwordsJSON = File.readJSON(
-  `${actionPath}/Contents/Resources/stopwords.json`,
-);
+const stopwordsPath = `${actionPath}/Contents/Resources/stopwords.json`;
+const stopwordsJSON = File.readJSON(stopwordsPath);
 const todoistDataPath = `${supportPath}/todoistData.json`;
 const usageDataPath = `${supportPath}/usageData.json`;
 
@@ -34,6 +33,20 @@ const reDeadline = /{([^}]+)}/;
 
 function capitalizeFirstLetter(string) {
   return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+}
+
+function buildWordsList(string) {
+  return string
+    .replace(/\[(.+)\]\(.+\)/, '$1') // replace markdown links
+    .replace(/https?\S+/, '') // replace links
+    .replace(/,|\||\(|\)|\[|\]|\\|\/|:|,|\.|\?|\d+/g, '') // replace numbers and other stuff
+    .replace(
+      /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+      '',
+    ) // replace emojis
+    .toLowerCase()
+    .split(' ')
+    .filter((word) => !stopwords.has(word));
 }
 
 function parseDeadlineDate(string) {
@@ -138,4 +151,113 @@ function cleanupUnusedIds(usageData) {
   LaunchBar.log('Removed old ids from usage data file:', changes);
 
   return usageData;
+}
+
+// MARK: Clean Up Stopwords and Used Words Lists
+
+function cleanStopwordsUsedWordsList() {
+  LaunchBar.hide();
+
+  const logPath = '/tmp/filter_log.log';
+  const logs = [];
+
+  const addLog = (message) => {
+    logs.push(message);
+    LaunchBar.log(message);
+  };
+
+  const stopwords = File.readJSON(stopwordsPath);
+
+  // Step 1: Deduplicate stopwords
+  // let totalDuplicatesRemoved = 0;
+
+  // for (const key in stopwords) {
+  //   if (Array.isArray(stopwords[key])) {
+  //     const originalLength = stopwords[key].length;
+  //     stopwords[key] = [...new Set(stopwords[key])];
+  //     const duplicates = originalLength - stopwords[key].length;
+  //     if (duplicates > 0) {
+  //       addLog(`${key}: Removed ${duplicates} duplicates`);
+  //       totalDuplicatesRemoved += duplicates;
+  //     }
+  //   }
+  // }
+
+  // File.writeJSON(stopwords, stopwordsPath);
+  // addLog(`Total duplicates removed: ${totalDuplicatesRemoved}\n`);
+
+  // Step 2: Create a set of all stopwords (lowercase for comparison)
+  const allStopwords = new Set();
+  for (const category in stopwords) {
+    if (Array.isArray(stopwords[category])) {
+      stopwords[category].forEach((word) => {
+        allStopwords.add(word.toLowerCase());
+      });
+    }
+  }
+
+  addLog(`Total unique stopwords: ${allStopwords.size}\n`);
+
+  // Step 3: Filter usageData
+  const usageData = File.readJSON(usageDataPath);
+
+  const categories = ['labels', 'projects', 'sections'];
+  const stats = {};
+  const removedWords = {};
+
+  categories.forEach((category) => {
+    stats[category] = { itemsProcessed: 0, wordsRemoved: 0, wordsKept: 0 };
+    removedWords[category] = {};
+
+    if (usageData[category]) {
+      for (const id in usageData[category]) {
+        if (usageData[category][id].usedWords) {
+          stats[category].itemsProcessed++;
+          const filtered = {};
+          for (const word in usageData[category][id].usedWords) {
+            if (!allStopwords.has(word.toLowerCase())) {
+              filtered[word] = usageData[category][id].usedWords[word];
+              stats[category].wordsKept++;
+            } else {
+              stats[category].wordsRemoved++;
+              removedWords[category][word] =
+                (removedWords[category][word] || 0) +
+                usageData[category][id].usedWords[word];
+            }
+          }
+          usageData[category][id].usedWords = filtered;
+        }
+      }
+    }
+  });
+
+  File.writeJSON(usageData, usageDataPath);
+
+  // Log results
+  addLog('Filtering Results:');
+  for (const category in stats) {
+    const s = stats[category];
+    addLog(
+      `${category}: ${s.itemsProcessed} items, ${s.wordsRemoved} words removed, ${s.wordsKept} words kept`,
+    );
+  }
+
+  // Log removed words by category
+  addLog('\n--- Removed Words ---');
+  for (const category in removedWords) {
+    const words = Object.keys(removedWords[category]).sort(
+      (a, b) => removedWords[category][b] - removedWords[category][a],
+    );
+    if (words.length > 0) {
+      addLog(`\n${category} (${words.length} unique stopwords removed):`);
+      words.forEach((word) => {
+        addLog(`  ${word}: ${removedWords[category][word]}`);
+      });
+    }
+  }
+
+  // Write logs to file
+  File.writeText(logs.join('\n'), logPath);
+
+  LaunchBar.openURL(File.fileURLForPath(logPath));
 }

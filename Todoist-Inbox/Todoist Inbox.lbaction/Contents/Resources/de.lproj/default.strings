@@ -52,3 +52,5 @@
 "All usage statistics cleared." = "Alle Nutzungsstatistiken wurden gelöscht.";
 "No links. " = "Keine Links. ";
 "Open Task" = "Aufgabe öffnen";
+"Clean Up Used Words" = "Verwendete Wörter bereinigen";
+"Reapply stopwords filtering to used words list." = "Stopwords-Filter erneut auf bestehende Daten anwenden.";
