@@ -160,7 +160,7 @@ function run(argument) {
   argument = argument.replace(/\s+/g, ' ').trim();
   argument = capitalizeFirstLetter(argument);
 
-  const taskDict = {
+  const task = {
     content: argument,
     description,
     dueString,
@@ -176,28 +176,28 @@ function run(argument) {
 
   if (!argument) return LaunchBar.alert('This task has no content!'.localize());
 
-  if (LaunchBar.options.commandKey) return advancedOptions(taskDict);
+  if (LaunchBar.options.commandKey) return advancedOptions(task);
 
-  postTask(taskDict);
+  postTask(task);
 }
 
-function postTask(taskDict) {
+function postTask(task) {
   LaunchBar.hide();
 
   let body;
-  if (taskDict.advancedData) {
-    body = processAdvancedData(taskDict);
+  if (task.advancedData) {
+    body = processAdvancedData(task);
   } else {
     body = {
-      content: taskDict.content,
-      description: taskDict.description,
+      content: task.content,
+      description: task.description,
       due_lang: lang,
-      due_string: taskDict.dueString,
-      priority: taskDict.prioValue,
-      duration: taskDict.duration,
-      duration_unit: taskDict.durationUnit,
-      deadline_date: taskDict.deadline?.date,
-      deadline_lang: taskDict.deadline?.lang,
+      due_string: task.dueString,
+      priority: task.prioValue,
+      duration: task.duration,
+      duration_unit: task.durationUnit,
+      deadline_date: task.deadline?.date,
+      deadline_lang: task.deadline?.lang,
     };
   }
 
@@ -210,10 +210,10 @@ function postTask(taskDict) {
       Authorization: `Bearer ${apiToken}`,
     },
   });
-  processPostResponse(result, taskDict.reminder);
+  processPostResponse(result, task.reminder);
 }
 
-function advancedOptions(taskDict) {
+function advancedOptions(task) {
   if (!File.exists(todoistDataPath)) {
     Action.preferences.syncToken = undefined;
     Action.preferences.lastSyncDate = undefined;
@@ -226,32 +226,34 @@ function advancedOptions(taskDict) {
 
   Action.preferences.updateNow = true; // TEST: comment out for testing
 
-  taskDict.advancedData = true;
+  task.advancedData = true;
 
-  const labelDict = taskDict.labelDict;
-  const usedLabels = taskDict.usedLabels || [];
+  const labelDict = task.labelDict;
+  const usedLabels = task.usedLabels || [];
 
   const todoistData = getTodoistData();
   const usageData = getUsageData();
 
   let labels = todoistData.labels?.filter((label) => !label.is_archived);
 
-  if (labelDict) taskDict.usedLabels = [...usedLabels, labelDict];
+  if (labelDict) task.usedLabels = [...usedLabels, labelDict];
 
-  const usedLabelsNames = taskDict.usedLabels
-    ? taskDict.usedLabels.map((usedLabel) => usedLabel.labelName)
+  const usedLabelsNames = task.usedLabels
+    ? task.usedLabels.map((usedLabel) => usedLabel.labelName)
     : [];
   labels = labels.filter((label) => !usedLabelsNames.includes(label.name));
 
   // Clean up and split used words
-  const words = taskDict.content
+  const combinedText = `${task.content} ${task.description || ''}`;
+  const words = combinedText
     .replace(/\[(.+)\]\(.+\)/, '$1') // replace markdown links
     .replace(/https?\S+/, '') // replace links
     .replace(/,|\||\(|\)|\[|\]|\\|\/|:|,|\.|\?|\d+/g, '') // replace numbers and other stuff
     .toLowerCase()
-    .split(' ');
+    .split(' ')
+    .filter((word) => !stopwords.has(word));
 
-  taskDict.words = words;
+  task.words = words;
 
   // MARK: Projects
 
@@ -285,7 +287,7 @@ function advancedOptions(taskDict) {
       usage,
       action: 'postTask',
       actionArgument: {
-        ...taskDict,
+        ...task,
         type: labelDict ? 'projectAndLabel' : 'project',
         id,
         index,
@@ -351,7 +353,7 @@ function advancedOptions(taskDict) {
       usage,
       action: 'postTask',
       actionArgument: {
-        ...taskDict,
+        ...task,
         type: labelDict ? 'sectionAndLabel' : 'section',
         id,
         sectionProjectId,
@@ -401,7 +403,7 @@ function advancedOptions(taskDict) {
       usage,
       action: 'advancedOptions',
       actionArgument: {
-        ...taskDict,
+        ...task,
         labelDict: {
           labelName: name,
           labelId: id,
@@ -548,31 +550,31 @@ function advancedOptions(taskDict) {
   return finalResults;
 }
 
-function processAdvancedData(taskDict) {
+function processAdvancedData(task) {
   const todoistData = getTodoistData();
   const usageData = getUsageData();
 
   const projects = todoistData.projects;
 
-  const usedLabels = taskDict.usedLabels;
-  const newWords = taskDict.words.filter((word) => !stopwords.has(word));
+  const usedLabels = task.usedLabels;
+  const newWords = task.words;
 
   let body = {
-    content: taskDict.content,
-    description: taskDict.description,
+    content: task.content,
+    description: task.description,
     due_lang: lang,
-    due_string: taskDict.dueString,
-    priority: taskDict.prioValue,
-    duration: taskDict.duration,
-    duration_unit: taskDict.durationUnit,
-    deadline_date: taskDict.deadline?.date,
-    deadline_lang: taskDict.deadline?.lang,
-    project_id: taskDict.id,
+    due_string: task.dueString,
+    priority: task.prioValue,
+    duration: task.duration,
+    duration_unit: task.durationUnit,
+    deadline_date: task.deadline?.date,
+    deadline_lang: task.deadline?.lang,
+    project_id: task.id,
   };
 
   // Sections & Section with Labels
-  if (taskDict.type.includes('section')) {
-    const sectionId = taskDict.id;
+  if (task.type.includes('section')) {
+    const sectionId = task.id;
 
     // Remember used words with frequency tracking
     if (!usageData.sections[sectionId]) {
@@ -588,10 +590,10 @@ function processAdvancedData(taskDict) {
     usageData.sections[sectionId].usage =
       (usageData.sections[sectionId].usage || 0) + 1;
 
-    body.project_id = taskDict.sectionProjectId;
-    body.section_id = taskDict.id;
+    body.project_id = task.sectionProjectId;
+    body.section_id = task.id;
 
-    if (taskDict.type == 'sectionAndLabel') {
+    if (task.type == 'sectionAndLabel') {
       // Add labels to body
       body.labels = usedLabels.map((usedLabel) => usedLabel.labelName);
 
@@ -638,7 +640,7 @@ function processAdvancedData(taskDict) {
   }
 
   // Projects & Projects with Labels
-  const projectId = taskDict.id;
+  const projectId = task.id;
 
   // Statistics for projects except for Inbox
   const project = projects.find((p) => p.id === projectId);
@@ -658,7 +660,7 @@ function processAdvancedData(taskDict) {
       (usageData.projects[projectId].usage || 0) + 1;
   }
 
-  if (taskDict.type == 'projectAndLabel') {
+  if (task.type == 'projectAndLabel') {
     // Add label to body
     body.labels = usedLabels.map((usedLabel) => usedLabel.labelName);
 
@@ -988,7 +990,7 @@ function settings() {
       alwaysShowsSubtitle: true,
     },
     {
-      title: 'Update'.localize(),
+      title: 'Update Options'.localize(),
       icon: 'updateTemplate',
       children: refreshData(),
     },
@@ -1017,8 +1019,7 @@ function refreshData() {
   return [
     {
       title: 'Refresh projects, sections & labels.'.localize(),
-      subtitle:
-        'Local data will be updated without affecting usage statistics.'.localize(),
+      subtitle: 'Local data will be updated.'.localize(),
       icon: 'updateTemplate',
       action: 'update',
       alwaysShowsSubtitle: true,

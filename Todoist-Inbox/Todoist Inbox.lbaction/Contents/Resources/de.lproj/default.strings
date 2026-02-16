@@ -18,8 +18,8 @@
 "Hit enter to turn off" = "Eingabetaste drücken, um auszuschalten.";
 "Inbox" = "Eingang";
 "Just a second! Local data needs to be updated." = "Einen Moment, bitte! Lokale Daten müssen aktualisiert werden.";
-"Local data will be updated without affecting usage statistics." = "Lokale Daten werden aktualisiert. Nutzungsdaten bleiben erhalten.";
-"Update" = "Aktualisieren";
+"Local data will be updated." = "Lokale Daten werden aktualisiert.";
+"Update Options" = "Aktualisierungsoptionen";
 "A complete reset including usage data." = "Nutzungsdaten werden zurückgesetzt!";
 "Projects, sections & labels reset." = "Projekte, Abschitte & Etiketten wurden zurückgesetzt.";
 " change(s)" = " Änderung(en)";
