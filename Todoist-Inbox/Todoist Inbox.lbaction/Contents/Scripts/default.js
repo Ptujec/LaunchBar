@@ -291,7 +291,7 @@ function advancedOptions(task) {
 
     // Determine match count for prioritization
     let matchCount = words.filter((word) =>
-      project.name.toLowerCase().includes(word),
+      isWholeWordMatch(project.name, word),
     ).length;
 
     if (projectUsageItem.usedWords) {
@@ -363,7 +363,7 @@ function advancedOptions(task) {
 
     // Determine match count for prioritization
     let matchCount = words.filter((word) =>
-      section.name.toLowerCase().includes(word),
+      isWholeWordMatch(section.name, word),
     ).length;
     if (sectionUsageItem.usedWords) {
       const additionalMatches = words.reduce((sum, word) => {
@@ -417,7 +417,7 @@ function advancedOptions(task) {
 
     // Determine match count for prioritization
     let matchCount = words.filter((word) =>
-      label.name.toLowerCase().includes(word),
+      isWholeWordMatch(label.name, word),
     ).length;
     if (labelUsageItem.usedWords) {
       const additionalMatches = words.reduce((sum, word) => {

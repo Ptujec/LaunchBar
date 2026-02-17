@@ -98,6 +98,12 @@ function isRecentlyUsed(lastUsedDate) {
   return lastDate >= thirtyDaysAgo;
 }
 
+// Helper function to check if text contains a whole word match
+function isWholeWordMatch(text, word) {
+  const words = text.toLowerCase().split(/\s+/);
+  return words.includes(word);
+}
+
 // MARK: Todoist Data File Management
 
 function getTodoistData() {
