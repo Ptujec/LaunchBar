@@ -36,7 +36,7 @@ include('update.js');
 function run(argument) {
   let prioMatch,
     prioValue,
-    prioText,
+    prioString,
     dueString,
     duration,
     durationUnit,
@@ -81,19 +81,19 @@ function run(argument) {
   switch (prioMatch ? prioMatch[0].trim() : '') {
     case 'p1':
       prioValue = 4;
-      prioText = 'Priority 1'.localize();
+      prioString = 'Priority 1'.localize();
       break;
     case 'p2':
       prioValue = 3;
-      prioText = 'Priority 2'.localize();
+      prioString = 'Priority 2'.localize();
       break;
     case 'p3':
       prioValue = 2;
-      prioText = 'Priority 3'.localize();
+      prioString = 'Priority 3'.localize();
       break;
     default:
       prioValue = 1;
-      prioText = '';
+      prioString = '';
   }
 
   argument = argument.replace(rePrio, ' ');
@@ -168,7 +168,7 @@ function run(argument) {
     durationUnit,
     reminder,
     prioValue,
-    prioText,
+    prioString,
     deadline,
     // lang, // not needed because its global
     advancedData: false,
@@ -228,7 +228,7 @@ function advancedOptions(task) {
 
   task.advancedData = true;
 
-  const labelDict = task.labelDict;
+  const labelObj = task.labelObj;
   const usedLabels = task.usedLabels || [];
 
   const todoistData = getTodoistData();
@@ -236,7 +236,7 @@ function advancedOptions(task) {
 
   let labels = todoistData.labels?.filter((label) => !label.is_archived);
 
-  if (labelDict) task.usedLabels = [...usedLabels, labelDict];
+  if (labelObj) task.usedLabels = [...usedLabels, labelObj];
 
   const usedLabelsNames = task.usedLabels
     ? task.usedLabels.map((usedLabel) => usedLabel.labelName)
@@ -281,7 +281,7 @@ function advancedOptions(task) {
       action: 'postTask',
       actionArgument: {
         ...task,
-        type: labelDict ? 'projectAndLabel' : 'project',
+        type: labelObj ? 'projectAndLabel' : 'project',
         id,
         index,
       },
@@ -290,7 +290,10 @@ function advancedOptions(task) {
     };
 
     // Determine match count for prioritization
-    let matchCount = words.includes(project.name.toLowerCase()) ? 2 : 0;
+    let matchCount = words.filter((word) =>
+      project.name.toLowerCase().includes(word),
+    ).length;
+
     if (projectUsageItem.usedWords) {
       const additionalMatches = words.reduce((sum, word) => {
         const frequency = projectUsageItem.usedWords[word] || 0;
@@ -305,9 +308,12 @@ function advancedOptions(task) {
       pushDataProject.badge = 'Prioritized'.localize();
     }
 
+    const isRecent = isRecentlyUsed(projectUsageItem.lastUsedDate);
+
     return {
       data: pushDataProject,
       matchCount,
+      isRecent,
     };
   });
 
@@ -347,7 +353,7 @@ function advancedOptions(task) {
       action: 'postTask',
       actionArgument: {
         ...task,
-        type: labelDict ? 'sectionAndLabel' : 'section',
+        type: labelObj ? 'sectionAndLabel' : 'section',
         id,
         sectionProjectId,
         index,
@@ -356,7 +362,9 @@ function advancedOptions(task) {
     };
 
     // Determine match count for prioritization
-    let matchCount = words.includes(section.name.toLowerCase()) ? 2 : 0;
+    let matchCount = words.filter((word) =>
+      section.name.toLowerCase().includes(word),
+    ).length;
     if (sectionUsageItem.usedWords) {
       const additionalMatches = words.reduce((sum, word) => {
         const frequency = sectionUsageItem.usedWords[word] || 0;
@@ -371,9 +379,12 @@ function advancedOptions(task) {
       pushDataSection.badge = 'Prioritized'.localize();
     }
 
+    const isRecent = isRecentlyUsed(sectionUsageItem.lastUsedDate);
+
     return {
       data: pushDataSection,
       matchCount,
+      isRecent,
       originalIndex: index,
     };
   });
@@ -397,7 +408,7 @@ function advancedOptions(task) {
       action: 'advancedOptions',
       actionArgument: {
         ...task,
-        labelDict: {
+        labelObj: {
           labelName: name,
           labelId: id,
         },
@@ -405,7 +416,9 @@ function advancedOptions(task) {
     };
 
     // Determine match count for prioritization
-    let matchCount = words.includes(label.name.toLowerCase()) ? 2 : 0;
+    let matchCount = words.filter((word) =>
+      label.name.toLowerCase().includes(word),
+    ).length;
     if (labelUsageItem.usedWords) {
       const additionalMatches = words.reduce((sum, word) => {
         const frequency = labelUsageItem.usedWords[word] || 0;
@@ -416,8 +429,8 @@ function advancedOptions(task) {
 
     // Calculate relationship frequency if selected label exists
     let relationshipFreq = 0;
-    if (labelDict && labelUsageItem.projectRelationships) {
-      const selectedLabelId = labelDict.labelId;
+    if (labelObj && labelUsageItem.projectRelationships) {
+      const selectedLabelId = labelObj.labelId;
       const selectedLabelData = usageData.labels[selectedLabelId];
       if (selectedLabelData?.projectRelationships) {
         relationshipFreq = selectedLabelData.projectRelationships[id] || 0;
@@ -425,6 +438,8 @@ function advancedOptions(task) {
     }
 
     // Add match count and badge if applicable
+    const isRecent = isRecentlyUsed(labelUsageItem.lastUsedDate);
+
     if (matchCount > 0) {
       pushDataLabel.matchCount = matchCount;
       pushDataLabel.badge = 'Prioritized'.localize();
@@ -432,6 +447,7 @@ function advancedOptions(task) {
         data: pushDataLabel,
         matchCount,
         relationshipFreq,
+        isRecent,
         originalIndex: index,
       };
     }
@@ -440,6 +456,7 @@ function advancedOptions(task) {
       data: pushDataLabel,
       matchCount,
       relationshipFreq,
+      isRecent,
       originalIndex: index,
     };
   });
@@ -450,15 +467,18 @@ function advancedOptions(task) {
       ...result,
       type: 'project',
       relationshipFreq: 0,
+      isRecent: result.isRecent,
     })),
     ...sectionResults.map((result) => ({
       ...result,
       type: 'section',
       relationshipFreq: 0,
+      isRecent: result.isRecent,
     })),
     ...labelResults.map((result) => ({
       ...result,
       type: 'label',
+      isRecent: result.isRecent,
     })),
   ];
 
@@ -470,21 +490,26 @@ function advancedOptions(task) {
       return b.matchCount - a.matchCount;
     }
 
-    // Secondary: relationship frequency (for labels) or usage (for projects/sections)
-    const aSecondary =
+    // Secondary: recency (used within 30 days)
+    if (a.isRecent !== b.isRecent) {
+      return b.isRecent ? 1 : -1; // Recently used items come first
+    }
+
+    // Tertiary: relationship frequency (for labels) or usage (for projects/sections)
+    const aTertiary =
       a.relationshipFreq !== undefined && a.relationshipFreq > 0
         ? a.relationshipFreq
         : a.data.usage;
-    const bSecondary =
+    const bTertiary =
       b.relationshipFreq !== undefined && b.relationshipFreq > 0
         ? b.relationshipFreq
         : b.data.usage;
 
-    if (bSecondary !== aSecondary) {
-      return bSecondary - aSecondary;
+    if (bTertiary !== aTertiary) {
+      return bTertiary - aTertiary;
     }
 
-    // Tertiary: general usage count (final tiebreaker)
+    // Quaternary: general usage count (final tiebreaker)
     return b.data.usage - a.data.usage;
   });
 
@@ -492,7 +517,7 @@ function advancedOptions(task) {
   const topThreeIds = new Set(
     topThreePrioritized.map((item) =>
       item.type === 'label'
-        ? item.data.actionArgument.labelDict.labelId
+        ? item.data.actionArgument.labelObj.labelId
         : item.data.actionArgument.id,
     ),
   );
@@ -526,8 +551,7 @@ function advancedOptions(task) {
 
   const remainingLabels = labelResults
     .filter(
-      (result) =>
-        !topThreeIds.has(result.data.actionArgument.labelDict.labelId),
+      (result) => !topThreeIds.has(result.data.actionArgument.labelObj.labelId),
     )
     .sort((a, b) => a.originalIndex - b.originalIndex)
     .map((result) => result.data);
@@ -582,6 +606,7 @@ function processAdvancedData(task) {
     // Count usage
     usageData.sections[sectionId].usage =
       (usageData.sections[sectionId].usage || 0) + 1;
+    usageData.sections[sectionId].lastUsedDate = new Date().toISOString();
 
     body.project_id = task.sectionProjectId;
     body.section_id = task.id;
@@ -607,6 +632,7 @@ function processAdvancedData(task) {
       usageData.labels[lastLabelId].projectRelationships[sectionId] =
         (usageData.labels[lastLabelId].projectRelationships[sectionId] || 0) +
         1;
+      usageData.labels[lastLabelId].lastUsedDate = new Date().toISOString();
 
       // Remember words and count usage for each label with frequency tracking
       for (const usedLabel of usedLabels) {
@@ -625,6 +651,7 @@ function processAdvancedData(task) {
         usageData.labels[labelId].usedWords = labelUsedWords;
         usageData.labels[labelId].usage =
           (usageData.labels[labelId].usage || 0) + 1;
+        usageData.labels[labelId].lastUsedDate = new Date().toISOString();
       }
     }
 
@@ -651,6 +678,7 @@ function processAdvancedData(task) {
     // Count usage
     usageData.projects[projectId].usage =
       (usageData.projects[projectId].usage || 0) + 1;
+    usageData.projects[projectId].lastUsedDate = new Date().toISOString();
   }
 
   if (task.type == 'projectAndLabel') {
@@ -673,6 +701,7 @@ function processAdvancedData(task) {
     }
     usageData.labels[lastLabelId].projectRelationships[projectId] =
       (usageData.labels[lastLabelId].projectRelationships[projectId] || 0) + 1;
+    usageData.labels[lastLabelId].lastUsedDate = new Date().toISOString();
 
     // Remember words and count usage for each label with frequency tracking
     for (const usedLabel of usedLabels) {
@@ -691,6 +720,7 @@ function processAdvancedData(task) {
       usageData.labels[labelId].usedWords = labelUsedWords;
       usageData.labels[labelId].usage =
         (usageData.labels[labelId].usage || 0) + 1;
+      usageData.labels[labelId].lastUsedDate = new Date().toISOString();
     }
   }
 
@@ -701,7 +731,6 @@ function processAdvancedData(task) {
 function processPostResponse(result, reminder) {
   if (!result.error) {
     if (result.response.status != 200) {
-      // LaunchBar.log(JSON.stringify(result));
       LaunchBar.displayNotification({
         title: 'Todoist Action Error',
         string: `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,

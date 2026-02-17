@@ -89,6 +89,15 @@ function parseDeadlineDate(string) {
   }
 }
 
+// Helper function to check if an item was used within 30 days
+function isRecentlyUsed(lastUsedDate) {
+  if (!lastUsedDate) return false;
+  const lastDate = new Date(lastUsedDate);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  return lastDate >= thirtyDaysAgo;
+}
+
 // MARK: Todoist Data File Management
 
 function getTodoistData() {
@@ -169,22 +178,22 @@ function cleanStopwordsUsedWordsList() {
   const stopwords = File.readJSON(stopwordsPath);
 
   // Step 1: Deduplicate stopwords
-  // let totalDuplicatesRemoved = 0;
+  let totalDuplicatesRemoved = 0;
 
-  // for (const key in stopwords) {
-  //   if (Array.isArray(stopwords[key])) {
-  //     const originalLength = stopwords[key].length;
-  //     stopwords[key] = [...new Set(stopwords[key])];
-  //     const duplicates = originalLength - stopwords[key].length;
-  //     if (duplicates > 0) {
-  //       addLog(`${key}: Removed ${duplicates} duplicates`);
-  //       totalDuplicatesRemoved += duplicates;
-  //     }
-  //   }
-  // }
+  for (const key in stopwords) {
+    if (Array.isArray(stopwords[key])) {
+      const originalLength = stopwords[key].length;
+      stopwords[key] = [...new Set(stopwords[key])];
+      const duplicates = originalLength - stopwords[key].length;
+      if (duplicates > 0) {
+        addLog(`${key}: Removed ${duplicates} duplicates`);
+        totalDuplicatesRemoved += duplicates;
+      }
+    }
+  }
 
-  // File.writeJSON(stopwords, stopwordsPath);
-  // addLog(`Total duplicates removed: ${totalDuplicatesRemoved}\n`);
+  File.writeJSON(stopwords, stopwordsPath);
+  addLog(`Total duplicates removed: ${totalDuplicatesRemoved}\n`);
 
   // Step 2: Create a set of all stopwords (lowercase for comparison)
   const allStopwords = new Set();
