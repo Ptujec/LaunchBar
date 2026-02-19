@@ -105,25 +105,6 @@ function resetTodoistData() {
   });
 }
 
-function resetUsageData() {
-  LaunchBar.hide();
-
-  const emptyUsageData = {
-    projects: {},
-    sections: {},
-    labels: {},
-  };
-
-  saveUsageData(emptyUsageData);
-
-  // Notification
-  LaunchBar.displayNotification({
-    title: 'Todoist Inbox'.localize(),
-    subtitle: 'Usage Data Reset'.localize(),
-    string: 'All usage statistics cleared.'.localize(),
-  });
-}
-
 function performSync(syncToken = '*') {
   const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
     headerFields: { Authorization: `Bearer ${apiToken}` },
@@ -134,7 +115,7 @@ function performSync(syncToken = '*') {
   });
 
   if (result.error) {
-    LaunchBar.alert(result.error);
+    LaunchBar.alert('Todoist Action Error', result.error);
     return null;
   }
 
@@ -260,4 +241,289 @@ function updateResourceData(
     archivedItems,
     updatedNameCount: updatedItems.length,
   };
+}
+
+function resetUsageData() {
+  const emptyUsageData = {
+    projects: {},
+    sections: {},
+    labels: {},
+    tasks: {},
+  };
+
+  saveUsageData(emptyUsageData, true);
+
+  const response = LaunchBar.alert(
+    'Todoist Inbox'.localize(),
+    'All usage statistics cleared. Do you want to import statistics from existing tasks?'.localize(),
+    'Ok',
+    'Cancel',
+  );
+  switch (response) {
+    case 0:
+      importUsedWords();
+    case 1:
+      break;
+  }
+}
+
+function importUsedWords() {
+  LaunchBar.hide();
+
+  const logPath = '/tmp/import_used_words_log.log';
+  const logs = [];
+
+  const addLog = (message) => {
+    logs.push(message);
+    LaunchBar.log(message);
+  };
+
+  const result = getRecentTasks();
+  if (!result || !result.data || !result.data.results) {
+    addLog('Error: Could not fetch recent tasks');
+    File.writeText(logs.join('\n'), logPath);
+    LaunchBar.openURL(File.fileURLForPath(logPath));
+    return;
+  }
+
+  const tasks = result.data.results;
+  const usageData = getUsageData();
+  const todoistData = getTodoistData();
+
+  // Create sets of existing task IDs for quick lookup
+  const processedTaskIds = new Set(Object.keys(usageData.tasks || {}));
+
+  // Create maps for project and section ID lookups
+  const projectMap = new Map(todoistData.projects.map((p) => [p.id, p]));
+  const sectionMap = new Map(todoistData.sections.map((s) => [s.id, s]));
+  const labelMap = new Map(todoistData.labels.map((l) => [l.id, l]));
+
+  let tasksProcessed = 0;
+  let tasksSkipped = 0;
+  let totalWordsAdded = 0;
+  const stats = {
+    projects: { itemsUpdated: 0, wordsAdded: 0 },
+    sections: { itemsUpdated: 0, wordsAdded: 0 },
+    labels: { itemsUpdated: 0, wordsAdded: 0 },
+  };
+
+  addLog(`Import Statistics - ${new Date().toISOString()}\n`);
+  addLog(`Total recent tasks: ${tasks.length}`);
+  addLog(`Already processed tasks: ${processedTaskIds.size}`);
+  addLog(`Available projects: ${projectMap.size}`);
+  addLog(`Available sections: ${sectionMap.size}`);
+  addLog(`Available labels: ${labelMap.size}\n`);
+
+  for (const task of tasks) {
+    // Skip if task already processed
+    if (processedTaskIds.has(task.id)) {
+      tasksSkipped++;
+      continue;
+    }
+
+    // Extract words from content and description
+    const combinedText = `${task.content} ${task.description?.split('\n').join(' ') || ''}`;
+    const words = buildWordsList(combinedText);
+
+    // Store task record for future reference
+    if (!usageData.tasks) {
+      usageData.tasks = {};
+    }
+    usageData.tasks[task.id] = {
+      added_at: task.added_at,
+    };
+
+    // Update section usage OR project usage (not both)
+    // If task has a section, only update section; otherwise update project
+    if (task.section_id) {
+      const sectionId = task.section_id;
+
+      // Ensure section entry exists with proper structure
+      if (!usageData.sections[sectionId]) {
+        usageData.sections[sectionId] = {
+          usedWords: {},
+          usage: 0,
+          lastUsedDate: task.added_at,
+        };
+      } else {
+        // Ensure usedWords property exists (in case section was empty)
+        if (!usageData.sections[sectionId].usedWords) {
+          usageData.sections[sectionId].usedWords = {};
+        }
+      }
+
+      // Update lastUsedDate if newer
+      if (
+        !usageData.sections[sectionId].lastUsedDate ||
+        new Date(task.added_at) >
+          new Date(usageData.sections[sectionId].lastUsedDate)
+      ) {
+        usageData.sections[sectionId].lastUsedDate = task.added_at;
+      }
+
+      // Increment usage count
+      usageData.sections[sectionId].usage =
+        (usageData.sections[sectionId].usage || 0) + 1;
+
+      // Add word counts
+      for (const word of words) {
+        usageData.sections[sectionId].usedWords[word] =
+          (usageData.sections[sectionId].usedWords[word] || 0) + 1;
+      }
+
+      stats.sections.itemsUpdated++;
+      stats.sections.wordsAdded += words.length;
+      totalWordsAdded += words.length;
+    } else if (task.project_id) {
+      const projectId = task.project_id;
+
+      // Ensure project entry exists with proper structure
+      if (!usageData.projects[projectId]) {
+        usageData.projects[projectId] = {
+          usedWords: {},
+          usage: 0,
+          lastUsedDate: task.added_at,
+        };
+      } else {
+        // Ensure usedWords property exists (in case project was empty)
+        if (!usageData.projects[projectId].usedWords) {
+          usageData.projects[projectId].usedWords = {};
+        }
+      }
+
+      // Update lastUsedDate if newer
+      if (
+        !usageData.projects[projectId].lastUsedDate ||
+        new Date(task.added_at) >
+          new Date(usageData.projects[projectId].lastUsedDate)
+      ) {
+        usageData.projects[projectId].lastUsedDate = task.added_at;
+      }
+
+      // Increment usage count
+      usageData.projects[projectId].usage =
+        (usageData.projects[projectId].usage || 0) + 1;
+
+      // Add word counts
+      for (const word of words) {
+        usageData.projects[projectId].usedWords[word] =
+          (usageData.projects[projectId].usedWords[word] || 0) + 1;
+      }
+
+      stats.projects.itemsUpdated++;
+      stats.projects.wordsAdded += words.length;
+      totalWordsAdded += words.length;
+    }
+
+    // Update label usage
+    if (task.labels && Array.isArray(task.labels)) {
+      for (const labelName of task.labels) {
+        // Find label ID by name
+        const label = Array.from(labelMap.values()).find(
+          (l) => l.name === labelName,
+        );
+        if (label) {
+          const labelId = label.id;
+
+          // Ensure label entry exists with proper structure
+          if (!usageData.labels[labelId]) {
+            usageData.labels[labelId] = {
+              usedWords: {},
+              usage: 0,
+              lastUsedDate: task.added_at,
+            };
+            stats.labels.itemsUpdated++;
+          } else {
+            // Ensure usedWords property exists (in case label was empty)
+            if (!usageData.labels[labelId].usedWords) {
+              usageData.labels[labelId].usedWords = {};
+            }
+          }
+
+          // Update lastUsedDate if newer
+          if (
+            !usageData.labels[labelId].lastUsedDate ||
+            new Date(task.added_at) >
+              new Date(usageData.labels[labelId].lastUsedDate)
+          ) {
+            usageData.labels[labelId].lastUsedDate = task.added_at;
+          }
+
+          // Increment usage count
+          usageData.labels[labelId].usage =
+            (usageData.labels[labelId].usage || 0) + 1;
+
+          // Add word counts
+          for (const word of words) {
+            usageData.labels[labelId].usedWords[word] =
+              (usageData.labels[labelId].usedWords[word] || 0) + 1;
+          }
+
+          stats.labels.wordsAdded += words.length;
+        }
+      }
+    }
+
+    tasksProcessed++;
+  }
+
+  if (tasksProcessed > 0) {
+    saveUsageData(usageData, true);
+  }
+
+  // Log summary
+  addLog(`\n--- Import Summary ---`);
+  addLog(`New tasks processed: ${tasksProcessed}`);
+  addLog(`Already processed tasks updated: ${tasksSkipped}`);
+  addLog(`Total words added: ${totalWordsAdded}\n`);
+
+  addLog(
+    `Projects: ${stats.projects.itemsUpdated} items updated, ${stats.projects.wordsAdded} words added`,
+  );
+  addLog(
+    `Sections: ${stats.sections.itemsUpdated} items updated, ${stats.sections.wordsAdded} words added`,
+  );
+  addLog(
+    `Labels: ${stats.labels.itemsUpdated} items updated, ${stats.labels.wordsAdded} words added`,
+  );
+
+  // Write logs to file
+  File.writeText(logs.join('\n'), logPath);
+
+  LaunchBar.openURL(File.fileURLForPath(logPath));
+}
+
+function getRecentTasks() {
+  const filter = encodeURI('created after: -30 days');
+
+  const result = HTTP.getJSON(
+    `https://api.todoist.com/api/v1/tasks/filter?query=${filter}&limit=200`,
+    {
+      headerFields: {
+        Authorization: `Bearer ${apiToken}`,
+      },
+    },
+  );
+
+  // const result = File.readJSON(`${Action.supportPath}/test.json`);
+
+  if (result.error) {
+    LaunchBar.alert('Todoist Action Error', result.error);
+    return null;
+  }
+
+  if (result.response.status != 200) {
+    LaunchBar.alert(
+      'Todoist Action Error',
+      `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
+    );
+
+    if (result.response.status == 401) {
+      Action.preferences.apiToken = undefined; // to promt API token entry dialog
+    }
+
+    return;
+  }
+
+  return result;
 }

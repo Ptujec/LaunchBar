@@ -8,10 +8,11 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 DOCUMENTATION:
 General:
 - https://developer.todoist.com/api/v1/
+
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 
-Tasks:
-- https://developer.todoist.com/guides/#tasks (URL Scheme)
+Task URL Scheme:
+- https://developer.todoist.com/guides/#tasks 
 
 Reminders:
   - https://developer.todoist.com/api/v1/#tag/Sync/Reminders/Add-a-reminder
@@ -244,7 +245,7 @@ function advancedOptions(task) {
   labels = labels.filter((label) => !usedLabelsNames.includes(label.name));
 
   // Build used words list for relevance matching and prioritization
-  const combinedText = `${task.content} ${task.description || ''}`;
+  const combinedText = `${task.content} ${task.description?.split('\n').join(' ') || ''}`;
   const words = buildWordsList(combinedText);
   task.words = words;
 
@@ -729,42 +730,56 @@ function processAdvancedData(task) {
 }
 
 function processPostResponse(result, reminder) {
-  if (!result.error) {
-    if (result.response.status != 200) {
-      LaunchBar.displayNotification({
-        title: 'Todoist Action Error',
-        string: `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
-      });
-      if (result.response.status == 401) {
-        Action.preferences.apiToken = undefined; // to promt API token entry dialog
-      }
-      return;
-    }
+  if (result.error) {
+    LaunchBar.alert('Todoist Action Error', result.error);
+    return null;
+  }
 
-    // MARK: Open Task URL
+  if (result.response.status != 200) {
+    LaunchBar.alert(
+      'Todoist Action Error',
+      `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
+    );
 
-    const data = eval(`[${result.data}]`)[0];
-    const taskID = data.id;
-    const url = `todoist://task?id=${taskID}`;
-
-    // Open Task
-    if (LaunchBar.options.commandKey || Action.preferences.openTaskOnAdd) {
-      LaunchBar.openURL(url);
-    }
-
-    // Add Reminder
-    if (reminder) {
-      const dueDate = data.due?.date;
-      postReminder(taskID, reminder, dueDate);
+    if (result.response.status == 401) {
+      Action.preferences.apiToken = undefined; // to promt API token entry dialog
     }
 
     return;
   }
 
-  LaunchBar.displayNotification({
-    title: 'Todoist Action Error',
-    string: result.error,
-  });
+  const data = eval(`[${result.data}]`)[0];
+  const taskID = data.id;
+  const addedAt = data.added_at;
+
+  // Track task ID and creation date in usage data
+  const usageData = getUsageData();
+  if (!usageData.tasks) usageData.tasks = {};
+  if (!usageData.tasks[taskID]) usageData.tasks[taskID] = {};
+
+  usageData.tasks[taskID].added_at = addedAt;
+
+  LaunchBar.log('Task ID added: ', taskID);
+
+  saveUsageData(usageData);
+
+  // Clean up task IDs older than 30 days
+  cleanupOldTaskIds();
+
+  // Open Task
+  const url = `todoist://task?id=${taskID}`;
+
+  if (LaunchBar.options.commandKey || Action.preferences.openTaskOnAdd) {
+    LaunchBar.openURL(url);
+  }
+
+  // Add Reminder
+  if (reminder) {
+    const dueDate = data.due?.date;
+    postReminder(taskID, reminder, dueDate);
+  }
+
+  return;
 }
 
 function postReminder(taskID, reminder, dueDate) {
@@ -803,7 +818,7 @@ function postReminder(taskID, reminder, dueDate) {
   });
 
   if (result.error) {
-    LaunchBar.alert(result.error);
+    LaunchBar.alert('Todoist Action Error', result.error);
     return;
   }
 
@@ -1061,6 +1076,15 @@ function refreshData() {
       icon: 'eraserTemplate',
       action: 'resetUsageDataWarning',
       alwaysShowsSubtitle: true,
+    },
+    {
+      title: 'Import Statistics'.localize(),
+      icon: 'importTemplate',
+      subtitle:
+        'Imports statistics from tasks created in the last 30 days.'.localize(),
+      alwaysShowsSubtitle: true,
+      action: 'importUsedWords',
+      actionRunsInBackground: true,
     },
     {
       title: 'Clean Up Used Words'.localize(),

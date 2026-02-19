@@ -39,7 +39,7 @@ function setApiKey() {
         });
 
         if (result.error) {
-          LaunchBar.alert(result.error);
+          LaunchBar.alert('Todoist Action Error', result.error);
           break;
         }
 

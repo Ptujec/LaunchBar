@@ -37,12 +37,14 @@ function capitalizeFirstLetter(string) {
 
 function buildWordsList(string) {
   return string
-    .replace(/\[(.+)\]\(.+\)/, '$1') // replace markdown links
-    .replace(/https?\S+/, '') // replace links
-    .replace(/,|\||\(|\)|\[|\]|\\|\/|:|,|\.|\?|\d+/g, '') // replace numbers and other stuff
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1') // replace markdown links
+    .replace(/https?\S+/g, ' ') // replace links
+    .replace(/\d{4}-\d{2}-\d{2}/g, ' ') // remove date strings like 2026-02-18 (before removing dashes)
+    .replace(/,|\||\(|\)|\[|\]|\\|\/|:|\*|,|\"|\.|\?|-/g, ' ') // replace punctuation and dashes
+    .replace(/\b\d{1,3}\b|\b\d{5,}\b/g, ' ') // remove numbers except 4-digit years (using word boundaries)
     .replace(
       /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-      '',
+      ' ',
     ) // replace emojis
     .toLowerCase()
     .split(' ')
@@ -130,15 +132,25 @@ function getUsageData() {
       projects: {},
       sections: {},
       labels: {},
+      tasks: {},
     };
   } else {
     usageData = File.readJSON(usageDataPath);
+
+    // Deep copy to ensure no shared references between categories or items
+    // This prevents modifications to one section/project/label from affecting others
+    usageData = {
+      projects: JSON.parse(JSON.stringify(usageData.projects || {})),
+      sections: JSON.parse(JSON.stringify(usageData.sections || {})),
+      labels: JSON.parse(JSON.stringify(usageData.labels || {})),
+      tasks: JSON.parse(JSON.stringify(usageData.tasks || {})),
+    };
   }
   return usageData;
 }
 
-function saveUsageData(data) {
-  const cleanedData = cleanupUnusedIds(data);
+function saveUsageData(data, skipCleanup = false) {
+  const cleanedData = skipCleanup ? data : cleanupUnusedIds(data);
   File.writeJSON(cleanedData, usageDataPath);
 }
 
@@ -275,4 +287,36 @@ function cleanStopwordsUsedWordsList() {
   File.writeText(logs.join('\n'), logPath);
 
   LaunchBar.openURL(File.fileURLForPath(logPath));
+}
+
+// MARK: Clean Up Old Task IDs
+
+function cleanupOldTaskIds() {
+  const usageData = getUsageData();
+
+  if (!usageData.tasks || Object.keys(usageData.tasks).length === 0) {
+    return;
+  }
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  let tasksRemoved = 0;
+
+  // Iterate through tasks and remove old ones
+  for (const taskId in usageData.tasks) {
+    const taskData = usageData.tasks[taskId];
+    if (taskData.added_at) {
+      const addedDate = new Date(taskData.added_at);
+      if (addedDate < thirtyDaysAgo) {
+        delete usageData.tasks[taskId];
+        tasksRemoved++;
+      }
+    }
+  }
+
+  if (tasksRemoved > 0) {
+    saveUsageData(usageData);
+    LaunchBar.log(`Removed ${tasksRemoved} old task IDs (older than 30 days)`);
+  }
 }

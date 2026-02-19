@@ -203,6 +203,7 @@
     "euren",
     "eurer",
     "eures",
+    "evtl",
     "f",
     "fällig",
     "folgende",
@@ -407,6 +408,7 @@
     "neue",
     "neuen",
     "neun",
+    "nen",
     "neunte",
     "neunten",
     "neunter",
@@ -2164,6 +2166,8 @@
   ],
   "general" : [
     "",
+    " ",
+    " ",
     "&",
     "→",
     "-",
@@ -2263,6 +2267,12 @@
     "ru",
     "zh",
     "ja",
-    "ko"
+    "ko",
+    "docx",
+    "pdf",
+    "xlsx",
+    "pptx",
+    "txt",
+    "md"
   ]
 }
