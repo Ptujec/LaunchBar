@@ -1,42 +1,27 @@
-function runWithString(argument) {
-  // This is no official api. This could stop working any time...
+/* 
+Google Suggestions for LaunchBar Actions
+by Christian Bender (@ptujec)
+2024-12-13
 
-  //
-  var result = HTTP.get(
-    'http://suggestqueries.google.com/complete/search?client=chrome&hl=si&q=' +
-      encodeURIComponent(argument),
-    3
-  );
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
 
-  if (result == undefined) {
-    LaunchBar.log('HTTP.getJSON() returned undefined');
-    return [];
-  }
-  if (result.error != undefined) {
-    LaunchBar.log('Error in HTTP request: ' + result.error);
-    return [];
-  }
+function run(argument) {
+  if (!argument.trim()) return;
 
-  var json = eval(result.data.replace('window.google.ac.h', ''));
+  const url = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURI(
+    argument
+  )}`;
 
-  LaunchBar.log(json);
-  LaunchBar.log(json[1][0][0]);
+  const result = HTTP.get(url, 3);
 
-  var suggestionsResult = json;
+  if (!result) return;
+  if (result.error) return LaunchBar.log(result.error);
 
-  try {
-    var suggestions = [];
-    var i = 0;
-    for (i = 0; i < suggestionsResult[1].length; i++) {
-      var suggestion = suggestionsResult[1][i];
-      suggestions.push({
-        title: suggestion,
-        icon: 'gTemplate',
-      });
-    }
-    return suggestions;
-  } catch (exception) {
-    LaunchBar.log('Exception while parsing result: ' + exception);
-    return [];
-  }
+  const suggestionsArray = JSON.parse(result.data)?.[1];
+
+  return suggestionsArray.map((title) => ({
+    title,
+    icon: 'gTemplate',
+  }));
 }
