@@ -17,7 +17,7 @@ function run() {
 
   const [frontmost, appName, isSupported] = LaunchBar.execute(
     '/bin/bash',
-    './appInfo.sh'
+    './appInfo.sh',
   )
     .trim()
     .split('\n');
@@ -38,6 +38,7 @@ function run() {
   if (
     frontmost === 'com.brave.Browser' ||
     frontmost === 'com.google.Chrome' ||
+    frontmost === 'net.imput.helium' ||
     frontmost === 'company.thebrowser.Browser' ||
     frontmost === 'com.vivaldi.Vivaldi'
   ) {
@@ -120,7 +121,7 @@ function getURLSafari(frontmost) {
 	    end if
       return _url & "\n" & _time
     end tell
-  `
+  `,
   )?.split('\n');
 
   url =
@@ -153,7 +154,7 @@ function getURLChromium(frontmost) {
       end if
       return _url & "\n" & _time  
     end tell
-  `
+  `,
   )?.split('\n');
 
   url =
@@ -236,13 +237,15 @@ function handleYoutubeUrl(url, time) {
 
   let ytId;
 
+  if (url.includes('/shorts/')) return url;
+
   if (url.includes('youtu.be')) {
     ytId = url.split('youtu.be/')[1]?.split('?')[0];
   } else {
     ytId = url.split('v=')[1]?.split('&')[0];
   }
 
-  if (!ytId) return [url, ytId];
+  if (!ytId) return url;
 
   url =
     `${baseUrl}${ytId}` +
@@ -257,7 +260,7 @@ function handleTwitchUrl(url, time) {
   const baseUrl = 'https://www.twitch.tv/videos/';
 
   const videoIdMatch = url.match(/\/videos\/(\d+)/);
-  if (!videoIdMatch) return [url, null];
+  if (!videoIdMatch) return url;
 
   const videoId = videoIdMatch[1];
 
