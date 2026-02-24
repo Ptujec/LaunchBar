@@ -14,6 +14,7 @@
 supported_browsers=(
     "com.apple.Safari"
     "com.kagi.kagimacOS"
+    "net.imput.helium@"
     "com.brave.Browser"
     "com.google.Chrome"
     "com.vivaldi.Vivaldi"
