@@ -8,7 +8,9 @@ This action pastes the title and URL of the current website, formatted as **rich
 
 By default, the action takes the website information from your default browser. If your default browser is not running, it will look for one of the other supported browsers (Safari, Chrome, Brave, Arc, Vivaldi). 
 
-You can enter a **custom title** by holding down the space bar. If you hold down the command key, only the **plain link** will be inserted.
+You can enter a **custom title** by holding down the space bar. If you hold down the `command` key, only the **plain link** will be inserted. 
+
+If you hold down the `option` key you can add the **current time marker** to **YouTube** and **Twitch** video URLs. However, for this to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu. 
 
 ## Setup (IMPORTANT!)
 

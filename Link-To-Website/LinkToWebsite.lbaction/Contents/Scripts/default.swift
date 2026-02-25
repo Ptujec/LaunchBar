@@ -3,7 +3,7 @@
 /* 
 Link to Website Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-02-13
+2026-02-25
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -15,11 +15,12 @@ import Cocoa
 struct Environment {
     static let info = ProcessInfo.processInfo.environment
     static let isCommandKeyPressed = info["LB_OPTION_COMMAND_KEY"] == "1"
+    static let isAlternateKeyPressed = info["LB_OPTION_ALTERNATE_KEY"] == "1"
 }
 
 // MARK: - Browser Detection
 
-let supportedBrowsers = ["com.apple.safari", "company.thebrowser.browser", "com.google.chrome", "com.vivaldi.vivaldi", "com.brave.browser"]
+let supportedBrowsers = ["com.apple.safari", "company.thebrowser.browser", "com.google.chrome", "net.imput.helium", "com.vivaldi.vivaldi", "com.brave.browser", "com.kagi.kagimacos"]
 
 func getActiveBrowser() -> String? {
     let workspace = NSWorkspace.shared
@@ -37,7 +38,7 @@ func getActiveBrowser() -> String? {
        let defaultBrowser = handlers.first(where: { $0["LSHandlerURLScheme"] as? String == "http" })?["LSHandlerRoleAll"] as? String,
        supportedBrowsers.contains(where: { $0.lowercased() == defaultBrowser.lowercased() }),
        isRunning(defaultBrowser) {
-        return defaultBrowser
+        return defaultBrowser.lowercased()
     }
     
     // Fall back to first running supported browser
@@ -46,21 +47,36 @@ func getActiveBrowser() -> String? {
 
 // MARK: - Browser Script Generation
 
-func getBrowserScript(browser: String, customTitle: String?) -> String {
+func getBrowserScript(browser: String, customTitle: String?, includeTime: Bool = false) -> String {
+    let isSafariStyle = browser == "com.apple.safari" || browser == "com.kagi.kagimacos"
+    
     let baseScript: String
-    if browser == "com.apple.safari" {
-        baseScript = "tell application id \"com.apple.safari\"\nset _url to URL of front document\n"
+    if isSafariStyle {
+        baseScript = "tell application id \"\(browser)\"\nset _url to URL of front document\n"
     } else {
         baseScript = "tell application id \"\(browser)\"\nset _url to URL of active tab of front window\n"
     }
     
     let titlePart = customTitle != nil ?
         "set _name to \"\(customTitle!)\"" :
-        (browser == "com.apple.safari" ?
+        (isSafariStyle ?
             "set _name to name of front document" :
             "set _name to title of active tab of front window")
     
-    return baseScript + titlePart + "\nreturn {_url, _name}\nend tell"
+    let timePart: String
+    if includeTime {
+        let jsExecution: String
+        if isSafariStyle {
+            jsExecution = "set _time to (do JavaScript \"String(Math.round(document.querySelector('video').currentTime))\" in front document) as string"
+        } else {
+            jsExecution = "set _time to (execute active tab of front window javascript \"String(Math.round(document.querySelector('video').currentTime))\")"
+        }
+        timePart = "\nset _time to \"\"\nif (_url contains \"youtube.com\") or (_url contains \"youtu.be\") or (_url contains \"twitch.tv\") then\n  try\n    \(jsExecution)\n  on error e\n    set _time to \"\"\n  end try\nend if\nreturn {_url, _name, _time}"
+    } else {
+        timePart = "\nreturn {_url, _name, \"\"}"
+    }
+    
+    return baseScript + titlePart + timePart + "\nend tell"
 }
 
 // MARK: - Pasteboard Handling
@@ -90,10 +106,73 @@ func cleanTitle(_ title: String) -> String {
     return cleanedTitle.trimmingCharacters(in: .whitespaces)
 }
 
+// MARK: - Time Append for Video URLs
+
+func appendTimeToVideoURL(_ url: String, time: String) -> String {
+    guard !time.isEmpty, let timeValue = Double(time), timeValue > 10 else {
+        return url
+    }
+    
+    if url.contains("youtube.com") || url.contains("youtu.be") {
+        return handleYoutubeUrl(url, time: time)
+    }
+    
+    if url.contains("twitch.tv") {
+        return handleTwitchUrl(url, time: time)
+    }
+    
+    return url
+}
+
+func handleYoutubeUrl(_ url: String, time: String) -> String {
+    let baseUrl = "https://www.youtube.com/watch?v="
+    var ytId: String?
+    
+    if url.contains("youtu.be") {
+        let components = url.split(separator: "youtu.be/")
+        if components.count > 1 {
+            ytId = String(components[1]).split(separator: "?")[0].trimmingCharacters(in: .whitespaces)
+        }
+    } else {
+        let components = url.split(separator: "v=")
+        if components.count > 1 {
+            ytId = String(components[1]).split(separator: "&")[0].trimmingCharacters(in: .whitespaces)
+        }
+    }
+    
+    guard let ytId = ytId, !ytId.isEmpty else {
+        return url
+    }
+    
+    let timeValue = Int(Double(time) ?? 0)
+    let timeParam = timeValue > 10 ? "&t=\(timeValue)s" : ""
+    return baseUrl + ytId + timeParam
+}
+
+func handleTwitchUrl(_ url: String, time: String) -> String {
+    let baseUrl = "https://www.twitch.tv/videos/"
+    let pattern = "/videos/(\\d+)"
+    
+    guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        return url
+    }
+    
+    let range = NSRange(url.startIndex..., in: url)
+    guard let match = regex.firstMatch(in: url, range: range),
+          let videoIdRange = Range(match.range(at: 1), in: url) else {
+        return url
+    }
+    
+    let videoId = String(url[videoIdRange])
+    let timeValue = Int(Double(time) ?? 0)
+    let timeParam = timeValue > 10 ? "?t=\(timeValue)s" : ""
+    return baseUrl + videoId + timeParam
+}
+
 // MARK: - Browser Information Retrieval
 
-func getBrowserInfo(browser: String, customTitle: String?) throws -> (url: String, title: String) {
-    let script = getBrowserScript(browser: browser, customTitle: customTitle)
+func getBrowserInfo(browser: String, customTitle: String?, includeTime: Bool = false) throws -> (url: String, title: String, time: String) {
+    let script = getBrowserScript(browser: browser, customTitle: customTitle, includeTime: includeTime)
 
     NSLog("Script: \(script)")
     
@@ -110,7 +189,9 @@ func getBrowserInfo(browser: String, customTitle: String?) throws -> (url: Strin
         throw NSError(domain: "AppleScriptError", code: -1, userInfo: error as? [String: Any] ?? [:])
     }
     
-    return (url, title)
+    let time = result.atIndex(3)?.stringValue ?? ""
+    
+    return (url, title, time)
 }
 
 // MARK: - Clipboard Operations
@@ -165,9 +246,15 @@ func main() {
             exit(0)
         }
         
-        let info = try getBrowserInfo(browser: browser, customTitle: customTitle)
+        let info = try getBrowserInfo(browser: browser, customTitle: customTitle, includeTime: Environment.isAlternateKeyPressed)
+        var url = info.url
         let cleanedTitle = cleanTitle(info.title)
-        copyToClipboard(title: cleanedTitle, url: info.url)
+        
+        if Environment.isAlternateKeyPressed {
+            url = appendTimeToVideoURL(url, time: info.time)
+        }
+        
+        copyToClipboard(title: cleanedTitle, url: url)
         executePaste()
     } catch {
         NSLog("Error: \(error.localizedDescription)")
