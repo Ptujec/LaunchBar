@@ -106,6 +106,25 @@ func cleanTitle(_ title: String) -> String {
     return cleanedTitle.trimmingCharacters(in: .whitespaces)
 }
 
+// MARK: - Time Formatting
+
+func formatTimeForTitle(_ time: String) -> String {
+    guard !time.isEmpty, let timeValue = Double(time), timeValue > 0 else {
+        return ""
+    }
+    
+    let totalSeconds = Int(timeValue)
+    let hours = totalSeconds / 3600
+    let minutes = (totalSeconds % 3600) / 60
+    let seconds = totalSeconds % 60
+    
+    if hours > 0 {
+        return String(format: " (%02d:%02d:%02d)", hours, minutes, seconds)
+    } else {
+        return String(format: " (%02d:%02d)", minutes, seconds)
+    }
+}
+
 // MARK: - Time Append for Video URLs
 
 func appendTimeToVideoURL(_ url: String, time: String) -> String {
@@ -248,13 +267,14 @@ func main() {
         
         let info = try getBrowserInfo(browser: browser, customTitle: customTitle, includeTime: Environment.isAlternateKeyPressed)
         var url = info.url
-        let cleanedTitle = cleanTitle(info.title)
+        var title = cleanTitle(info.title)
         
         if Environment.isAlternateKeyPressed {
             url = appendTimeToVideoURL(url, time: info.time)
+            title += formatTimeForTitle(info.time)
         }
         
-        copyToClipboard(title: cleanedTitle, url: url)
+        copyToClipboard(title: title, url: url)
         executePaste()
     } catch {
         NSLog("Error: \(error.localizedDescription)")
