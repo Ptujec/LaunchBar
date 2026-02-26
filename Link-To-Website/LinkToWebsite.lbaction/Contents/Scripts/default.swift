@@ -143,6 +143,26 @@ func appendTimeToVideoURL(_ url: String, time: String) -> String {
     return url
 }
 
+func removeTimeFromURL(_ url: String) -> String {
+    var processedUrl = url
+    
+    if url.contains("youtube.com") || url.contains("youtu.be") {
+        // Remove &t=XXXs parameter
+        processedUrl = processedUrl.replacingOccurrences(of: "&t=\\d+s", with: "", options: .regularExpression)
+        // Remove ?t=XXXs parameter
+        processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s", with: "", options: .regularExpression)
+    }
+    
+    if url.contains("twitch.tv") {
+        // Remove ?t=XXXs parameter
+        processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s", with: "", options: .regularExpression)
+        // Remove &t=XXXs parameter
+        processedUrl = processedUrl.replacingOccurrences(of: "&t=\\d+s", with: "", options: .regularExpression)
+    }
+    
+    return processedUrl
+}
+
 func handleYoutubeUrl(_ url: String, time: String) -> String {
     let baseUrl = "https://www.youtube.com/watch?v="
     var ytId: String?
@@ -272,6 +292,8 @@ func main() {
         if Environment.isAlternateKeyPressed {
             url = appendTimeToVideoURL(url, time: info.time)
             title += formatTimeForTitle(info.time)
+        } else {
+            url = removeTimeFromURL(url)
         }
         
         copyToClipboard(title: title, url: url)
