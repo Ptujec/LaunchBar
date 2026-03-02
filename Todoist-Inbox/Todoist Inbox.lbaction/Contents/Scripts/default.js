@@ -229,7 +229,7 @@ function advancedOptions(task) {
 
   task.advancedData = true;
 
-  const labelObj = task.labelObj;
+  const selectedLabel = task.selectedLabel;
   const usedLabels = task.usedLabels || [];
 
   const todoistData = getTodoistData();
@@ -237,7 +237,7 @@ function advancedOptions(task) {
 
   let labels = todoistData.labels?.filter((label) => !label.is_archived);
 
-  if (labelObj) task.usedLabels = [...usedLabels, labelObj];
+  if (selectedLabel) task.usedLabels = [...usedLabels, selectedLabel];
 
   const usedLabelsNames = task.usedLabels
     ? task.usedLabels.map((usedLabel) => usedLabel.labelName)
@@ -282,7 +282,7 @@ function advancedOptions(task) {
       action: 'postTask',
       actionArgument: {
         ...task,
-        type: labelObj ? 'projectAndLabel' : 'project',
+        type: selectedLabel ? 'projectAndLabel' : 'project',
         id,
         index,
       },
@@ -354,7 +354,7 @@ function advancedOptions(task) {
       action: 'postTask',
       actionArgument: {
         ...task,
-        type: labelObj ? 'sectionAndLabel' : 'section',
+        type: selectedLabel ? 'sectionAndLabel' : 'section',
         id,
         sectionProjectId,
         index,
@@ -409,11 +409,12 @@ function advancedOptions(task) {
       action: 'advancedOptions',
       actionArgument: {
         ...task,
-        labelObj: {
+        selectedLabel: {
           labelName: name,
           labelId: id,
         },
       },
+      actionReturnsItems: true,
     };
 
     // Determine match count for prioritization
@@ -430,8 +431,8 @@ function advancedOptions(task) {
 
     // Calculate relationship frequency if selected label exists
     let relationshipFreq = 0;
-    if (labelObj && labelUsageItem.projectRelationships) {
-      const selectedLabelId = labelObj.labelId;
+    if (selectedLabel && labelUsageItem.projectRelationships) {
+      const selectedLabelId = selectedLabel.labelId;
       const selectedLabelData = usageData.labels[selectedLabelId];
       if (selectedLabelData?.projectRelationships) {
         relationshipFreq = selectedLabelData.projectRelationships[id] || 0;
@@ -518,7 +519,7 @@ function advancedOptions(task) {
   const topThreeIds = new Set(
     topThreePrioritized.map((item) =>
       item.type === 'label'
-        ? item.data.actionArgument.labelObj.labelId
+        ? item.data.actionArgument.selectedLabel.labelId
         : item.data.actionArgument.id,
     ),
   );
@@ -552,7 +553,8 @@ function advancedOptions(task) {
 
   const remainingLabels = labelResults
     .filter(
-      (result) => !topThreeIds.has(result.data.actionArgument.labelObj.labelId),
+      (result) =>
+        !topThreeIds.has(result.data.actionArgument.selectedLabel.labelId),
     )
     .sort((a, b) => a.originalIndex - b.originalIndex)
     .map((result) => result.data);

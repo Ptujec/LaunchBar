@@ -329,138 +329,47 @@ function importUsedWords() {
     if (!usageData.tasks) {
       usageData.tasks = {};
     }
-    usageData.tasks[task.id] = {
-      added_at: task.added_at,
-    };
+    usageData.tasks[task.id] = { added_at: task.added_at };
 
     // Update section usage OR project usage (not both)
-    // If task has a section, only update section; otherwise update project
     if (task.section_id) {
       const sectionId = task.section_id;
-
-      // Ensure section entry exists with proper structure
-      if (!usageData.sections[sectionId]) {
-        usageData.sections[sectionId] = {
-          usedWords: {},
-          usage: 0,
-          lastUsedDate: task.added_at,
-        };
-      } else {
-        // Ensure usedWords property exists (in case section was empty)
-        if (!usageData.sections[sectionId].usedWords) {
-          usageData.sections[sectionId].usedWords = {};
-        }
-      }
-
-      // Update lastUsedDate if newer
-      if (
-        !usageData.sections[sectionId].lastUsedDate ||
-        new Date(task.added_at) >
-          new Date(usageData.sections[sectionId].lastUsedDate)
-      ) {
-        usageData.sections[sectionId].lastUsedDate = task.added_at;
-      }
-
-      // Increment usage count
-      usageData.sections[sectionId].usage =
-        (usageData.sections[sectionId].usage || 0) + 1;
-
-      // Add word counts
-      for (const word of words) {
-        usageData.sections[sectionId].usedWords[word] =
-          (usageData.sections[sectionId].usedWords[word] || 0) + 1;
-      }
-
+      ensureUsageEntry(usageData.sections, sectionId, task.added_at);
+      updateUsageEntry(usageData.sections[sectionId], words, task.added_at);
       stats.sections.itemsUpdated++;
       stats.sections.wordsAdded += words.length;
       totalWordsAdded += words.length;
     } else if (task.project_id) {
       const projectId = task.project_id;
-
-      // Ensure project entry exists with proper structure
-      if (!usageData.projects[projectId]) {
-        usageData.projects[projectId] = {
-          usedWords: {},
-          usage: 0,
-          lastUsedDate: task.added_at,
-        };
-      } else {
-        // Ensure usedWords property exists (in case project was empty)
-        if (!usageData.projects[projectId].usedWords) {
-          usageData.projects[projectId].usedWords = {};
-        }
+      const project = projectMap.get(projectId);
+      // Skip tracking for inbox project
+      if (!project?.inbox_project) {
+        ensureUsageEntry(usageData.projects, projectId, task.added_at);
+        updateUsageEntry(usageData.projects[projectId], words, task.added_at);
+        stats.projects.itemsUpdated++;
+        stats.projects.wordsAdded += words.length;
+        totalWordsAdded += words.length;
       }
-
-      // Update lastUsedDate if newer
-      if (
-        !usageData.projects[projectId].lastUsedDate ||
-        new Date(task.added_at) >
-          new Date(usageData.projects[projectId].lastUsedDate)
-      ) {
-        usageData.projects[projectId].lastUsedDate = task.added_at;
-      }
-
-      // Increment usage count
-      usageData.projects[projectId].usage =
-        (usageData.projects[projectId].usage || 0) + 1;
-
-      // Add word counts
-      for (const word of words) {
-        usageData.projects[projectId].usedWords[word] =
-          (usageData.projects[projectId].usedWords[word] || 0) + 1;
-      }
-
-      stats.projects.itemsUpdated++;
-      stats.projects.wordsAdded += words.length;
-      totalWordsAdded += words.length;
     }
 
     // Update label usage
     if (task.labels && Array.isArray(task.labels)) {
       for (const labelName of task.labels) {
-        // Find label ID by name
         const label = Array.from(labelMap.values()).find(
           (l) => l.name === labelName,
         );
-        if (label) {
-          const labelId = label.id;
+        if (!label) continue;
 
-          // Ensure label entry exists with proper structure
-          if (!usageData.labels[labelId]) {
-            usageData.labels[labelId] = {
-              usedWords: {},
-              usage: 0,
-              lastUsedDate: task.added_at,
-            };
-            stats.labels.itemsUpdated++;
-          } else {
-            // Ensure usedWords property exists (in case label was empty)
-            if (!usageData.labels[labelId].usedWords) {
-              usageData.labels[labelId].usedWords = {};
-            }
-          }
-
-          // Update lastUsedDate if newer
-          if (
-            !usageData.labels[labelId].lastUsedDate ||
-            new Date(task.added_at) >
-              new Date(usageData.labels[labelId].lastUsedDate)
-          ) {
-            usageData.labels[labelId].lastUsedDate = task.added_at;
-          }
-
-          // Increment usage count
-          usageData.labels[labelId].usage =
-            (usageData.labels[labelId].usage || 0) + 1;
-
-          // Add word counts
-          for (const word of words) {
-            usageData.labels[labelId].usedWords[word] =
-              (usageData.labels[labelId].usedWords[word] || 0) + 1;
-          }
-
-          stats.labels.wordsAdded += words.length;
-        }
+        const labelId = label.id;
+        const isNew = ensureUsageEntry(
+          usageData.labels,
+          labelId,
+          task.added_at,
+          true,
+        );
+        updateUsageEntry(usageData.labels[labelId], words, task.added_at);
+        if (isNew) stats.labels.itemsUpdated++;
+        stats.labels.wordsAdded += words.length;
       }
     }
 
@@ -505,8 +414,6 @@ function getRecentTasks() {
     },
   );
 
-  // const result = File.readJSON(`${Action.supportPath}/test.json`);
-
   if (result.error) {
     LaunchBar.alert('Todoist Action Error', result.error);
     return null;
@@ -526,4 +433,38 @@ function getRecentTasks() {
   }
 
   return result;
+}
+
+// Helper function to ensure an entry exists with proper structure
+function ensureUsageEntry(container, id, addedDate, isNewEntry = false) {
+  if (!container[id]) {
+    container[id] = {
+      usedWords: {},
+      usage: 0,
+      lastUsedDate: addedDate,
+    };
+    return true; // indicates this was newly created
+  } else if (!container[id].usedWords) {
+    container[id].usedWords = {};
+  }
+  return false;
+}
+
+// Helper function to update usage entry with new data
+function updateUsageEntry(entry, words, addedDate) {
+  // Update lastUsedDate if newer
+  if (
+    !entry.lastUsedDate ||
+    new Date(addedDate) > new Date(entry.lastUsedDate)
+  ) {
+    entry.lastUsedDate = addedDate;
+  }
+
+  // Increment usage count
+  entry.usage = (entry.usage || 0) + 1;
+
+  // Add word counts
+  for (const word of words) {
+    entry.usedWords[word] = (entry.usedWords[word] || 0) + 1;
+  }
 }
