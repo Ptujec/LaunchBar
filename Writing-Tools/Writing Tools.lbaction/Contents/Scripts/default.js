@@ -42,7 +42,7 @@ function run(argument) {
   const frontmostAppID = LaunchBar.execute(
     '/bin/sh',
     '-c',
-    'lsappinfo info -only bundleid $(/usr/bin/lsappinfo front)'
+    'lsappinfo info -only bundleid $(/usr/bin/lsappinfo front)',
   )
     .split('=')[1]
     .split('"')[1];
@@ -97,14 +97,46 @@ function run(argument) {
   return mainAction({ content, hasArgument, frontmostAppID });
 }
 
-function mainAction({ content, hasArgument, frontmostAppID, tool }) {
+function mainAction({
+  content,
+  hasArgument,
+  frontmostAppID,
+  tool,
+  isCustomPrompt,
+}) {
   LaunchBar.hide();
 
   const prefs = Action.preferences;
   const model = prefs.model || 'gpt-4o-mini';
   const defaultToolID = prefs.defaultToolID || '1';
   const tools = getUserToolsJSON();
-  tool = tool ? tool : tools.find((tool) => tool.id === defaultToolID);
+
+  // Handle custom prompt
+  if (isCustomPrompt) {
+    const customPrompt = LaunchBar.executeAppleScript(
+      `set result to display dialog "${'Enter Prompt'.localize()}:" with title "${'New Prompt'.localize()}" default answer ""`,
+      'set result to text returned of result',
+    ).trim();
+
+    if (customPrompt === '') return;
+
+    const toolsData = File.readJSON(userToolsPath);
+
+    if (!toolsData.customPromptPersona) {
+      toolsData.customPromptPersona = toolsPath.customPromptPersona;
+      File.writeJSON(toolsData, userToolsPath);
+    }
+
+    const customPromptPersona = toolsData.customPromptPersona;
+
+    tool = {
+      id: 'custom',
+      prompt: `${customPrompt}\n`,
+      persona: customPromptPersona,
+    };
+  } else {
+    tool = tool ? tool : tools.find((tool) => tool.id === defaultToolID);
+  }
 
   // API CALL
   const result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
@@ -227,14 +259,14 @@ function compareTexts({ content, answer }) {
     'tell application "BBEdit"',
     '	activate',
     `	set theResult to compare file ("${originalTextFile}" as POSIX file) against file ("${answerTextFile}" as POSIX file)`,
-    'end tell'
+    'end tell',
   );
 }
 
 function playConfirmationSound() {
   LaunchBar.execute(
     '/usr/bin/afplay',
-    '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf'
+    '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf',
   );
 }
 
@@ -243,7 +275,7 @@ function confirmationDialog() {
     'Select all text?'.localize(),
     '',
     'Ok',
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
   switch (response) {
     case 0:

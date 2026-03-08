@@ -1,4 +1,5 @@
 {
+  "customPromptPersona" : "You are a proofreader. Review the provided text for any spelling, grammar, or punctuation errors. Respond only with the edited text in the language of the provided text.",
   "tools" : [
     {
       "id" : "1",

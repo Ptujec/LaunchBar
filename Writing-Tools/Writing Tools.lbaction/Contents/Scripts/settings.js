@@ -9,7 +9,7 @@ function settings() {
   const defaultToolID = prefs.defaultToolID || '1';
   const tools = getUserToolsJSON();
   const defaultToolName = tools.find(
-    (tool) => tool.id === defaultToolID
+    (tool) => tool.id === defaultToolID,
   )?.title;
 
   return [
@@ -90,19 +90,38 @@ function showTools({ content, hasArgument, frontmostAppID }) {
   const tools = getUserToolsJSON();
   const defaultToolID = Action.preferences.defaultToolID || '1';
 
-  return tools.map((tool) => ({
+  const toolItems = tools.map((tool) => ({
     title: `${tool.title}`.localize(),
     icon: content
       ? 'toolTemplate'
       : tool.id === defaultToolID
-      ? 'checkTemplate.png'
-      : 'circleTemplate.png',
+        ? 'checkTemplate.png'
+        : 'circleTemplate.png',
     badge:
       content && tool.id === defaultToolID ? 'Default'.localize() : undefined,
     action: content ? 'mainAction' : 'setDefaultTool',
     actionArgument: { content, hasArgument, frontmostAppID, tool },
     actionRunsInBackground: content ? true : false,
   }));
+
+  // Add custom prompt at the top if content is available
+  if (content) {
+    const customPromptItem = {
+      title: 'New Prompt'.localize(),
+      icon: 'toolTemplate',
+      action: 'mainAction',
+      actionArgument: {
+        content,
+        hasArgument,
+        frontmostAppID,
+        isCustomPrompt: true,
+      },
+      actionRunsInBackground: true,
+    };
+    return [customPromptItem, ...toolItems];
+  }
+
+  return toolItems;
 }
 
 function setDefaultTool({ tool }) {
@@ -133,7 +152,7 @@ function showModels() {
   if (result.response.status !== 200) {
     return LaunchBar.alert(
       `Error ${result.response.status}`,
-      result.response.localizedStatus
+      result.response.localizedStatus,
     );
   }
 
@@ -146,7 +165,7 @@ function showModels() {
         (item) =>
           item.id.startsWith('gpt-') &&
           !item.id.includes('realtime-preview') &&
-          !item.id.includes('audio')
+          !item.id.includes('audio'),
       )
       // .sort((a, b) => a.id > b.id)
       .map((item) => ({
@@ -179,8 +198,8 @@ function showAuthors({ isMain, content, hasArgument, frontmostAppID }) {
         isMain === true
           ? 'iATemplate'
           : author === Action.preferences.iaAuthor
-          ? 'checkTemplate.png'
-          : 'circleTemplate.png',
+            ? 'checkTemplate.png'
+            : 'circleTemplate.png',
       action: 'setAuthor',
       actionArgument: {
         author,
@@ -228,7 +247,7 @@ function getApps() {
             const wrapper = path + '/Wrapper/';
             if (File.exists(wrapper)) {
               const wrapperItem = File.getDirectoryContents(wrapper).find(
-                (item) => item.endsWith('.app')
+                (item) => item.endsWith('.app'),
               );
               if (wrapperItem) {
                 infoPlistPath = `${path}/Wrapper/${wrapperItem}/Info.plist`;
@@ -247,8 +266,8 @@ function getApps() {
             const types = docType.LSItemContentTypes || [];
             return types.some((type) =>
               ['public.plain-text', 'public.text', 'public.content'].includes(
-                type
-              )
+                type,
+              ),
             );
           });
 
@@ -288,7 +307,7 @@ function excludeApp(app) {
   ) {
     excludedApps.splice(
       excludedApps.findIndex((excludedApp) => excludedApp.appID === app.appID),
-      1
+      1,
     );
   } else {
     excludedApps.push(app);
@@ -314,7 +333,7 @@ function setApiKey() {
     '1) Press »Open OpenAI.com« to create an API key.\n2) Press »Set API Key«'.localize(),
     'Open OpenAI.com'.localize(),
     'Set API Key'.localize(),
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
   switch (response) {
     case 0:
@@ -331,7 +350,7 @@ function setApiKey() {
 
       LaunchBar.alert(
         'Success!'.localize(),
-        'API key set to: '.localize() + Action.preferences.apiKey
+        'API key set to: '.localize() + Action.preferences.apiKey,
       );
       break;
     case 2:
@@ -343,7 +362,7 @@ function checkAPIKey(apiKey) {
   if (!apiKey.startsWith('sk-')) {
     LaunchBar.alert(
       'Invalid API key format'.localize(),
-      'Make sure the API key is the most recent item in the clipboard!'.localize()
+      'Make sure the API key is the most recent item in the clipboard!'.localize(),
     );
     return false;
   }
@@ -358,7 +377,7 @@ function checkAPIKey(apiKey) {
 
   LaunchBar.alert(
     'Invalid OpenAI API key'.localize(),
-    `Error ${result.response.status}: ${result.response.localizedStatus}`
+    `Error ${result.response.status}: ${result.response.localizedStatus}`,
   );
 
   return false;
