@@ -67,11 +67,11 @@ func getBrowserScript(browser: String, customTitle: String?, includeTime: Bool =
     if includeTime {
         let jsExecution: String
         if isSafariStyle {
-            jsExecution = "set _time to (do JavaScript \"String(Math.round(document.querySelector('video').currentTime))\" in front document) as string"
+            jsExecution = "set _time to (do JavaScript \"var el = document.querySelector('video') || document.querySelector('audio'); String(Math.round(el.currentTime))\" in front document) as string"
         } else {
-            jsExecution = "set _time to (execute active tab of front window javascript \"String(Math.round(document.querySelector('video').currentTime))\")"
+            jsExecution = "set _time to (execute active tab of front window javascript \"var el = document.querySelector('video') || document.querySelector('audio'); String(Math.round(el.currentTime))\")"
         }
-        timePart = "\nset _time to \"\"\nif (_url contains \"youtube.com\") or (_url contains \"youtu.be\") or (_url contains \"twitch.tv\") then\n  try\n    \(jsExecution)\n  on error e\n    set _time to \"\"\n  end try\nend if\nreturn {_url, _name, _time}"
+        timePart = "\nset _time to \"\"\nif (_url contains \"youtube.com\") or (_url contains \"youtu.be\") or (_url contains \"twitch.tv\") or (_url contains \"pocketcasts.com\") then\n  try\n    \(jsExecution)\n  on error e\n    set _time to \"\"\n  end try\nend if\nreturn {_url, _name, _time}"
     } else {
         timePart = "\nreturn {_url, _name, \"\"}"
     }
@@ -94,11 +94,14 @@ func createAttributedString(text: String, url: String = "") -> NSAttributedStrin
 func cleanTitle(_ title: String) -> String {
     var cleanedTitle = title
     
-    // Remove YouTube notification count at start
+    // Remove notification count at start
     cleanedTitle = cleanedTitle.replacingOccurrences(of: #"^\(\d+\)\s*"#, with: "", options: .regularExpression)
     
     // Remove " - YouTube" at the end
     cleanedTitle = cleanedTitle.replacingOccurrences(of: #"\s*-\s*YouTube$"#, with: "", options: .regularExpression)
+    
+    // Remove " - Pocket Casts" at the end
+    cleanedTitle = cleanedTitle.replacingOccurrences(of: #"\s*-\s*Pocket Casts$"#, with: "", options: .regularExpression)
     
     // Remove other common patterns if needed
     // Add more patterns here as needed
@@ -140,6 +143,10 @@ func appendTimeToVideoURL(_ url: String, time: String) -> String {
         return handleTwitchUrl(url, time: time)
     }
     
+    if url.contains("pocketcasts.com") {
+        return handlePocketCastsUrl(url, time: time)
+    }
+    
     return url
 }
 
@@ -158,6 +165,13 @@ func removeTimeFromURL(_ url: String) -> String {
         processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s", with: "", options: .regularExpression)
         // Remove &t=XXXs parameter
         processedUrl = processedUrl.replacingOccurrences(of: "&t=\\d+s", with: "", options: .regularExpression)
+    }
+    
+    if url.contains("pocketcasts.com") {
+        // Remove ?t=XXX parameter (with or without 's' suffix)
+        processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
+        // Remove &t=XXX parameter (with or without 's' suffix)
+        processedUrl = processedUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
     }
     
     return processedUrl
@@ -206,6 +220,21 @@ func handleTwitchUrl(_ url: String, time: String) -> String {
     let timeValue = Int(Double(time) ?? 0)
     let timeParam = timeValue > 10 ? "?t=\(timeValue)s" : ""
     return baseUrl + videoId + timeParam
+}
+
+func handlePocketCastsUrl(_ url: String, time: String) -> String {
+    let timeValue = Int(Double(time) ?? 0)
+    guard timeValue > 10 else {
+        return url
+    }
+    
+    // Remove existing time parameter if present (with or without 's' suffix)
+    var baseUrl = url
+    baseUrl = baseUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
+    baseUrl = baseUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
+    
+    let timeParam = "?t=\(timeValue)"
+    return baseUrl + timeParam
 }
 
 // MARK: - Browser Information Retrieval
