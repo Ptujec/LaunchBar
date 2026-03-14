@@ -131,7 +131,7 @@ function mainAction({
 
     tool = {
       id: 'custom',
-      prompt: `${customPrompt}\n`,
+      prompt: `${customPrompt}:\n`,
       persona: customPromptPersona,
     };
   } else {
