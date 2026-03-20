@@ -11,8 +11,11 @@ const globalStorePath =
 
 const actualFileURL = File.fileURLForPath('/Applications/Actual.app');
 
+// URL patterns - matches message://, https://, x-soulver://, and other custom protocols
+const urlRegex = /([a-z-]+):\/\/[^\s]*/gi;
+
 const addActionExists = File.exists(
-  '~/Library/Application Support/LaunchBar/Actions/ActualAddTransaction.lbaction'
+  '~/Library/Application Support/LaunchBar/Actions/ActualAddTransaction.lbaction',
 );
 
 const fullDataActionSupportPath = addActionExists
@@ -58,7 +61,7 @@ const recentPrefs = {
 function getDatabaseData(
   customDatabasePath,
   customBudgetID,
-  requireFullData = false
+  requireFullData = false,
 ) {
   const { databasePath: defaultDatabasePath, budgetID: defaultBudgetID } =
     getBudgetInfo();
@@ -95,7 +98,7 @@ function getDatabaseData(
     '/bin/bash',
     './parseDataBase.sh',
     databasePath,
-    fetchMode
+    fetchMode,
   );
 
   if (!result) {
@@ -154,7 +157,7 @@ function getCachedDatabaseData(options = {}) {
       requireFullData ||
       (checkForEntity &&
         !data.transactions.some(
-          (t) => t[checkForEntity.field] === checkForEntity.id
+          (t) => t[checkForEntity.field] === checkForEntity.id,
         ));
 
     if (needsFullData) {
@@ -214,8 +217,8 @@ function showBudgets() {
       a.isDefaultBudget
         ? -1
         : b.isDefaultBudget
-        ? 1
-        : a.title.localeCompare(b.title)
+          ? 1
+          : a.title.localeCompare(b.title),
     );
 }
 
@@ -241,7 +244,7 @@ function formatAmount(amount, numberFormat) {
 
 function formatDate(dateString, format) {
   const date = new Date(
-    String(dateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')
+    String(dateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
   );
 
   return format
@@ -293,7 +296,7 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
   if (!getCategoryBalance.cache) {
     getCategoryBalance.cache = preprocessCategoryData(
       transactions,
-      zero_budgets
+      zero_budgets,
     );
   }
 

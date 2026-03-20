@@ -109,7 +109,7 @@ function showAccountTransactions({
     .filter((t) => t.account_id === accountId)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
     .map((t) =>
-      formatTransaction(t, numberFormat, dateFormat, transactions, accountId)
+      formatTransaction(t, numberFormat, dateFormat, transactions, accountId),
     );
 
   return accountTransactions.length > 0
@@ -139,7 +139,7 @@ function showCategories(customDatabasePath, customBudgetID) {
     currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1); // YYYYMM
 
   const currentMonthTransactions = transactions.filter(
-    (t) => Math.floor(t.date / 100) === currentMonth
+    (t) => Math.floor(t.date / 100) === currentMonth,
   );
 
   return categories
@@ -149,20 +149,20 @@ function showCategories(customDatabasePath, customBudgetID) {
         cat.id,
         transactions,
         zero_budgets,
-        cat
+        cat,
       );
 
       const budgetData = zero_budgets.find(
-        (b) => b.month === currentMonth && b.category === cat.id
+        (b) => b.month === currentMonth && b.category === cat.id,
       ) || { budgeted: 0, carryover: 0 }; // budgeted is amount, carryover is 1 or 0
 
       const categoryTransactions = currentMonthTransactions.filter(
-        (t) => t.category_id === cat.id
+        (t) => t.category_id === cat.id,
       );
 
       const netFlow = categoryTransactions.reduce(
         (sum, t) => sum + t.amount,
-        0
+        0,
       );
 
       const noteText = notes?.find((note) => note.id === cat.id)?.note;
@@ -192,8 +192,8 @@ function showCategories(customDatabasePath, customBudgetID) {
         balance < 0
           ? 'categoryRed'
           : balance === 0
-          ? 'categoryGreyTemplate'
-          : 'categoryTemplate';
+            ? 'categoryGreyTemplate'
+            : 'categoryTemplate';
 
       return {
         title: `${cat.name}${displayBalance}`,
@@ -259,22 +259,17 @@ function handleCategoryAction({
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
   const transactionItems = categoryTransactions.map((t) =>
-    formatTransaction(t, numberFormat, dateFormat, categoryTransactions)
+    formatTransaction(t, numberFormat, dateFormat, categoryTransactions),
   );
 
   return [...noteItem, ...transactionItems];
 }
 
-function handleTransactionAction({
-  t,
-  formattedAmount,
-  formattedDate,
-  messageUrl,
-}) {
+function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
     LaunchBar.openURL(
-      messageUrl && !LaunchBar.options.alternateKey ? messageUrl : actualFileURL
+      url && !LaunchBar.options.alternateKey ? url : actualFileURL,
     );
     return;
   }
@@ -343,7 +338,7 @@ function handleTransactionAction({
     const childTransactions = transactions
       .filter((ct) => ct.parent_id === t.id)
       .map((ct) =>
-        formatTransaction(ct, numberFormat, dateFormat, transactions)
+        formatTransaction(ct, numberFormat, dateFormat, transactions),
       );
 
     return childTransactions.length > 0
@@ -351,9 +346,7 @@ function handleTransactionAction({
       : [{ title: 'No child transactions found', icon: 'alert' }];
   }
 
-  const displayNotes = t.notes
-    ? t.notes.replace(/message:\/\/[^\s]*/, '').trim()
-    : '';
+  const displayNotes = t.notes ? t.notes.replace(urlRegex, '').trim() : '';
 
   return [
     t.payee_name
@@ -399,10 +392,10 @@ function handleTransactionAction({
       actionReturnsItems: true,
     },
     {
-      title: t.notes && !displayNotes ? '(Mail URL)' : displayNotes,
+      title: t.notes && !displayNotes ? '(URL)' : displayNotes,
       icon: 'noteTemplate',
-      url: messageUrl ? messageUrl : undefined,
-      label: messageUrl ? '􀉣' : undefined,
+      url,
+      label: url ? '􀉣' : undefined,
     },
   ];
 }
@@ -412,7 +405,7 @@ function handleTransactionAction({
 function showPayeeTransactions(
   { payeeName: payeeId },
   customDatabasePath,
-  customBudgetID
+  customBudgetID,
 ) {
   const data = getCachedDatabaseData({
     customDatabasePath,
@@ -503,7 +496,7 @@ function formatTransaction(t, numberFormat, dateFormat, transactions) {
     !t.payee_name && t.notes.startsWith('Reconciliation balance adjustment');
   const formattedAmount = formatAmount(t.amount, numberFormat);
 
-  const messageUrl = t.notes?.match(/message:\/\/[^\s]*/)?.[0];
+  const url = t.notes?.match(urlRegex)?.[0] || null;
 
   let title = [
     isTransfer ? 'Transfer' : t.payee_name,
@@ -541,13 +534,11 @@ function formatTransaction(t, numberFormat, dateFormat, transactions) {
   let subtitle = t.is_parent
     ? `${formattedDate} (Split)`
     : t.category_name
-    ? `${formattedDate} ⋅ ${t.category_name}`
-    : formattedDate;
+      ? `${formattedDate} ⋅ ${t.category_name}`
+      : formattedDate;
 
   if (t.notes && subtitle.length < 40) {
-    const displayNotes = t.notes
-      ? t.notes.replace(/message:\/\/[^\s]*/, '')
-      : '';
+    const displayNotes = t.notes.replace(urlRegex, '').trim();
     const remainingSpace = 48 - subtitle.length - 3; // 3 for " ⋅ "
     const truncatedNotes =
       displayNotes.length > remainingSpace
@@ -561,14 +552,14 @@ function formatTransaction(t, numberFormat, dateFormat, transactions) {
     title,
     subtitle,
     alwaysShowsSubtitle: true,
-    label: t.is_parent ? '􀙠' : messageUrl ? '􀉣' : undefined,
+    label: t.is_parent ? '􀙠' : url ? '􀉣' : undefined,
     badge,
     action: 'handleTransactionAction',
     actionArgument: {
       t,
       formattedAmount,
       formattedDate,
-      messageUrl,
+      url,
     },
     actionReturnsItems: true,
     transferItem: isTransfer
