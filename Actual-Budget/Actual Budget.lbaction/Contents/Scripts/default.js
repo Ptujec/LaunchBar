@@ -392,7 +392,7 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
       actionReturnsItems: true,
     },
     {
-      title: t.notes && !displayNotes ? '(URL)' : displayNotes,
+      title: t.notes && !displayNotes ? t.notes : displayNotes,
       icon: 'noteTemplate',
       url,
       label: url ? '􀉣' : undefined,
@@ -496,7 +496,7 @@ function formatTransaction(t, numberFormat, dateFormat, transactions) {
     !t.payee_name && t.notes.startsWith('Reconciliation balance adjustment');
   const formattedAmount = formatAmount(t.amount, numberFormat);
 
-  const url = t.notes?.match(urlRegex)?.[0] || null;
+  const url = t.notes?.match(urlRegex)?.[0];
 
   let title = [
     isTransfer ? 'Transfer' : t.payee_name,
