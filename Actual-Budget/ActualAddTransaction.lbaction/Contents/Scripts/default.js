@@ -7,6 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 TODO:
 - implement cleared setting later … for now make all cleared
+- add more url actions like in other Actual Action
 */
 
 include('global.js');

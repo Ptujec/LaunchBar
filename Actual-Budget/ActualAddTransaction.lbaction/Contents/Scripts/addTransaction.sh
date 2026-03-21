@@ -25,6 +25,28 @@ log() {
     echo "$1" >&2
 }
 
+# Function to normalize accented characters (fix corrupted unicode)
+normalize_accents() {
+    local text="$1"
+    echo "$text" | sed \
+        -e 's/ö/ö/g' \
+        -e 's/Ö/Ö/g' \
+        -e 's/ä/ä/g' \
+        -e 's/Ä/Ä/g' \
+        -e 's/ü/ü/g' \
+        -e 's/Ü/Ü/g' \
+        -e 's/č/č/g' \
+        -e 's/Č/Č/g' \
+        -e 's/š/š/g' \
+        -e 's/Š/Š/g' \
+        -e 's/ž/ž/g' \
+        -e 's/Ž/Ž/g'
+}
+
+# Normalize accented characters in notes and new payee name
+NOTES=$(normalize_accents "$NOTES")
+NEW_PAYEE_NAME=$(normalize_accents "$NEW_PAYEE_NAME")
+
 # Check if Actual is running and quit it if it is
 if pgrep -x "Actual" > /dev/null; then
     log "Terminating Actual process..."
