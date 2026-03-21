@@ -224,6 +224,18 @@ function showBudgets() {
 
 // MARK: - Formatting and Calculations
 
+function normalizeAccents(text) {
+  // NOTE: Maybe I can get rid of this once I found the error source and fixed the data in the database
+
+  return text
+    .replace(/ö/gi, 'ö')
+    .replace(/ä/gi, 'ä')
+    .replace(/ü/gi, 'ü')
+    .replace(/č/gi, 'č')
+    .replace(/š/gi, 'š')
+    .replace(/ž/gi, 'ž');
+}
+
 function formatAmount(amount, numberFormat) {
   const locales = {
     'dot-comma': 'de-DE',

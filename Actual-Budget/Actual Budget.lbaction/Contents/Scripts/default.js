@@ -13,7 +13,9 @@ Documentation:
 
 include('global.js');
 
-function run() {
+function run(argument) {
+  if (argument) return search(argument);
+
   if (LaunchBar.options.commandKey) {
     LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
     return;
@@ -33,6 +35,161 @@ function run() {
   return LaunchBar.options.shiftKey
     ? showCategories()
     : showAccountsAndTransactions();
+}
+
+// MARK: - Search
+
+function search(argument) {
+  const data = getDatabaseData(null, null, true);
+  if (!data) return [];
+
+  const {
+    categories,
+    payees,
+    transactions,
+    numberFormat,
+    dateFormat,
+    zero_budgets,
+    notes,
+  } = data;
+
+  // Normalize search query for case-insensitive matching
+  const trimmedArgument = argument.trim();
+  const isExactPhrase =
+    trimmedArgument.startsWith('"') && trimmedArgument.endsWith('"');
+  const query = isExactPhrase
+    ? normalizeAccents(trimmedArgument.slice(1, -1)).toLowerCase()
+    : normalizeAccents(trimmedArgument).toLowerCase();
+
+  if (!query) {
+    return [{ title: 'Enter search terms', icon: 'alert' }];
+  }
+
+  // Search categories
+  const matchedCategories = categories
+    ? categories
+        .filter(
+          (cat) =>
+            (isExactPhrase
+              ? normalizeAccents(cat.name?.toLowerCase()) === query ||
+                normalizeAccents(cat.group_name?.toLowerCase()) === query
+              : normalizeAccents(cat.name?.toLowerCase()).includes(query) ||
+                normalizeAccents(cat.group_name?.toLowerCase()).includes(
+                  query,
+                )) && cat.name !== 'Starting Balances',
+        )
+        .map((cat) => {
+          const balance = getCategoryBalance(
+            cat.id,
+            transactions,
+            zero_budgets,
+            cat,
+          );
+          const budgetData = zero_budgets.find(
+            (b) =>
+              b.month ===
+                new Date().getFullYear() * 100 + (new Date().getMonth() + 1) &&
+              b.category === cat.id,
+          ) || { budgeted: 0, carryover: 0 };
+
+          const categoryTransactions = transactions.filter(
+            (t) =>
+              t.category_id === cat.id &&
+              Math.floor(t.date / 100) ===
+                new Date().getFullYear() * 100 + (new Date().getMonth() + 1),
+          );
+
+          const netFlow = categoryTransactions.reduce(
+            (sum, t) => sum + t.amount,
+            0,
+          );
+          const noteText = notes?.find((note) => note.id === cat.id)?.note;
+
+          const displayCarryover = budgetData?.carryover === 1 ? '→ ' : '';
+          const displayBalance =
+            balance !== 0 ? `: ${formatAmount(balance, numberFormat)}` : '';
+          const displayNetFlow =
+            netFlow !== 0 && netFlow !== balance
+              ? `Flow: ${formatAmount(netFlow, numberFormat)}`
+              : undefined;
+          const displayBudgeted =
+            budgetData.budgeted > 0
+              ? `Budgeted: ${formatAmount(budgetData.budgeted, numberFormat)}`
+              : 'No Budget';
+
+          const subtitle =
+            cat.group_is_income === 0
+              ? displayCarryover +
+                [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
+              : undefined;
+
+          const icon =
+            balance < 0
+              ? 'categoryRed'
+              : balance === 0
+                ? 'categoryGreyTemplate'
+                : 'categoryTemplate';
+
+          return {
+            title: `${cat.name}${displayBalance}`,
+            subtitle,
+            alwaysShowsSubtitle: true,
+            label: cat.group_name,
+            icon,
+            action: 'handleCategoryAction',
+            actionArgument: {
+              categoryId: cat.id,
+              categoryTransactions,
+              numberFormat,
+              dateFormat,
+              noteText,
+            },
+            actionReturnsItems:
+              categoryTransactions.length > 0 || noteText != null,
+          };
+        })
+    : [];
+
+  // Search payees
+  const matchedPayees = payees
+    ? payees
+        .filter((payee) =>
+          isExactPhrase
+            ? normalizeAccents(payee.name?.toLowerCase()) === query
+            : normalizeAccents(payee.name?.toLowerCase()).includes(query),
+        )
+        .map((payee) => ({
+          title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
+          icon: 'payeeTemplate',
+          action: 'showPayeeTransactions',
+          actionArgument: {
+            payeeName: payee.id,
+          },
+          actionReturnsItems: true,
+        }))
+    : [];
+
+  // Search notes (return transactions)
+  const noteMatches = transactions
+    .filter((t) => !t.is_child)
+    .filter((t) => {
+      if (!t.notes) return false;
+      const notesLower = normalizeAccents(t.notes.toLowerCase());
+      if (isExactPhrase) {
+        return notesLower.includes(query);
+      }
+      // Split query into words and find transactions where ALL words are in notes
+      const queryWords = query.split(/\s+/).filter(Boolean);
+      return queryWords.every((word) => notesLower.includes(word));
+    })
+    .slice(0, 50)
+    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
+
+  const results = [...matchedCategories, ...matchedPayees, ...noteMatches];
+
+  return results.length > 0
+    ? results
+    : [{ title: `No matches found for "${argument}"`, icon: 'alert' }];
 }
 
 // MARK: - Budget Selection (Optional)

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Actual Budget</string>
 	<key>CFBundleVersion</key>
-	<string>1.8.1</string>
+	<string>1.9</string>
 	<key>LBAbbreviation</key>
 	<string>a</string>
 	<key>LBAssociatedApplication</key>
@@ -35,10 +35,14 @@
 	<dict>
 		<key>LBDefaultScript</key>
 		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
+			<key>LBLiveFeedbackEnabled</key>
+			<true/>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
