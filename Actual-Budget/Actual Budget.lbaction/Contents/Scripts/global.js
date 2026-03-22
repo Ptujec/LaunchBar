@@ -139,7 +139,6 @@ function getCachedDatabaseData(options = {}) {
     customBudgetID = null,
     requireFullData = false,
     checkForEntity = null, // { id: string, field: string } to check if entity exists in basic data
-    alternateKeyPressed = false,
   } = options;
 
   const { budgetID: defaultBudgetID } = getBudgetInfo();
@@ -153,7 +152,6 @@ function getCachedDatabaseData(options = {}) {
     data = File.readJSON(basicCacheFilePath);
 
     const needsFullData =
-      alternateKeyPressed ||
       requireFullData ||
       (checkForEntity &&
         !data.transactions.some(
@@ -224,17 +222,17 @@ function showBudgets() {
 
 // MARK: - Formatting and Calculations
 
-function normalizeAccents(text) {
-  // NOTE: Maybe I can get rid of this once I found the error source and fixed the data in the database
+// function normalizeAccents(text) {
+//   // NOTE: Maybe I can get rid of this once I found the error source and fixed the data in the database
 
-  return text
-    .replace(/ö/gi, 'ö')
-    .replace(/ä/gi, 'ä')
-    .replace(/ü/gi, 'ü')
-    .replace(/č/gi, 'č')
-    .replace(/š/gi, 'š')
-    .replace(/ž/gi, 'ž');
-}
+//   return text
+//     .replace(/ö/gi, 'ö')
+//     .replace(/ä/gi, 'ä')
+//     .replace(/ü/gi, 'ü')
+//     .replace(/č/gi, 'č')
+//     .replace(/š/gi, 'š')
+//     .replace(/ž/gi, 'ž');
+// }
 
 function formatAmount(amount, numberFormat) {
   const locales = {

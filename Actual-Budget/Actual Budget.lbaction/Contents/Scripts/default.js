@@ -1,7 +1,7 @@
 /*
 Actual Budget Action for LaunchBar
 by Christian Bender (@ptujec)
-2025-03-05
+2026-03-21
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -58,8 +58,8 @@ function search(argument) {
   const isExactPhrase =
     trimmedArgument.startsWith('"') && trimmedArgument.endsWith('"');
   const query = isExactPhrase
-    ? normalizeAccents(trimmedArgument.slice(1, -1)).toLowerCase()
-    : normalizeAccents(trimmedArgument).toLowerCase();
+    ? trimmedArgument.slice(1, -1).toLowerCase()
+    : trimmedArgument.toLowerCase();
 
   if (!query) {
     return [{ title: 'Enter search terms', icon: 'alert' }];
@@ -71,12 +71,11 @@ function search(argument) {
         .filter(
           (cat) =>
             (isExactPhrase
-              ? normalizeAccents(cat.name?.toLowerCase()) === query ||
-                normalizeAccents(cat.group_name?.toLowerCase()) === query
-              : normalizeAccents(cat.name?.toLowerCase()).includes(query) ||
-                normalizeAccents(cat.group_name?.toLowerCase()).includes(
-                  query,
-                )) && cat.name !== 'Starting Balances',
+              ? cat.name?.toLowerCase() === query ||
+                cat.group_name?.toLowerCase() === query
+              : cat.name?.toLowerCase().includes(query) ||
+                cat.group_name?.toLowerCase().includes(query)) &&
+            cat.name !== 'Starting Balances',
         )
         .map((cat) => {
           const balance = getCategoryBalance(
@@ -143,6 +142,7 @@ function search(argument) {
               numberFormat,
               dateFormat,
               noteText,
+              fromSearch: true,
             },
             actionReturnsItems:
               categoryTransactions.length > 0 || noteText != null,
@@ -155,8 +155,8 @@ function search(argument) {
     ? payees
         .filter((payee) =>
           isExactPhrase
-            ? normalizeAccents(payee.name?.toLowerCase()) === query
-            : normalizeAccents(payee.name?.toLowerCase()).includes(query),
+            ? payee.name?.toLowerCase() === query
+            : payee.name?.toLowerCase().includes(query),
         )
         .map((payee) => ({
           title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
@@ -164,6 +164,7 @@ function search(argument) {
           action: 'showPayeeTransactions',
           actionArgument: {
             payeeName: payee.id,
+            fromSearch: true,
           },
           actionReturnsItems: true,
         }))
@@ -174,7 +175,7 @@ function search(argument) {
     .filter((t) => !t.is_child)
     .filter((t) => {
       if (!t.notes) return false;
-      const notesLower = normalizeAccents(t.notes.toLowerCase());
+      const notesLower = t.notes.toLowerCase();
       if (isExactPhrase) {
         return notesLower.includes(query);
       }
@@ -255,7 +256,7 @@ function showAccountTransactions({
     customDatabasePath,
     customBudgetID,
     checkForEntity: { id: accountId, field: 'account_id' },
-    alternateKeyPressed: LaunchBar.options.alternateKey,
+    requireFullData: LaunchBar.options.alternateKey,
   });
 
   if (!data) return [];
@@ -402,6 +403,7 @@ function handleCategoryAction({
   numberFormat,
   dateFormat,
   noteText,
+  fromSearch,
 }) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
@@ -409,8 +411,8 @@ function handleCategoryAction({
     return;
   }
 
-  if (LaunchBar.options.alternateKey) {
-    return showCategoryTransactions({ categoryId });
+  if (LaunchBar.options.alternateKey || fromSearch) {
+    return showCategoryTransactions({ categoryId, fromSearch });
   }
 
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
@@ -560,7 +562,7 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
 // MARK: - Payee Transactions Display
 
 function showPayeeTransactions(
-  { payeeName: payeeId },
+  { payeeName: payeeId, fromSearch = false },
   customDatabasePath,
   customBudgetID,
 ) {
@@ -568,7 +570,7 @@ function showPayeeTransactions(
     customDatabasePath,
     customBudgetID,
     checkForEntity: { id: payeeId, field: 'payee_id' },
-    alternateKeyPressed: LaunchBar.options.alternateKey,
+    requireFullData: fromSearch || LaunchBar.options.alternateKey,
   });
 
   if (!data) return [];
@@ -577,7 +579,7 @@ function showPayeeTransactions(
 
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
-    .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
+    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return payeeTransactions.length > 0
@@ -606,7 +608,7 @@ function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
     : [{ title: 'No transactions found for this date', icon: 'alert' }];
 }
 
-function showCategoryTransactions({ categoryId }) {
+function showCategoryTransactions({ categoryId, fromSearch = false }) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
     LaunchBar.openURL(actualFileURL);
@@ -615,7 +617,7 @@ function showCategoryTransactions({ categoryId }) {
 
   const data = getCachedDatabaseData({
     checkForEntity: { id: categoryId, field: 'category_id' },
-    alternateKeyPressed: LaunchBar.options.alternateKey,
+    requireFullData: fromSearch || LaunchBar.options.alternateKey,
   });
 
   if (!data) return [];
@@ -624,7 +626,7 @@ function showCategoryTransactions({ categoryId }) {
 
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
-    .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
+    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return categoryTransactions.length > 0
@@ -650,7 +652,7 @@ function formatTransfer(sourceAccount, targetAccount) {
 function formatTransaction(t, numberFormat, dateFormat, transactions) {
   const isTransfer = t.transfer_id != null;
   const isReconciliation =
-    !t.payee_name && t.notes.startsWith('Reconciliation balance adjustment');
+    !t.payee_name && t.notes?.startsWith('Reconciliation balance adjustment');
   const formattedAmount = formatAmount(t.amount, numberFormat);
 
   const url = t.notes?.match(urlRegex)?.[0];
