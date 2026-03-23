@@ -40,6 +40,13 @@ function run(argument) {
 // MARK: - Search
 
 function search(argument) {
+  // Auto complete/remove quotations
+  if (argument.startsWith('"') && !argument.endsWith('"')) {
+    removeLeadingQuote();
+  } else if (!argument.startsWith('"') && argument.endsWith('"')) {
+    addLeadingQuote();
+  }
+
   const data = getDatabaseData(null, null, true);
   if (!data) return [];
 
@@ -70,11 +77,8 @@ function search(argument) {
     ? categories
         .filter(
           (cat) =>
-            (isExactPhrase
-              ? cat.name?.toLowerCase() === query ||
-                cat.group_name?.toLowerCase() === query
-              : cat.name?.toLowerCase().includes(query) ||
-                cat.group_name?.toLowerCase().includes(query)) &&
+            (matchesQuery(cat.name, query, isExactPhrase) ||
+              matchesQuery(cat.group_name, query, isExactPhrase)) &&
             cat.name !== 'Starting Balances',
         )
         .map((cat) => {
@@ -153,11 +157,7 @@ function search(argument) {
   // Search payees
   const matchedPayees = payees
     ? payees
-        .filter((payee) =>
-          isExactPhrase
-            ? payee.name?.toLowerCase() === query
-            : payee.name?.toLowerCase().includes(query),
-        )
+        .filter((payee) => matchesQuery(payee.name, query, isExactPhrase))
         .map((payee) => ({
           title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
           icon: 'payeeTemplate',
@@ -173,16 +173,7 @@ function search(argument) {
   // Search notes (return transactions)
   const noteMatches = transactions
     .filter((t) => !t.is_child)
-    .filter((t) => {
-      if (!t.notes) return false;
-      const notesLower = t.notes.toLowerCase();
-      if (isExactPhrase) {
-        return notesLower.includes(query);
-      }
-      // Split query into words and find transactions where ALL words are in notes
-      const queryWords = query.split(/\s+/).filter(Boolean);
-      return queryWords.every((word) => notesLower.includes(word));
-    })
+    .filter((t) => matchesQuery(t.notes, query, isExactPhrase))
     .slice(0, 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
@@ -579,7 +570,7 @@ function showPayeeTransactions(
 
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
-    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50)
+    .slice(0, LaunchBar.options.alternateKey ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return payeeTransactions.length > 0
@@ -626,7 +617,7 @@ function showCategoryTransactions({ categoryId, fromSearch = false }) {
 
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
-    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50)
+    .slice(0, LaunchBar.options.alternateKey ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return categoryTransactions.length > 0

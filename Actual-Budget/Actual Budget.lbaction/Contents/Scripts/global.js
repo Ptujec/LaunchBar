@@ -359,3 +359,43 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
 
   return runningBalance;
 }
+
+// MARK: - Search Helper Functions
+
+function matchesQuery(text, query, isExactPhrase) {
+  if (!text) return false;
+  const textLower = text.toLowerCase();
+  if (isExactPhrase) {
+    return textLower === query;
+  }
+  // Split query into words and find all words present in text
+  const queryWords = query.split(/\s+/).filter(Boolean);
+  return queryWords.every((word) => textLower.includes(word));
+}
+
+function addLeadingQuote() {
+  LaunchBar.executeAppleScript(`
+    tell application "System Events"
+      key code 123 using command down 
+      delay 0.01
+      key code 19 using shift down 
+      delay 0.01
+      key code 124 using command down 
+    end tell
+  `);
+}
+
+function removeLeadingQuote() {
+  LaunchBar.executeAppleScript(`
+    delay 0.1
+    tell application "System Events"
+      key code 123 using command down 
+      delay 0.01
+      key code 124
+      delay 0.01
+      key code 51
+      delay 0.01
+      key code 124 using command down 
+    end tell
+  `);
+}
