@@ -187,7 +187,8 @@ function parseAmount(input) {
   }
 
   // Check for calculation first (supports +, -, *, x, X)
-  if (/\d+[,.]?\d*\s*[+\-xX*]\s*\d+/.test(input)) {
+  // Allow optional leading +/- sign
+  if (/^\s*[+\-]?\s*\d+[,.]?\d*\s*[+\-xX*]/.test(input)) {
     const result = parseCalculation(input, numberFormat);
     if (result) return result;
   }
@@ -200,22 +201,58 @@ function parseAmount(input) {
 }
 
 function parseCalculation(input, numberFormat) {
-  const numbers = input
-    .split(/[+\-xX*]/)
-    .map((n) => parseSingleAmount(n.trim(), numberFormat)?.value);
+  // Check for leading operator that indicates sign intent
+  const leadingOpMatch = input.match(/^\s*([+\-])/);
+  const leadingOp = leadingOpMatch ? leadingOpMatch[1] : null;
+
+  // Check for trailing operator that indicates sign intent
+  const trailingOpMatch = input.match(/[+\-xX*]\s*$/);
+  const trailingOp = trailingOpMatch ? trailingOpMatch[0].trim() : null;
+
+  // Remove leading and trailing operators for processing
+  let cleanInput = input.trim();
+  if (leadingOp) cleanInput = cleanInput.replace(/^\s*[+\-]\s*/, '');
+  if (trailingOp) cleanInput = cleanInput.replace(/[+\-xX*]\s*$/, '');
+
+  const numbers = cleanInput.split(/[+\-xX*]/).map((n) => {
+    const cleanedInput = n
+      .trim()
+      .replace(/[+€$]|[^\d,.]/g, '')
+      .trim();
+    if (!cleanedInput) return undefined;
+
+    // Parse as absolute value (ignore income flag for calculations)
+    let amount;
+    if (cleanedInput.includes(',') || cleanedInput.includes('.')) {
+      const [whole, decimal = ''] = cleanedInput.split(/[,.]/);
+      amount = `${whole || '0'}${decimal.padEnd(2, '0')}`;
+    } else {
+      amount =
+        cleanedInput.length <= 2 ? cleanedInput.padStart(2, '0') : cleanedInput;
+    }
+    return Math.abs(parseInt(amount));
+  });
   if (numbers.includes(undefined)) return null;
 
-  const operators = input.match(/[+\-xX*]/g) || [];
-  return formatAmountResult(
-    numbers.reduce((sum, num, i) => {
-      if (i === 0) return num;
-      const op = operators[i - 1];
-      if (op === '+') return sum + num;
-      if (op === '-') return sum - num;
-      return sum * num; // handles x, X, *
-    }),
-    numberFormat,
-  );
+  const operators = cleanInput.match(/[+\-xX*]/g) || [];
+  let result = numbers.reduce((sum, num, i) => {
+    if (i === 0) return num;
+    const op = operators[i - 1];
+    if (op === '+') return sum + num;
+    if (op === '-') return sum - num;
+    return sum * num; // handles x, X, *
+  });
+
+  // Apply sign based on leading or trailing operator
+  // Leading/trailing + makes amount positive, leading/trailing - makes it negative
+  // Otherwise default to negative
+  if (leadingOp === '+' || trailingOp === '+') {
+    result = Math.abs(result); // positive
+  } else {
+    result = -Math.abs(result); // negative (default)
+  }
+
+  return formatAmountResult(result, numberFormat);
 }
 
 function parseSingleAmount(input, numberFormat) {
