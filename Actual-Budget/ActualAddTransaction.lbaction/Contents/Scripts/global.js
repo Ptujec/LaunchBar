@@ -156,7 +156,7 @@ function parseDataBase({ databasePath }) {
   const result = LaunchBar.execute(
     '/bin/bash',
     './parseDataBase.sh',
-    databasePath
+    databasePath,
   );
 
   if (!result) {
@@ -186,8 +186,8 @@ function parseAmount(input) {
     numberFormatPrefs.set(numberFormat);
   }
 
-  // Check for calculation first
-  if (/\d+[,.]?\d*\s*[+-]\s*\d+/.test(input)) {
+  // Check for calculation first (supports +, -, *, x, X)
+  if (/\d+[,.]?\d*\s*[+\-xX*]\s*\d+/.test(input)) {
     const result = parseCalculation(input, numberFormat);
     if (result) return result;
   }
@@ -201,16 +201,20 @@ function parseAmount(input) {
 
 function parseCalculation(input, numberFormat) {
   const numbers = input
-    .split(/[+-]/)
+    .split(/[+\-xX*]/)
     .map((n) => parseSingleAmount(n.trim(), numberFormat)?.value);
   if (numbers.includes(undefined)) return null;
 
-  const operators = input.match(/[+-]/g) || [];
+  const operators = input.match(/[+\-xX*]/g) || [];
   return formatAmountResult(
-    numbers.reduce((sum, num, i) =>
-      i === 0 ? num : operators[i - 1] === '+' ? sum + num : sum - num
-    ),
-    numberFormat
+    numbers.reduce((sum, num, i) => {
+      if (i === 0) return num;
+      const op = operators[i - 1];
+      if (op === '+') return sum + num;
+      if (op === '-') return sum - num;
+      return sum * num; // handles x, X, *
+    }),
+    numberFormat,
   );
 }
 
@@ -278,7 +282,7 @@ function formatAmount(amount, numberFormat) {
 
 function formatDate(dateString, format) {
   const date = new Date(
-    String(dateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')
+    String(dateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
   );
 
   return format
@@ -312,8 +316,8 @@ function formatTransaction(t, numberFormat, dateFormat) {
   let subtitle = t.is_parent
     ? `${formattedDate} (Split)`
     : t.category_name
-    ? `${formattedDate} ⋅ ${t.category_name}`
-    : formattedDate;
+      ? `${formattedDate} ⋅ ${t.category_name}`
+      : formattedDate;
 
   if (t.notes && subtitle.length < 40) {
     const displayNotes = t.notes
@@ -398,7 +402,7 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
   if (!getCategoryBalance.cache) {
     getCategoryBalance.cache = preprocessCategoryData(
       transactions,
-      zero_budgets
+      zero_budgets,
     );
   }
 
@@ -464,7 +468,7 @@ function getNote() {
 
   const [appID, isSupported, mailRunning] = LaunchBar.execute(
     '/bin/bash',
-    './appInfo.sh'
+    './appInfo.sh',
   )
     .trim()
     .split('\n');
@@ -480,7 +484,7 @@ function getNote() {
 
   return LaunchBar.executeAppleScript(
     `set result to display dialog "Note:" with title "Add Note & Complete" default answer "${defaultAnswer}"`,
-    'set result to text returned of result'
+    'set result to text returned of result',
   ).trim();
 }
 
@@ -536,7 +540,7 @@ function getNoteFromBrowser(appID) {
 
 function getNoteFromMail() {
   const [mailLinkRaw, subjectRaw] = LaunchBar.executeAppleScriptFile(
-    './mail.applescript'
+    './mail.applescript',
   )
     .trim()
     .split('\n');
