@@ -365,9 +365,10 @@ function getCategoryBalance(categoryId, transactions, zero_budgets, category) {
 function matchesQuery(text, query, isExactPhrase) {
   if (!text) return false;
   const textLower = text.toLowerCase();
-  if (isExactPhrase) {
-    return textLower === query;
-  }
+
+  // Exact phrase: must contain the phrase as a substring
+  if (isExactPhrase) return textLower.includes(query);
+
   // Split query into words and find all words present in text
   const queryWords = query.split(/\s+/).filter(Boolean);
   return queryWords.every((word) => textLower.includes(word));
@@ -375,27 +376,81 @@ function matchesQuery(text, query, isExactPhrase) {
 
 function addLeadingQuote() {
   LaunchBar.executeAppleScript(`
-    tell application "System Events"
-      key code 123 using command down 
-      delay 0.01
-      key code 19 using shift down 
-      delay 0.01
-      key code 124 using command down 
-    end tell
+use scripting additions
+use framework "Foundation"
+
+property NSShiftKeyMask : a reference to 131072
+property NSEvent : a reference to current application's NSEvent
+
+on run {}
+	set modifier_down to true
+	repeat while modifier_down
+		set modifier_flags to NSEvent's modifierFlags()
+		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
+		set modifier_down to shift_down
+	end repeat
+	
+	tell application "System Events"
+		key code 123 using command down
+		delay 0.01
+		key code 19 using shift down
+		delay 0.01
+		key code 124 using command down
+	end tell
+end run
   `);
 }
 
 function removeLeadingQuote() {
   LaunchBar.executeAppleScript(`
-    delay 0.1
-    tell application "System Events"
-      key code 123 using command down 
-      delay 0.01
-      key code 124
-      delay 0.01
-      key code 51
-      delay 0.01
-      key code 124 using command down 
-    end tell
+use scripting additions
+use framework "Foundation"
+
+property NSShiftKeyMask : a reference to 131072
+property NSEvent : a reference to current application's NSEvent
+
+on run {}
+	set modifier_down to true
+	repeat while modifier_down
+		set modifier_flags to NSEvent's modifierFlags()
+		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
+		set modifier_down to shift_down
+	end repeat
+	
+	tell application "System Events"
+		key code 123 using command down
+		delay 0.01
+		key code 124
+		delay 0.01
+		key code 51
+		delay 0.01
+		key code 124 using command down
+	end tell
+end run
+  `);
+}
+
+function addEndingQuote() {
+  LaunchBar.executeAppleScript(`
+use scripting additions
+use framework "Foundation"
+
+property NSShiftKeyMask : a reference to 131072
+property NSEvent : a reference to current application's NSEvent
+
+on run {}
+	set modifier_down to true
+	repeat while modifier_down
+		set modifier_flags to NSEvent's modifierFlags()
+		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
+		set modifier_down to shift_down
+	end repeat
+	
+	tell application "System Events"
+		key code 19 using shift down
+		delay 0.01
+		key code 123
+	end tell
+end run
   `);
 }

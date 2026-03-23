@@ -41,6 +41,9 @@ function run(argument) {
 
 function search(argument) {
   // Auto complete/remove quotations
+  if (argument === '"') addEndingQuote();
+  if (argument === '""') return;
+
   if (argument.startsWith('"') && !argument.endsWith('"')) {
     removeLeadingQuote();
   } else if (!argument.startsWith('"') && argument.endsWith('"')) {
@@ -67,10 +70,6 @@ function search(argument) {
   const query = isExactPhrase
     ? trimmedArgument.slice(1, -1).toLowerCase()
     : trimmedArgument.toLowerCase();
-
-  if (!query) {
-    return [{ title: 'Enter search terms', icon: 'alert' }];
-  }
 
   // Search categories
   const matchedCategories = categories
@@ -181,7 +180,7 @@ function search(argument) {
 
   return results.length > 0
     ? results
-    : [{ title: `No matches found for "${argument}"`, icon: 'alert' }];
+    : { title: `No matches found for "${argument}"`, icon: 'alert' };
 }
 
 // MARK: - Budget Selection (Optional)
