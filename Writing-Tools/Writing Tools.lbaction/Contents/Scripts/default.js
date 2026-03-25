@@ -107,7 +107,7 @@ function mainAction({
   LaunchBar.hide();
 
   const prefs = Action.preferences;
-  const model = prefs.model || 'gpt-4o-mini';
+  const model = prefs.model || recommendedModel;
   const defaultToolID = prefs.defaultToolID || '1';
   const tools = getUserToolsJSON();
 

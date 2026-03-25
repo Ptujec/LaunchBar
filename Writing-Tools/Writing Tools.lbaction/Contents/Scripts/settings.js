@@ -4,6 +4,8 @@ by Christian Bender (@ptujec)
 2024-12-18
 */
 
+const recommendedModel = 'gpt-5.3-chat-latest';
+
 function settings() {
   const prefs = Action.preferences || {};
   const defaultToolID = prefs.defaultToolID || '1';
@@ -22,7 +24,7 @@ function settings() {
     {
       title: 'Choose Model'.localize(),
       icon: 'gearTemplate',
-      badge: prefs.model || 'gpt-4o-mini',
+      badge: prefs.model || recommendedModel,
       actionReturnsItems: true,
       action: 'showModels',
     },
@@ -141,7 +143,7 @@ function resetTools() {
 
 function showModels() {
   const prefs = Action.preferences;
-  const currentModel = prefs.model || 'gpt-4o-mini';
+  const currentModel = prefs.model || recommendedModel;
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
@@ -174,7 +176,8 @@ function showModels() {
           currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
         action: 'setModel',
         actionArgument: item.id,
-        badge: item.id === 'gpt-4o-mini' ? 'Recommended'.localize() : undefined,
+        badge:
+          item.id === recommendedModel ? 'Recommended'.localize() : undefined,
       }))
   );
 }
