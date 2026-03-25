@@ -187,8 +187,8 @@ function parseAmount(input) {
   }
 
   // Check for calculation first (supports +, -, *, x, X)
-  // Allow optional leading +/- sign
-  if (/^\s*[+\-]?\s*\d+[,.]?\d*\s*[+\-xX*]/.test(input)) {
+  // Allow optional leading +/- sign, and optional currency symbols
+  if (/^\s*[+\-]?\s*\d+[€$]?[,.]?\d*\s*[+\-xX*]/.test(input)) {
     const result = parseCalculation(input, numberFormat);
     if (result) return result;
   }
