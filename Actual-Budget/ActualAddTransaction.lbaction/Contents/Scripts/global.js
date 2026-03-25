@@ -215,6 +215,8 @@ function parseCalculation(input, numberFormat) {
   if (trailingOp) cleanInput = cleanInput.replace(/[+\-xX*]\s*$/, '');
 
   const numbers = cleanInput.split(/[+\-xX*]/).map((n) => {
+    const hasCurrencySymbol = /[€$]/.test(n);
+    const hasDecimalSeparator = /[,.]/.test(n);
     const cleanedInput = n
       .trim()
       .replace(/[+€$]|[^\d,.]/g, '')
@@ -227,8 +229,15 @@ function parseCalculation(input, numberFormat) {
       const [whole, decimal = ''] = cleanedInput.split(/[,.]/);
       amount = `${whole || '0'}${decimal.padEnd(2, '0')}`;
     } else {
-      amount =
-        cleanedInput.length <= 2 ? cleanedInput.padStart(2, '0') : cleanedInput;
+      // If currency symbol is present without decimal, treat as whole unit amount
+      if (hasCurrencySymbol && !hasDecimalSeparator) {
+        amount = `${cleanedInput}00`; // e.g., "600€" -> "60000" cents
+      } else {
+        amount =
+          cleanedInput.length <= 2
+            ? cleanedInput.padStart(2, '0')
+            : cleanedInput;
+      }
     }
     return Math.abs(parseInt(amount));
   });
@@ -257,6 +266,8 @@ function parseCalculation(input, numberFormat) {
 
 function parseSingleAmount(input, numberFormat) {
   const income = input.includes('+');
+  const hasCurrencySymbol = /[€$]/.test(input);
+  const hasDecimalSeparator = /[,.]/.test(input);
   const cleanedInput = input.replace(/[+€$]|[^\d,.]/g, '').trim();
 
   if (!cleanedInput) return { success: false };
@@ -266,8 +277,13 @@ function parseSingleAmount(input, numberFormat) {
     const [whole, decimal = ''] = cleanedInput.split(/[,.]/);
     amount = `${whole || '0'}${decimal.padEnd(2, '0')}`;
   } else {
-    amount =
-      cleanedInput.length <= 2 ? cleanedInput.padStart(2, '0') : cleanedInput;
+    // If currency symbol is present without decimal, treat as whole unit amount
+    if (hasCurrencySymbol && !hasDecimalSeparator) {
+      amount = `${cleanedInput}00`; // e.g., "600€" -> "60000" cents
+    } else {
+      amount =
+        cleanedInput.length <= 2 ? cleanedInput.padStart(2, '0') : cleanedInput;
+    }
   }
 
   return {
