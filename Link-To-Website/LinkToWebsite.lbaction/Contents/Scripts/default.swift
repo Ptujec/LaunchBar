@@ -6,6 +6,10 @@ by Christian Bender (@ptujec)
 2026-02-25
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+Documentation:
+- https://developer.obdev.at/resources/documentation/launchbar-developer-documentation/#/script-environment
+
 */
 
 import Cocoa
@@ -16,6 +20,7 @@ struct Environment {
     static let info = ProcessInfo.processInfo.environment
     static let isCommandKeyPressed = info["LB_OPTION_COMMAND_KEY"] == "1"
     static let isAlternateKeyPressed = info["LB_OPTION_ALTERNATE_KEY"] == "1"
+    static let isControlKeyPressed = info["LB_OPTION_CONTROL_KEY"] == "1"
 }
 
 // MARK: - Browser Detection
@@ -71,7 +76,7 @@ func getBrowserScript(browser: String, customTitle: String?, includeTime: Bool =
         } else {
             jsExecution = "set _time to (execute active tab of front window javascript \"var el = document.querySelector('video') || document.querySelector('audio'); String(Math.round(el.currentTime))\")"
         }
-        timePart = "\nset _time to \"\"\nif (_url contains \"youtube.com\") or (_url contains \"youtu.be\") or (_url contains \"twitch.tv\") or (_url contains \"pocketcasts.com\") then\n  try\n    \(jsExecution)\n  on error e\n    set _time to \"\"\n  end try\nend if\nreturn {_url, _name, _time}"
+        timePart = "\nset _time to \"\"\nif (_url contains \"youtube.com\") or (_url contains \"youtu.be\") or (_url contains \"twitch.tv\") or (_url contains \"pocketcasts.com\") or (_url contains \"open.spotify.com\") then\n  try\n    \(jsExecution)\n  on error e\n    set _time to \"\"\n  end try\nend if\nreturn {_url, _name, _time}"
     } else {
         timePart = "\nreturn {_url, _name, \"\"}"
     }
@@ -147,6 +152,10 @@ func appendTimeToVideoURL(_ url: String, time: String) -> String {
         return handlePocketCastsUrl(url, time: time)
     }
     
+    if url.contains("open.spotify.com") {
+        return handleSpotifyUrl(url, time: time)
+    }
+    
     return url
 }
 
@@ -168,6 +177,13 @@ func removeTimeFromURL(_ url: String) -> String {
     }
     
     if url.contains("pocketcasts.com") {
+        // Remove ?t=XXX parameter (with or without 's' suffix)
+        processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
+        // Remove &t=XXX parameter (with or without 's' suffix)
+        processedUrl = processedUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
+    }
+    
+    if url.contains("open.spotify.com") {
         // Remove ?t=XXX parameter (with or without 's' suffix)
         processedUrl = processedUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
         // Remove &t=XXX parameter (with or without 's' suffix)
@@ -223,6 +239,21 @@ func handleTwitchUrl(_ url: String, time: String) -> String {
 }
 
 func handlePocketCastsUrl(_ url: String, time: String) -> String {
+    let timeValue = Int(Double(time) ?? 0)
+    guard timeValue > 10 else {
+        return url
+    }
+    
+    // Remove existing time parameter if present (with or without 's' suffix)
+    var baseUrl = url
+    baseUrl = baseUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
+    baseUrl = baseUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
+    
+    let timeParam = "?t=\(timeValue)"
+    return baseUrl + timeParam
+}
+
+func handleSpotifyUrl(_ url: String, time: String) -> String {
     let timeValue = Int(Double(time) ?? 0)
     guard timeValue > 10 else {
         return url
@@ -314,11 +345,14 @@ func main() {
             exit(0)
         }
         
-        let info = try getBrowserInfo(browser: browser, customTitle: customTitle, includeTime: Environment.isAlternateKeyPressed)
+        let info = try getBrowserInfo(browser: browser, customTitle: customTitle, includeTime: Environment.isAlternateKeyPressed || Environment.isControlKeyPressed)
         var url = info.url
         var title = cleanTitle(info.title)
         
-        if Environment.isAlternateKeyPressed {
+        if Environment.isControlKeyPressed {
+            url = appendTimeToVideoURL(url, time: info.time)
+            title = formatTimeForTitle(info.time).trimmingCharacters(in: .whitespaces)
+        } else if Environment.isAlternateKeyPressed {
             url = appendTimeToVideoURL(url, time: info.time)
             title += formatTimeForTitle(info.time)
         } else {
