@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Link to Website</string>
 	<key>CFBundleVersion</key>
-	<string>1.3.1</string>
+	<string>1.3.2</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -33,8 +33,6 @@ Note: This action needs to be compiled! The Compile Swift Action can help with t
 			<array>
 				<string>string</string>
 			</array>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBRunInBackground</key>
 			<true/>
 			<key>LBScriptName</key>

@@ -234,7 +234,8 @@ func handleTwitchUrl(_ url: String, time: String) -> String {
     
     let videoId = String(url[videoIdRange])
     let timeValue = Int(Double(time) ?? 0)
-    let timeParam = timeValue > 10 ? "?t=\(timeValue)s" : ""
+    let separator = url.contains("?") ? "&" : "?"
+    let timeParam = timeValue > 10 ? "\(separator)t=\(timeValue)s" : ""
     return baseUrl + videoId + timeParam
 }
 
@@ -249,7 +250,8 @@ func handlePocketCastsUrl(_ url: String, time: String) -> String {
     baseUrl = baseUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
     baseUrl = baseUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
     
-    let timeParam = "?t=\(timeValue)"
+    let separator = baseUrl.contains("?") ? "&" : "?"
+    let timeParam = "\(separator)t=\(timeValue)"
     return baseUrl + timeParam
 }
 
@@ -264,7 +266,8 @@ func handleSpotifyUrl(_ url: String, time: String) -> String {
     baseUrl = baseUrl.replacingOccurrences(of: "\\?t=\\d+s?", with: "", options: .regularExpression)
     baseUrl = baseUrl.replacingOccurrences(of: "&t=\\d+s?", with: "", options: .regularExpression)
     
-    let timeParam = "?t=\(timeValue)"
+    let separator = baseUrl.contains("?") ? "&" : "?"
+    let timeParam = "\(separator)t=\(timeValue)"
     return baseUrl + timeParam
 }
 
