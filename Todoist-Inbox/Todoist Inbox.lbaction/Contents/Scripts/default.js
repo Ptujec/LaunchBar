@@ -71,7 +71,7 @@ function run(argument) {
 
   // Description
   description = argument.includes(': ')
-    ? capitalizeFirstLetter(argument.match(reDescription)[1])
+    ? argument.match(reDescription)[1]
     : null;
   argument = argument.includes(': ')
     ? argument.replace(reDescription, '')
@@ -159,7 +159,6 @@ function run(argument) {
   // Add quoted string parts & cleanup
   argument = quotedParts ? quotedParts + argument : argument;
   argument = argument.replace(/\s+/g, ' ').trim();
-  argument = capitalizeFirstLetter(argument);
 
   const task = {
     content: argument,

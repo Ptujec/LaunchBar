@@ -31,10 +31,6 @@ const reDeadline = /{([^}]+)}/;
 
 // MARK: Functions
 
-function capitalizeFirstLetter(string) {
-  return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
-}
-
 function buildWordsList(string) {
   return string
     .replace(/\[(.+?)\]\(.+?\)/g, '$1') // replace markdown links

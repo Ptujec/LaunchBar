@@ -350,7 +350,7 @@ function main(string) {
     suggestions = [
       ...suggestions,
       {
-        title: capitalizeFirstLetter(description),
+        title: description,
         icon: 'descriptionTemplate',
         order: 2,
       },
@@ -483,7 +483,7 @@ function main(string) {
     suggestions = [
       ...suggestions,
       {
-        title: capitalizeFirstLetter(string.trim()),
+        title: string.trim(),
         icon: 'titleTemplate',
         order: 1,
       },
