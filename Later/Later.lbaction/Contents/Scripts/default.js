@@ -44,6 +44,8 @@ function runWithURL(url) {
   if (url.includes('facebook.com')) url = handleFacebookUrl(url);
   if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
   if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
+  if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url, time);
+  if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url, time);
 
   let title = LaunchBar.execute('/bin/bash', './getTitle.sh', url).trim();
 
@@ -86,12 +88,10 @@ function run() {
   }
 
   let ytId, twitchId;
-  if (url.includes('youtu')) {
-    [url, ytId] = handleYoutubeUrl(url, time);
-  }
-  if (url.includes('twitch.tv')) {
-    [url, twitchId] = handleTwitchUrl(url, time);
-  }
+  if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
+  if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
+  if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url, time);
+  if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url, time);
 
   addLink({ url, title, ytId, twitchId });
 }
@@ -265,9 +265,9 @@ function getInfoFromBrowser(appID) {
         set _url to URL of front document
         set _name to name of front document
         set _time to ""
-        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
-              set _time to (do JavaScript "String(Math.round(document.querySelector('video').currentTime))" in front document) as string
+              set _time to (do JavaScript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))" in front document) as string
           on error e
               -- do nothing
           end try
@@ -282,9 +282,9 @@ function getInfoFromBrowser(appID) {
         set _url to URL of active tab of front window
         set _name to title of active tab of front window
         set _time to ""
-        if (_url contains "youtube.com") or (_url contains "twitch.tv") then
+        if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
-            set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video').currentTime))")
+            set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))")
           on error e
             -- do nothing
           end try
@@ -392,6 +392,20 @@ function handleTwitchUrl(url, time) {
     ((time && parseFloat(time)) > 10 ? `?t=${time}s` : '');
 
   return [url, videoId];
+}
+
+// Helper function to add time parameter to URLs
+function addTimeParameterToUrl(url, time) {
+  if (!time || parseFloat(time) <= 10) return url;
+
+  const timeValue = Math.round(parseFloat(time));
+
+  // Remove existing time parameter if present
+  let baseUrl = url.replace(/\?t=\d+/, '').replace(/&t=\d+/, '');
+
+  // Use '&' if URL already has query parameters, otherwise use '?'
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return baseUrl + `${separator}t=${timeValue}`;
 }
 
 function handleFacebookUrl(url) {
