@@ -172,7 +172,9 @@ function search(argument) {
   // Search notes (return transactions)
   const noteMatches = transactions
     .filter((t) => !t.is_child)
-    .filter((t) => matchesQuery(t.notes, query, isExactPhrase))
+    .filter((t) =>
+      matchesQuery(t.notes?.replace(urlRegex, '').trim(), query, isExactPhrase),
+    )
     .slice(0, 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
@@ -509,15 +511,17 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
           actionReturnsItems: true,
         }
       : undefined,
-    {
-      title: t.category_name,
-      icon: 'categoryTemplate',
-      action: 'showCategoryTransactions',
-      actionArgument: {
-        categoryId: t.category_id,
-      },
-      actionReturnsItems: true,
-    },
+    t.category_name
+      ? {
+          title: t.category_name,
+          icon: 'categoryTemplate',
+          action: 'showCategoryTransactions',
+          actionArgument: {
+            categoryId: t.category_id,
+          },
+          actionReturnsItems: true,
+        }
+      : undefined,
     {
       title: t.account_name,
       icon: 'creditcardTemplate',
@@ -569,7 +573,7 @@ function showPayeeTransactions(
 
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
-    .slice(0, LaunchBar.options.alternateKey ? undefined : 50) // NOTE: adjust to show all for fromSearch?
+    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return payeeTransactions.length > 0
@@ -616,7 +620,7 @@ function showCategoryTransactions({ categoryId, fromSearch = false }) {
 
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
-    .slice(0, LaunchBar.options.alternateKey ? undefined : 50) // NOTE: adjust to show all for fromSearch?
+    .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
   return categoryTransactions.length > 0
