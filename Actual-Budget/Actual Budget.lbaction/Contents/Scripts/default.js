@@ -226,7 +226,17 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
     .filter((t) => !t.is_child)
     .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
     .slice(0, 150)
-    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
+    .map((t) =>
+      formatTransaction(
+        t,
+        numberFormat,
+        dateFormat,
+        transactions,
+        undefined,
+        customDatabasePath,
+        customBudgetID,
+      ),
+    );
 
   return [...accountResults, ...recentTransactions];
 }
@@ -259,7 +269,15 @@ function showAccountTransactions({
     .filter((t) => t.account_id === accountId)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
     .map((t) =>
-      formatTransaction(t, numberFormat, dateFormat, transactions, accountId),
+      formatTransaction(
+        t,
+        numberFormat,
+        dateFormat,
+        transactions,
+        accountId,
+        customDatabasePath,
+        customBudgetID,
+      ),
     );
 
   return accountTransactions.length > 0
@@ -358,6 +376,8 @@ function showCategories(customDatabasePath, customBudgetID) {
           numberFormat,
           dateFormat,
           noteText,
+          customDatabasePath,
+          customBudgetID,
         },
         actionReturnsItems: categoryTransactions.length > 0 || noteText != null,
         balance,
@@ -396,6 +416,8 @@ function handleCategoryAction({
   dateFormat,
   noteText,
   fromSearch,
+  customDatabasePath,
+  customBudgetID,
 }) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
@@ -404,19 +426,39 @@ function handleCategoryAction({
   }
 
   if (LaunchBar.options.alternateKey || fromSearch) {
-    return showCategoryTransactions({ categoryId, fromSearch });
+    return showCategoryTransactions({
+      categoryId,
+      fromSearch,
+      customDatabasePath,
+      customBudgetID,
+    });
   }
 
   const noteItem = noteText ? [{ title: noteText, icon: 'noteTemplate' }] : [];
 
   const transactionItems = categoryTransactions.map((t) =>
-    formatTransaction(t, numberFormat, dateFormat, categoryTransactions),
+    formatTransaction(
+      t,
+      numberFormat,
+      dateFormat,
+      categoryTransactions,
+      undefined,
+      customDatabasePath,
+      customBudgetID,
+    ),
   );
 
   return [...noteItem, ...transactionItems];
 }
 
-function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
+function handleTransactionAction({
+  t,
+  formattedAmount,
+  formattedDate,
+  url,
+  customDatabasePath = null,
+  customBudgetID = null,
+}) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
     LaunchBar.openURL(
@@ -428,6 +470,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
   // For transfers, show source account, target account, amount and date
   if (t.transfer_id) {
     const data = getCachedDatabaseData({
+      customDatabasePath,
+      customBudgetID,
       checkForEntity: { id: t.transfer_id, field: 'id' },
     });
 
@@ -450,6 +494,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
         action: 'showAccountTransactions',
         actionArgument: {
           accountId: t.amount < 0 ? t.account_id : relatedTransfer.account_id,
+          customDatabasePath,
+          customBudgetID,
         },
         actionReturnsItems: true,
       },
@@ -459,6 +505,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
         action: 'showAccountTransactions',
         actionArgument: {
           accountId: t.amount < 0 ? relatedTransfer.account_id : t.account_id,
+          customDatabasePath,
+          customBudgetID,
         },
         actionReturnsItems: true,
       },
@@ -472,6 +520,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
         action: 'showTransactionsByDate',
         actionArgument: {
           date: t.date,
+          customDatabasePath,
+          customBudgetID,
         },
         actionReturnsItems: true,
       },
@@ -480,6 +530,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
 
   if (t.is_parent) {
     const data = getCachedDatabaseData({
+      customDatabasePath,
+      customBudgetID,
       checkForEntity: { id: t.id, field: 'parent_id' },
     });
 
@@ -489,7 +541,15 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
     const childTransactions = transactions
       .filter((ct) => ct.parent_id === t.id)
       .map((ct) =>
-        formatTransaction(ct, numberFormat, dateFormat, transactions),
+        formatTransaction(
+          ct,
+          numberFormat,
+          dateFormat,
+          transactions,
+          undefined,
+          customDatabasePath,
+          customBudgetID,
+        ),
       );
 
     return childTransactions.length > 0
@@ -507,6 +567,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
           action: 'showPayeeTransactions',
           actionArgument: {
             payeeName: t.payee_id,
+            customDatabasePath,
+            customBudgetID,
           },
           actionReturnsItems: true,
         }
@@ -518,6 +580,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
           action: 'showCategoryTransactions',
           actionArgument: {
             categoryId: t.category_id,
+            customDatabasePath,
+            customBudgetID,
           },
           actionReturnsItems: true,
         }
@@ -528,6 +592,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
       action: 'showAccountTransactions',
       actionArgument: {
         accountId: t.account_id,
+        customDatabasePath,
+        customBudgetID,
       },
       actionReturnsItems: true,
     },
@@ -541,6 +607,8 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
       action: 'showTransactionsByDate',
       actionArgument: {
         date: t.date,
+        customDatabasePath,
+        customBudgetID,
       },
       actionReturnsItems: true,
     },
@@ -555,11 +623,12 @@ function handleTransactionAction({ t, formattedAmount, formattedDate, url }) {
 
 // MARK: - Payee Transactions Display
 
-function showPayeeTransactions(
-  { payeeName: payeeId, fromSearch = false },
-  customDatabasePath,
-  customBudgetID,
-) {
+function showPayeeTransactions({
+  payeeName: payeeId,
+  fromSearch = false,
+  customDatabasePath = null,
+  customBudgetID = null,
+}) {
   const data = getCachedDatabaseData({
     customDatabasePath,
     customBudgetID,
@@ -574,14 +643,28 @@ function showPayeeTransactions(
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
     .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
-    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
+    .map((t) =>
+      formatTransaction(
+        t,
+        numberFormat,
+        dateFormat,
+        transactions,
+        undefined,
+        customDatabasePath,
+        customBudgetID,
+      ),
+    );
 
   return payeeTransactions.length > 0
     ? payeeTransactions
     : [{ title: 'No transactions found', icon: 'alert' }];
 }
 
-function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
+function showTransactionsByDate({
+  date,
+  customDatabasePath = null,
+  customBudgetID = null,
+}) {
   const data = getCachedDatabaseData({
     customDatabasePath,
     customBudgetID,
@@ -595,14 +678,29 @@ function showTransactionsByDate({ date, customDatabasePath, customBudgetID }) {
     .filter((t) => t.date === date)
     .filter((t) => !t.is_child)
     .filter((t) => !t.transfer_id || (t.transfer_id && t.amount < 0))
-    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
+    .map((t) =>
+      formatTransaction(
+        t,
+        numberFormat,
+        dateFormat,
+        transactions,
+        undefined,
+        customDatabasePath,
+        customBudgetID,
+      ),
+    );
 
   return dateTransactions.length > 0
     ? dateTransactions
     : [{ title: 'No transactions found for this date', icon: 'alert' }];
 }
 
-function showCategoryTransactions({ categoryId, fromSearch = false }) {
+function showCategoryTransactions({
+  categoryId,
+  fromSearch = false,
+  customDatabasePath = null,
+  customBudgetID = null,
+}) {
   if (LaunchBar.options.commandKey) {
     LaunchBar.hide();
     LaunchBar.openURL(actualFileURL);
@@ -610,6 +708,8 @@ function showCategoryTransactions({ categoryId, fromSearch = false }) {
   }
 
   const data = getCachedDatabaseData({
+    customDatabasePath,
+    customBudgetID,
     checkForEntity: { id: categoryId, field: 'category_id' },
     requireFullData: fromSearch || LaunchBar.options.alternateKey,
   });
@@ -621,7 +721,17 @@ function showCategoryTransactions({ categoryId, fromSearch = false }) {
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
     .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
-    .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
+    .map((t) =>
+      formatTransaction(
+        t,
+        numberFormat,
+        dateFormat,
+        transactions,
+        undefined,
+        customDatabasePath,
+        customBudgetID,
+      ),
+    );
 
   return categoryTransactions.length > 0
     ? categoryTransactions
@@ -643,7 +753,15 @@ function formatTransfer(sourceAccount, targetAccount) {
   return `${sourceAccount} → ${targetAccount}`;
 }
 
-function formatTransaction(t, numberFormat, dateFormat, transactions) {
+function formatTransaction(
+  t,
+  numberFormat,
+  dateFormat,
+  transactions,
+  accountId,
+  customDatabasePath = null,
+  customBudgetID = null,
+) {
   const isTransfer = t.transfer_id != null;
   const isReconciliation =
     !t.payee_name && t.notes?.startsWith('Reconciliation balance adjustment');
@@ -713,6 +831,8 @@ function formatTransaction(t, numberFormat, dateFormat, transactions) {
       formattedAmount,
       formattedDate,
       url,
+      customDatabasePath,
+      customBudgetID,
     },
     actionReturnsItems: true,
     transferItem: isTransfer
