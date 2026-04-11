@@ -18,9 +18,6 @@ if [ ! -r "$DB_PATH" ]; then
   exit 1
 fi
 
-# Get current month for reference
-current_month=$(date +"%Y%m")
-
 # Get accounts data using read-only mode
 accounts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     SELECT 
@@ -104,17 +101,7 @@ if [ $? -ne 0 ]; then
   dateFormat="[]"
 fi
 
-# Initialize output with basic data
-output='{
-  "accounts": '"$accounts"',
-  "transactions": '"$transactions"',
-  "numberFormat": "'"$( echo "$numberFormat" | jq -r '.[0].value // "comma-dot"')"'",
-  "dateFormat": "'"$( echo "$dateFormat" | jq -r '.[0].value // "MM-dd-yyyy"')"'",
-  "hasFullData": false,
-  "useCache": false
-}'
-
-# If full data is requested, add categories and zero_budgets
+# Initialize output with basic data - or build full data if requested
 if [ "$FETCH_MODE" = "full" ]; then
     categories=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
         WITH RECURSIVE
@@ -195,19 +182,25 @@ if [ "$FETCH_MODE" = "full" ]; then
       payees="[]"
     fi
 
-    # Add full data to output
-    output=$(echo "$output" | jq \
-        --argjson cats "$categories" \
-        --argjson budgets "$zero_budgets" \
-        --argjson notes "$notes" \
-        --argjson payees "$payees" \
-        '. + {
-            categories: $cats,
-            zero_budgets: $budgets,
-            notes: $notes,
-            payees: $payees,
-            hasFullData: true
-        }')
+    # Build JSON with full data
+    echo '{
+  "accounts": '"$accounts"',
+  "transactions": '"$transactions"',
+  "numberFormat": "'"$( echo "$numberFormat" | jq -r '.[0].value // "comma-dot"')"'",
+  "dateFormat": "'"$( echo "$dateFormat" | jq -r '.[0].value // "MM-dd-yyyy"')"'",
+  "categories": '"$categories"',
+  "zero_budgets": '"$zero_budgets"',
+  "notes": '"$notes"',
+  "payees": '"$payees"',
+  "hasFullData": true
+}' | jq '.'
+else
+    # Build JSON with basic data
+    echo '{
+  "accounts": '"$accounts"',
+  "transactions": '"$transactions"',
+  "numberFormat": "'"$( echo "$numberFormat" | jq -r '.[0].value // "comma-dot"')"'",
+  "dateFormat": "'"$( echo "$dateFormat" | jq -r '.[0].value // "MM-dd-yyyy"')"'",
+  "hasFullData": false
+}' | jq '.'
 fi
-
-echo "$output" | jq '.'
