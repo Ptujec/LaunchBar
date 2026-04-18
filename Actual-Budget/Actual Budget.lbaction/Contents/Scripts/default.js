@@ -171,7 +171,7 @@ function search(argument) {
 
   // Search notes (return transactions)
   const noteMatches = transactions
-    .filter((t) => !t.is_child)
+    .filter((t) => !t.is_parent)
     .filter((t) =>
       matchesQuery(t.notes?.replace(urlRegex, '').trim(), query, isExactPhrase),
     )
@@ -642,6 +642,7 @@ function showPayeeTransactions({
 
   const payeeTransactions = transactions
     .filter((t) => t.payee_id === payeeId)
+    .filter((t) => !t.is_child)
     .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) =>
       formatTransaction(
@@ -720,6 +721,7 @@ function showCategoryTransactions({
 
   const categoryTransactions = transactions
     .filter((t) => t.category_id === categoryId)
+    .filter((t) => !t.is_parent)
     .slice(0, LaunchBar.options.alternateKey || fromSearch ? undefined : 50) // NOTE: adjust to show all for fromSearch?
     .map((t) =>
       formatTransaction(
