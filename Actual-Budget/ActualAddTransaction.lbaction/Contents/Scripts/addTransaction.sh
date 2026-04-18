@@ -47,6 +47,9 @@ normalize_accents() {
 NOTES=$(normalize_accents "$NOTES")
 NEW_PAYEE_NAME=$(normalize_accents "$NEW_PAYEE_NAME")
 
+# Escape single quotes for SQL by doubling them
+NOTES=$(echo "$NOTES" | sed "s/'/''/g")
+
 # Check if Actual is running and quit it if it is
 if pgrep -x "Actual" > /dev/null; then
     log "Terminating Actual process..."
@@ -94,6 +97,8 @@ cp "$DB_PATH" "$TEMP_DB"
 # If we have a new payee name, create the payee first
 if [ -n "$NEW_PAYEE_NAME" ]; then
     PAYEE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+    # Escape single quotes for SQL by doubling them
+    NEW_PAYEE_NAME=$(echo "$NEW_PAYEE_NAME" | sed "s/'/''/g")
     
     sqlite3 "$TEMP_DB" << EOF
 BEGIN TRANSACTION;
