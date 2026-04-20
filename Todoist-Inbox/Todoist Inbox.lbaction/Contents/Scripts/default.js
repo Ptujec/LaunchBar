@@ -320,7 +320,8 @@ function advancedOptions(task) {
   // MARK: Sections
 
   const sections = todoistData.sections?.filter(
-    (section) => !section.is_archived,
+    (section) =>
+      !section.is_archived && projects.find((p) => p.id === section.project_id),
   );
 
   const sectionResults = sections.map((section, index) => {
