@@ -85,12 +85,7 @@ function search(argument) {
     : [];
 
   const buildCategoryItem = (cat) => {
-    const balance = getCategoryBalance(
-      cat.id,
-      transactions,
-      zero_budgets,
-      cat,
-    );
+    const balance = getCategoryBalance(cat.id, transactions, zero_budgets, cat);
     const budgetData = zero_budgets.find(
       (b) =>
         b.month ===
@@ -105,10 +100,7 @@ function search(argument) {
           new Date().getFullYear() * 100 + (new Date().getMonth() + 1),
     );
 
-    const netFlow = categoryTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0,
-    );
+    const netFlow = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
     const noteText = notes?.find((note) => note.id === cat.id)?.note;
 
     const displayCarryover = budgetData?.carryover === 1 ? '→ ' : '';
@@ -151,8 +143,7 @@ function search(argument) {
         noteText,
         fromSearch: true,
       },
-      actionReturnsItems:
-        categoryTransactions.length > 0 || noteText != null,
+      actionReturnsItems: categoryTransactions.length > 0 || noteText != null,
     };
   };
 
@@ -194,9 +185,18 @@ function search(argument) {
         fromSearch: true,
       },
       actionReturnsItems: true,
+      payeeName: payee.name, // Track original name for sorting
     }));
 
-  const matchedPayees = [...payeesExact, ...payeesPartial];
+  // Separate payee partial matches: those starting with query first
+  const payeesStartWith = payeesPartial.filter((p) =>
+    p.payeeName.toLowerCase().startsWith(query),
+  );
+  const payeesContain = payeesPartial.filter(
+    (p) => !p.payeeName.toLowerCase().startsWith(query),
+  );
+
+  const matchedPayees = [...payeesExact, ...payeesStartWith, ...payeesContain];
 
   // Search notes (return transactions)
   const noteMatches = transactions
@@ -207,7 +207,8 @@ function search(argument) {
     .slice(0, 50)
     .map((t) => formatTransaction(t, numberFormat, dateFormat, transactions));
 
-  const results = [...matchedCategories, ...matchedPayees, ...noteMatches];
+  // Prioritize results: exact payees → payees starting with query → other payees → categories → transactions
+  const results = [...matchedPayees, ...matchedCategories, ...noteMatches];
 
   return results.length > 0
     ? results
