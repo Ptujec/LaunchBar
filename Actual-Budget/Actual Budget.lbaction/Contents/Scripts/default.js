@@ -71,103 +71,132 @@ function search(argument) {
     ? trimmedArgument.slice(1, -1).toLowerCase()
     : trimmedArgument.toLowerCase();
 
-  // Search categories
-  const matchedCategories = categories
-    ? categories
-        .filter(
-          (cat) =>
-            (matchesQuery(cat.name, query, isExactPhrase) ||
-              matchesQuery(cat.group_name, query, isExactPhrase)) &&
-            cat.name !== 'Starting Balances',
-        )
-        .map((cat) => {
-          const balance = getCategoryBalance(
-            cat.id,
-            transactions,
-            zero_budgets,
-            cat,
-          );
-          const budgetData = zero_budgets.find(
-            (b) =>
-              b.month ===
-                new Date().getFullYear() * 100 + (new Date().getMonth() + 1) &&
-              b.category === cat.id,
-          ) || { budgeted: 0, carryover: 0 };
+  // Helper function to check for exact match
+  const isExactMatch = (text) => text?.toLowerCase() === query;
 
-          const categoryTransactions = transactions.filter(
-            (t) =>
-              t.category_id === cat.id &&
-              Math.floor(t.date / 100) ===
-                new Date().getFullYear() * 100 + (new Date().getMonth() + 1),
-          );
-
-          const netFlow = categoryTransactions.reduce(
-            (sum, t) => sum + t.amount,
-            0,
-          );
-          const noteText = notes?.find((note) => note.id === cat.id)?.note;
-
-          const displayCarryover = budgetData?.carryover === 1 ? '→ ' : '';
-          const displayBalance =
-            balance !== 0 ? `: ${formatAmount(balance, numberFormat)}` : '';
-          const displayNetFlow =
-            netFlow !== 0 && netFlow !== balance
-              ? `Flow: ${formatAmount(netFlow, numberFormat)}`
-              : undefined;
-          const displayBudgeted =
-            budgetData.budgeted > 0
-              ? `Budgeted: ${formatAmount(budgetData.budgeted, numberFormat)}`
-              : 'No Budget';
-
-          const subtitle =
-            cat.group_is_income === 0
-              ? displayCarryover +
-                [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
-              : undefined;
-
-          const icon =
-            balance < 0
-              ? 'categoryRed'
-              : balance === 0
-                ? 'categoryGreyTemplate'
-                : 'categoryTemplate';
-
-          return {
-            title: `${cat.name}${displayBalance}`,
-            subtitle,
-            alwaysShowsSubtitle: true,
-            label: cat.group_name,
-            icon,
-            action: 'handleCategoryAction',
-            actionArgument: {
-              categoryId: cat.id,
-              categoryTransactions,
-              numberFormat,
-              dateFormat,
-              noteText,
-              fromSearch: true,
-            },
-            actionReturnsItems:
-              categoryTransactions.length > 0 || noteText != null,
-          };
-        })
+  // Search categories - separate exact from partial matches
+  const allCategories = categories
+    ? categories.filter(
+        (cat) =>
+          (matchesQuery(cat.name, query, isExactPhrase) ||
+            matchesQuery(cat.group_name, query, isExactPhrase)) &&
+          cat.name !== 'Starting Balances',
+      )
     : [];
 
-  // Search payees
-  const matchedPayees = payees
-    ? payees
-        .filter((payee) => matchesQuery(payee.name, query, isExactPhrase))
-        .map((payee) => ({
-          title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
-          icon: 'payeeTemplate',
-          action: 'showPayeeTransactions',
-          actionArgument: {
-            payeeName: payee.id,
-            fromSearch: true,
-          },
-          actionReturnsItems: true,
-        }))
+  const buildCategoryItem = (cat) => {
+    const balance = getCategoryBalance(
+      cat.id,
+      transactions,
+      zero_budgets,
+      cat,
+    );
+    const budgetData = zero_budgets.find(
+      (b) =>
+        b.month ===
+          new Date().getFullYear() * 100 + (new Date().getMonth() + 1) &&
+        b.category === cat.id,
+    ) || { budgeted: 0, carryover: 0 };
+
+    const categoryTransactions = transactions.filter(
+      (t) =>
+        t.category_id === cat.id &&
+        Math.floor(t.date / 100) ===
+          new Date().getFullYear() * 100 + (new Date().getMonth() + 1),
+    );
+
+    const netFlow = categoryTransactions.reduce(
+      (sum, t) => sum + t.amount,
+      0,
+    );
+    const noteText = notes?.find((note) => note.id === cat.id)?.note;
+
+    const displayCarryover = budgetData?.carryover === 1 ? '→ ' : '';
+    const displayBalance =
+      balance !== 0 ? `: ${formatAmount(balance, numberFormat)}` : '';
+    const displayNetFlow =
+      netFlow !== 0 && netFlow !== balance
+        ? `Flow: ${formatAmount(netFlow, numberFormat)}`
+        : undefined;
+    const displayBudgeted =
+      budgetData.budgeted > 0
+        ? `Budgeted: ${formatAmount(budgetData.budgeted, numberFormat)}`
+        : 'No Budget';
+
+    const subtitle =
+      cat.group_is_income === 0
+        ? displayCarryover +
+          [displayNetFlow, displayBudgeted].filter(Boolean).join(' ⋅ ')
+        : undefined;
+
+    const icon =
+      balance < 0
+        ? 'categoryRed'
+        : balance === 0
+          ? 'categoryGreyTemplate'
+          : 'categoryTemplate';
+
+    return {
+      title: `${cat.name}${displayBalance}`,
+      subtitle,
+      alwaysShowsSubtitle: true,
+      label: cat.group_name,
+      icon,
+      action: 'handleCategoryAction',
+      actionArgument: {
+        categoryId: cat.id,
+        categoryTransactions,
+        numberFormat,
+        dateFormat,
+        noteText,
+        fromSearch: true,
+      },
+      actionReturnsItems:
+        categoryTransactions.length > 0 || noteText != null,
+    };
+  };
+
+  const matchedCategories = [
+    ...allCategories
+      .filter((cat) => isExactMatch(cat.name))
+      .map(buildCategoryItem),
+    ...allCategories
+      .filter((cat) => !isExactMatch(cat.name))
+      .map(buildCategoryItem),
+  ];
+
+  // Search payees - separate exact from partial matches
+  const allPayees = payees
+    ? payees.filter((payee) => matchesQuery(payee.name, query, isExactPhrase))
     : [];
+
+  const payeesExact = allPayees
+    .filter((payee) => isExactMatch(payee.name))
+    .map((payee) => ({
+      title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
+      icon: 'payeeTemplate',
+      action: 'showPayeeTransactions',
+      actionArgument: {
+        payeeName: payee.id,
+        fromSearch: true,
+      },
+      actionReturnsItems: true,
+    }));
+
+  const payeesPartial = allPayees
+    .filter((payee) => !isExactMatch(payee.name))
+    .map((payee) => ({
+      title: payee.transfer_acct ? `Transfer: ${payee.name}` : payee.name,
+      icon: 'payeeTemplate',
+      action: 'showPayeeTransactions',
+      actionArgument: {
+        payeeName: payee.id,
+        fromSearch: true,
+      },
+      actionReturnsItems: true,
+    }));
+
+  const matchedPayees = [...payeesExact, ...payeesPartial];
 
   // Search notes (return transactions)
   const noteMatches = transactions

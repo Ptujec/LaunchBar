@@ -70,25 +70,25 @@ function getDatabaseData(
 
   const basicCacheFilePath = `${Action.supportPath}/db-cache-${budgetID}-basic.json`;
   const fullCacheFilePath = `${fullDataActionSupportPath}/db-cache-${budgetID}.json`;
-  const cacheFilePath = requireFullData
-    ? fullCacheFilePath
-    : basicCacheFilePath;
 
-  // Check if cache is valid
-  if (File.exists(cacheFilePath)) {
-    const dbModDate = File.modificationDate(databasePath);
-    const cacheModDate = File.modificationDate(cacheFilePath);
+  const dbModDate = File.modificationDate(databasePath);
 
-    // If database is NOT newer than cache, check if we have required data
+  // Always check full cache first - if it's valid, use it (full data is a superset)
+  if (File.exists(fullCacheFilePath)) {
+    const cacheModDate = File.modificationDate(fullCacheFilePath);
     if (dbModDate < cacheModDate) {
-      if (requireFullData) {
-        const cachedData = File.readJSON(cacheFilePath);
-        if (cachedData.hasFullData) {
-          return cachedData;
-        }
-      } else {
-        return File.readJSON(cacheFilePath);
+      const cachedData = File.readJSON(fullCacheFilePath);
+      if (cachedData.hasFullData) {
+        return cachedData;
       }
+    }
+  }
+
+  // Fall back to basic cache if we don't need full data
+  if (!requireFullData && File.exists(basicCacheFilePath)) {
+    const cacheModDate = File.modificationDate(basicCacheFilePath);
+    if (dbModDate < cacheModDate) {
+      return File.readJSON(basicCacheFilePath);
     }
   }
 
@@ -146,8 +146,20 @@ function getCachedDatabaseData(options = {}) {
   const basicCacheFilePath = `${Action.supportPath}/db-cache-${budgetID}-basic.json`;
   const fullCacheFilePath = `${fullDataActionSupportPath}/db-cache-${budgetID}.json`;
 
+  const actualDbPath = customDatabasePath || getBudgetInfo().databasePath;
+  const dbModDate = File.modificationDate(actualDbPath);
+
   let data;
 
+  // Always check full cache first - if it's valid, use it (full data is a superset)
+  if (File.exists(fullCacheFilePath)) {
+    const cacheModDate = File.modificationDate(fullCacheFilePath);
+    if (dbModDate < cacheModDate) {
+      return File.readJSON(fullCacheFilePath);
+    }
+  }
+
+  // Fall back to basic cache if it exists and is valid
   if (File.exists(basicCacheFilePath)) {
     data = File.readJSON(basicCacheFilePath);
 
@@ -159,19 +171,11 @@ function getCachedDatabaseData(options = {}) {
         ));
 
     if (needsFullData) {
-      if (File.exists(fullCacheFilePath)) {
-        data = File.readJSON(fullCacheFilePath);
-        const basicData = createBasicData(data);
-        File.writeJSON(basicData, basicCacheFilePath);
-      } else {
-        data = getDatabaseData(customDatabasePath, customBudgetID, true);
-      }
+      // Need full data but basic cache was our only valid option, fetch fresh
+      data = getDatabaseData(customDatabasePath, customBudgetID, true);
     }
-  } else if (File.exists(fullCacheFilePath)) {
-    data = File.readJSON(fullCacheFilePath);
-    const basicData = createBasicData(data);
-    File.writeJSON(basicData, basicCacheFilePath);
   } else {
+    // No valid basic cache, fetch fresh data
     data = getDatabaseData(customDatabasePath, customBudgetID, requireFullData);
   }
 
