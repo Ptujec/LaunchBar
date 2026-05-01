@@ -78,7 +78,7 @@ Elk.zone is a web client for Mastodon. This action combines [search](#1-search-a
 
 ## API-Token 
 
-Go to "https//:`your.server`/settings/applications/". (If you came here from the dialog in the action that link should have opened automatically along with this one.) Then click the `New application` button. 
+Go to "https://`your.server`/settings/applications/". (If you came here from the dialog in the action that link should have opened automatically along with this one.) Then click the `New application` button. 
 
 You need the following permissions:
 
