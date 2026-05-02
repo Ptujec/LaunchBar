@@ -9,21 +9,21 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Paste scripture</string>
 	<key>CFBundleVersion</key>
-	<string>3.3.4</string>
+	<string>3.4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⇧⏎ = Settings, ⌘⏎ (after entry) = Choose translation</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#paste-scripture</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Accordance-Actions/Accordance%20-%20Paste%20scripture.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#paste-scripture</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.OakTree.Accordance</string>
