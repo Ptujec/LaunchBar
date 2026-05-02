@@ -123,11 +123,14 @@ function paste(text, reference) {
 
   const frontmostAppID = LaunchBar.executeAppleScript(getFrontmostAS).trim();
 
-  if (frontmostAppID === 'pro.writer.mac') {
+  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iawriter) {
     return pasteInWriter(formattedText);
   }
 
-  if (frontmostAppID === 'com.apple.iWork.Keynote') {
+  if (
+    frontmostAppID === 'com.apple.iWork.Keynote' &&
+    Action.preferences.keynote
+  ) {
     return pasteInKeynote(text, reference);
   }
 
@@ -155,33 +158,31 @@ function pasteInWriter(text) {
 }
 
 function pasteInKeynote(text, reference) {
-  // Implement
-
   LaunchBar.executeAppleScript(`
-      tell application "Keynote"
-      	activate
-      	set _doc to the front document
-        set _slide_num to slide number of current slide of _doc
-	      tell _doc to duplicate slide _slide_num to after slide _slide_num
-      	set _slide to current slide of _doc      	
-      	tell _slide
-          set _text_items to get text items          
-          -- set text values
-          set object text of item 1 of _text_items to "${text}"
-      		set object text of item 2 of _text_items to "${reference}"
-          -- set position of reference 20 below the text
-      		delay 0.1
+    tell application "Keynote"
+      activate
+    	set _doc to the front document
+      set _slide_num to slide number of current slide of _doc
+      tell _doc to duplicate slide _slide_num to after slide _slide_num
+    	set _slide to current slide of _doc      	
+     	tell _slide
+        set _text_items to get text items          
+        -- set text values
+        set object text of item 1 of _text_items to "${text}"
+      	set object text of item 2 of _text_items to "${reference}"
+        -- set position of reference 20 below the text
+      	delay 0.1
       		
-      		set _pos_1 to get position of item 1 of _text_items
-      		set _y_1 to item 2 of _pos_1
-      		set _height_1 to get height of item 1 of _text_items
-      		
-      		set _y_2 to _y_1 + _height_1 + 20
-      		set _pos_2 to get position of item 2 of _text_items
-      		set _x_2 to item 1 of _pos_2
-      		set position of item 2 of _text_items to {_x_2, _y_2}
-        end tell   	
-      end tell
+      	set _pos_1 to get position of item 1 of _text_items
+      	set _y_1 to item 2 of _pos_1
+      	set _height_1 to get height of item 1 of _text_items
+      	
+      	set _y_2 to _y_1 + _height_1 + 20
+      	set _pos_2 to get position of item 2 of _text_items
+      	set _x_2 to item 1 of _pos_2
+    		set position of item 2 of _text_items to {_x_2, _y_2}
+      end tell   	
+    end tell
     `);
 }
 
@@ -227,7 +228,33 @@ function settings() {
       icon: 'bookTemplate',
       children: listTranslations(),
     },
+    {
+      title: 'Use Keynote Paste'.localize(),
+      subtitle:
+        'Uses first text item as the text, second as the reference.'.localize(),
+      alwaysShowsSubtitle: true,
+      icon: Action.preferences.keynote ? 'checkTemplate' : 'circleTemplate',
+      action: 'toggleKeynotePaste',
+    },
+    {
+      title: 'Use iA Writer Paste'.localize(),
+      subtitle:
+        'Paste as "Accordance". Set up "Accordance" as an author in iA Writer first.'.localize(),
+      alwaysShowsSubtitle: true,
+      icon: Action.preferences.iawriter ? 'checkTemplate' : 'circleTemplate',
+      action: 'toggleIWriterPaste',
+    },
   ];
+}
+
+function toggleKeynotePaste() {
+  Action.preferences.keynote = !Action.preferences.keynote;
+  return settings();
+}
+
+function toggleIWriterPaste() {
+  Action.preferences.iawriter = !Action.preferences.iawriter;
+  return settings();
 }
 
 function listFormats() {
