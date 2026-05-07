@@ -11,6 +11,7 @@ Documentation:
 The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
+
 String.prototype.localizationTable = 'default';
 
 const AccordancePrefs = eval(
@@ -29,7 +30,7 @@ function run(argument) {
     Action.preferences.translation ||
     AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
 
-  if (LaunchBar.options.shiftKey) return listTranslations();
+  if (LaunchBar.options.shiftKey) return settings();
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
@@ -72,7 +73,7 @@ function run(argument) {
   }
 
   if (LaunchBar.options.commandKey) {
-    return listTranslations(newArgument, argument);
+    return listTranslations({ newArgument, argument, mode: 'lookup' });
   } else {
     return getText(newArgument, argument, translation);
   }
@@ -86,6 +87,19 @@ function getText(newArgument, argument, translation) {
   if (text.startsWith('ERR')) {
     trackFailedTranslation(newArgument, translation);
 
+    const fallbackTranslation =
+      Action.preferences.fallbackTranslation ||
+      AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+
+    if (fallbackTranslation && translation !== fallbackTranslation) {
+      // LaunchBar.displayNotification({
+      //   title: 'Accordance Display action',
+      //   string: `The text is not available in "${translation}". Falling back to "${fallbackTranslation}"`,
+      // });
+
+      return getText(newArgument, argument, fallbackTranslation);
+    }
+
     const response = LaunchBar.alert(
       'Error!',
       text +
@@ -96,7 +110,7 @@ function getText(newArgument, argument, translation) {
 
     switch (response) {
       case 0:
-        return listTranslations(newArgument, argument, true);
+        return listTranslations({ newArgument, argument, mode: 'lookup' });
       case 1:
         return;
     }
@@ -147,10 +161,29 @@ function replaceBookName(bookName) {
   return bookName;
 }
 
-function listTranslations(newArgument, argument, retry = false) {
-  const selectTranslation = retry || LaunchBar.options.commandKey;
+function settings() {
+  return [
+    {
+      title: 'Choose default translation'.localize(),
+      icon: 'bookTemplate',
+      label: Action.preferences.translation.replace(/°|-LEM/g, ''),
+      children: listTranslations({ mode: 'default' }),
+    },
+    {
+      title: 'Choose fallback translation'.localize(),
+      icon: 'bookTemplate',
+      label: Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, ''),
+      children: listTranslations({
+        mode: 'fallback',
+      }),
+    },
+  ];
+}
+
+function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   const translations = File.getDirectoryContents(textModulesPath);
-  const failedTranslations = getFailedTranslations(newArgument);
+  const failedTranslations =
+    mode === 'lookup' ? getFailedTranslations(newArgument) : [];
 
   return translations
     .map((translationFile) => {
@@ -175,29 +208,40 @@ function listTranslations(newArgument, argument, retry = false) {
 
       const isLastUsed = translation === Action.preferences.lastUsed;
       const isDefault = translation === Action.preferences.translation;
+      const isFallback = translation === Action.preferences.fallbackTranslation;
       const isFailed = failedTranslations.includes(translation);
 
-      if (isFailed && selectTranslation) return null;
+      if (isFailed && mode === 'lookup') return null;
 
       const item = {
         title: translationName,
-        subtitle: argument,
-        alwaysShowsSubtitle: true,
-        action: selectTranslation ? 'setTranslation' : 'setDefaultTranslation',
+        ...(mode === 'lookup' &&
+          // argument && { subtitle: argument, alwaysShowsSubtitle: true }),
+          argument && { subtitle: argument }),
+        action:
+          mode === 'default'
+            ? 'setDefaultTranslation'
+            : mode === 'fallback'
+              ? 'setFallbackTranslation'
+              : 'setTranslation',
         actionArgument: {
           newArgument: newArgument,
           argument: argument,
           translation: translation,
         },
         icon:
-          isDefault && !selectTranslation
+          (mode === 'default' && isDefault) ||
+          (mode === 'fallback' && isFallback)
             ? 'selectedBookTemplate'
             : 'bookTemplate',
-        ...(isLastUsed && selectTranslation && { badge: 'recent'.localize() }),
+        ...(mode === 'lookup' && isLastUsed && { badge: 'recent'.localize() }),
         priority:
-          isLastUsed && selectTranslation
-            ? 0
-            : isDefault && !selectTranslation
+          mode === 'lookup'
+            ? isLastUsed
+              ? 0
+              : 2
+            : (mode === 'default' && isDefault) ||
+                (mode === 'fallback' && isFallback)
               ? 1
               : 2,
       };
@@ -215,7 +259,12 @@ function listTranslations(newArgument, argument, retry = false) {
 
 function setDefaultTranslation({ translation }) {
   Action.preferences.translation = translation;
-  return listTranslations();
+  return listTranslations({ mode: 'default' });
+}
+
+function setFallbackTranslation({ translation }) {
+  Action.preferences.fallbackTranslation = translation;
+  return listTranslations({ mode: 'fallback' });
 }
 
 function setTranslation({ newArgument, argument, translation }) {
