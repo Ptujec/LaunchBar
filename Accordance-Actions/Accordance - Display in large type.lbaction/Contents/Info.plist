@@ -9,21 +9,21 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Display in large type</string>
 	<key>CFBundleVersion</key>
-	<string>3.4.4</string>
+	<string>3.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⇧⏎ = Set default translation, ⌘⏎ (after entry) = Choose translation</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
-		<key>LBWebsiteURL</key>
-		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#display-in-large-type</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Accordance-Actions/Accordance%20-%20Display%20in%20large%20type.lbaction/Contents/Info.plist</string>
+		<key>LBWebsiteURL</key>
+		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#display-in-large-type</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.OakTree.Accordance</string>
@@ -39,8 +39,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>

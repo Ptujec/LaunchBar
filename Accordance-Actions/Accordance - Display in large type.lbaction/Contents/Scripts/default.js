@@ -1,4 +1,4 @@
-/* 
+/*
 Accordance Display Text Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-06-29
@@ -14,11 +14,11 @@ The Original Accordance Automation Script Library:
 String.prototype.localizationTable = 'default';
 
 const AccordancePrefs = eval(
-  File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
+  File.readText('~/Library/Preferences/Accordance Preferences/General.apref'),
 )[0]; // For default translation & vers notation settings
 
 const bookNameDictionary = File.readJSON(
-  Action.path + '/Contents/Resources/booknames.json'
+  Action.path + '/Contents/Resources/booknames.json',
 ); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
 
 const textModulesPath =
@@ -29,9 +29,7 @@ function run(argument) {
     Action.preferences.translation ||
     AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
 
-  if (LaunchBar.options.shiftKey) {
-    return listTranslations();
-  }
+  if (LaunchBar.options.shiftKey) return listTranslations();
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
@@ -59,7 +57,7 @@ function run(argument) {
     // convert book names
     newArgument = argument.replace(
       /([a-zžščöäüß]+(?: [a-zžščöäüß]+)?)/gi,
-      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1)
+      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1),
     );
 
     // more clean up for accordance and special treatment for the pentateuch
@@ -76,35 +74,53 @@ function run(argument) {
   if (LaunchBar.options.commandKey) {
     return listTranslations(newArgument, argument);
   } else {
-    displayText(newArgument, argument, translation);
+    return getText(newArgument, argument, translation);
   }
 }
 
-function displayText(newArgument, argument, translation) {
+function getText(newArgument, argument, translation) {
   let text = LaunchBar.executeAppleScript(
-    'tell application "Accordance" to set theResult to «event AccdTxRf» {"' +
-      translation +
-      '", "' +
-      newArgument +
-      '", true}'
+    `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
   ).trim();
+
+  if (text.startsWith('ERR')) {
+    trackFailedTranslation(newArgument, translation);
+
+    const response = LaunchBar.alert(
+      'Error!',
+      text +
+        `\nTry picking a different translation than "${translation}" or check your query.`,
+      'Ok',
+      'Cancel'.localize(),
+    );
+
+    switch (response) {
+      case 0:
+        return listTranslations(newArgument, argument, true);
+      case 1:
+        return;
+    }
+  }
+
+  // Clear failed translations on success
+  clearFailedTranslations(newArgument);
 
   // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
   text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
-
-  // Split up text into lines -- Uncommented as of LB 6.18.3
-  // text = splitTextIntoLines(text).join('\n');
-
-  // Uncomment the following line if you are using this a lot in Fullscreen mode
-  // LaunchBar.executeAppleScript('tell application "Mission Control" to launch');
 
   // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
   const translationName = translation.replace(/°|-LEM/g, '');
   // Uppercase first character of query
   argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
+  const reference = `${argument} ${translationName}`;
+
+  display(text, reference);
+}
+
+function display(text, reference) {
   LaunchBar.displayInLargeType({
-    title: argument + ' (' + translationName + ')',
+    title: reference,
     string: text,
   });
 }
@@ -131,70 +147,70 @@ function replaceBookName(bookName) {
   return bookName;
 }
 
-function listTranslations(newArgument, argument) {
-  const isCommandKeyPressed = LaunchBar.options.commandKey;
+function listTranslations(newArgument, argument, retry = false) {
+  const selectTranslation = retry || LaunchBar.options.commandKey;
   const translations = File.getDirectoryContents(textModulesPath);
+  const failedTranslations = getFailedTranslations(newArgument);
 
-  let defaultTranslation = [];
-  let lastUsedTranslation = [];
-  let rest = [];
+  return translations
+    .map((translationFile) => {
+      const translation = translationFile.split('.')[0];
+      const extension = translationFile.split('.')[1];
 
-  translations.map((translationFile) => {
-    const translation = translationFile.split('.')[0];
-    const extension = translationFile.split('.')[1];
+      let translationName;
+      if (extension == 'atext') {
+        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
+        if (!File.exists(plistPath)) {
+          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        }
 
-    let translationName;
-    if (extension == 'atext') {
-      let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-      if (!File.exists(plistPath)) {
-        plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        const plist = File.readPlist(plistPath);
+        translationName =
+          plist['com.oaktree.module.humanreadablename'] ||
+          plist['com.oaktree.module.fullmodulename'] ||
+          translation.trim().replace('°', '');
+      } else {
+        translationName = translation.trim().replace('°', '');
       }
 
-      const plist = File.readPlist(plistPath);
-      translationName =
-        plist['com.oaktree.module.humanreadablename'] ||
-        plist['com.oaktree.module.fullmodulename'] ||
-        translation.trim().replace('°', '');
-    } else {
-      translationName = translation.trim().replace('°', '');
-    }
+      const isLastUsed = translation === Action.preferences.lastUsed;
+      const isDefault = translation === Action.preferences.translation;
+      const isFailed = failedTranslations.includes(translation);
 
-    const pushContent = {
-      title: translationName,
-      subtitle: argument,
-      alwaysShowsSubtitle: true,
-      action: isCommandKeyPressed ? 'setTranslation' : 'setDefaultTranslation',
-      actionArgument: {
-        argument: argument,
-        newArgument: newArgument,
-        translation: translation,
-      },
-      icon: 'bookTemplate',
-    };
+      if (isFailed && selectTranslation) return null;
 
-    const isLastUsed = translation === Action.preferences.lastUsed;
-    const isDefault = translation === Action.preferences.translation;
+      const item = {
+        title: translationName,
+        subtitle: argument,
+        alwaysShowsSubtitle: true,
+        action: selectTranslation ? 'setTranslation' : 'setDefaultTranslation',
+        actionArgument: {
+          newArgument: newArgument,
+          argument: argument,
+          translation: translation,
+        },
+        icon:
+          isDefault && !selectTranslation
+            ? 'selectedBookTemplate'
+            : 'bookTemplate',
+        ...(isLastUsed && selectTranslation && { badge: 'recent'.localize() }),
+        priority:
+          isLastUsed && selectTranslation
+            ? 0
+            : isDefault && !selectTranslation
+              ? 1
+              : 2,
+      };
 
-    if (isLastUsed && isCommandKeyPressed) {
-      pushContent.badge = 'recent'.localize();
-      lastUsedTranslation.push(pushContent);
-    } else if (isDefault && !isCommandKeyPressed) {
-      pushContent.icon = 'selectedBookTemplate';
-      defaultTranslation.push(pushContent);
-    } else if (isDefault && isCommandKeyPressed) {
-      rest.push(pushContent);
-    } else {
-      pushContent.icon = 'bookTemplate';
-      rest.push(pushContent);
-    }
-  });
-
-  rest.sort((a, b) => a.title.localeCompare(b.title));
-
-  let result = isCommandKeyPressed
-    ? lastUsedTranslation.concat(rest)
-    : lastUsedTranslation.concat(defaultTranslation.concat(rest));
-  return result;
+      return item;
+    })
+    .filter((item) => item !== null)
+    .sort((a, b) =>
+      a.priority !== b.priority
+        ? a.priority - b.priority
+        : a.title.localeCompare(b.title),
+    )
+    .map(({ priority, ...item }) => item);
 }
 
 function setDefaultTranslation({ translation }) {
@@ -204,30 +220,24 @@ function setDefaultTranslation({ translation }) {
 
 function setTranslation({ newArgument, argument, translation }) {
   Action.preferences.lastUsed = translation;
-  displayText(newArgument, argument, translation);
+  return getText(newArgument, argument, translation);
 }
 
-function splitTextIntoLines(text) {
-  if (text.length > 900) {
-    text = text.slice(0, 897) + '...';
+function trackFailedTranslation(newArgument, translation) {
+  const key = `failedTranslations_${newArgument}`;
+  let failed = Action.preferences[key] || [];
+  if (!failed.includes(translation)) {
+    failed.push(translation);
+    Action.preferences[key] = failed;
   }
+}
 
-  let words = text.split(' ');
-  let lines = [];
-  let currentLine = '';
-  for (let i = 0; i < words.length; i++) {
-    let word = words[i];
-    if (currentLine.length + word.length + 1 > 64) {
-      lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine += (currentLine ? ' ' : '') + word;
-    }
-  }
+function getFailedTranslations(newArgument) {
+  const key = `failedTranslations_${newArgument}`;
+  return Action.preferences[key] || [];
+}
 
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines;
+function clearFailedTranslations(newArgument) {
+  const key = `failedTranslations_${newArgument}`;
+  delete Action.preferences[key];
 }
