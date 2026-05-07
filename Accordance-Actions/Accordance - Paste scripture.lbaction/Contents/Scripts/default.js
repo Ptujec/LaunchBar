@@ -9,7 +9,7 @@ Sources:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 
-TODO: Refactor (functions and such) 
+TODO: Refactor (functions and such)
 */
 
 String.prototype.localizationTable = 'default';
@@ -74,7 +74,7 @@ function run(argument) {
   }
 
   if (LaunchBar.options.commandKey) {
-    return listTranslations(newArgument, argument);
+    return listTranslations({ newArgument, argument, mode: 'lookup' });
   } else {
     return getText(newArgument, argument, translation);
   }
@@ -98,7 +98,7 @@ function getText(newArgument, argument, translation) {
 
     switch (response) {
       case 0:
-        return listTranslations(newArgument, argument, true);
+        return listTranslations({ newArgument, argument, mode: 'lookup' });
       case 1:
         return;
     }
@@ -243,12 +243,14 @@ function settings() {
       title: 'Format'.localize(),
       // subtitle: 'Hit return to change!'.localize(),
       icon: formatIcon,
+      label: Action.preferences.format.localize() || 'plain'.localize(),
       children: listFormats(),
     },
     {
       title: 'Choose default translation'.localize(),
       icon: 'bookTemplate',
-      children: listTranslations(),
+      label: Action.preferences.translation.replace(/°|-LEM/g, ''),
+      children: listTranslations({ mode: 'default' }),
     },
     {
       title: 'Use Keynote Paste'.localize(),
@@ -307,10 +309,11 @@ function setFormat(format) {
   return settings();
 }
 
-function listTranslations(newArgument, argument, retry = false) {
-  const selectTranslation = retry || LaunchBar.options.commandKey;
+function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
+  const isDefaultMode = mode === 'default';
   const translations = File.getDirectoryContents(textModulesPath);
-  const failedTranslations = getFailedTranslations(newArgument);
+  const failedTranslations =
+    mode === 'lookup' ? getFailedTranslations(newArgument) : [];
 
   return translations
     .map((translationFile) => {
@@ -337,29 +340,23 @@ function listTranslations(newArgument, argument, retry = false) {
       const isDefault = translation === Action.preferences.translation;
       const isFailed = failedTranslations.includes(translation);
 
-      if (isFailed && selectTranslation) return null;
+      if (isFailed && !isDefaultMode) return null;
 
       const item = {
         title: translationName,
         subtitle: argument,
-        alwaysShowsSubtitle: true,
-        action: selectTranslation ? 'setTranslation' : 'setDefaultTranslation',
+        // alwaysShowsSubtitle: true,
+        action: isDefaultMode ? 'setDefaultTranslation' : 'setTranslation',
         actionArgument: {
           newArgument: newArgument,
           argument: argument,
           translation: translation,
         },
         icon:
-          isDefault && !selectTranslation
-            ? 'selectedBookTemplate'
-            : 'bookTemplate',
-        ...(isLastUsed && selectTranslation && { badge: 'recent'.localize() }),
+          isDefault && isDefaultMode ? 'selectedBookTemplate' : 'bookTemplate',
+        ...(isLastUsed && !isDefaultMode && { badge: 'recent'.localize() }),
         priority:
-          isLastUsed && selectTranslation
-            ? 0
-            : isDefault && !selectTranslation
-              ? 1
-              : 2,
+          isLastUsed && !isDefaultMode ? 0 : isDefault && isDefaultMode ? 1 : 2,
       };
 
       return item;
@@ -375,7 +372,7 @@ function listTranslations(newArgument, argument, retry = false) {
 
 function setDefaultTranslation({ translation }) {
   Action.preferences.translation = translation;
-  return listTranslations();
+  return settings();
 }
 
 function setTranslation({ newArgument, argument, translation }) {
