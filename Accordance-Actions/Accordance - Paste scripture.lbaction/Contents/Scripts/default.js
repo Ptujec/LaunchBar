@@ -1,4 +1,4 @@
-/* 
+/*
 Accordance Paste Text Action for LaunchBar
 by Christian Bender (@ptujec)
 2022-09-03
@@ -9,7 +9,7 @@ Sources:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 
-TODO: Refactor (functions and such)
+TODO: Refactor (functions and such) 
 */
 
 String.prototype.localizationTable = 'default';
@@ -76,7 +76,7 @@ function run(argument) {
   if (LaunchBar.options.commandKey) {
     return listTranslations(newArgument, argument);
   } else {
-    getText(newArgument, argument, translation);
+    return getText(newArgument, argument, translation);
   }
 }
 
@@ -85,12 +85,27 @@ function getText(newArgument, argument, translation) {
     `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
   ).trim();
 
-  // TODO: Pick a different translation
-  // return listTranslations(newArgument, argument);
   if (text.startsWith('ERR')) {
-    LaunchBar.alert('Error!', text);
-    return;
+    trackFailedTranslation(newArgument, translation);
+
+    const response = LaunchBar.alert(
+      'Error!',
+      text +
+        `\nTry picking a different translation than "${translation}" or check your query.`,
+      'Ok',
+      'Cancel'.localize(),
+    );
+
+    switch (response) {
+      case 0:
+        return listTranslations(newArgument, argument, true);
+      case 1:
+        return;
+    }
   }
+
+  // Clear failed translations on success
+  clearFailedTranslations(newArgument);
 
   // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
   text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
@@ -118,10 +133,15 @@ function paste(text, reference) {
         ? `"${text}" ${reference}`
         : formattedText;
 
-  const getFrontmostAS =
-    'tell application "System Events" to set _frontmoste to bundle identifier of application processes whose frontmost is true as string';
+  const frontmostAppID = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
 
-  const frontmostAppID = LaunchBar.executeAppleScript(getFrontmostAS).trim();
+  if (frontmostAppID === 'pro.writer.mac') {
+    formattedText = `> ${text} (${reference})`;
+  }
+
+  if (frontmostAppID === 'com.ideasoncanvas.mindnode') {
+    formattedText = `${text} (${reference})`;
+  }
 
   if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iawriter) {
     return pasteInWriter(formattedText);
@@ -131,6 +151,7 @@ function paste(text, reference) {
     frontmostAppID === 'com.apple.iWork.Keynote' &&
     Action.preferences.keynote
   ) {
+    LaunchBar.setClipboardString(text); // Workaround for stupid Unicode stuff
     return pasteInKeynote(text, reference);
   }
 
@@ -147,12 +168,13 @@ function pasteInWriter(text) {
   const pasteEditsFromMenu =
     'menu 1 of menu item 10 of menu 4 of menu bar 1 of application process "iA Writer"';
 
-  const pasteInWriterAS =
-    'delay 0.1\n' +
-    'tell application "iA Writer" to activate\n' +
-    'tell application "System Events"\n' +
-    `click menu item "${authorName}" of ${pasteEditsFromMenu}\n` +
-    'end tell\n';
+  const pasteInWriterAS = `
+    delay 0.1
+    tell application "iA Writer" to activate
+    tell application "System Events"
+    click menu item "${authorName}" of ${pasteEditsFromMenu}
+    end tell
+    `;
 
   LaunchBar.executeAppleScript(pasteInWriterAS);
 }
@@ -164,24 +186,24 @@ function pasteInKeynote(text, reference) {
     	set _doc to the front document
       set _slide_num to slide number of current slide of _doc
       tell _doc to duplicate slide _slide_num to after slide _slide_num
-    	set _slide to current slide of _doc      	
+    	set _slide to current slide of _doc
      	tell _slide
-        set _text_items to get text items          
+        set _text_items to get text items
         -- set text values
         set object text of item 1 of _text_items to "${text}"
       	set object text of item 2 of _text_items to "${reference}"
         -- set position of reference 20 below the text
       	delay 0.1
-      		
+
       	set _pos_1 to get position of item 1 of _text_items
       	set _y_1 to item 2 of _pos_1
       	set _height_1 to get height of item 1 of _text_items
-      	
+
       	set _y_2 to _y_1 + _height_1 + 20
       	set _pos_2 to get position of item 2 of _text_items
       	set _x_2 to item 1 of _pos_2
     		set position of item 2 of _text_items to {_x_2, _y_2}
-      end tell   	
+      end tell
     end tell
     `);
 }
@@ -285,71 +307,70 @@ function setFormat(format) {
   return settings();
 }
 
-function listTranslations(newArgument, argument) {
-  const isCommandKeyPressed = LaunchBar.options.commandKey;
+function listTranslations(newArgument, argument, retry = false) {
+  const selectTranslation = retry || LaunchBar.options.commandKey;
   const translations = File.getDirectoryContents(textModulesPath);
+  const failedTranslations = getFailedTranslations(newArgument);
 
-  let defaultTranslation = [];
-  let lastUsedTranslation = [];
-  let rest = [];
+  return translations
+    .map((translationFile) => {
+      const translation = translationFile.split('.')[0];
+      const extension = translationFile.split('.')[1];
 
-  translations.map((translationFile) => {
-    const translation = translationFile.split('.')[0];
-    const extension = translationFile.split('.')[1];
+      let translationName;
+      if (extension == 'atext') {
+        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
+        if (!File.exists(plistPath)) {
+          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        }
 
-    let translationName;
-    if (extension == 'atext') {
-      let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-      if (!File.exists(plistPath)) {
-        plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        const plist = File.readPlist(plistPath);
+        translationName =
+          plist['com.oaktree.module.humanreadablename'] ||
+          plist['com.oaktree.module.fullmodulename'] ||
+          translation.trim().replace('°', '');
+      } else {
+        translationName = translation.trim().replace('°', '');
       }
 
-      const plist = File.readPlist(plistPath);
-      translationName =
-        plist['com.oaktree.module.humanreadablename'] ||
-        plist['com.oaktree.module.fullmodulename'] ||
-        translation.trim().replace('°', '');
-    } else {
-      translationName = translation.trim().replace('°', '');
-    }
+      const isLastUsed = translation === Action.preferences.lastUsed;
+      const isDefault = translation === Action.preferences.translation;
+      const isFailed = failedTranslations.includes(translation);
 
-    const pushContent = {
-      title: translationName,
-      subtitle: argument,
-      alwaysShowsSubtitle: true,
-      action: isCommandKeyPressed ? 'setTranslation' : 'setDefaultTranslation',
-      actionArgument: {
-        newArgument: newArgument,
-        argument: argument,
-        translation: translation,
-      },
-      icon: 'bookTemplate',
-    };
+      if (isFailed && selectTranslation) return null;
 
-    const isLastUsed = translation === Action.preferences.lastUsed;
-    const isDefault = translation === Action.preferences.translation;
+      const item = {
+        title: translationName,
+        subtitle: argument,
+        alwaysShowsSubtitle: true,
+        action: selectTranslation ? 'setTranslation' : 'setDefaultTranslation',
+        actionArgument: {
+          newArgument: newArgument,
+          argument: argument,
+          translation: translation,
+        },
+        icon:
+          isDefault && !selectTranslation
+            ? 'selectedBookTemplate'
+            : 'bookTemplate',
+        ...(isLastUsed && selectTranslation && { badge: 'recent'.localize() }),
+        priority:
+          isLastUsed && selectTranslation
+            ? 0
+            : isDefault && !selectTranslation
+              ? 1
+              : 2,
+      };
 
-    if (isLastUsed && isCommandKeyPressed) {
-      pushContent.icon = 'bookTemplate';
-      pushContent.badge = 'recent'.localize();
-      lastUsedTranslation.push(pushContent);
-    } else if (isDefault && !isCommandKeyPressed) {
-      pushContent.icon = 'selectedBookTemplate';
-      defaultTranslation.push(pushContent);
-    } else if (isDefault && isCommandKeyPressed) {
-      rest.push(pushContent);
-    } else {
-      pushContent.icon = 'bookTemplate';
-      rest.push(pushContent);
-    }
-  });
-
-  rest.sort((a, b) => a.title.localeCompare(b.title));
-
-  let result = isCommandKeyPressed
-    ? lastUsedTranslation.concat(rest)
-    : lastUsedTranslation.concat(defaultTranslation.concat(rest));
-  return result;
+      return item;
+    })
+    .filter((item) => item !== null)
+    .sort((a, b) =>
+      a.priority !== b.priority
+        ? a.priority - b.priority
+        : a.title.localeCompare(b.title),
+    )
+    .map(({ priority, ...item }) => item);
 }
 
 function setDefaultTranslation({ translation }) {
@@ -359,5 +380,24 @@ function setDefaultTranslation({ translation }) {
 
 function setTranslation({ newArgument, argument, translation }) {
   Action.preferences.lastUsed = translation;
-  getText(newArgument, argument, translation);
+  return getText(newArgument, argument, translation);
+}
+
+function trackFailedTranslation(newArgument, translation) {
+  const key = `failedTranslations_${newArgument}`;
+  let failed = Action.preferences[key] || [];
+  if (!failed.includes(translation)) {
+    failed.push(translation);
+    Action.preferences[key] = failed;
+  }
+}
+
+function getFailedTranslations(newArgument) {
+  const key = `failedTranslations_${newArgument}`;
+  return Action.preferences[key] || [];
+}
+
+function clearFailedTranslations(newArgument) {
+  const key = `failedTranslations_${newArgument}`;
+  delete Action.preferences[key];
 }

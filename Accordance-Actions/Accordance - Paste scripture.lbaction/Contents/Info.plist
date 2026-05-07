@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Paste scripture</string>
 	<key>CFBundleVersion</key>
-	<string>3.4.1</string>
+	<string>3.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -39,8 +39,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
