@@ -1,7 +1,7 @@
 /*
 Accordance Display Text Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-06-29
+2026-05-08
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -22,7 +22,7 @@ const accordanceDefaultSearchText =
   AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
 
 const bookNameDictionary = File.readJSON(
-  Action.path + '/Contents/Resources/booknames.json',
+  `${Action.path}/Contents/Resources/booknames.json`,
 ); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
 
 const textModulesPath =
@@ -74,14 +74,18 @@ function run(argument) {
       .replace(/5 ?Moses/, 'Deuteronomy');
   }
 
-  if (LaunchBar.options.commandKey) {
-    return listTranslations({ newArgument, argument, mode: 'lookup' });
-  } else {
-    return getText(newArgument, argument, translation);
-  }
+  return LaunchBar.options.commandKey
+    ? listTranslations({ newArgument, argument, mode: 'lookup' })
+    : getText(newArgument, argument, translation);
 }
 
-function getText(newArgument, argument, translation, isFallback = false) {
+function getText(
+  newArgument,
+  argument,
+  translation,
+  isFallback = false,
+  isDefaultFallback = false,
+) {
   let text = LaunchBar.executeAppleScript(
     `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
   ).trim();
@@ -89,15 +93,18 @@ function getText(newArgument, argument, translation, isFallback = false) {
   if (text.startsWith('ERR')) {
     trackFailedTranslation(newArgument, translation);
 
+    const defaultTranslation =
+      Action.preferences.translation || accordanceDefaultSearchText;
+
     const fallbackTranslation =
       Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
 
-    if (fallbackTranslation && translation !== fallbackTranslation) {
-      // LaunchBar.displayNotification({
-      //   title: 'Accordance Display action',
-      //   string: `The text is not available in "${translation}". Falling back to "${fallbackTranslation}"`,
-      // });
+    // First try to use the default before fallback … if translation is not the default
+    if (translation !== defaultTranslation) {
+      return getText(newArgument, argument, defaultTranslation, false, true);
+    }
 
+    if (fallbackTranslation && translation !== fallbackTranslation) {
       return getText(newArgument, argument, fallbackTranslation, true);
     }
 
@@ -113,8 +120,7 @@ function getText(newArgument, argument, translation, isFallback = false) {
 
     const response = LaunchBar.alert(
       'Error!',
-      text +
-        `\nTry picking a different translation than "${translation}" or check your query.`,
+      `${text}\nTry picking a different translation than "${translation}" or check your query.`,
       'Ok',
       'Cancel'.localize(),
     );
@@ -140,7 +146,8 @@ function getText(newArgument, argument, translation, isFallback = false) {
 
   let reference = `${argument} ${translationName}`;
 
-  if (isFallback) reference += ' (fallback)';
+  if (isFallback) reference += ' (fallback)'.localize();
+  if (isDefaultFallback) reference += ' (default)'.localize();
 
   display(text, reference);
 }
@@ -154,7 +161,6 @@ function display(text, reference) {
 
 function replaceBookName(bookName) {
   // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
-
   bookName = bookName.trim().toLowerCase();
 
   const foundBook = bookNameDictionary.booknames.find((book) => {
