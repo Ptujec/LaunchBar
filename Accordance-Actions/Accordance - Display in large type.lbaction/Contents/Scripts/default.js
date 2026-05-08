@@ -18,6 +18,9 @@ const AccordancePrefs = eval(
   File.readText('~/Library/Preferences/Accordance Preferences/General.apref'),
 )[0]; // For default translation & vers notation settings
 
+const accordanceDefaultSearchText =
+  AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+
 const bookNameDictionary = File.readJSON(
   Action.path + '/Contents/Resources/booknames.json',
 ); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
@@ -27,8 +30,7 @@ const textModulesPath =
 
 function run(argument) {
   const translation =
-    Action.preferences.translation ||
-    AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+    Action.preferences.translation || accordanceDefaultSearchText;
 
   if (LaunchBar.options.shiftKey) return settings();
 
@@ -79,7 +81,7 @@ function run(argument) {
   }
 }
 
-function getText(newArgument, argument, translation) {
+function getText(newArgument, argument, translation, isFallback = false) {
   let text = LaunchBar.executeAppleScript(
     `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
   ).trim();
@@ -88,8 +90,7 @@ function getText(newArgument, argument, translation) {
     trackFailedTranslation(newArgument, translation);
 
     const fallbackTranslation =
-      Action.preferences.fallbackTranslation ||
-      AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+      Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
 
     if (fallbackTranslation && translation !== fallbackTranslation) {
       // LaunchBar.displayNotification({
@@ -97,7 +98,17 @@ function getText(newArgument, argument, translation) {
       //   string: `The text is not available in "${translation}". Falling back to "${fallbackTranslation}"`,
       // });
 
-      return getText(newArgument, argument, fallbackTranslation);
+      return getText(newArgument, argument, fallbackTranslation, true);
+    }
+
+    // If fallback translation also failed, exclude it and clear the preference
+    if (isFallback) {
+      trackFailedFallbackTranslation(translation);
+      Action.preferences.fallbackTranslation = undefined;
+    }
+
+    if (accordanceDefaultSearchText) {
+      return getText(newArgument, argument, accordanceDefaultSearchText, true);
     }
 
     const response = LaunchBar.alert(
@@ -127,7 +138,9 @@ function getText(newArgument, argument, translation) {
   // Uppercase first character of query
   argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
-  const reference = `${argument} ${translationName}`;
+  let reference = `${argument} ${translationName}`;
+
+  if (isFallback) reference += ' (fallback)';
 
   display(text, reference);
 }
@@ -162,6 +175,10 @@ function replaceBookName(bookName) {
 }
 
 function settings() {
+  const fallbackTranslation =
+    Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, '') ||
+    accordanceDefaultSearchText;
+
   return [
     {
       title: 'Choose default translation'.localize(),
@@ -172,10 +189,10 @@ function settings() {
     {
       title: 'Choose fallback translation'.localize(),
       icon: 'bookTemplate',
-      label: Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, ''),
-      children: listTranslations({
-        mode: 'fallback',
-      }),
+      label: fallbackTranslation,
+      action: 'listTranslations',
+      actionArgument: { mode: 'fallback' },
+      actionReturnsItems: true,
     },
   ];
 }
@@ -184,6 +201,8 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   const translations = File.getDirectoryContents(textModulesPath);
   const failedTranslations =
     mode === 'lookup' ? getFailedTranslations(newArgument) : [];
+  const failedFallbackTranslations =
+    mode === 'fallback' ? getFailedFallbackTranslations() : [];
 
   return translations
     .map((translationFile) => {
@@ -207,11 +226,22 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
       }
 
       const isLastUsed = translation === Action.preferences.lastUsed;
-      const isDefault = translation === Action.preferences.translation;
-      const isFallback = translation === Action.preferences.fallbackTranslation;
+      const isDefault =
+        translation ===
+        (Action.preferences.translation || accordanceDefaultSearchText);
+      const isFallback =
+        translation ===
+        (Action.preferences.fallbackTranslation || accordanceDefaultSearchText);
       const isFailed = failedTranslations.includes(translation);
+      const isFailedFallback = failedFallbackTranslations.includes(translation);
 
       if (isFailed && mode === 'lookup') return null;
+      if (
+        isFailedFallback &&
+        mode === 'fallback' &&
+        !LaunchBar.options.commandKey
+      )
+        return null;
 
       const item = {
         title: translationName,
@@ -259,11 +289,14 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
 
 function setDefaultTranslation({ translation }) {
   Action.preferences.translation = translation;
-  return listTranslations({ mode: 'default' });
+  return settings();
 }
 
 function setFallbackTranslation({ translation }) {
   Action.preferences.fallbackTranslation = translation;
+  Action.preferences.failedFallbackTranslations = (
+    Action.preferences.failedFallbackTranslations || []
+  ).filter((t) => t !== translation);
   return listTranslations({ mode: 'fallback' });
 }
 
@@ -274,19 +307,31 @@ function setTranslation({ newArgument, argument, translation }) {
 
 function trackFailedTranslation(newArgument, translation) {
   const key = `failedTranslations_${newArgument}`;
-  let failed = Action.preferences[key] || [];
+  const failed = Action.preferences[key] || [];
   if (!failed.includes(translation)) {
-    failed.push(translation);
-    Action.preferences[key] = failed;
+    Action.preferences[key] = [...failed, translation];
   }
 }
 
 function getFailedTranslations(newArgument) {
-  const key = `failedTranslations_${newArgument}`;
-  return Action.preferences[key] || [];
+  return Action.preferences[`failedTranslations_${newArgument}`] || [];
 }
 
 function clearFailedTranslations(newArgument) {
-  const key = `failedTranslations_${newArgument}`;
-  delete Action.preferences[key];
+  delete Action.preferences[`failedTranslations_${newArgument}`];
+}
+
+function trackFailedFallbackTranslation(translation) {
+  const failed = Action.preferences.failedFallbackTranslations || [];
+  if (!failed.includes(translation)) {
+    Action.preferences.failedFallbackTranslations = [...failed, translation];
+  }
+}
+
+function getFailedFallbackTranslations() {
+  return Action.preferences.failedFallbackTranslations || [];
+}
+
+function clearFailedFallbackTranslations() {
+  delete Action.preferences.failedFallbackTranslations;
 }
