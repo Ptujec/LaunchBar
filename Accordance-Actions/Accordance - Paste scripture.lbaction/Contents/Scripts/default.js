@@ -18,6 +18,9 @@ const AccordancePrefs = eval(
   File.readText('~/Library/Preferences/Accordance Preferences/General.apref'),
 )[0]; // For default translation & vers notation settings
 
+const accordanceDefaultSearchText =
+  AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+
 const bookNameDictionary = File.readJSON(
   Action.path + '/Contents/Resources/booknames.json',
 ); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
@@ -27,8 +30,7 @@ const textModulesPath =
 
 function run(argument) {
   const translation =
-    Action.preferences.translation ||
-    AccordancePrefs['com.oaktree.settings.general.defaultsearchtext'];
+    Action.preferences.translation || accordanceDefaultSearchText;
 
   if (LaunchBar.options.shiftKey) {
     return settings();
@@ -238,18 +240,21 @@ function settings() {
         ? 'citationTemplate'
         : 'markdownTemplate';
 
+  const defaultTranslation =
+    Action.preferences.translation || accordanceDefaultSearchText;
+
   return [
     {
       title: 'Format'.localize(),
       // subtitle: 'Hit return to change!'.localize(),
       icon: formatIcon,
-      label: Action.preferences.format.localize() || 'plain'.localize(),
+      label: Action.preferences.format?.localize() || 'plain'.localize(),
       children: listFormats(),
     },
     {
       title: 'Choose default translation'.localize(),
       icon: 'bookTemplate',
-      label: Action.preferences.translation.replace(/°|-LEM/g, ''),
+      label: defaultTranslation?.replace(/°|-LEM/g, ''),
       children: listTranslations({ mode: 'default' }),
     },
     {
@@ -337,7 +342,9 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
       }
 
       const isLastUsed = translation === Action.preferences.lastUsed;
-      const isDefault = translation === Action.preferences.translation;
+      const isDefault =
+        translation ===
+        (Action.preferences.translation || accordanceDefaultSearchText);
       const isFailed = failedTranslations.includes(translation);
 
       if (isFailed && !isDefaultMode) return null;
@@ -382,19 +389,16 @@ function setTranslation({ newArgument, argument, translation }) {
 
 function trackFailedTranslation(newArgument, translation) {
   const key = `failedTranslations_${newArgument}`;
-  let failed = Action.preferences[key] || [];
+  const failed = Action.preferences[key] || [];
   if (!failed.includes(translation)) {
-    failed.push(translation);
-    Action.preferences[key] = failed;
+    Action.preferences[key] = [...failed, translation];
   }
 }
 
 function getFailedTranslations(newArgument) {
-  const key = `failedTranslations_${newArgument}`;
-  return Action.preferences[key] || [];
+  return Action.preferences[`failedTranslations_${newArgument}`] || [];
 }
 
 function clearFailedTranslations(newArgument) {
-  const key = `failedTranslations_${newArgument}`;
-  delete Action.preferences[key];
+  delete Action.preferences[`failedTranslations_${newArgument}`];
 }
