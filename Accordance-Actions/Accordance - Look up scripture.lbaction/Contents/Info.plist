@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Look up scripture</string>
 	<key>CFBundleVersion</key>
-	<string>4.5.2</string>
+	<string>4.5.3</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.OakTree.Accordance</string>
 	<key>LBDescription</key>
@@ -17,14 +17,14 @@
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>⌘⏎ = Choose translation
 
 This action is associated with Accordance. So you can run it by pressing space when the app is selected.
 </string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBUpdateURL</key>
 		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Accordance-Actions/Accordance%20-%20Look%20up%20scripture.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>

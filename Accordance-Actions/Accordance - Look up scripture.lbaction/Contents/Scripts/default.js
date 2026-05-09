@@ -1,4 +1,4 @@
-/* 
+/*
 Accordance Look Up Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-06-29
@@ -13,12 +13,14 @@ The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
 
+String.prototype.localizationTable = 'default';
+
 const AccordancePrefs = eval(
-  File.readText('~/Library/Preferences/Accordance Preferences/General.apref')
+  File.readText('~/Library/Preferences/Accordance Preferences/General.apref'),
 )[0]; // For default translation & vers notation settings
 
 const bookNameDictionary = File.readJSON(
-  Action.path + '/Contents/Resources/booknames.json'
+  `${Action.path}/Contents/Resources/booknames.json`,
 ); // Currently contains German and Slovene names. You could expand it with your language by adding the relevant names to the "alt" array.
 
 const textModulesPath =
@@ -26,12 +28,11 @@ const textModulesPath =
 
 function run(argument) {
   argument = argument.trim();
+  let newArgument;
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
     AccordancePrefs['com.oaktree.settings.general.useeuropeanversenotation'];
-
-  let newArgument;
 
   if (num == 0) {
     // Default Vers Notation
@@ -52,7 +53,7 @@ function run(argument) {
     // convert book names
     newArgument = argument.replace(
       /([a-zžščöäüß]+(?: [a-zžščöäüß]+)?)/gi,
-      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1)
+      (match, p1) => (p1 != 'f' && p1 != 'ff' ? replaceBookName(p1) : p1),
     );
 
     // more clean up for accordance and special treatment for the pentateuch
@@ -66,7 +67,103 @@ function run(argument) {
       .replace(/5 ?Moses/, 'Deuteronomy');
   }
 
-  return lookUpOptions(newArgument, argument);
+  return lookUpOptions(newArgument, argument, num);
+}
+
+function lookUpOptions(newArgument, argument, num) {
+  if (LaunchBar.options.commandKey) {
+    return chooseTranslation(newArgument, argument);
+  }
+
+  LaunchBar.hide();
+
+  const chapterVerseSeparator = num == 0 ? ',' : ':';
+
+  // Smart options - choosing between read and research based on input
+  if (
+    newArgument.endsWith('f') ||
+    newArgument.includes('-') ||
+    newArgument.includes('–') ||
+    newArgument.includes(';') ||
+    !newArgument.includes(chapterVerseSeparator)
+  ) {
+    LaunchBar.openURL(`accord://read?${encodeURI(newArgument)}`);
+    return;
+  }
+
+  // UI language check
+  const accPlist = File.readPlist(
+    '~/Library/Preferences/com.OakTree.Accordance.plist',
+  );
+  let lang = accPlist.AppleLanguages;
+
+  if (!lang) {
+    const globalPlist = File.readPlist(
+      '/Library/Preferences/.GlobalPreferences.plist',
+    );
+    lang = globalPlist.AppleLanguages;
+  }
+
+  const allTextSetting = lang[0]?.startsWith('de')
+    ? '[Alle_Texte];Verses?'
+    : '[All_Texts];Verses?';
+
+  LaunchBar.openURL(
+    `accord://research/${allTextSetting}${encodeURI(newArgument)}`,
+  );
+}
+
+function chooseTranslation(newArgument, argument) {
+  const translations = File.getDirectoryContents(textModulesPath);
+
+  return translations
+    .map((translationFile) => {
+      const [translation, extension] = translationFile.split('.');
+
+      let translationName;
+      if (extension === 'atext') {
+        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
+        if (!File.exists(plistPath)) {
+          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        }
+        const plist = File.readPlist(plistPath);
+        translationName =
+          plist['com.oaktree.module.humanreadablename'] ??
+          plist['com.oaktree.module.fullmodulename'] ??
+          translation.trim().replace('°', '');
+      } else {
+        translationName = translation.trim().replace('°', '');
+      }
+
+      const item = {
+        title: translationName,
+        subtitle: argument,
+        alwaysShowsSubtitle: true,
+        action: 'lookupInTranslation',
+        actionArgument: { translation, newArgument },
+        icon: 'bookTemplate',
+      };
+
+      if (translation === Action.preferences.lastUsed) {
+        item.badge = 'recent'.localize();
+      }
+
+      return item;
+    })
+    .sort((a, b) => {
+      if (a.badge) return -1;
+      if (b.badge) return 1;
+      return a.title.localeCompare(b.title);
+    });
+}
+
+function lookupInTranslation({ translation, newArgument }) {
+  Action.preferences.lastUsed = translation;
+
+  LaunchBar.hide();
+  LaunchBar.openURL(
+    `accord://read/${encodeURI(translation)}?${encodeURI(newArgument)}`,
+  );
 }
 
 function replaceBookName(bookName) {
@@ -88,109 +185,4 @@ function replaceBookName(bookName) {
   if (foundBook) bookName = foundBook.english;
 
   return bookName;
-}
-
-function lookUpOptions(newArgument, argument) {
-  // UI language check
-  const accPlist = File.readPlist(
-    '~/Library/Preferences/com.OakTree.Accordance.plist'
-  );
-  let lang = accPlist.AppleLanguages;
-
-  if (lang) {
-    lang = lang.toString();
-  } else {
-    const globalPlist = File.readPlist(
-      '/Library/Preferences/.GlobalPreferences.plist'
-    );
-    lang = globalPlist.AppleLanguages.toString();
-  }
-
-  let allTextSetting = lang.startsWith('de')
-    ? '[Alle_Texte];Verses?'
-    : '[All_Texts];Verses?';
-
-  // Choose translation
-  if (LaunchBar.options.commandKey) {
-    return chooseTranslation(newArgument, argument);
-  }
-
-  LaunchBar.hide();
-
-  // Smart options - choosing between read and research based on input
-  if (
-    newArgument.endsWith('f') ||
-    newArgument.includes('-') ||
-    newArgument.includes('–') ||
-    newArgument.includes(';') ||
-    !newArgument.includes(',')
-  ) {
-    LaunchBar.openURL('accord://read?' + encodeURI(newArgument));
-  } else {
-    LaunchBar.openURL(
-      'accord://research/' + allTextSetting + encodeURI(newArgument)
-    );
-  }
-}
-
-function chooseTranslation(newArgument, argument) {
-  const translations = File.getDirectoryContents(textModulesPath);
-
-  let lastUsedTranslation = [];
-  let rest = [];
-
-  translations.map((translationFile) => {
-    const translation = translationFile.split('.')[0];
-    const extension = translationFile.split('.')[1];
-
-    let translationName;
-    if (extension == 'atext') {
-      let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-      if (!File.exists(plistPath)) {
-        plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
-      }
-
-      const plist = File.readPlist(plistPath);
-      translationName =
-        plist['com.oaktree.module.humanreadablename'] ||
-        plist['com.oaktree.module.fullmodulename'] ||
-        translation.trim().replace('°', '');
-    } else {
-      translationName = translation.trim().replace('°', '');
-    }
-
-    const pushContent = {
-      title: translationName,
-      subtitle: argument,
-      alwaysShowsSubtitle: true,
-      action: 'lookupInTranslation',
-      actionArgument: {
-        translation: translation,
-        newArgument: newArgument,
-      },
-      icon: 'bookTemplate',
-    };
-
-    const isLastUsed = translation === Action.preferences.lastUsed;
-
-    if (isLastUsed) {
-      pushContent.badge = 'recent';
-      lastUsedTranslation.push(pushContent);
-    } else {
-      rest.push(pushContent);
-    }
-  });
-
-  rest.sort((a, b) => a.title.localeCompare(b.title));
-
-  return lastUsedTranslation.concat(rest);
-}
-
-function lookupInTranslation({ translation, newArgument }) {
-  Action.preferences.lastUsed = translation;
-
-  LaunchBar.hide();
-  LaunchBar.openURL(
-    'accord://read/' + encodeURI(translation) + '?' + encodeURI(newArgument)
-  );
 }
