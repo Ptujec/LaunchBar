@@ -135,20 +135,19 @@ function chooseTranslation(newArgument, argument) {
         translationName = translation.trim().replace('°', '');
       }
 
-      const item = {
+      const badge =
+        translation === Action.preferences.lastUsed
+          ? 'recent'.localize()
+          : undefined;
+
+      return {
         title: translationName,
         subtitle: argument,
-        alwaysShowsSubtitle: true,
         action: 'lookupInTranslation',
         actionArgument: { translation, newArgument },
+        badge,
         icon: 'bookTemplate',
       };
-
-      if (translation === Action.preferences.lastUsed) {
-        item.badge = 'recent'.localize();
-      }
-
-      return item;
     })
     .sort((a, b) => {
       if (a.badge) return -1;
