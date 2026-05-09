@@ -1,15 +1,13 @@
 /*
 Accordance Paste Text Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-09-03
+2026-05-08
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Sources:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
-
-TODO: Refactor (functions and such)
 */
 
 String.prototype.localizationTable = 'default';
@@ -32,9 +30,7 @@ function run(argument) {
   const translation =
     Action.preferences.translation || accordanceDefaultSearchText;
 
-  if (LaunchBar.options.shiftKey) {
-    return settings();
-  }
+  if (LaunchBar.options.shiftKey) return settings();
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
@@ -48,7 +44,6 @@ function run(argument) {
   } else {
     // European Vers Notation
     argument = argument
-      // argument clean up
       .trim()
       .replace(/\(|\)/g, '') // remove brackets
       .replace(/\s+/g, ' '); // remove multiple spaces
@@ -75,11 +70,9 @@ function run(argument) {
       .replace(/5 ?Moses/, 'Deuteronomy');
   }
 
-  if (LaunchBar.options.commandKey) {
-    return listTranslations({ newArgument, argument, mode: 'lookup' });
-  } else {
-    return getText(newArgument, argument, translation);
-  }
+  return LaunchBar.options.commandKey
+    ? listTranslations({ newArgument, argument, mode: 'lookup' })
+    : getText(newArgument, argument, translation);
 }
 
 function getText(newArgument, argument, translation) {
@@ -92,8 +85,7 @@ function getText(newArgument, argument, translation) {
 
     const response = LaunchBar.alert(
       'Error!',
-      text +
-        `\nTry picking a different translation than "${translation}" or check your query.`,
+      `${text}\nTry picking a different translation than "${translation}" or check your query.`,
       'Ok',
       'Cancel'.localize(),
     );
@@ -162,10 +154,11 @@ function paste(text, reference) {
 }
 
 function pasteInWriter(text) {
-  LaunchBar.setClipboardString(text);
-
   // TODO: Implement in Settings
   // const authorName = Action.preferences.iaAuthor;
+
+  LaunchBar.setClipboardString(text);
+
   const authorName = 'Accordance';
   const pasteEditsFromMenu =
     'menu 1 of menu item 10 of menu 4 of menu bar 1 of application process "iA Writer"';
@@ -315,55 +308,56 @@ function setFormat(format) {
 }
 
 function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
-  const isDefaultMode = mode === 'default';
   const translations = File.getDirectoryContents(textModulesPath);
   const failedTranslations =
     mode === 'lookup' ? getFailedTranslations(newArgument) : [];
+  const defaultPref =
+    Action.preferences.translation || accordanceDefaultSearchText;
 
   return translations
     .map((translationFile) => {
-      const translation = translationFile.split('.')[0];
-      const extension = translationFile.split('.')[1];
+      const [translation, extension] = translationFile.split('.');
+      let translationName = translation.trim().replace('°', '');
 
-      let translationName;
-      if (extension == 'atext') {
-        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-        if (!File.exists(plistPath)) {
-          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
-        }
-
+      if (extension === 'atext') {
+        const plistPath = File.exists(
+          `${textModulesPath}${translation}.atext/Info.plist`,
+        )
+          ? `${textModulesPath}${translation}.atext/Info.plist`
+          : `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
         const plist = File.readPlist(plistPath);
         translationName =
-          plist['com.oaktree.module.humanreadablename'] ||
-          plist['com.oaktree.module.fullmodulename'] ||
-          translation.trim().replace('°', '');
-      } else {
-        translationName = translation.trim().replace('°', '');
+          plist['com.oaktree.module.humanreadablename'] ??
+          plist['com.oaktree.module.fullmodulename'] ??
+          translationName;
       }
 
       const isLastUsed = translation === Action.preferences.lastUsed;
-      const isDefault =
-        translation ===
-        (Action.preferences.translation || accordanceDefaultSearchText);
+      const isDefault = translation === defaultPref;
       const isFailed = failedTranslations.includes(translation);
 
-      if (isFailed && !isDefaultMode) return null;
+      if (isFailed && mode === 'lookup') {
+        return null;
+      }
+
+      const isSelected = mode === 'default' && isDefault;
+      const actionsByMode = {
+        default: 'setDefaultTranslation',
+        lookup: 'setTranslation',
+      };
+      const prioritiesByMode = {
+        default: isSelected ? 1 : 2,
+        lookup: isLastUsed ? 0 : 2,
+      };
 
       const item = {
         title: translationName,
-        subtitle: argument,
-        // alwaysShowsSubtitle: true,
-        action: isDefaultMode ? 'setDefaultTranslation' : 'setTranslation',
-        actionArgument: {
-          newArgument: newArgument,
-          argument: argument,
-          translation: translation,
-        },
-        icon:
-          isDefault && isDefaultMode ? 'selectedBookTemplate' : 'bookTemplate',
-        ...(isLastUsed && !isDefaultMode && { badge: 'recent'.localize() }),
-        priority:
-          isLastUsed && !isDefaultMode ? 0 : isDefault && isDefaultMode ? 1 : 2,
+        ...(mode === 'lookup' && argument && { subtitle: argument }),
+        action: actionsByMode[mode],
+        actionArgument: { newArgument, argument, translation },
+        icon: isSelected ? 'selectedBookTemplate' : 'bookTemplate',
+        ...(mode === 'lookup' && isLastUsed && { badge: 'recent'.localize() }),
+        priority: prioritiesByMode[mode],
       };
 
       return item;
