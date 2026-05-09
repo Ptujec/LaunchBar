@@ -77,7 +77,7 @@ function lookUpOptions(newArgument, argument, num) {
 
   LaunchBar.hide();
 
-  const chapterVerseSeparator = num == 0 ? ',' : ':';
+  const chapterVerseSeparator = num == 0 ? ':' : ',';
 
   // Smart options - choosing between read and research based on input
   if (
