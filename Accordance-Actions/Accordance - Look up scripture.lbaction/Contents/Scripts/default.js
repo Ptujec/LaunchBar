@@ -91,20 +91,7 @@ function lookUpOptions(newArgument, argument, num) {
     return;
   }
 
-  // UI language check
-  const accPlist = File.readPlist(
-    '~/Library/Preferences/com.OakTree.Accordance.plist',
-  );
-  let lang = accPlist.AppleLanguages;
-
-  if (!lang) {
-    const globalPlist = File.readPlist(
-      '/Library/Preferences/.GlobalPreferences.plist',
-    );
-    lang = globalPlist.AppleLanguages;
-  }
-
-  const allTextSetting = lang[0]?.startsWith('de')
+  const allTextSetting = getUILanguage().startsWith('de')
     ? '[Alle_Texte];Verses?'
     : '[All_Texts];Verses?';
 
@@ -184,4 +171,20 @@ function replaceBookName(bookName) {
   if (foundBook) bookName = foundBook.english;
 
   return bookName;
+}
+
+function getUILanguage() {
+  const accPlist = File.readPlist(
+    '~/Library/Preferences/com.OakTree.Accordance.plist',
+  );
+  let lang = accPlist.AppleLanguages;
+
+  if (!lang) {
+    const globalPlist = File.readPlist(
+      '/Library/Preferences/.GlobalPreferences.plist',
+    );
+    lang = globalPlist.AppleLanguages;
+  }
+
+  return lang?.[0] || 'en';
 }
