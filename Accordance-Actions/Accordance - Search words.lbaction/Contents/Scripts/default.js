@@ -1,7 +1,7 @@
-/* 
+/*
 Accordance Search words Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-06-29
+2026-05-09
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -20,16 +20,15 @@ const textModulesPath =
 function run(argument) {
   // Mode (search or research)
   if (argument.includes('#') || LaunchBar.options.commandKey) {
-    if (LaunchBar.options.commandKey) {
-      return chooseTranslation(argument);
-    } else {
-      let query = searchOptions(argument);
-      LaunchBar.openURL('accord://search;Words?' + encodeURI(query));
-    }
+    if (LaunchBar.options.commandKey) return chooseTranslation(argument);
+
+    LaunchBar.openURL(
+      `accord://search;Words?${encodeURI(searchOptions(argument))}`,
+    );
     return;
   }
 
-  let allSetting = getLanguage().startsWith('de') ? '[Alle]' : '[All]';
+  const allSetting = getUILanguage().startsWith('de') ? '[Alle]' : '[All]';
 
   // Fix for Slovene Unicode Characters (German Umlaute seem to be ok)
   const substrings = ['č', 'ž', 'š', 'Č', 'Ž', 'Š'];
@@ -37,31 +36,17 @@ function run(argument) {
     ? ';Unicode?'
     : '?';
 
-  const query = searchOptions(argument);
-
   LaunchBar.openURL(
-    'accord://research/' + allSetting + suffix + encodeURI(query)
+    `accord://research/${allSetting}${suffix}${encodeURI(searchOptions(argument))}`,
   );
-}
-
-function getLanguage() {
-  const accPlist = File.readPlist(
-    '~/Library/Preferences/com.OakTree.Accordance.plist'
-  );
-  let lang = accPlist.AppleLanguages;
-  if (!lang) {
-    const globalPlist = File.readPlist(
-      '/Library/Preferences/.GlobalPreferences.plist'
-    );
-    lang = globalPlist.AppleLanguages.toString();
-  }
-  return lang.toString();
 }
 
 function searchOptions(argument) {
-  // Search options:
-  // A = <AND>, O = <OR>, N = <NOT>
-  query = argument
+  /*
+  Search options:
+  A = <AND>, O = <OR>, N = <NOT>
+  */
+  let query = argument
     .trim()
     .replace(/(:)\s+/, '$1')
     .replace(/\s+(#)/, '$1')
@@ -70,72 +55,76 @@ function searchOptions(argument) {
     .replace(/\sN\s/g, '<NOT>');
 
   // Replace spaces with <AND> except if the query is in quotation marks
-  if (!query.includes('"')) {
-    query = query.replace(/\s/g, '<AND>');
-  }
+  if (!query.includes('"')) query = query.replace(/\s/g, '<AND>');
+
   return query;
 }
 
 function chooseTranslation(argument) {
   const translations = File.getDirectoryContents(textModulesPath);
 
-  let lastUsedTranslation = [];
-  let rest = [];
+  return translations
+    .map((translationFile) => {
+      const [translation, extension] = translationFile.split('.');
 
-  translations.map((translationFile) => {
-    const translation = translationFile.split('.')[0];
-    const extension = translationFile.split('.')[1];
-
-    let translationName;
-    if (extension == 'atext') {
-      let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-      if (!File.exists(plistPath)) {
-        plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+      let translationName;
+      if (extension === 'atext') {
+        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
+        if (!File.exists(plistPath)) {
+          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
+        }
+        const plist = File.readPlist(plistPath);
+        translationName =
+          plist['com.oaktree.module.humanreadablename'] ??
+          plist['com.oaktree.module.fullmodulename'] ??
+          translation.trim().replace('°', '');
+      } else {
+        translationName = translation.trim().replace('°', '');
       }
 
-      const plist = File.readPlist(plistPath);
-      translationName =
-        plist['com.oaktree.module.humanreadablename'] ||
-        plist['com.oaktree.module.fullmodulename'] ||
-        translation.trim().replace('°', '');
-    } else {
-      translationName = translation.trim().replace('°', '');
-    }
+      const badge =
+        translation === Action.preferences.lastUsed
+          ? 'recent'.localize()
+          : undefined;
 
-    const pushContent = {
-      title: translationName,
-      subtitle: argument,
-      alwaysShowsSubtitle: true,
-      action: 'searchInTranslation',
-      actionArgument: {
-        translation: translation,
-        argument: argument,
-      },
-      icon: 'bookTemplate',
-    };
+      return {
+        title: translationName,
+        subtitle: argument,
+        action: 'searchInTranslation',
+        actionArgument: { translation, argument },
+        badge,
+        icon: 'bookTemplate',
+      };
+    })
 
-    const isLastUsed = translation === Action.preferences.lastUsed;
-
-    if (isLastUsed) {
-      pushContent.badge = 'recent';
-      lastUsedTranslation.push(pushContent);
-    } else {
-      rest.push(pushContent);
-    }
-  });
-
-  rest.sort((a, b) => a.title.localeCompare(b.title));
-
-  return lastUsedTranslation.concat(rest);
+    .sort((a, b) => {
+      if (a.badge) return -1;
+      if (b.badge) return 1;
+      return a.title.localeCompare(b.title);
+    });
 }
 
 function searchInTranslation({ translation, argument }) {
   Action.preferences.lastUsed = translation;
 
-  let query = searchOptions(argument);
-
   LaunchBar.hide();
   LaunchBar.openURL(
-    'accord://search/' + encodeURI(translation) + ';Words?' + encodeURI(query)
+    `accord://search/${encodeURI(translation)};Words?${encodeURI(searchOptions(argument))}`, // NOTE: does not handle šumnike correctly … I reported this here: https://support.accordancebible.com/hc/en-us/community/posts/50159326235803-Issue-with-Slovene-unicode-characters-in-search-url
   );
+}
+
+function getUILanguage() {
+  const accPlist = File.readPlist(
+    '~/Library/Preferences/com.OakTree.Accordance.plist',
+  );
+  let lang = accPlist.AppleLanguages;
+
+  if (!lang) {
+    const globalPlist = File.readPlist(
+      '/Library/Preferences/.GlobalPreferences.plist',
+    );
+    lang = globalPlist.AppleLanguages;
+  }
+
+  return lang?.[0] || 'en';
 }

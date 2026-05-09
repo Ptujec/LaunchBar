@@ -9,17 +9,17 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Search words</string>
 	<key>CFBundleVersion</key>
-	<string>5.4.5</string>
+	<string>5.4.6</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
 		<string>Christian Bender</string>
 		<key>LBEmail</key>
-		<string>ptujec@me.com</string>
+		<string></string>
 		<key>LBSummary</key>
 		<string>A = AND, O = OR, N = NOT, Exact search with \"\", ⌘⏎ = Choose translation</string>
 		<key>LBTwitter</key>
-		<string>@ptujec</string>
+		<string></string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Accordance-Actions#search-words</string>
 		<key>LBUpdateURL</key>
