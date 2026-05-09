@@ -209,77 +209,66 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
     mode === 'lookup' ? getFailedTranslations(newArgument) : [];
   const failedFallbackTranslations =
     mode === 'fallback' ? getFailedFallbackTranslations() : [];
+  const defaultPref =
+    Action.preferences.translation || accordanceDefaultSearchText;
+  const fallbackPref =
+    Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
 
   return translations
     .map((translationFile) => {
-      const translation = translationFile.split('.')[0];
-      const extension = translationFile.split('.')[1];
+      const [translation, extension] = translationFile.split('.');
+      let translationName = translation.trim().replace('°', '');
 
-      let translationName;
-      if (extension == 'atext') {
-        let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
-        if (!File.exists(plistPath)) {
-          plistPath = `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
-        }
-
+      if (extension === 'atext') {
+        const plistPath = File.exists(
+          `${textModulesPath}${translation}.atext/Info.plist`,
+        )
+          ? `${textModulesPath}${translation}.atext/Info.plist`
+          : `${textModulesPath}${translation}.atext/ExtraInfo.plist`;
         const plist = File.readPlist(plistPath);
         translationName =
-          plist['com.oaktree.module.humanreadablename'] ||
-          plist['com.oaktree.module.fullmodulename'] ||
-          translation.trim().replace('°', '');
-      } else {
-        translationName = translation.trim().replace('°', '');
+          plist['com.oaktree.module.humanreadablename'] ??
+          plist['com.oaktree.module.fullmodulename'] ??
+          translationName;
       }
 
       const isLastUsed = translation === Action.preferences.lastUsed;
-      const isDefault =
-        translation ===
-        (Action.preferences.translation || accordanceDefaultSearchText);
-      const isFallback =
-        translation ===
-        (Action.preferences.fallbackTranslation || accordanceDefaultSearchText);
+      const isDefault = translation === defaultPref;
+      const isFallback = translation === fallbackPref;
       const isFailed = failedTranslations.includes(translation);
       const isFailedFallback = failedFallbackTranslations.includes(translation);
 
-      if (isFailed && mode === 'lookup') return null;
       if (
-        isFailedFallback &&
-        mode === 'fallback' &&
-        !LaunchBar.options.commandKey
-      )
+        (isFailed && mode === 'lookup') ||
+        (isFailedFallback &&
+          mode === 'fallback' &&
+          !LaunchBar.options.commandKey)
+      ) {
         return null;
+      }
+
+      const isSelected =
+        (mode === 'default' && isDefault) ||
+        (mode === 'fallback' && isFallback);
+      const actionsByMode = {
+        default: 'setDefaultTranslation',
+        fallback: 'setFallbackTranslation',
+        lookup: 'setTranslation',
+      };
+      const prioritiesByMode = {
+        default: isSelected ? 1 : 2,
+        fallback: isSelected ? 1 : 2,
+        lookup: isLastUsed ? 0 : 2,
+      };
 
       const item = {
         title: translationName,
-        ...(mode === 'lookup' &&
-          // argument && { subtitle: argument, alwaysShowsSubtitle: true }),
-          argument && { subtitle: argument }),
-        action:
-          mode === 'default'
-            ? 'setDefaultTranslation'
-            : mode === 'fallback'
-              ? 'setFallbackTranslation'
-              : 'setTranslation',
-        actionArgument: {
-          newArgument: newArgument,
-          argument: argument,
-          translation: translation,
-        },
-        icon:
-          (mode === 'default' && isDefault) ||
-          (mode === 'fallback' && isFallback)
-            ? 'selectedBookTemplate'
-            : 'bookTemplate',
+        ...(mode === 'lookup' && argument && { subtitle: argument }),
+        action: actionsByMode[mode],
+        actionArgument: { newArgument, argument, translation },
+        icon: isSelected ? 'selectedBookTemplate' : 'bookTemplate',
         ...(mode === 'lookup' && isLastUsed && { badge: 'recent'.localize() }),
-        priority:
-          mode === 'lookup'
-            ? isLastUsed
-              ? 0
-              : 2
-            : (mode === 'default' && isDefault) ||
-                (mode === 'fallback' && isFallback)
-              ? 1
-              : 2,
+        priority: prioritiesByMode[mode],
       };
 
       return item;
