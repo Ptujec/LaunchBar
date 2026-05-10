@@ -1,4 +1,5 @@
 "Format" = "Formatierung";
+"Format by App" = "Formatierung per App";
 "Paste unformatted" = "Einfach einfügen";
 "Paste with quotations" = "Als Zitat einfügen";
 "Paste as markdown quote" = "Als Markdown Zitat einfügen";
@@ -13,3 +14,4 @@
 "plain" = "Einfach";
 "citation" = "Zitat";
 "markdown" = "Markdown";
+"Default" = "Standard";

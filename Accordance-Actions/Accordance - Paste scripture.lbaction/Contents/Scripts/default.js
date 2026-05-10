@@ -26,6 +26,8 @@ const bookNameDictionary = File.readJSON(
 const textModulesPath =
   '~/Library/Application Support/Accordance/Modules/Texts/';
 
+const fallbackFormat = 'plain';
+
 function run(argument) {
   const translation =
     Action.preferences.translation || accordanceDefaultSearchText;
@@ -117,25 +119,20 @@ function getText(newArgument, argument, translation) {
 function paste(text, reference) {
   LaunchBar.hide();
 
-  let format = Action.preferences.format;
+  const frontmostAppID = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
+
+  // Get format: first check app-specific format, then fall back to default format
+  const appFormats = Action.preferences.appFormats || {};
+  let format = appFormats[frontmostAppID] || Action.preferences.format;
+
   let formattedText = `${text} (${reference})`;
 
   formattedText =
     format === 'markdown'
       ? `> ${formattedText}`
       : format === 'citation'
-        ? `"${text}" ${reference}`
+        ? `“${text}” (${reference})`
         : formattedText;
-
-  const frontmostAppID = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
-
-  if (frontmostAppID === 'pro.writer.mac') {
-    formattedText = `> ${text} (${reference})`;
-  }
-
-  if (frontmostAppID === 'com.ideasoncanvas.mindnode') {
-    formattedText = `${text} (${reference})`;
-  }
 
   if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iawriter) {
     return pasteInWriter(formattedText);
@@ -224,31 +221,40 @@ function replaceBookName(bookName) {
   return bookName;
 }
 
+// SETTINGS
+
 function settings() {
   const formatIcon =
-    Action.preferences.format == undefined ||
-    Action.preferences.format == 'plain'
-      ? 'plainTemplate'
-      : Action.preferences.format == 'citation'
-        ? 'citationTemplate'
-        : 'markdownTemplate';
+    Action.preferences.format == undefined
+      ? `${fallbackFormat}Template`
+      : `${Action.preferences.format}Template`;
 
   const defaultTranslation =
     Action.preferences.translation || accordanceDefaultSearchText;
 
+  const appFormatsCount = Action.preferences.appFormats
+    ? String(Object.keys(Action.preferences.appFormats ?? {}).length)
+    : undefined;
+
   return [
-    {
-      title: 'Format'.localize(),
-      // subtitle: 'Hit return to change!'.localize(),
-      icon: formatIcon,
-      label: Action.preferences.format?.localize() || 'plain'.localize(),
-      children: listFormats(),
-    },
     {
       title: 'Choose default translation'.localize(),
       icon: 'bookTemplate',
-      label: defaultTranslation?.replace(/°|-LEM/g, ''),
+      badge: defaultTranslation?.replace(/°|-LEM/g, ''),
       children: listTranslations({ mode: 'default' }),
+    },
+    {
+      title: 'Format'.localize(),
+      icon: formatIcon,
+      badge: Action.preferences.format?.localize() ?? 'plain'.localize(),
+      children: listFormats(),
+    },
+    {
+      title: 'Format by App'.localize(),
+      icon: 'appsTemplate',
+      badge: appFormatsCount,
+      action: 'showAppList',
+      actionReturnsItems: true,
     },
     {
       title: 'Use Keynote Paste'.localize(),
@@ -269,43 +275,7 @@ function settings() {
   ];
 }
 
-function toggleKeynotePaste() {
-  Action.preferences.keynote = !Action.preferences.keynote;
-  return settings();
-}
-
-function toggleIWriterPaste() {
-  Action.preferences.iawriter = !Action.preferences.iawriter;
-  return settings();
-}
-
-function listFormats() {
-  return [
-    {
-      title: 'Paste unformatted'.localize(),
-      icon: 'plainTemplate',
-      action: 'setFormat',
-      actionArgument: 'plain',
-    },
-    {
-      title: 'Paste with quotations'.localize(),
-      icon: 'citationTemplate',
-      action: 'setFormat',
-      actionArgument: 'citation',
-    },
-    {
-      title: 'Paste as markdown quote'.localize(),
-      icon: 'markdownTemplate',
-      action: 'setFormat',
-      actionArgument: 'markdown',
-    },
-  ];
-}
-
-function setFormat(format) {
-  Action.preferences.format = format;
-  return settings();
-}
+// Translations
 
 function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   const translations = File.getDirectoryContents(textModulesPath);
@@ -395,4 +365,128 @@ function getFailedTranslations(newArgument) {
 
 function clearFailedTranslations(newArgument) {
   delete Action.preferences[`failedTranslations_${newArgument}`];
+}
+
+// Formatting & Paste Options
+
+function toggleKeynotePaste() {
+  Action.preferences.keynote = !Action.preferences.keynote;
+  return settings();
+}
+
+function toggleIWriterPaste() {
+  Action.preferences.iawriter = !Action.preferences.iawriter;
+  return settings();
+}
+
+function listFormats() {
+  return [
+    {
+      title: 'Paste unformatted'.localize(),
+      icon: 'plainTemplate',
+      action: 'setFormat',
+      actionArgument: 'plain',
+    },
+    {
+      title: 'Paste with quotations'.localize(),
+      icon: 'citationTemplate',
+      action: 'setFormat',
+      actionArgument: 'citation',
+    },
+    {
+      title: 'Paste as markdown quote'.localize(),
+      icon: 'markdownTemplate',
+      action: 'setFormat',
+      actionArgument: 'markdown',
+    },
+  ];
+}
+
+function setFormat(format) {
+  Action.preferences.format = format;
+  return settings();
+}
+
+function showAppList() {
+  const basePath = '/Applications/';
+  const dirContents = File.getDirectoryContents(basePath);
+
+  return dirContents
+    .map((item) => {
+      const fullPath = basePath + item;
+      if (item.endsWith('.app') && File.isDirectory(fullPath)) return fullPath;
+
+      if (File.isDirectory(fullPath)) {
+        const appItem = File.getDirectoryContents(fullPath).find((sub) =>
+          sub.endsWith('.app'),
+        );
+        return appItem ? `${fullPath}/${appItem}` : null;
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .map((path) => {
+      const title = File.displayName(path).replace('.app', '');
+      const infoPlistPath = `${path}/Contents/Info.plist`;
+
+      if (!File.exists(infoPlistPath)) return null;
+
+      const infoPlist = File.readPlist(infoPlistPath);
+      const {
+        LSUIElement: agentApp,
+        CFBundleIdentifier: appID,
+        CFBundleDocumentTypes: documentTypes = [],
+      } = infoPlist;
+
+      LaunchBar.log(appID, JSON.stringify(documentTypes));
+      const canHandleText = documentTypes.some((docType) => {
+        const name = docType.CFBundleTypeName?.toLowerCase() || '';
+        return (
+          name.includes('text') ||
+          name.includes('mail') ||
+          name.includes('document')
+        );
+      });
+
+      const appFormat = Action.preferences.appFormats[appID];
+
+      if (!agentApp && appID && canHandleText) {
+        return {
+          title,
+          badge: appFormat?.localize() ?? undefined,
+          icon: appID,
+          action: 'showFormatOptionsForApp',
+          actionArgument: appID,
+          actionReturnsItems: true,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => !!b.badge - !!a.badge || a.title.localeCompare(b.title));
+}
+
+function showFormatOptionsForApp(appID) {
+  const formats = listFormats();
+  return [
+    ...formats.map((format) => ({
+      ...format,
+      title: format.title,
+      action: 'setFormatForApp',
+      actionArgument: { appID, format: format.actionArgument },
+    })),
+    {
+      title: 'Default'.localize(),
+      icon: 'resetTemplate',
+      action: 'setFormatForApp',
+      actionArgument: { appID, format: undefined },
+    },
+  ];
+}
+
+function setFormatForApp({ appID, format }) {
+  const appFormats = Action.preferences.appFormats || {};
+  appFormats[appID] = format;
+  Action.preferences.appFormats = appFormats;
+  return showAppList();
 }
