@@ -306,9 +306,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
       const isDefault = translation === defaultPref;
       const isFailed = failedTranslations.includes(translation);
 
-      if (isFailed && mode === 'lookup') {
-        return null;
-      }
+      if (isFailed && mode === 'lookup') return;
 
       const isSelected = mode === 'default' && isDefault;
       const actionsByMode = {
@@ -332,7 +330,6 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
 
       return item;
     })
-    .filter((item) => item !== null)
     .sort((a, b) =>
       a.priority !== b.priority
         ? a.priority - b.priority
@@ -414,22 +411,22 @@ function showAppList() {
   return dirContents
     .map((item) => {
       const fullPath = basePath + item;
-      if (item.endsWith('.app') && File.isDirectory(fullPath)) return fullPath;
+      if (item.endsWith('.app') && File.isDirectory(fullPath)) {
+        return fullPath;
+      }
 
       if (File.isDirectory(fullPath)) {
         const appItem = File.getDirectoryContents(fullPath).find((sub) =>
           sub.endsWith('.app'),
         );
-        return appItem ? `${fullPath}/${appItem}` : null;
+        return appItem ? `${fullPath}/${appItem}` : undefined;
       }
-      return null;
     })
-    .filter(Boolean)
     .map((path) => {
       const title = File.displayName(path).replace('.app', '');
       const infoPlistPath = `${path}/Contents/Info.plist`;
 
-      if (!File.exists(infoPlistPath)) return null;
+      if (!File.exists(infoPlistPath)) return;
 
       const infoPlist = File.readPlist(infoPlistPath);
       const {
@@ -460,9 +457,7 @@ function showAppList() {
           actionReturnsItems: true,
         };
       }
-      return null;
     })
-    .filter(Boolean)
     .sort((a, b) => !!b.badge - !!a.badge || a.title.localeCompare(b.title));
 }
 
@@ -476,7 +471,7 @@ function showFormatOptionsForApp(appID) {
       actionArgument: { appID, format: format.actionArgument },
     })),
     {
-      title: 'Default'.localize(),
+      title: 'Reset to default'.localize(),
       icon: 'resetTemplate',
       action: 'setFormatForApp',
       actionArgument: { appID, format: undefined },
