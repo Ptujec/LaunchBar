@@ -121,29 +121,29 @@ function paste(text, reference) {
 
   const frontmostAppID = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
 
-  // Get format: first check app-specific format, then fall back to default format
-  const appFormats = Action.preferences.appFormats || {};
-  let format = appFormats[frontmostAppID] || Action.preferences.format;
-
-  let formattedText = `${text} (${reference})`;
-
-  formattedText =
-    format === 'markdown'
-      ? `> ${formattedText}`
-      : format === 'citation'
-        ? `“${text}” (${reference})`
-        : formattedText;
-
-  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iawriter) {
-    return pasteInWriter(formattedText);
-  }
-
   if (
     frontmostAppID === 'com.apple.iWork.Keynote' &&
     Action.preferences.keynote
   ) {
     LaunchBar.setClipboardString(text); // Workaround for stupid Unicode stuff
     return pasteInKeynote(text, reference);
+  }
+
+  // Get format: first check app-specific format, then fall back to default format
+  const appFormats = Action.preferences.appFormats || {};
+  let format = appFormats[frontmostAppID] || Action.preferences.format;
+
+  const plainFormatted = `${text} (${reference})`;
+  const formats = {
+    plain: plainFormatted,
+    citation: `“${text}” (${reference})`,
+    markdown: `> ${plainFormatted}`,
+  };
+
+  const formattedText = formats[format] || formats[fallbackFormat];
+
+  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iawriter) {
+    return pasteInWriter(formattedText);
   }
 
   // TODO: Add location url to the clipboard (accord://read/ELBER#Rom_4,11) … Accordance Paste Helper Action
