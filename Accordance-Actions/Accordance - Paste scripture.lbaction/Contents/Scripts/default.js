@@ -26,7 +26,7 @@ const bookNameDictionary = File.readJSON(
 const textModulesPath =
   '~/Library/Application Support/Accordance/Modules/Texts/';
 
-const fallbackFormat = 'plain';
+const fallbackFormat = 'citation';
 
 function run(argument) {
   const translation =
@@ -246,7 +246,7 @@ function settings() {
     {
       title: 'Format'.localize(),
       icon: formatIcon,
-      badge: Action.preferences.format?.localize() ?? 'plain'.localize(),
+      badge: Action.preferences.format?.localize() ?? fallbackFormat.localize(),
       children: listFormats(),
     },
     {
@@ -327,9 +327,9 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
         ...(mode === 'lookup' && isLastUsed && { badge: 'recent'.localize() }),
         priority: prioritiesByMode[mode],
       };
-
       return item;
     })
+    .filter(Boolean)
     .sort((a, b) =>
       a.priority !== b.priority
         ? a.priority - b.priority
