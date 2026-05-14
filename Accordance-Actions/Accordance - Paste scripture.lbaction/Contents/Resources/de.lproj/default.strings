@@ -15,3 +15,6 @@
 "citation" = "Zitat";
 "markdown" = "Markdown";
 "Reset to default" = "Auf Standard zurücksetzen";
+"Choose fallback translation" = "Ersatzübersetzung auswählen";
+" (fallback)" = " (Fallback)";
+" (default)" = " (Standard)";

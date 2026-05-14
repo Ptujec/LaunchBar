@@ -29,10 +29,10 @@ const textModulesPath =
 const fallbackFormat = 'citation';
 
 function run(argument) {
+  if (LaunchBar.options.shiftKey) return settings();
+
   const translation =
     Action.preferences.translation || accordanceDefaultSearchText;
-
-  if (LaunchBar.options.shiftKey) return settings();
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
@@ -77,43 +77,60 @@ function run(argument) {
     : getText(newArgument, argument, translation);
 }
 
-function getText(newArgument, argument, translation) {
-  let text = LaunchBar.executeAppleScript(
-    `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
-  ).trim();
+function getText(newArgument, argument, initialTranslation) {
+  const defaultTranslation =
+    Action.preferences.translation || accordanceDefaultSearchText;
+  const fallbackTranslation = Action.preferences.fallbackTranslation; // || accordanceDefaultSearchText;
 
-  if (text.startsWith('ERR')) {
-    trackFailedTranslation(newArgument, translation);
+  // Build priority list of translations to try (avoid duplicates)
+  const translationsToTry = [
+    initialTranslation,
+    ...(defaultTranslation && defaultTranslation !== initialTranslation
+      ? [defaultTranslation]
+      : []),
+    ...(fallbackTranslation &&
+    fallbackTranslation !== initialTranslation &&
+    fallbackTranslation !== defaultTranslation
+      ? [fallbackTranslation]
+      : []),
+  ];
 
-    const response = LaunchBar.alert(
-      'Error!',
-      `${text}\nTry picking a different translation than "${translation}" or check your query.`,
-      'Ok',
-      'Cancel'.localize(),
-    );
+  for (const currentTranslation of translationsToTry) {
+    let text = LaunchBar.executeAppleScript(
+      `tell application "Accordance" to set theResult to «event AccdTxRf» {"${currentTranslation}", "${newArgument}", true}`,
+    ).trim();
 
-    switch (response) {
-      case 0:
-        return listTranslations({ newArgument, argument, mode: 'lookup' });
-      case 1:
-        return;
+    if (!text.startsWith('ERR')) {
+      clearFailedTranslations(newArgument);
+      clearFailedFallbackTranslations();
+
+      // Cleanup quote (NOTE: Only works if you have checked "Split discontiguous verses" in Citation settings in Accordance)
+      text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
+
+      // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
+      const translationName = currentTranslation.replace(/°|-LEM/g, '');
+
+      // Uppercase first character of query
+      argument = argument.charAt(0).toUpperCase() + argument.slice(1);
+
+      const reference = `${argument} ${translationName}`;
+
+      paste(text, reference);
+      return;
+    }
+    LaunchBar.log(`${currentTranslation} failed: ${text}`);
+
+    // Track failed translation
+    trackFailedTranslation(newArgument, currentTranslation);
+
+    // If this was the fallback translation and it failed, mark it
+    if (currentTranslation === fallbackTranslation) {
+      trackFailedFallbackTranslation(currentTranslation);
     }
   }
 
-  // Clear failed translations on success
-  clearFailedTranslations(newArgument);
-
-  // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
-  text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
-
-  // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
-  const translationName = translation.replace(/°|-LEM/g, '');
-  // Uppercase first character of query
-  argument = argument.charAt(0).toUpperCase() + argument.slice(1);
-
-  const reference = `${argument} ${translationName}`;
-
-  paste(text, reference);
+  // All predefined translations failed
+  return listTranslations({ newArgument, argument, mode: 'lookup' });
 }
 
 function paste(text, reference) {
@@ -229,12 +246,12 @@ function settings() {
       ? `${fallbackFormat}Template`
       : `${Action.preferences.format}Template`;
 
-  const defaultTranslation =
-    Action.preferences.translation || accordanceDefaultSearchText;
-
   const appFormatsCount = Action.preferences.appFormats
     ? String(Object.keys(Action.preferences.appFormats ?? {}).length)
     : undefined;
+
+  const defaultTranslation =
+    Action.preferences.translation || accordanceDefaultSearchText;
 
   return [
     {
@@ -242,6 +259,14 @@ function settings() {
       icon: 'bookTemplate',
       badge: defaultTranslation?.replace(/°|-LEM/g, ''),
       children: listTranslations({ mode: 'default' }),
+    },
+    {
+      title: 'Choose fallback translation'.localize(),
+      icon: 'bookTemplate',
+      badge: Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, ''),
+      action: 'listTranslations',
+      actionArgument: { mode: 'fallback' },
+      actionReturnsItems: true,
     },
     {
       title: 'Format'.localize(),
@@ -281,8 +306,11 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   const translations = File.getDirectoryContents(textModulesPath);
   const failedTranslations =
     mode === 'lookup' ? getFailedTranslations(newArgument) : [];
+  const failedFallbackTranslations =
+    mode === 'fallback' ? getFailedFallbackTranslations() : [];
   const defaultPref =
     Action.preferences.translation || accordanceDefaultSearchText;
+  const fallbackPref = Action.preferences.fallbackTranslation;
 
   return translations
     .map((translationFile) => {
@@ -304,17 +332,30 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
 
       const isLastUsed = translation === Action.preferences.lastUsed;
       const isDefault = translation === defaultPref;
+      const isFallback = translation === fallbackPref;
       const isFailed = failedTranslations.includes(translation);
+      const isFailedFallback = failedFallbackTranslations.includes(translation);
 
-      if (isFailed && mode === 'lookup') return;
+      if (
+        (isFailed && mode === 'lookup') ||
+        (isFailedFallback &&
+          mode === 'fallback' &&
+          !LaunchBar.options.commandKey)
+      ) {
+        return;
+      }
 
-      const isSelected = mode === 'default' && isDefault;
+      const isSelected =
+        (mode === 'default' && isDefault) ||
+        (mode === 'fallback' && isFallback);
       const actionsByMode = {
         default: 'setDefaultTranslation',
+        fallback: 'setFallbackTranslation',
         lookup: 'setTranslation',
       };
       const prioritiesByMode = {
         default: isSelected ? 1 : 2,
+        fallback: isSelected ? 1 : 2,
         lookup: isLastUsed ? 0 : 2,
       };
 
@@ -327,6 +368,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
         ...(mode === 'lookup' && isLastUsed && { badge: 'recent'.localize() }),
         priority: prioritiesByMode[mode],
       };
+
       return item;
     })
     .filter(Boolean)
@@ -340,6 +382,14 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
 
 function setDefaultTranslation({ translation }) {
   Action.preferences.translation = translation;
+  return settings();
+}
+
+function setFallbackTranslation({ translation }) {
+  Action.preferences.fallbackTranslation = translation;
+  Action.preferences.failedFallbackTranslations = (
+    Action.preferences.failedFallbackTranslations || []
+  ).filter((t) => t !== translation);
   return settings();
 }
 
@@ -362,6 +412,21 @@ function getFailedTranslations(newArgument) {
 
 function clearFailedTranslations(newArgument) {
   delete Action.preferences[`failedTranslations_${newArgument}`];
+}
+
+function trackFailedFallbackTranslation(translation) {
+  const failed = Action.preferences.failedFallbackTranslations || [];
+  if (!failed.includes(translation)) {
+    Action.preferences.failedFallbackTranslations = [...failed, translation];
+  }
+}
+
+function getFailedFallbackTranslations() {
+  return Action.preferences.failedFallbackTranslations || [];
+}
+
+function clearFailedFallbackTranslations() {
+  delete Action.preferences.failedFallbackTranslations;
 }
 
 // Formatting & Paste Options
