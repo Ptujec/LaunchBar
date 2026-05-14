@@ -29,10 +29,10 @@ const textModulesPath =
   '~/Library/Application Support/Accordance/Modules/Texts/';
 
 function run(argument) {
+  if (LaunchBar.options.shiftKey) return settings();
+
   const translation =
     Action.preferences.translation || accordanceDefaultSearchText;
-
-  if (LaunchBar.options.shiftKey) return settings();
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
   const num =
@@ -79,77 +79,72 @@ function run(argument) {
     : getText(newArgument, argument, translation);
 }
 
-function getText(
-  newArgument,
-  argument,
-  translation,
-  isFallback = false,
-  isDefaultFallback = false,
-) {
-  let text = LaunchBar.executeAppleScript(
-    `tell application "Accordance" to set theResult to «event AccdTxRf» {"${translation}", "${newArgument}", true}`,
-  ).trim();
+function getText(newArgument, argument, initialTranslation) {
+  const defaultTranslation =
+    Action.preferences.translation || accordanceDefaultSearchText;
+  const fallbackTranslation =
+    Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
 
-  if (text.startsWith('ERR')) {
-    trackFailedTranslation(newArgument, translation);
+  // Build priority list of translations to try (avoid duplicates)
+  const translationsToTry = [
+    initialTranslation,
+    ...(defaultTranslation && defaultTranslation !== initialTranslation
+      ? [defaultTranslation]
+      : []),
+    ...(fallbackTranslation &&
+    fallbackTranslation !== initialTranslation &&
+    fallbackTranslation !== defaultTranslation
+      ? [fallbackTranslation]
+      : []),
+  ];
 
-    const defaultTranslation =
-      Action.preferences.translation || accordanceDefaultSearchText;
+  for (const currentTranslation of translationsToTry) {
+    let text = LaunchBar.executeAppleScript(
+      `tell application "Accordance" to set theResult to «event AccdTxRf» {"${currentTranslation}", "${newArgument}", true}`,
+    ).trim();
 
-    const fallbackTranslation =
-      Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
+    if (!text.startsWith('ERR')) {
+      clearFailedTranslations(newArgument);
+      clearFailedFallbackTranslations();
 
-    // First try to use the default before fallback … if translation is not the default
-    if (translation !== defaultTranslation) {
-      return getText(newArgument, argument, defaultTranslation, false, true);
+      // Cleanup quote (NOTE: Only works if you have checked "Split discontiguous verses" in Citation settings in Accordance)
+      text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
+
+      // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
+      const translationName = currentTranslation.replace(/°|-LEM/g, '');
+
+      // Uppercase first character of query
+      argument = argument.charAt(0).toUpperCase() + argument.slice(1);
+
+      const isFallback = currentTranslation === fallbackTranslation;
+      const isDefault =
+        currentTranslation === defaultTranslation &&
+        currentTranslation !== initialTranslation;
+
+      const suffix = isFallback
+        ? ' (fallback)'.localize()
+        : isDefault
+          ? ' (default)'.localize()
+          : '';
+
+      const reference = `${argument} ${translationName}${suffix}`;
+
+      display(text, reference);
+      return;
     }
+    LaunchBar.log(`${currentTranslation} failed: ${text}`);
 
-    if (fallbackTranslation && translation !== fallbackTranslation) {
-      return getText(newArgument, argument, fallbackTranslation, true);
-    }
+    // Track failed translation
+    trackFailedTranslation(newArgument, currentTranslation);
 
-    // If fallback translation also failed, exclude it and clear the preference
-    if (isFallback) {
-      trackFailedFallbackTranslation(translation);
-      Action.preferences.fallbackTranslation = undefined;
-    }
-
-    if (accordanceDefaultSearchText) {
-      return getText(newArgument, argument, accordanceDefaultSearchText, true);
-    }
-
-    const response = LaunchBar.alert(
-      'Error!',
-      `${text}\nTry picking a different translation than "${translation}" or check your query.`,
-      'Ok',
-      'Cancel'.localize(),
-    );
-
-    switch (response) {
-      case 0:
-        return listTranslations({ newArgument, argument, mode: 'lookup' });
-      case 1:
-        return;
+    // If this was the fallback translation and it failed, mark it
+    if (currentTranslation === fallbackTranslation) {
+      trackFailedFallbackTranslation(currentTranslation);
     }
   }
 
-  // Clear failed translations on success
-  clearFailedTranslations(newArgument);
-
-  // Cleanup quote (Ony works if you have checked "Split discontiguous verses" in Citation settings)
-  text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
-
-  // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
-  const translationName = translation.replace(/°|-LEM/g, '');
-  // Uppercase first character of query
-  argument = argument.charAt(0).toUpperCase() + argument.slice(1);
-
-  let reference = `${argument} ${translationName}`;
-
-  if (isFallback) reference += ' (fallback)'.localize();
-  if (isDefaultFallback) reference += ' (default)'.localize();
-
-  display(text, reference);
+  // All predefined translations failed
+  return listTranslations({ newArgument, argument, mode: 'lookup' });
 }
 
 function display(text, reference) {
@@ -160,7 +155,7 @@ function display(text, reference) {
 }
 
 function replaceBookName(bookName) {
-  // Replace alternative booknames and abbreviations with the english name (so Accordance can parse it correctly)
+  // Replace alternative booknames and abbreviations with the english name so Accordance can parse it correctly
   bookName = bookName.trim().toLowerCase();
 
   const foundBook = bookNameDictionary.booknames.find((book) => {
@@ -176,26 +171,27 @@ function replaceBookName(bookName) {
   });
 
   if (foundBook) bookName = foundBook.english;
-
   return bookName;
 }
 
 function settings() {
+  const defaultTranslation =
+    Action.preferences.translation || accordanceDefaultSearchText;
+
   const fallbackTranslation =
-    Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, '') ||
-    accordanceDefaultSearchText;
+    Action.preferences.fallbackTranslation || accordanceDefaultSearchText;
 
   return [
     {
       title: 'Choose default translation'.localize(),
       icon: 'bookTemplate',
-      label: Action.preferences.translation.replace(/°|-LEM/g, ''),
+      badge: defaultTranslation.replace(/°|-LEM/g, ''),
       children: listTranslations({ mode: 'default' }),
     },
     {
       title: 'Choose fallback translation'.localize(),
       icon: 'bookTemplate',
-      label: fallbackTranslation,
+      badge: fallbackTranslation.replace(/°|-LEM/g, ''),
       action: 'listTranslations',
       actionArgument: { mode: 'fallback' },
       actionReturnsItems: true,
@@ -244,7 +240,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
           mode === 'fallback' &&
           !LaunchBar.options.commandKey)
       ) {
-        return null;
+        return;
       }
 
       const isSelected =
@@ -273,7 +269,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
 
       return item;
     })
-    .filter((item) => item !== null)
+    .filter(Boolean)
     .sort((a, b) =>
       a.priority !== b.priority
         ? a.priority - b.priority
@@ -292,7 +288,7 @@ function setFallbackTranslation({ translation }) {
   Action.preferences.failedFallbackTranslations = (
     Action.preferences.failedFallbackTranslations || []
   ).filter((t) => t !== translation);
-  return listTranslations({ mode: 'fallback' });
+  return settings();
 }
 
 function setTranslation({ newArgument, argument, translation }) {
