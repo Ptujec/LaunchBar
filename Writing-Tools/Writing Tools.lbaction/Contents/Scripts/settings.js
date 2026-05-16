@@ -1,10 +1,10 @@
 /*
-Settings for Writing Tools Action for LaunchBar (using Chat GPT) 
+Settings for Writing Tools Action for LaunchBar (using Chat GPT)
 by Christian Bender (@ptujec)
 2024-12-18
 */
 
-const recommendedModel = 'gpt-5.3-chat-latest';
+const recommendedModel = 'gpt-5.4-mini';
 
 function settings() {
   const prefs = Action.preferences || {};
