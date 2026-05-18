@@ -822,11 +822,23 @@ function postReminder(taskID, reminder, dueDate) {
   }
 
   if (!result.response || result.response.status !== 200) {
-    const statusCode = result.response?.status || 'unknown';
-    const errorMessage = result.data
-      ? JSON.parse(result.data).error_message || 'Unknown error'
-      : 'No response data';
-    LaunchBar.alert(`Todoist API Error (${statusCode}): ${errorMessage}`);
+    const statusCode = result.response?.status;
+
+    const title = statusCode
+      ? `Todoist API Error (${statusCode})`
+      : 'Todoist API Error';
+
+    const localizedStatus = result.response?.localizedStatus;
+
+    const resultData = result.data;
+
+    const errorMessage = localizedStatus
+      ? `${localizedStatus}: ${resultData ? resultData : ''}`
+      : resultData
+        ? resultData
+        : '';
+
+    LaunchBar.alert(title, errorMessage);
     return;
   }
 
