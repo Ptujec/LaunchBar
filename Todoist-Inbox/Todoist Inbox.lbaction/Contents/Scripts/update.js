@@ -1,18 +1,18 @@
-/* 
+/*
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-04-05
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
-Documentation: 
+Documentation:
 - https://developer.todoist.com/api/v1/#tag/Sync/Overview/Read-resources
 */
 
 function update(hide = true) {
   if (hide) LaunchBar.hide();
 
-  if (!apiToken) return;
+  if (!Action.preferences.apiToken) return;
 
   const syncToken = Action.preferences.syncToken || '*';
   const timestamp = new Date().toLocaleString('sv').replace(/[: ]/g, '-');
@@ -81,7 +81,7 @@ function update(hide = true) {
 function resetTodoistData() {
   LaunchBar.hide();
 
-  if (!apiToken) return;
+  if (!Action.preferences.apiToken) return;
 
   const syncResult = performSync('*');
   if (!syncResult) return;
@@ -107,7 +107,7 @@ function resetTodoistData() {
 
 function performSync(syncToken = '*') {
   const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
-    headerFields: { Authorization: `Bearer ${apiToken}` },
+    headerFields: { Authorization: `Bearer ${Action.preferences.apiToken}` },
     body: {
       sync_token: syncToken,
       resource_types: '["labels", "projects", "sections"]',
@@ -120,12 +120,24 @@ function performSync(syncToken = '*') {
   }
 
   if (!result.response || result.response.status !== 200) {
-    const statusCode = result.response?.status || 'unknown';
-    const errorMessage = result.data
-      ? JSON.parse(result.data).error_message || 'Unknown error'
-      : 'No response data';
-    LaunchBar.alert(`Todoist API Error (${statusCode}): ${errorMessage}`);
-    return null;
+    const statusCode = result.response?.status;
+
+    const title = statusCode
+      ? `Todoist API Error (${statusCode})`
+      : 'Todoist API Error';
+
+    const localizedStatus = result.response?.localizedStatus;
+
+    const resultData = result.data;
+
+    const errorMessage = localizedStatus
+      ? `${localizedStatus}: ${resultData ? resultData : ''}`
+      : resultData
+        ? resultData
+        : '';
+
+    LaunchBar.alert(title, errorMessage);
+    return;
   }
 
   return {
@@ -409,7 +421,7 @@ function getRecentTasks() {
     `https://api.todoist.com/api/v1/tasks/filter?query=${filter}&limit=200`,
     {
       headerFields: {
-        Authorization: `Bearer ${apiToken}`,
+        Authorization: `Bearer ${Action.preferences.apiToken}`,
       },
     },
   );

@@ -1,4 +1,4 @@
-/* 
+/*
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-04
@@ -16,7 +16,7 @@ include('localization.js');
 include('setKey.js');
 
 function runWithString(string) {
-  if (apiToken == undefined) {
+  if (Action.preferences.apiToken == undefined) {
     setApiKey();
     return;
   }
@@ -166,10 +166,10 @@ function handleQuotes(string) {
   const handleQuotesAS = `
     use scripting additions
     use framework "Foundation"
-    
+
     property NSShiftKeyMask : a reference to 131072
     property NSEvent : a reference to current application's NSEvent
-    
+
     on run ()
     	set modifier_down to true
     	repeat while modifier_down
@@ -177,7 +177,7 @@ function handleQuotes(string) {
     		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
     		set modifier_down to shift_down
     	end repeat
-    	
+
     	tell application "System Events"
     		keystroke "a" using command down
     		delay 0.05
@@ -185,7 +185,7 @@ function handleQuotes(string) {
     		delay 0.05
     		${moveCursor}
     	end tell
-    	
+
     	set the clipboard to "${currentClipboard}"
     end run
   `;
@@ -195,7 +195,7 @@ function handleQuotes(string) {
 
 function expandCurlyBraces() {
   LaunchBar.executeAppleScript(`
-    tell application "System Events"  
+    tell application "System Events"
       keystroke "}"
       key code 123
     end tell

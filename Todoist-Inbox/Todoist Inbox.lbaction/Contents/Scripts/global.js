@@ -1,4 +1,4 @@
-/* 
+/*
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-04
@@ -7,8 +7,6 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
 // MARK: Constants
-
-const apiToken = Action.preferences.apiToken;
 
 const supportPath = Action.supportPath;
 const actionPath = Action.path;

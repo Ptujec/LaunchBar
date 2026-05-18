@@ -1,4 +1,4 @@
-/* 
+/*
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-04-05
@@ -12,7 +12,7 @@ General:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 
 Task URL Scheme:
-- https://developer.todoist.com/guides/#tasks 
+- https://developer.todoist.com/guides/#tasks
 
 Reminders:
   - https://developer.todoist.com/api/v1/#tag/Sync/Reminders/Add-a-reminder
@@ -45,10 +45,7 @@ function run(argument) {
     quotedParts,
     deadline;
 
-  if (!apiToken) {
-    setApiKey();
-    return;
-  }
+  if (!Action.preferences.apiToken) return setApiKey();
 
   if (LaunchBar.options.shiftKey) return settings();
 
@@ -207,7 +204,7 @@ function postTask(task) {
   const result = HTTP.postJSON('https://api.todoist.com/api/v1.0/tasks', {
     body: body,
     headerFields: {
-      Authorization: `Bearer ${apiToken}`,
+      Authorization: `Bearer ${Action.preferences.apiToken}`,
     },
   });
   processPostResponse(result, task.reminder);
@@ -813,7 +810,7 @@ function postReminder(taskID, reminder, dueDate) {
   ];
 
   const result = HTTP.postJSON(`https://api.todoist.com/api/v1/sync`, {
-    headerFields: { Authorization: `Bearer ${apiToken}` },
+    headerFields: { Authorization: `Bearer ${Action.preferences.apiToken}` },
     body: {
       commands,
     },
@@ -1051,7 +1048,7 @@ function openTaskSetting(argument) {
 }
 
 function refreshData() {
-  if (!apiToken) {
+  if (!Action.preferences.apiToken) {
     setApiKey();
     return;
   }

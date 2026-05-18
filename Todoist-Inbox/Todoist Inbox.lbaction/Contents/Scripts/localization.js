@@ -1,4 +1,4 @@
-/* 
+/*
 Todoist Inbox Action for LaunchBar
 by Christian Bender (@ptujec)
 2024-10-04
