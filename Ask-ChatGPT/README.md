@@ -3,21 +3,11 @@
 *[→ Click here to view a list of all my actions.](https://ptujec.github.io/launchbar)* 
 
 
-This action allows you to send requests to ChatGPT. There are **two main ways to use it**:
-
-### 1: Chat away 
+This action allows you to send requests to ChatGPT. 
 
 <img src="01.jpg" width="740"/> 
 
 Press `space` to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
-
-<img src="02.jpg" width="740"/> 
-
-### 2: Use predefined prompts 
-
-Press `enter` to access a menu of predefined prompts. You can customize them in the [settings](#settings) to suit your needs. This is convenient for frequently used tasks.
-
-<img src="03.jpg" width="740"/> 
 
 ### What’s next?
 
@@ -29,48 +19,35 @@ The chat will open as a simple **markdown file** when done.
 
 Additionally the answer is automatically copied to the **clipboard**.
 
-This action works very well with [iA Writer](https://ia.net/writer) in preview mode. [Marked](https://marked2app.com/) is also a great option since it is specifically designed to preview markdown files.
+This action works with any text editor, but especially well with a dedicated preview app for Markdown files like [Markdown Preview](https://markdownpreview.app/) or [Marked](https://markedapp.com/).
 
 ### Additional Features
 
-- To view recent chats, select the action in LaunchBar and press `command` + `enter` 
-- Use alternative personas with `command` + `enter` when you are done entering text. 
-- Optionally compare input and answer in [BBEdit](https://www.barebones.com/products/bbedit/) instead of creating a chat by setting `useCompare` to `true` in a custom prompt.
+- To view recent chats, select the action in LaunchBar and press `enter` or right arrow 
+- Use alternative system prompts with `command` + `enter` when you are done entering text. 
 
 ### Settings
 
 Access the settings with `option` + `enter`. Here you can:
 
-- Choose a default persona
+- Choose a default system prompt
 - Choose between models
-- Choose an editor to display the resulting chats 
+- Choose an editor/viewer to display the resulting chats 
 - Set or reset your API key
-- Update, reset or customize prompts and personas
+- Update, reset or customize system prompts 
 
-### Customize prompts and personas
+### Customize system prompts
 
-You can customize and add as many prompts and personas as you want, and choose an emoji as the icon to identify them easily. 
+You can customize and add as many system prompts as you want, and choose an emoji as the icon to identify them easily. 
 
 ```
 {
-  "prompts": [
-    {
-      "icon": "✍🏻",
-      "argument": "The instruction passed to the model",
-      "title": "Your unique title",
-      "addURL": false,
-      "addClipboard": true,
-      "description": "A description to display as the subtitle",
-      "persona": "The persona for this task (optional)",
-      "useCompare": true
-    }
-  ],
-  "personas": [
+  "systemPrompts": [
     {
       "title": "Assistant",
       "icon": "weasel",
-      "description": "This is the default persona",
-      "persona": "You are a helpful assistant."
+      "description": "This is the default",
+      "systemPrompt": "You are a helpful assistant."
     }
   ]
 }
@@ -83,9 +60,6 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 ## Miscellaneous
 
 - [ChipiChat](https://github.com/quinncomendant/ChipiChat.lbaction#chipichat-launchbarchatgpt) is a cool alternative LaunchBar action for ChatGPT. 
-- Here is a [long list of interesting prompts](https://prompts.chat) that may serve as inspiration for both prompts and personas to use with this action.
-- [QLMarkdown](https://github.com/sbarex/QLMarkdown) is a great Quick Look plugin for Markdown files.
-- I really enjoyed [this episode of Changelog](https://changelog.fm/534#t=45:20) and especially [Simon's](https://github.com/simonw) take on LLMs.
 - Why the icon? [The answer is in this toot.](https://mastodon.social/@tess/110105460869464011)
 
 ## Download & Update
