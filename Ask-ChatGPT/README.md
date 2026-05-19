@@ -59,7 +59,7 @@ To use this action, you need an [API key from OpenAI](https://platform.openai.co
 
 ## Miscellaneous
 
-- [ChipiChat](https://github.com/quinncomendant/ChipiChat.lbaction#chipichat-launchbarchatgpt) is a cool alternative LaunchBar action for ChatGPT. 
+- [ChipiChat](https://github.com/quinncomendant/ChipiChat.lbaction#chipichat-launchbarchatgpt) is an alternative LaunchBar action for ChatGPT with a lot more features. 
 - Why the icon? [The answer is in this toot.](https://mastodon.social/@tess/110105460869464011)
 
 ## Download & Update
