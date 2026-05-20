@@ -25,7 +25,7 @@ Additionally the answer is automatically copied to the **clipboard**.
 
 This action works with any text editor, but especially well with a dedicated preview app for Markdown files like [Markdown Preview](https://markdownpreview.app/) or [Marked](https://markedapp.com/).
 
-### Settings
+## Settings
 
 Access the settings with `option` + `enter`. Here you can:
 
@@ -35,7 +35,7 @@ Access the settings with `option` + `enter`. Here you can:
 - Set or reset your API key
 - Update, reset or customize system prompts 
 
-### Customize system prompts
+## Customize system prompts
 
 You can customize and add as many system prompts as you want, and choose an emoji as the icon to identify them easily. 
 
