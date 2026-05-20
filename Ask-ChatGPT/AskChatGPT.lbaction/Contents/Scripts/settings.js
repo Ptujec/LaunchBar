@@ -4,9 +4,9 @@ function settings() {
   return [
     {
       title: 'Choose Default System Prompt'.localize(),
-      icon: Action.preferences.defaultSystemPromptIcon ?? 'weasel',
+      icon: Action.preferences.defaultSystemPrompt?.icon ?? 'weasel',
       badge:
-        Action.preferences.defaultSystemPromptTitle ??
+        Action.preferences.defaultSystemPrompt?.title ??
         File.readJSON(userPresetsPath).systemPrompts[0].title,
       children: showSystemPrompts(),
     },
@@ -44,9 +44,7 @@ function settings() {
 }
 
 function setSystemPrompt(item) {
-  Action.preferences.defaultSystemPrompt = item.systemPrompt;
-  Action.preferences.defaultSystemPromptTitle = item.title;
-  Action.preferences.defaultSystemPromptIcon = item.icon;
+  Action.preferences.defaultSystemPrompt = item;
   return settings();
 }
 

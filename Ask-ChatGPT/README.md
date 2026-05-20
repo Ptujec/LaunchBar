@@ -3,28 +3,27 @@
 *[→ Click here to view a list of all my actions.](https://ptujec.github.io/launchbar)* 
 
 
-This action allows you to send requests to ChatGPT. 
+This action allows you to send prompts to ChatGPT. 
 
 <img src="01.jpg" width="740"/> 
 
-Press `space` to start or continue a "conversation" with ChatGPT. Type your question or command, and then select one of the options presented to you, such as starting a new chat or continuing the current conversation.
+## How It Works
 
-### What’s next?
+Press `space` to enter a new prompt. If you have already started a chat, you can continue it, or start a new one. (Note: You can use an alternative system prompt with `command` + `enter` when you are done typing your prompt.)
 
-No need to wait while the answer is generated. All this is happening in the background without affecting the LaunchBar interface.
+You can also press `enter` to see all your past chats and continue any of them. Just press `enter` again. You can also use Quicklook here.
 
-The chat will open as a simple **markdown file** when done. 
+You do not need to wait while the answer is being generated. Everything happens in the background without affecting the LaunchBar interface.
+
+## Chat Display
+
+Once the answer is ready it will open as a simple **markdown file**. 
 
 <img src="04.jpg" width="740"/> 
 
 Additionally the answer is automatically copied to the **clipboard**.
 
 This action works with any text editor, but especially well with a dedicated preview app for Markdown files like [Markdown Preview](https://markdownpreview.app/) or [Marked](https://markedapp.com/).
-
-### Additional Features
-
-- To view recent chats, select the action in LaunchBar and press `enter` or right arrow 
-- Use alternative system prompts with `command` + `enter` when you are done entering text. 
 
 ### Settings
 

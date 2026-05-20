@@ -6,13 +6,17 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
-- https://platform.openai.com/docs/api-reference/chat
-- https://platform.openai.com/docs/guides/chat/introduction
+- https://developers.openai.com/api/docs
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
 
 TODO:
-- icons for recents ( with clock (history)?)
 
+- check api … update if necessary
+  - how we post
+    - https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create#(resource)%20chat.completions%20%3E%20(method)%20create%20%3E%20(params)%200.non_streaming%20%3E%20(param)%20messages%20%3E%20(schema)
+  - modell selection
+- when none default sys prompt set in settings use badge?
+- consistent and meaningful naming
 */
 
 String.prototype.localizationTable = 'default';
@@ -68,7 +72,7 @@ function run(argument) {
 
   if (LaunchBar.options.alternateKey) return settings();
 
-  if (!argument) return showChats({});
+  if (!argument) return showChats();
 
   if (LaunchBar.options.commandKey) return showSystemPrompts(argument);
 
@@ -76,18 +80,21 @@ function run(argument) {
 }
 
 function options(item) {
-  const { argument, icon, systemPrompt, presetTitle } = item;
-  const defaultSystemPromptIcon =
-    Action.preferences.defaultSystemPromptIcon ?? 'weasel';
-  const defaultIcon = icon ?? defaultSystemPromptIcon;
+  const { argument, systemPrompt, presetTitle } = item;
+
+  const newChatIcon =
+    Action.preferences.defaultSystemPrompt?.icon &&
+    Action.preferences.defaultSystemPrompt?.icon !== 'weasel'
+      ? Action.preferences.defaultSystemPrompt?.icon
+      : 'weasel_blank';
 
   const newChatItem = {
     title: 'New Chat'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
-    icon: defaultIcon,
+    icon: newChatIcon,
     action: 'ask',
-    actionArgument: { argument, icon: defaultIcon },
+    actionArgument: { argument },
     actionRunsInBackground: true,
   };
 
@@ -100,18 +107,16 @@ function options(item) {
           /\.md$/,
           '',
         );
-        const recentIcon = icon ?? recentChat.icon ?? defaultSystemPromptIcon;
         return {
           title: `${'Continue'.localize()}: ${recentFileTitle}`,
           subtitle: `Prompt: ${argument}`,
           alwaysShowsSubtitle: true,
-          icon: recentIcon,
+          icon: 'weasel_watch',
           action: 'ask',
           actionArgument: {
             argument,
             presetTitle: recentChat.presetTitle,
             addRecent: true,
-            icon: recentIcon,
             recentPath: recentChat.path,
             recentFileTitle,
             systemPrompt: recentChat.systemPrompt,
@@ -136,23 +141,9 @@ function options(item) {
     actionRunsInBackground: true,
   };
 
-  const allChats = {
-    title: 'Continue Older Chats'.localize(),
-    subtitle: `Prompt: ${argument}`,
-    alwaysShowsSubtitle: true,
-    icon: 'weasel',
-    action: 'showChats',
-    actionArgument: {
-      argument: `${argument}\n`,
-      addRecent: true,
-    },
-    actionReturnsItems: true,
-  };
-
   const baseItems = [
     newChatItem,
     ...(continueChatItem ? [continueChatItem] : []),
-    ...(allChats ? [allChats] : []),
     clipboardItem,
   ];
 
@@ -180,6 +171,7 @@ function options(item) {
 function ask(item) {
   let argument = item.argument.trim();
   let title = item.isPrompt ? (item.presetTitle ?? argument) : argument;
+  let recentPath;
 
   // ITEMS WITH CLIPBOARD CONTENT
   if (item.addClipboard) {
@@ -194,31 +186,32 @@ function ask(item) {
       'Cancel',
     );
 
-    if (response === 0) {
-      title = `${title} - ${clipboard}`;
-      argument += `\n\n${clipboard}`;
-    }
+    if (response !== 0) return;
+
+    title = `${title} - ${clipboard}`;
+    argument += `\n\n${clipboard}`;
   }
 
   LaunchBar.hide();
 
   // ITEMS WITH URL
-  let question = argument;
+  let prompt = argument;
 
   // INCLUDE PREVIOUS CHAT HISTORY
   if (item.addRecent) {
-    const recentPath = item.recentPath;
+    recentPath = item.recentPath;
     if (!File.exists(recentPath)) return;
 
     const text = File.readText(recentPath).replace(/^> /gm, '');
-    question = `${text}...${argument}\n`;
+    prompt = `${text}...${argument}\n`;
     title = item.recentFileTitle;
   } else {
     // TITLE CLEANUP
     title = title
       .replace(/[&~=§#@[\]{}()+\\\/%*$:;,.?><\|""'´]/g, ' ')
       .replace(/[\s_]{2,}/g, ' ')
-      .substring(0, 80);
+      .substring(0, 80)
+      .trim();
 
     if (title.length === 80) title += '…';
   }
@@ -228,7 +221,7 @@ function ask(item) {
 
   // SYSTEM PROMPT
   const defaultSystemPrompt =
-    Action.preferences.systemPrompt ??
+    Action.preferences.systemPrompt?.systemPrompt ??
     File.readJSON(userPresetsPath).systemPrompts[0].systemPrompt;
 
   const systemPrompt = item.systemPrompt ?? defaultSystemPrompt;
@@ -242,14 +235,14 @@ function ask(item) {
       model,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: question },
+        { role: 'user', content: prompt },
       ],
     },
   });
 
   const presetTitle =
     item.presetTitle ??
-    Action.preferences.defaultSystemPromptTitle ??
+    Action.preferences.defaultSystemPrompt?.title ??
     File.readJSON(userPresetsPath).systemPrompts[0].title;
 
   processResult(
@@ -260,6 +253,7 @@ function ask(item) {
     item.icon,
     presetTitle,
     item.isPrompt,
+    recentPath,
   );
 }
 
@@ -271,6 +265,7 @@ function processResult(
   icon,
   presetTitle,
   isPrompt,
+  recentPath,
 ) {
   // Error handling
   if (!result.response) {
@@ -304,15 +299,58 @@ function processResult(
   LaunchBar.setClipboardString(answer);
 
   // CREATE/OPEN CHAT TEXT FILE
-  const fileLocation = `${chatsFolder}${title}.md`;
-  const recentChatDict = {
+  const fileLocation = recentPath || `${chatsFolder}${title}.md`;
+  const recentChat = {
     systemPrompt,
     presetTitle,
     icon,
     path: fileLocation,
     isPrompt,
   };
-  openChatTextFile(argument, fileLocation, answer, recentChatDict);
+  openChatTextFile(argument, fileLocation, answer, recentChat);
+}
+
+function openChatTextFile(argument, fileLocation, answer, recentChat) {
+  if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
+
+  const quotedArgument = argument
+    .split('\n')
+    .map((item) => `> ${item}`)
+    .join('\n');
+
+  let text = `${quotedArgument}\n\n---\n\n${answer}`;
+
+  if (File.exists(fileLocation)) {
+    text = File.readText(fileLocation) + '\n\n---\n\n' + text;
+  }
+
+  File.writeText(text, fileLocation);
+
+  // Open File
+  const fileURL = File.fileURLForPath(fileLocation);
+  LaunchBar.openURL(fileURL, Action.preferences.editor?.appID);
+
+  // TODO: needs to language independent
+
+  // if (Action.preferences.editor?.appID === 'pro.writer.mac') {
+  //   LaunchBar.executeAppleScript(
+  //     `
+  //     tell application "iA Writer" to activate
+  //     tell application "System Events"
+  //       try
+  //         click menu item "Modern (Sans)" of menu "Vorlage" of menu item "Vorlage" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
+  //         click menu item "Vorschau anzeigen" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
+  //       end try
+  //     end tell
+  //     `,
+  //   );
+  // }
+
+  // STORE TIMESTAMP
+  Action.preferences.recentTimeStamp = new Date().toISOString();
+
+  // STORE USED SYSTEM PROMPT PROPERTIES
+  Action.preferences.recentChat = recentChat;
 }
 
 function showSystemPrompts(argument) {
@@ -365,13 +403,14 @@ function alertWhenRunningInBackground(alertMessage) {
   LaunchBar.hide();
 }
 
-function showChats({ argument, addRecent }) {
+function showChats() {
   // DISPLAY RECENT CHATS
   if (!File.exists(chatsFolder)) {
-    return {
-      title: 'No folder with chats found!'.localize(),
-      icon: 'weasel_alert',
-    };
+    LaunchBar.alert(
+      'No folder with chats found!'.localize(),
+      'Press space to enter a prompt.'.localize(),
+    );
+    return;
   }
 
   const chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
@@ -379,13 +418,14 @@ function showChats({ argument, addRecent }) {
     .split('\n');
 
   if (chatFiles[0] === '') {
-    return {
-      title: 'No chats found!'.localize(),
-      icon: 'weasel_alert',
-    };
+    LaunchBar.alert(
+      'No chats found!'.localize(),
+      'Press space to enter a prompt.'.localize(),
+    );
+    return;
   }
 
-  return chatFiles.slice(addRecent ? 1 : 0).map((item) => {
+  return chatFiles.map((item) => {
     const filePath = `${chatsFolder}${item}`;
     const fileTitle = File.displayName(filePath).replace(/\.md$/, '');
 
@@ -400,60 +440,47 @@ function showChats({ argument, addRecent }) {
 
     return {
       title: fileTitle,
-      subtitle: addRecent ? `Prompt: ${argument}` : dateString,
+      subtitle: dateString,
       alwaysShowsSubtitle: true,
       icon: 'weasel_paper',
       path: filePath,
-      action: addRecent ? 'ask' : undefined,
+      action: 'chatOptions',
       actionArgument: {
-        argument: `${argument}\n`,
-        addRecent: true,
-        recentPath: filePath,
-        recentFileTitle: fileTitle,
+        filePath,
+        fileTitle,
       },
+      actionRunsInBackground: true,
     };
   });
 }
 
-function openChatTextFile(argument, fileLocation, answer, recentChatDict) {
-  if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
+function chatOptions({ filePath, fileTitle }) {
+  LaunchBar.hide();
 
-  const quotedArgument = argument
-    .split('\n')
-    .map((item) => `> ${item}`)
-    .join('\n');
-
-  let text = `${quotedArgument}\n\n${answer}`;
-
-  if (File.exists(fileLocation)) {
-    text = File.readText(fileLocation) + '\n\n' + text;
+  if (LaunchBar.options.commandKey) {
+    // LaunchBar.openURL(File.fileURLForPath(filePath));
+    LaunchBar.execute('/usr/bin/open', '-R', filePath);
+    return;
   }
 
-  File.writeText(text, fileLocation);
+  // Enter Prompt
+  const prompt = LaunchBar.executeAppleScript(
+    `
+    set result to display dialog "${'Enter a follow up prompt for'.localize()}:\n\\"${fileTitle.trim()}\\"" with title "Ask ChatGPT" default answer ""
+    set result to text returned of result
+    `,
+  ).trim();
 
-  // Open File
-  const fileURL = File.fileURLForPath(fileLocation);
-  LaunchBar.openURL(fileURL, Action.preferences.editor?.appID);
+  if (prompt === '') return;
 
-  // TODO: needs to language independent
+  const item = {
+    argument: prompt,
+    addRecent: true,
+    recentPath: filePath,
+    recentFileTitle: fileTitle,
+  };
 
-  // if (Action.preferences.editor?.appID === 'pro.writer.mac') {
-  //   LaunchBar.executeAppleScript(
-  //     `
-  //     tell application "iA Writer" to activate
-  //     tell application "System Events"
-  //       try
-  //         click menu item "Modern (Sans)" of menu "Vorlage" of menu item "Vorlage" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
-  //         click menu item "Vorschau anzeigen" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
-  //       end try
-  //     end tell
-  //     `,
-  //   );
-  // }
+  ask(item);
 
-  // STORE TIMESTAMP
-  Action.preferences.recentTimeStamp = new Date().toISOString();
-
-  // STORE USED SYSTEM PROMPT PROPERTIES
-  Action.preferences.recentChat = recentChatDict;
+  // TODO: Ask with attached file content … make sure we save to the correct file location …  maybe in the future we can also store things like the original system prompt etc. … but needs different structure
 }
