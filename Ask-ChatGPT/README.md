@@ -43,6 +43,7 @@ You can customize and add as many system prompts as you want, and choose an emoj
 {
   "systemPrompts": [
     {
+      "id": "assistant",
       "title": "Assistant",
       "icon": "weasel",
       "description": "This is the default",

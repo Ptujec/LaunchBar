@@ -1,13 +1,13 @@
 // SETTING FUNCTIONS
 
 function settings() {
+  const defaultPreset = getDefaultPreset();
+
   return [
     {
       title: 'Choose Default System Prompt'.localize(),
-      icon: Action.preferences.defaultSystemPrompt?.icon ?? 'weasel',
-      badge:
-        Action.preferences.defaultSystemPrompt?.title ??
-        File.readJSON(userPresetsPath).systemPrompts[0].title,
+      icon: defaultPreset?.icon ?? 'weasel',
+      badge: defaultPreset?.title,
       children: showSystemPrompts(),
     },
     {
@@ -43,8 +43,8 @@ function settings() {
   ];
 }
 
-function setSystemPrompt(item) {
-  Action.preferences.defaultSystemPrompt = item;
+function setSystemPrompt(presetId) {
+  Action.preferences.defaultSystemPromptId = presetId;
   return settings();
 }
 
@@ -65,12 +65,8 @@ function showModels() {
   }
 
   return result.data.data
-    .filter(
-      (item) =>
-        item.id.startsWith('gpt-') &&
-        !item.id.includes('realtime-preview') &&
-        !item.id.includes('audio'),
-    )
+    .filter(filterModels)
+    .sort((a, b) => a.id.localeCompare(b.id))
     .map((item) => ({
       title: item.id,
       icon:
@@ -80,6 +76,26 @@ function showModels() {
       badge:
         item.id === recommendedModel ? 'Recommended'.localize() : undefined,
     }));
+}
+
+function filterModels(model) {
+  const id = model.id || '';
+
+  const disallowedPatterns = [
+    'image',
+    'transcribe',
+    'search',
+    'tts',
+    'codex',
+    'audio',
+    'realtime',
+  ];
+
+  if (!id.startsWith('gpt-') || model.owned_by === 'openai-internal')
+    return false;
+  if (disallowedPatterns.some((p) => id.includes(p))) return false;
+
+  return true;
 }
 
 function setModel(model) {
@@ -101,6 +117,19 @@ function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
     const b = ~~lastUsedParts[i];
     if (a > b) return true;
     if (a < b) return false;
+  }
+  return false;
+}
+
+function isVersionBelow(version1, version2) {
+  const parts1 = version1.split('.');
+  const parts2 = version2.split('.');
+
+  for (let i = 0; i < parts2.length; i++) {
+    const a = ~~parts1[i];
+    const b = ~~parts2[i];
+    if (a < b) return true;
+    if (a > b) return false;
   }
   return false;
 }
@@ -206,31 +235,6 @@ function checkAPIKey(apiKey) {
   return false;
 }
 
-function migrateUserPresets() {
-  const userPresets = File.readJSON(userPresetsPath);
-
-  // Check if old 'personas' key exists
-  if (userPresets.personas && !userPresets.systemPrompts) {
-    // Migrate from old format to new format
-    const migratedPrompts = userPresets.personas.map((item) => ({
-      title: item.title,
-      systemPrompt: item.persona, // 'persona' → 'systemPrompt'
-      description: item.description,
-      icon: item.icon,
-    }));
-
-    const updatedPresets = {
-      ...userPresets,
-      systemPrompts: migratedPrompts,
-    };
-
-    // Remove old 'personas' key
-    delete updatedPresets.personas;
-
-    File.writeJSON(updatedPresets, userPresetsPath);
-  }
-}
-
 // Editor selection
 
 const excludedApps = [
@@ -306,4 +310,86 @@ function canHandleMarkdown(infoPlist) {
 function setEditor(item) {
   Action.preferences.editor = item;
   return settings();
+}
+
+// MIGRATION FUNCTIONS
+
+function migrateUserPresets() {
+  const userPresets = File.readJSON(userPresetsPath);
+
+  // Check if old 'personas' key exists
+  if (userPresets.personas && !userPresets.systemPrompts) {
+    // Migrate from old format to new format
+    const migratedPrompts = userPresets.personas.map((item) => ({
+      title: item.title,
+      systemPrompt: item.persona, // 'persona' → 'systemPrompt'
+      description: item.description,
+      icon: item.icon,
+    }));
+
+    const updatedPresets = {
+      ...userPresets,
+      systemPrompts: migratedPrompts,
+    };
+
+    // Remove old 'personas' key
+    delete updatedPresets.personas;
+
+    File.writeJSON(updatedPresets, userPresetsPath);
+  }
+}
+
+function migratePresetsWithIds() {
+  if (!File.exists(userPresetsPath)) return;
+
+  const userPresets = File.readJSON(userPresetsPath);
+
+  if (userPresets.systemPrompts) {
+    userPresets.systemPrompts = userPresets.systemPrompts.map((preset) => {
+      // If preset already has an id, keep it
+      if (preset.id) return preset;
+
+      // Generate id from title: lowercase, replace spaces with underscores
+      const id = preset.title
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_]/g, '');
+
+      return {
+        ...preset,
+        id,
+      };
+    });
+
+    File.writeJSON(userPresets, userPresetsPath);
+  }
+}
+
+// SHARED HELPER FUNCTIONS
+
+function getDefaultPreset() {
+  const userPresets = File.readJSON(userPresetsPath).systemPrompts;
+  return (
+    userPresets.find(
+      (p) => p.id === Action.preferences.defaultSystemPromptId,
+    ) || userPresets[0]
+  );
+}
+
+function cleanupOrphanedChatMetadata() {
+  if (!File.exists(chatsFolder) || !Action.preferences.chatMetadata) return;
+
+  // Get all existing chat file IDs
+  const chatFiles = File.getDirectoryContents(chatsFolder, {
+    includeHidden: false,
+  });
+
+  const existingChatIds = new Set(chatFiles.map((file) => file.split('_')[0]));
+
+  // Remove orphaned entries
+  for (const id of Object.keys(Action.preferences.chatMetadata)) {
+    if (!existingChatIds.has(id)) {
+      delete Action.preferences.chatMetadata[id];
+    }
+  }
 }
