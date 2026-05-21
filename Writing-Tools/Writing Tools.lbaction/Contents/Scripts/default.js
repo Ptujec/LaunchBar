@@ -25,6 +25,7 @@ include('settings.js');
 
 const toolsPath = File.readJSON(`${Action.path}/Contents/Resources/tools.json`);
 const userToolsPath = `${Action.supportPath}/userTools.json`;
+const logPath = `${Action.supportPath}/writing-tools-usage.log`;
 
 function run(argument) {
   const prefs = Action.preferences;
@@ -152,10 +153,17 @@ function mainAction({
     },
   });
 
-  processResult({ result, content, hasArgument, frontmostAppID });
+  processResult({ result, content, hasArgument, frontmostAppID, model, tool });
 }
 
-function processResult({ result, content, hasArgument, frontmostAppID }) {
+function processResult({
+  result,
+  content,
+  hasArgument,
+  frontmostAppID,
+  model,
+  tool,
+}) {
   const prefs = Action.preferences;
 
   // ERROR HANDLING
@@ -185,6 +193,9 @@ function processResult({ result, content, hasArgument, frontmostAppID }) {
   // PARSE RESULT
   let data = JSON.parse(result.data);
   const answer = data.choices[0].message.content.trim();
+
+  // LOG TOKEN USAGE
+  logTokenUsage(data, model, tool);
 
   if (content === answer) {
     LaunchBar.alert('No changes. Input and answer are identical.'.localize());

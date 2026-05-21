@@ -76,6 +76,12 @@ function settings() {
       icon: 'keyTemplate',
       action: 'setApiKey',
     },
+    {
+      title: 'Show Usage Log'.localize(),
+      icon: 'logTemplate',
+      action: 'showUsageLog',
+      actionRunsInBackground: true,
+    },
   ];
 }
 
@@ -384,4 +390,46 @@ function checkAPIKey(apiKey) {
   );
 
   return false;
+}
+
+function logTokenUsage(data, model, tool) {
+  const usage = data.usage || {};
+
+  const timestamp = new Date().toISOString();
+  const logEntry = [
+    `[${timestamp}]`,
+    `Model: ${model}`,
+    `Tool: ${tool.id} (${tool.title})`,
+    `Prompt Tokens: ${usage.prompt_tokens || 0}`,
+    `Completion Tokens: ${usage.completion_tokens || 0}`,
+    `Total Tokens: ${usage.total_tokens || 0}`,
+    usage.prompt_tokens_details?.cached_tokens
+      ? `Cached Tokens: ${usage.prompt_tokens_details.cached_tokens}`
+      : '',
+    usage.completion_tokens_details?.reasoning_tokens
+      ? `Reasoning Tokens: ${usage.completion_tokens_details.reasoning_tokens}`
+      : '',
+    '---',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const existingContent = File.exists(logPath) ? File.readText(logPath) : '';
+  const newContent = existingContent
+    ? existingContent + '\n' + logEntry
+    : logEntry;
+
+  File.writeText(newContent, logPath);
+}
+
+function showUsageLog() {
+  if (!File.exists(logPath)) {
+    LaunchBar.alert(
+      'No Usage Log!'.localize(),
+      'The usage log file does not exist.'.localize(),
+    );
+    return;
+  }
+  LaunchBar.hide();
+  LaunchBar.openURL(File.fileURLForPath(logPath));
 }

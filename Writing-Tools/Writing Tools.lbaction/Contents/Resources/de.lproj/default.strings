@@ -37,3 +37,6 @@
 "Disable alert for this app!" = "Keine Bestätigung für diese App anzeigen!";
 "New Prompt" = "Neuer Prompt";
 "Enter Prompt" = "Prompt eingeben";
+"Show Usage Log" = "Nutzungsprotokoll anzeigen";
+"No Usage Log!" = "Kein Nutzungsprotokoll!";
+"The usage log file does not exist." = "Die Protokolldatei ist nicht vorhanden.";
