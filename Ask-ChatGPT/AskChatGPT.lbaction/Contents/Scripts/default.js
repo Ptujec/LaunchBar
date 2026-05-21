@@ -19,7 +19,6 @@ include('global.js');
 
 const recommendedModel = 'gpt-5.4-mini';
 const apiKey = Action.preferences.apiKey;
-const recentTimeStamp = Action.preferences.recentTimeStamp;
 const chatsFolder = `${Action.supportPath}/chats/`;
 const presets = File.readJSON(`${Action.path}/Contents/Resources/presets.json`);
 const userPresetsPath = `${Action.supportPath}/userPresets.json`;
@@ -150,11 +149,11 @@ function options(item) {
     clipboardItem,
   ];
 
-  // Check if need to reverse order (recent created less than 5 minutes ago)
+  // Check if need to reverse order (recent edited less than 5 minutes ago)
   const shouldReverse =
     hasRecentChat &&
-    recentChatInfo?.createdAt &&
-    (new Date() - new Date(recentChatInfo.createdAt)) / 60000 < 5;
+    recentChatInfo?.lastEdited &&
+    (new Date() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
   const items = shouldReverse
     ? [baseItems[1], baseItems[0], ...baseItems.slice(2)]
     : baseItems;
@@ -274,8 +273,7 @@ function ask(item) {
     },
   });
 
-  File.writeJSON(result, Action.supportPath + '/test.json');
-
+  // File.writeJSON(result, Action.supportPath + '/test.json');
   // const result = File.readJSON(Action.supportPath + '/test.json');
 
   const defaultPresetForTitle = getDefaultPreset();
@@ -335,9 +333,8 @@ function processResult(
   LaunchBar.setClipboardString(answer);
 
   // CREATE/OPEN CHAT TEXT FILE
-  const uid = LaunchBar.execute('/usr/bin/uuidgen').trim();
-
-  const fileLocation = recentPath || `${chatsFolder}${uid}_${title}.md`;
+  const uuid = LaunchBar.execute('/usr/bin/uuidgen').trim();
+  const fileLocation = recentPath || `${chatsFolder}${title}_${uuid}.md`;
 
   const recentChat = {
     systemPrompt,
@@ -416,7 +413,7 @@ function openChatTextFile(
       systemPrompt: chatInfo.systemPrompt,
       icon: chatInfo.icon,
       isPrompt: chatInfo.isPrompt,
-      createdAt: recentPath ? undefined : new Date().toISOString(),
+      lastEdited: new Date().toISOString(),
     };
   }
 }
@@ -561,22 +558,21 @@ function chatOptions({ filePath, fileTitle }) {
 function titleCleanup(title) {
   title = title.replace(/\.md$/, '').trim();
   if (title.includes('_')) {
-    return title.split('_')[1];
+    // Format: {title}_{uuid}
+    // Remove the UUID at the end (everything after the last underscore)
+    return title.substring(0, title.lastIndexOf('_'));
   }
   return title;
 }
 
 function extractChatId(fileLocation) {
   const fileName = File.displayName(fileLocation);
-  // Chat file format: {uuid}_{title}.md
-  const parts = fileName.replace(/\.md$/, '').split('_');
-  return parts[0]; // Return UUID
-}
-
-function isValidUuid(uuid) {
-  const uuidRegex =
-    /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-  return uuidRegex.test(uuid);
+  // Chat file format: {title}_{uuid}.md
+  const withoutExtension = fileName.replace(/\.md$/, '');
+  const parts = withoutExtension.split('_');
+  // UUID is at the end, so we take the last part if it's a valid UUID
+  const potentialUuid = parts[parts.length - 1];
+  return isValidUuid(potentialUuid) ? potentialUuid : undefined;
 }
 
 function getPresetIdByTitle(presetTitle) {

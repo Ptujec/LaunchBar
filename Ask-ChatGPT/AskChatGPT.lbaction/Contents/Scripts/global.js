@@ -1,3 +1,11 @@
+// HELPER FUNCTIONS
+
+function isValidUuid(uuid) {
+  const uuidRegex =
+    /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
 // SETTING FUNCTIONS
 
 function settings() {
@@ -384,7 +392,16 @@ function cleanupOrphanedChatMetadata() {
     includeHidden: false,
   });
 
-  const existingChatIds = new Set(chatFiles.map((file) => file.split('_')[0]));
+  // Extract UUIDs from filenames: {title}_{uuid}.md
+  const existingChatIds = new Set(
+    chatFiles
+      .map((file) => {
+        const withoutExtension = file.replace(/\.md$/, '');
+        const potentialUuid = withoutExtension.split('_').pop();
+        return isValidUuid(potentialUuid) ? potentialUuid : undefined;
+      })
+      .filter(Boolean),
+  );
 
   // Remove orphaned entries
   for (const id of Object.keys(Action.preferences.chatMetadata)) {
