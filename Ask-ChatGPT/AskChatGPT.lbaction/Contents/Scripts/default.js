@@ -1,29 +1,18 @@
 /*
-ChaptGPT Action for LaunchBar
+ChaptGPT Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2023-03-03
+2026-05-21
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://developers.openai.com/api/docs
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
-
-TODO:
-- refactor … consistant naming structure
 */
 
 String.prototype.localizationTable = 'default';
 
 include('global.js');
-
-const recommendedModel = 'gpt-5.4-mini';
-const apiKey = Action.preferences.apiKey;
-const chatsFolder = `${Action.supportPath}/chats/`;
-const presets = File.readJSON(`${Action.path}/Contents/Resources/presets.json`);
-const userPresetsPath = `${Action.supportPath}/userPresets.json`;
-const currentActionVersion = Action.version;
-const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '2.0';
 
 function run(argument) {
   if (!File.exists(userPresetsPath)) {
@@ -287,6 +276,7 @@ function ask(item) {
     presetTitle,
     item.isPrompt,
     recentPath,
+    model,
   );
 }
 
@@ -298,6 +288,7 @@ function processResult(
   presetTitle,
   isPrompt,
   recentPath,
+  model,
 ) {
   // Error handling
   if (!result.response) {
@@ -329,42 +320,24 @@ function processResult(
   );
 
   // COPY RESULT TO CLIPBOARD
-  const originalClipboard = LaunchBar.getClipboardString();
   LaunchBar.setClipboardString(answer);
 
   // CREATE/OPEN CHAT TEXT FILE
   const uuid = LaunchBar.execute('/usr/bin/uuidgen').trim();
   const fileLocation = recentPath || `${chatsFolder}${title}_${uuid}.md`;
 
-  const recentChat = {
+  openChatTextFile(argument, fileLocation, answer, {
     systemPrompt,
     presetTitle,
     icon,
-    path: fileLocation,
     isPrompt,
-  };
+  });
 
-  openChatTextFile(
-    argument,
-    fileLocation,
-    answer,
-    {
-      systemPrompt,
-      presetTitle,
-      icon,
-      isPrompt,
-    },
-    recentPath,
-  );
+  // LOG TOKEN USAGE
+  logTokenUsage(data, model, presetTitle, fileLocation);
 }
 
-function openChatTextFile(
-  argument,
-  fileLocation,
-  answer,
-  chatInfo,
-  recentPath,
-) {
+function openChatTextFile(argument, fileLocation, answer, chatInfo) {
   if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
 
   const quotedArgument = argument

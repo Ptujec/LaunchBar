@@ -1,3 +1,22 @@
+/*
+ChaptGPT Action Script for LaunchBar
+by Christian Bender (@ptujec)
+2026-05-21
+
+Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+*/
+
+// GLOBAL VARIABLES
+
+const recommendedModel = 'gpt-5.4-mini';
+const apiKey = Action.preferences.apiKey;
+const chatsFolder = `${Action.supportPath}/chats/`;
+const presets = File.readJSON(`${Action.path}/Contents/Resources/presets.json`);
+const userPresetsPath = `${Action.supportPath}/userPresets.json`;
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '4.0';
+const logPath = `${Action.supportPath}/askchatgpt-usage.log`;
+
 // HELPER FUNCTIONS
 
 function isValidUuid(uuid) {
@@ -47,6 +66,12 @@ function settings() {
       title: 'Reset System Prompts'.localize(),
       icon: 'sparkleTemplate',
       action: 'resetPresets',
+    },
+    {
+      title: 'Show Usage Log'.localize(),
+      icon: 'logTemplate',
+      action: 'showUsageLog',
+      actionRunsInBackground: true,
     },
   ];
 }
@@ -409,4 +434,49 @@ function cleanupOrphanedChatMetadata() {
       delete Action.preferences.chatMetadata[id];
     }
   }
+}
+
+// LOGGING FUNCTIONS
+
+function logTokenUsage(data, model, presetTitle, fileLocation) {
+  const usage = data.usage || {};
+
+  const timestamp = new Date().toISOString();
+  const logEntry = [
+    `[${timestamp}]`,
+    `File: ${fileLocation || ''}`,
+    `Model: ${model}`,
+    `Preset: ${presetTitle || 'default'}`,
+    `Prompt Tokens: ${usage.prompt_tokens || 0}`,
+    `Completion Tokens: ${usage.completion_tokens || 0}`,
+    `Total Tokens: ${usage.total_tokens || 0}`,
+    usage.prompt_tokens_details?.cached_tokens
+      ? `Cached Tokens: ${usage.prompt_tokens_details.cached_tokens}`
+      : '',
+    usage.completion_tokens_details?.reasoning_tokens
+      ? `Reasoning Tokens: ${usage.completion_tokens_details.reasoning_tokens}`
+      : '',
+    '---',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const existingContent = File.exists(logPath) ? File.readText(logPath) : '';
+  const newContent = existingContent
+    ? existingContent + '\n' + logEntry
+    : logEntry;
+
+  File.writeText(newContent, logPath);
+}
+
+function showUsageLog() {
+  if (!File.exists(logPath)) {
+    LaunchBar.alert(
+      'No Usage Log!'.localize(),
+      'The usage log file does not exist.'.localize(),
+    );
+    return;
+  }
+  LaunchBar.hide();
+  LaunchBar.openURL(File.fileURLForPath(logPath));
 }
