@@ -148,12 +148,11 @@ function resetTools() {
 }
 
 function showModels() {
-  const prefs = Action.preferences;
-  const currentModel = prefs.model || recommendedModel;
+  const currentModel = Action.preferences.model || recommendedModel;
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
-      Authorization: `Bearer ${prefs.apiKey}`,
+      Authorization: `Bearer ${Action.preferences.apiKey}`,
     },
   });
 
@@ -164,28 +163,38 @@ function showModels() {
     );
   }
 
-  const modelsData = result.data.data;
+  return result.data.data
+    .filter(filterModels)
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((item) => ({
+      title: item.id,
+      icon:
+        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+      action: 'setModel',
+      actionArgument: item.id,
+      badge:
+        item.id === recommendedModel ? 'Recommended'.localize() : undefined,
+    }));
+}
 
-  return (
-    modelsData
-      // Filter out versions that are not compatible with completions https://platform.openai.com/docs/models#model-endpoint-compatibility
-      .filter(
-        (item) =>
-          item.id.startsWith('gpt-') &&
-          !item.id.includes('realtime-preview') &&
-          !item.id.includes('audio'),
-      )
-      // .sort((a, b) => a.id > b.id)
-      .map((item) => ({
-        title: item.id,
-        icon:
-          currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
-        action: 'setModel',
-        actionArgument: item.id,
-        badge:
-          item.id === recommendedModel ? 'Recommended'.localize() : undefined,
-      }))
-  );
+function filterModels(model) {
+  const id = model.id || '';
+
+  const disallowedPatterns = [
+    'image',
+    'transcribe',
+    'search',
+    'tts',
+    'codex',
+    'audio',
+    'realtime',
+  ];
+
+  if (!id.startsWith('gpt-') || model.owned_by === 'openai-internal')
+    return false;
+  if (disallowedPatterns.some((p) => id.includes(p))) return false;
+
+  return true;
 }
 
 function setModel(model) {

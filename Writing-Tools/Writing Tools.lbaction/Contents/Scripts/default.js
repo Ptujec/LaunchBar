@@ -147,8 +147,8 @@ function mainAction({
     body: {
       model: model,
       messages: [
-        { role: 'system', content: tool.persona },
-        { role: 'user', content: `${tool.prompt}${content}` },
+        { role: 'developer', content: tool.persona },
+        { role: 'user', content: `${tool.prompt} ${content}` },
       ],
     },
   });
