@@ -6,27 +6,6 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
-// GLOBAL VARIABLES
-
-const recommendedModel = 'gpt-5.4-mini';
-const apiKey = Action.preferences.apiKey;
-const chatsFolder = `${Action.supportPath}/chats/`;
-const presets = File.readJSON(`${Action.path}/Contents/Resources/presets.json`);
-const userPresetsPath = `${Action.supportPath}/userPresets.json`;
-const currentActionVersion = Action.version;
-const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '4.0';
-const logPath = `${Action.supportPath}/askchatgpt-usage.log`;
-
-// HELPER FUNCTIONS
-
-function isValidUuid(uuid) {
-  const uuidRegex =
-    /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-  return uuidRegex.test(uuid);
-}
-
-// SETTING FUNCTIONS
-
 function settings() {
   const defaultPreset = getDefaultPreset();
 
@@ -76,40 +55,91 @@ function settings() {
   ];
 }
 
-function setSystemPrompt(presetId) {
-  Action.preferences.defaultSystemPromptId = presetId;
-  return settings();
+// CHAT FILES AND METADATA
+
+function titleCleanup(title) {
+  title = title.replace(/\.md$/, '').trim();
+  if (title.includes('_')) {
+    // Format: {title}_{uuid}
+    // Remove the UUID at the end (everything after the last underscore)
+    return title.substring(0, title.lastIndexOf('_'));
+  }
+  return title;
 }
 
-function showModels() {
-  const currentModel = Action.preferences.model || recommendedModel;
+function cleanupOrphanedChatMetadata() {
+  if (!File.exists(chatsFolder) || !Action.preferences.chatMetadata) return;
 
-  const result = HTTP.getJSON('https://api.openai.com/v1/models', {
-    headerFields: {
-      Authorization: `Bearer ${Action.preferences.apiKey}`,
-    },
+  // Get all existing chat file IDs
+  const chatFiles = File.getDirectoryContents(chatsFolder, {
+    includeHidden: false,
   });
 
-  if (result.response.status !== 200) {
-    return LaunchBar.alert(
-      `Error ${result.response.status}`,
-      result.response.localizedStatus,
-    );
+  // Extract UUIDs from filenames: {title}_{uuid}.md
+  const existingChatIds = new Set(
+    chatFiles
+      .map((file) => {
+        const withoutExtension = file.replace(/\.md$/, '');
+        const potentialUuid = withoutExtension.split('_').pop();
+        return isValidUuid(potentialUuid) ? potentialUuid : undefined;
+      })
+      .filter(Boolean),
+  );
+
+  // Remove orphaned entries
+  for (const id of Object.keys(Action.preferences.chatMetadata)) {
+    if (!existingChatIds.has(id)) {
+      delete Action.preferences.chatMetadata[id];
+    }
+  }
+}
+
+function getMostRecentChatInfo() {
+  // Get the most recent chat file from the filesystem
+  if (!File.exists(chatsFolder)) return undefined;
+
+  const chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
+    .trim()
+    .split('\n');
+
+  if (!chatFiles[0] || chatFiles[0] === '') return undefined;
+
+  const mostRecentFile = chatFiles[0];
+  const filePath = `${chatsFolder}${mostRecentFile}`;
+  const chatId = extractChatId(filePath);
+
+  const chatMetadata = Action.preferences.chatMetadata?.[chatId]; // currently lastEdited and presetId
+
+  if (!chatMetadata) {
+    // for older chats that don't have metadata
+    const lastEdited = File.modificationDate(filePath);
+    const presetId = getDefaultPreset()?.id;
+    return { filePath, lastEdited, presetId };
   }
 
-  return result.data.data
-    .filter(filterModels)
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map((item) => ({
-      title: item.id,
-      icon:
-        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
-      action: 'setModel',
-      actionArgument: item.id,
-      badge:
-        item.id === recommendedModel ? 'Recommended'.localize() : undefined,
-    }));
+  return {
+    filePath,
+    ...chatMetadata,
+  };
 }
+
+function extractChatId(fileLocation) {
+  const fileName = File.displayName(fileLocation);
+  // Chat file format: {title}_{uuid}.md
+  const withoutExtension = fileName.replace(/\.md$/, '');
+  const parts = withoutExtension.split('_');
+  // UUID is at the end, so we take the last part if it's a valid UUID
+  const potentialUuid = parts[parts.length - 1];
+  return isValidUuid(potentialUuid) ? potentialUuid : undefined;
+}
+
+function isValidUuid(uuid) {
+  const uuidRegex =
+    /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
+// MODELS
 
 function filterModels(model) {
   const id = model.id || '';
@@ -136,35 +166,31 @@ function setModel(model) {
   return settings();
 }
 
+// PRESETS
+
+function setSystemPrompt(presetId) {
+  Action.preferences.defaultSystemPromptId = presetId;
+  return settings();
+}
+
+function getDefaultPreset() {
+  const userPresets = File.readJSON(userPresetsPath).systemPrompts;
+  return (
+    userPresets.find(
+      (p) => p.id === Action.preferences.defaultSystemPromptId,
+    ) || userPresets[0]
+  );
+}
+
+function getPresetById(presetId) {
+  if (!presetId) return undefined;
+  const userPresets = File.readJSON(userPresetsPath);
+  return userPresets.systemPrompts?.find((p) => p.id === presetId);
+}
+
 function editPresets() {
   LaunchBar.hide();
   LaunchBar.openURL(File.fileURLForPath(userPresetsPath));
-}
-
-function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
-  const lastUsedParts = lastUsedActionVersion.split('.');
-  const currentParts = currentActionVersion.split('.');
-
-  for (let i = 0; i < currentParts.length; i++) {
-    const a = ~~currentParts[i];
-    const b = ~~lastUsedParts[i];
-    if (a > b) return true;
-    if (a < b) return false;
-  }
-  return false;
-}
-
-function isVersionBelow(version1, version2) {
-  const parts1 = version1.split('.');
-  const parts2 = version2.split('.');
-
-  for (let i = 0; i < parts2.length; i++) {
-    const a = ~~parts1[i];
-    const b = ~~parts2[i];
-    if (a < b) return true;
-    if (a > b) return false;
-  }
-  return false;
 }
 
 function comparePresets() {
@@ -214,6 +240,8 @@ function resetPresets() {
   File.writeJSON(presets, userPresetsPath);
   return settings();
 }
+
+// API KEY
 
 function setApiKey() {
   const response = LaunchBar.alert(
@@ -268,7 +296,7 @@ function checkAPIKey(apiKey) {
   return false;
 }
 
-// Editor selection
+// EDITOR SELECTION
 
 const excludedApps = [
   'com.ideasoncanvas.mindnode.macos',
@@ -345,7 +373,33 @@ function setEditor(item) {
   return settings();
 }
 
-// MIGRATION FUNCTIONS
+// ACTION SETUP CHECKS AND MIGRATION
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+
+  for (let i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i];
+    const b = ~~lastUsedParts[i];
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
+}
+
+function isVersionBelow(version1, version2) {
+  const parts1 = version1.split('.');
+  const parts2 = version2.split('.');
+
+  for (let i = 0; i < parts2.length; i++) {
+    const a = ~~parts1[i];
+    const b = ~~parts2[i];
+    if (a < b) return true;
+    if (a > b) return false;
+  }
+  return false;
+}
 
 function migrateUserPresets() {
   const userPresets = File.readJSON(userPresetsPath);
@@ -398,47 +452,9 @@ function migratePresetsWithIds() {
   }
 }
 
-// SHARED HELPER FUNCTIONS
+// LOGGING
 
-function getDefaultPreset() {
-  const userPresets = File.readJSON(userPresetsPath).systemPrompts;
-  return (
-    userPresets.find(
-      (p) => p.id === Action.preferences.defaultSystemPromptId,
-    ) || userPresets[0]
-  );
-}
-
-function cleanupOrphanedChatMetadata() {
-  if (!File.exists(chatsFolder) || !Action.preferences.chatMetadata) return;
-
-  // Get all existing chat file IDs
-  const chatFiles = File.getDirectoryContents(chatsFolder, {
-    includeHidden: false,
-  });
-
-  // Extract UUIDs from filenames: {title}_{uuid}.md
-  const existingChatIds = new Set(
-    chatFiles
-      .map((file) => {
-        const withoutExtension = file.replace(/\.md$/, '');
-        const potentialUuid = withoutExtension.split('_').pop();
-        return isValidUuid(potentialUuid) ? potentialUuid : undefined;
-      })
-      .filter(Boolean),
-  );
-
-  // Remove orphaned entries
-  for (const id of Object.keys(Action.preferences.chatMetadata)) {
-    if (!existingChatIds.has(id)) {
-      delete Action.preferences.chatMetadata[id];
-    }
-  }
-}
-
-// LOGGING FUNCTIONS
-
-function logTokenUsage(data, model, presetTitle, fileLocation) {
+function logTokenUsage(data, model, presetId, fileLocation) {
   const usage = data.usage || {};
 
   const timestamp = new Date().toISOString();
@@ -446,7 +462,7 @@ function logTokenUsage(data, model, presetTitle, fileLocation) {
     `[${timestamp}]`,
     `File: ${fileLocation || ''}`,
     `Model: ${model}`,
-    `Preset: ${presetTitle || 'default'}`,
+    `Preset: ${presetId}`,
     `Prompt Tokens: ${usage.prompt_tokens || 0}`,
     `Completion Tokens: ${usage.completion_tokens || 0}`,
     `Total Tokens: ${usage.total_tokens || 0}`,
