@@ -60,8 +60,7 @@ function settings() {
 function titleCleanup(title) {
   title = title.replace(/\.md$/, '').trim();
   if (title.includes('_')) {
-    // Format: {title}_{uuid}
-    // Remove the UUID at the end (everything after the last underscore)
+    // Remove the chat ID at the end (everything after the last underscore)
     return title.substring(0, title.lastIndexOf('_'));
   }
   return title;
@@ -75,14 +74,9 @@ function cleanupOrphanedChatMetadata() {
     includeHidden: false,
   });
 
-  // Extract UUIDs from filenames: {title}_{uuid}.md
   const existingChatIds = new Set(
     chatFiles
-      .map((file) => {
-        const withoutExtension = file.replace(/\.md$/, '');
-        const potentialUuid = withoutExtension.split('_').pop();
-        return isValidUuid(potentialUuid) ? potentialUuid : undefined;
-      })
+      .map((file) => extractChatId(`${chatsFolder}${file}`))
       .filter(Boolean),
   );
 
@@ -124,13 +118,13 @@ function getMostRecentChatInfo() {
 }
 
 function extractChatId(fileLocation) {
-  const fileName = File.displayName(fileLocation);
-  // Chat file format: {title}_{uuid}.md
-  const withoutExtension = fileName.replace(/\.md$/, '');
-  const parts = withoutExtension.split('_');
-  // UUID is at the end, so we take the last part if it's a valid UUID
-  const potentialUuid = parts[parts.length - 1];
-  return isValidUuid(potentialUuid) ? potentialUuid : undefined;
+  // Chat file format: {title}_{chatId}.md
+  const chatId = File.displayName(fileLocation)
+    ?.replace(/\.md$/, '')
+    ?.split('_')
+    ?.pop();
+
+  return isValidUuid(chatId) ? chatId : undefined;
 }
 
 function isValidUuid(uuid) {

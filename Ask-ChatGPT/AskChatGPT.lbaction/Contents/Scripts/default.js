@@ -311,13 +311,13 @@ function processResult(result, argument, presetId, recentPath, model) {
   const uuid = LaunchBar.execute('/usr/bin/uuidgen').trim();
   const fileLocation = recentPath || `${chatsFolder}${title}_${uuid}.md`;
 
-  openChatTextFile(argument, fileLocation, answer, presetId);
+  saveChatAndOpen(argument, fileLocation, answer, presetId);
 
   // LOG TOKEN USAGE
   logTokenUsage(data, model, presetId, fileLocation);
 }
 
-function openChatTextFile(argument, fileLocation, answer, presetId) {
+function saveChatAndOpen(argument, fileLocation, answer, presetId) {
   if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
 
   const quotedArgument = argument
@@ -355,11 +355,10 @@ function openChatTextFile(argument, fileLocation, answer, presetId) {
 
   // STORE CHAT METADATA
   const chatId = extractChatId(fileLocation);
-  // Only store metadata if chatId is a valid UUID (not for old files without UIDs)
-  if (chatId && isValidUuid(chatId)) {
-    if (!Action.preferences.chatMetadata) {
-      Action.preferences.chatMetadata = {};
-    }
+
+  if (chatId) {
+    if (!Action.preferences.chatMetadata) Action.preferences.chatMetadata = {};
+
     Action.preferences.chatMetadata[chatId] = {
       presetId,
       lastEdited: new Date().toISOString(),
