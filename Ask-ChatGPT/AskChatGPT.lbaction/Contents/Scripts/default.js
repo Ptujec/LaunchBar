@@ -6,8 +6,11 @@ by Christian Bender (@ptujec)
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
-- https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
+- https://developers.openai.com/api/reference/resources/responses/methods/create
+
+  Migration:
+    - https://developers.openai.com/api/docs/guides/migrate-to-responses?update-item-definitions=responses#migrating-from-chat-completions
 */
 
 String.prototype.localizationTable = 'default';
@@ -44,8 +47,6 @@ function run(argument) {
   }
 
   if (!apiKey) return setApiKey();
-
-  // run cleanup here
 
   if (isNewerVersion(lastUsedActionVersion, currentActionVersion)) {
     // Migrate presets to add ids if upgrading from version below 4.0
@@ -98,31 +99,22 @@ function options(item) {
   };
 
   const recentChatInfo = getMostRecentChatInfo();
-  const hasRecentChat =
-    recentChatInfo?.filePath && File.exists(recentChatInfo.filePath);
 
-  const continueChatItem = hasRecentChat
-    ? (() => {
-        const recentFileTitle = titleCleanup(
-          File.displayName(recentChatInfo.filePath),
-        );
-
-        return {
-          title: `${'Continue'.localize()}: ${recentFileTitle}`,
-          subtitle: `Prompt: ${argument}`,
-          alwaysShowsSubtitle: true,
-          icon: 'weasel_watch',
-          action: 'ask',
-          actionArgument: {
-            argument,
-            addRecent: true,
-            presetId: recentChatInfo.presetId,
-            recentPath: recentChatInfo.filePath,
-            recentFileTitle,
-          },
-          actionRunsInBackground: true,
-        };
-      })()
+  const continueChatItem = recentChatInfo
+    ? {
+        title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
+        subtitle: `Prompt: ${argument}`,
+        alwaysShowsSubtitle: true,
+        icon: 'weasel_watch',
+        action: 'ask',
+        actionArgument: {
+          argument,
+          addRecent: true,
+          recentPath: recentChatInfo.filePath,
+          recentFileTitle: recentChatInfo.title,
+        },
+        actionRunsInBackground: true,
+      }
     : undefined;
 
   const clipboardItem = {
@@ -146,9 +138,9 @@ function options(item) {
 
   // Check if need to reverse order (recent edited less than 5 minutes ago)
   const shouldReverse =
-    hasRecentChat &&
     recentChatInfo?.lastEdited &&
     (new Date() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
+
   const items = shouldReverse
     ? [baseItems[1], baseItems[0], ...baseItems.slice(2)]
     : baseItems;
@@ -171,10 +163,8 @@ function options(item) {
 
 function ask(item) {
   let argument = item.argument.trim();
-  let recentPath;
-  let presetId = item.presetId ?? getDefaultPreset()?.id;
 
-  // ITEMS WITH CLIPBOARD CONTENT
+  // ADD CLIPBOARD CONTENT
   if (item.addClipboard) {
     const clipboard = LaunchBar.getClipboardString().trim();
     const displayClipboard =
@@ -194,23 +184,43 @@ function ask(item) {
 
   LaunchBar.hide();
 
-  // CONTINUE PREVIOUS CHAT
-  let prompt = argument;
+  // API OPTIONS BASED ON CHAT EXISTENCE OF PREVIOUS RESPONSE ID
+  const model = item.model ?? Action.preferences.model ?? recommendedModel;
+  const recentPath = item.recentPath;
+
   let chatResponseProperties = {};
+  let previousResponseId, systemPrompt, effort, presetId;
 
   if (item.addRecent) {
-    recentPath = item.recentPath;
     if (!File.exists(recentPath)) return;
 
-    const text = File.readText(recentPath).replace(/^> /gm, '');
-    prompt = `${text}...${argument}\n`;
+    const chatFileId = extractChatFileId(recentPath);
+    if (!chatFileId) return;
+
+    previousResponseId =
+      Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
+
+    // NOTE: We could handle this gracefully by adding the existing text to the prompt … but I don't think it's worth the complexity
+    if (!previousResponseId) {
+      LaunchBar.alert(
+        'No previous response found',
+        'The responses API implementation requires a previous response ID',
+      ); // TODO: localize
+      return;
+    }
+
     chatResponseProperties = {
       content: {
         type: 'string',
-        description: 'Main assistant response',
+        description: 'Main response',
       },
     };
   } else {
+    const defaultPreset = getDefaultPreset();
+    presetId = item.presetId ?? defaultPreset?.id;
+    systemPrompt =
+      getPresetById(presetId)?.systemPrompt ?? defaultPreset?.systemPrompt;
+
     chatResponseProperties = {
       title: {
         type: 'string',
@@ -218,43 +228,36 @@ function ask(item) {
       },
       content: {
         type: 'string',
-        description: 'Main assistant response',
+        description: 'Main response',
       },
     };
+
+    effort = supportsReasoningEffort(model)
+      ? getReasoningEffort(model)
+      : undefined;
   }
 
-  // MODEL
-  const model = Action.preferences.model ?? recommendedModel;
-
-  // SYSTEM PROMPT
-  const defaultPreset = getDefaultPreset();
-  let systemPrompt = defaultPreset.systemPrompt;
-
-  if (item.addRecent) {
-    const chatId = extractChatId(item.recentPath);
-    const chatMetadata = Action.preferences.chatMetadata?.[chatId];
-    const recentPresetId = chatMetadata?.presetId ?? presetId;
-    const recentPreset = getPresetById(recentPresetId) ?? defaultPreset;
-
-    systemPrompt = recentPreset.systemPrompt;
-    presetId = recentPreset.id;
-  }
+  LaunchBar.log(
+    'effort: ' + effort,
+    'presetId: ' + presetId,
+    'systemPrompt: ' + systemPrompt,
+    'previousResponseId: ' + previousResponseId,
+  );
 
   // API CALL
-  const result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
+  const result = HTTP.postJSON('https://api.openai.com/v1/responses', {
     headerFields: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: {
       model,
-      messages: [
-        { role: 'developer', content: systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
+      instructions: systemPrompt,
+      input: argument,
+      previous_response_id: previousResponseId,
+      reasoning: effort ? { effort } : undefined,
+      text: {
+        format: {
           name: 'chat_response',
           schema: {
             type: 'object',
@@ -262,6 +265,7 @@ function ask(item) {
             required: Object.keys(chatResponseProperties),
             additionalProperties: false,
           },
+          type: 'json_schema',
           strict: true,
         },
       },
@@ -269,6 +273,11 @@ function ask(item) {
   });
 
   // File.writeJSON(result, Action.supportPath + '/test.json');
+  // File.writeJSON(
+  //   JSON.parse(result.data),
+  //   Action.supportPath + '/testData.json',
+  // );
+
   // const result = File.readJSON(Action.supportPath + '/test.json');
 
   processResult(result, argument, presetId, recentPath, model);
@@ -294,30 +303,27 @@ function processResult(result, argument, presetId, recentPath, model) {
 
   // PARSE RESULT
   const data = JSON.parse(result.data);
-  const content = JSON.parse(data.choices[0].message.content);
-  const answer = content.content;
-  const title = content.title;
+  const text = JSON.parse(data.output[0].content[0].text);
+  const answer = text.content;
+  const title = text.title;
+  const chatId = data.id;
 
   // PLAY CONFIRMATION SOUND
-  LaunchBar.execute(
-    '/usr/bin/afplay',
-    '/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/acknowledgment_sent.caf',
-  );
+  const chatFileId = LaunchBar.execute('/bin/bash', './soundAndUuid.sh').trim();
 
   // COPY RESULT TO CLIPBOARD
   LaunchBar.setClipboardString(answer);
 
   // CREATE/OPEN CHAT TEXT FILE
-  const uuid = LaunchBar.execute('/usr/bin/uuidgen').trim();
-  const fileLocation = recentPath || `${chatsFolder}${title}_${uuid}.md`;
+  const fileLocation = recentPath || `${chatsFolder}${title}_${chatFileId}.md`;
 
-  saveChatAndOpen(argument, fileLocation, answer, presetId);
+  saveChatAndOpen(argument, fileLocation, answer, chatId);
 
   // LOG TOKEN USAGE
   logTokenUsage(data, model, presetId, fileLocation);
 }
 
-function saveChatAndOpen(argument, fileLocation, answer, presetId) {
+function saveChatAndOpen(argument, fileLocation, answer, chatId) {
   if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
 
   const quotedArgument = argument
@@ -328,7 +334,7 @@ function saveChatAndOpen(argument, fileLocation, answer, presetId) {
   let text = `${quotedArgument}\n\n---\n\n${answer}`;
 
   if (File.exists(fileLocation)) {
-    text = File.readText(fileLocation) + '\n\n---\n\n' + text;
+    text = `${File.readText(fileLocation)}\n\n---\n\n${text}`;
   }
 
   File.writeText(text, fileLocation);
@@ -354,14 +360,13 @@ function saveChatAndOpen(argument, fileLocation, answer, presetId) {
   // }
 
   // STORE CHAT METADATA
-  const chatId = extractChatId(fileLocation);
+  const chatFileId = extractChatFileId(fileLocation);
 
-  if (chatId) {
+  if (chatFileId) {
     if (!Action.preferences.chatMetadata) Action.preferences.chatMetadata = {};
 
-    Action.preferences.chatMetadata[chatId] = {
-      presetId,
-      lastEdited: new Date().toISOString(),
+    Action.preferences.chatMetadata[chatFileId] = {
+      previousResponseId: chatId,
     };
   }
 }
@@ -447,7 +452,7 @@ function showChats() {
       alwaysShowsSubtitle: true,
       icon: 'weasel_paper',
       path: filePath,
-      action: 'chatOptions',
+      action: 'handleChatFileAction',
       actionArgument: {
         filePath,
         fileTitle,
@@ -457,8 +462,13 @@ function showChats() {
   });
 }
 
-function chatOptions({ filePath, fileTitle }) {
+function handleChatFileAction({ filePath, fileTitle }) {
   LaunchBar.hide();
+
+  // RETRIEVE STORED METADATA FOR THIS CHAT
+  const chatFileId = extractChatFileId(filePath);
+  const previousResponseId =
+    Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
 
   if (LaunchBar.options.commandKey) {
     // LaunchBar.openURL(File.fileURLForPath(filePath));
@@ -466,30 +476,29 @@ function chatOptions({ filePath, fileTitle }) {
     return;
   }
 
+  if (!previousResponseId || LaunchBar.options.alternateKey) {
+    LaunchBar.openURL(File.fileURLForPath(filePath));
+    return;
+  }
+
   // Enter Prompt
-  const prompt = LaunchBar.executeAppleScript(
+  const argument = LaunchBar.executeAppleScript(
     `
-    set result to display dialog "${'Enter a follow up prompt for'.localize()}:\n\\"${fileTitle.trim()}\\"" with title "Ask ChatGPT" default answer ""
+    set result to display dialog "${'Enter a follow up prompt for'.localize()}:\n\\"${fileTitle}\\"" with title "Ask ChatGPT" default answer ""
     set result to text returned of result
     `,
   ).trim();
 
-  if (prompt === '') return;
-
-  // RETRIEVE STORED METADATA FOR THIS CHAT
-  const chatId = extractChatId(filePath);
-  const chatMetadata = Action.preferences.chatMetadata?.[chatId];
+  if (argument === '') return;
 
   const item = {
-    argument: prompt,
+    argument,
     addRecent: true,
     recentPath: filePath,
-    presetId: chatMetadata?.presetId,
+    recentTitle: fileTitle,
   };
 
   ask(item);
-
-  // TODO: Ask with attached file content … make sure we save to the correct file location …  maybe in the future we can also store things like the original system prompt etc. … but needs different structure
 }
 
 function showModels() {

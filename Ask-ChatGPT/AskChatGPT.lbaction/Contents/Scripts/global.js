@@ -8,6 +8,16 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 function settings() {
   const defaultPreset = getDefaultPreset();
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  const supportsReasoning = supportsReasoningEffort(currentModel);
+  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
+
+  const effortBadge =
+    currentEffort === 'xhigh'
+      ? 'XHigh'.localize()
+      : (
+          currentEffort.charAt(0).toUpperCase() + currentEffort.slice(1)
+        ).localize();
 
   return [
     {
@@ -27,10 +37,19 @@ function settings() {
     {
       title: 'Choose model'.localize(),
       icon: 'gearTemplate',
-      badge: Action.preferences.model ?? recommendedModel,
+      badge: currentModel,
       action: 'showModels',
       actionReturnsItems: true,
     },
+    supportsReasoning
+      ? {
+          title: 'Set Reasoning Effort'.localize(),
+          icon: 'brainTemplate',
+          badge: effortBadge,
+          action: 'showReasoningOptions',
+          actionReturnsItems: true,
+        }
+      : undefined,
     {
       title: 'Set API Key'.localize(),
       icon: 'keyTemplate',
@@ -57,6 +76,29 @@ function settings() {
 
 // CHAT FILES AND METADATA
 
+function getMostRecentChatInfo() {
+  if (!File.exists(chatsFolder)) return;
+
+  const chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
+    .trim()
+    .split('\n');
+
+  if (!chatFiles[0] || chatFiles[0] === '') return;
+
+  const mostRecentFile = chatFiles[0];
+  const filePath = `${chatsFolder}${mostRecentFile}`;
+  const chatFileId = extractChatFileId(filePath);
+  const previousResponseId =
+    Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
+
+  if (!previousResponseId) return;
+
+  const title = titleCleanup(File.displayName(filePath));
+  const lastEdited = File.modificationDate(filePath);
+
+  return { filePath, title, lastEdited, previousResponseId };
+}
+
 function titleCleanup(title) {
   title = title.replace(/\.md$/, '').trim();
   if (title.includes('_')) {
@@ -66,71 +108,40 @@ function titleCleanup(title) {
   return title;
 }
 
-function cleanupOrphanedChatMetadata() {
-  if (!File.exists(chatsFolder) || !Action.preferences.chatMetadata) return;
-
-  // Get all existing chat file IDs
-  const chatFiles = File.getDirectoryContents(chatsFolder, {
-    includeHidden: false,
-  });
-
-  const existingChatIds = new Set(
-    chatFiles
-      .map((file) => extractChatId(`${chatsFolder}${file}`))
-      .filter(Boolean),
-  );
-
-  // Remove orphaned entries
-  for (const id of Object.keys(Action.preferences.chatMetadata)) {
-    if (!existingChatIds.has(id)) {
-      delete Action.preferences.chatMetadata[id];
-    }
-  }
-}
-
-function getMostRecentChatInfo() {
-  // Get the most recent chat file from the filesystem
-  if (!File.exists(chatsFolder)) return undefined;
-
-  const chatFiles = LaunchBar.execute('/bin/ls', '-t', chatsFolder)
-    .trim()
-    .split('\n');
-
-  if (!chatFiles[0] || chatFiles[0] === '') return undefined;
-
-  const mostRecentFile = chatFiles[0];
-  const filePath = `${chatsFolder}${mostRecentFile}`;
-  const chatId = extractChatId(filePath);
-
-  const chatMetadata = Action.preferences.chatMetadata?.[chatId]; // currently lastEdited and presetId
-
-  if (!chatMetadata) {
-    // for older chats that don't have metadata
-    const lastEdited = File.modificationDate(filePath);
-    const presetId = getDefaultPreset()?.id;
-    return { filePath, lastEdited, presetId };
-  }
-
-  return {
-    filePath,
-    ...chatMetadata,
-  };
-}
-
-function extractChatId(fileLocation) {
-  // Chat file format: {title}_{chatId}.md
-  const chatId = File.displayName(fileLocation)
+function extractChatFileId(fileLocation) {
+  // Chat file format: {title}_{chatFileId}.md
+  const chatFileId = File.displayName(fileLocation)
     ?.replace(/\.md$/, '')
     ?.split('_')
     ?.pop();
 
-  return isValidUuid(chatId) ? chatId : undefined;
+  return isValidUuid(chatFileId) ? chatFileId : undefined;
 }
 
 function isValidUuid(uuid) {
   const uuidRegex =
     /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
   return uuidRegex.test(uuid);
+}
+
+function cleanupOrphanedChatMetadata() {
+  if (!File.exists(chatsFolder) || !Action.preferences.chatMetadata) return;
+
+  const chatFiles = File.getDirectoryContents(chatsFolder, {
+    includeHidden: false,
+  });
+
+  const existingChatFileIds = new Set(
+    chatFiles
+      .map((file) => extractChatFileId(`${chatsFolder}${file}`))
+      .filter(Boolean),
+  );
+
+  for (const id of Object.keys(Action.preferences.chatMetadata)) {
+    if (!existingChatFileIds.has(id)) {
+      delete Action.preferences.chatMetadata[id];
+    }
+  }
 }
 
 // MODELS
@@ -143,7 +154,6 @@ function filterModels(model) {
     'transcribe',
     'search',
     'tts',
-    'codex',
     'audio',
     'realtime',
   ];
@@ -158,6 +168,64 @@ function filterModels(model) {
 function setModel(model) {
   Action.preferences.model = model;
   return settings();
+}
+
+// REASONING EFFORT (Supported for gpt-5.2 and above)
+
+function showReasoningOptions() {
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
+  const availableEfforts = [
+    'default',
+    'none',
+    'minimal',
+    'low',
+    'medium',
+    'high',
+    'xhigh',
+  ];
+
+  return availableEfforts.map((value) => {
+    const titleText =
+      value === 'xhigh'
+        ? 'XHigh'
+        : value.charAt(0).toUpperCase() + value.slice(1);
+    return {
+      title: titleText.localize(),
+      icon:
+        currentEffort === value ? 'checkTemplate.png' : 'circleTemplate.png',
+      // badge: currentModel,
+      action: 'selectReasoningEffort',
+      actionArgument: value,
+    };
+  });
+}
+
+function selectReasoningEffort(effort) {
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  setReasoningEffort(currentModel, effort);
+  return settings();
+}
+
+function supportsReasoningEffort(model) {
+  const match = model.match(/gpt-(\d+\.\d+)/);
+  if (!match) return false;
+  const version = parseFloat(match[1]);
+  return version >= 5.2;
+}
+
+function getReasoningEffort(model) {
+  const prefKey = `reasoningEffort_${model}`;
+  return Action.preferences[prefKey];
+}
+
+function setReasoningEffort(model, effort) {
+  const prefKey = `reasoningEffort_${model}`;
+  if (!effort || effort === 'default') {
+    delete Action.preferences[prefKey];
+    return;
+  }
+  Action.preferences[prefKey] = effort;
 }
 
 // PRESETS
@@ -455,11 +523,16 @@ function logTokenUsage(data, model, presetId, fileLocation) {
   const logEntry = [
     `[${timestamp}]`,
     `File: ${fileLocation || ''}`,
-    `Model: ${model}`,
     `Preset: ${presetId}`,
-    `Prompt Tokens: ${usage.prompt_tokens || 0}`,
-    `Completion Tokens: ${usage.completion_tokens || 0}`,
-    `Total Tokens: ${usage.total_tokens || 0}`,
+    `Instructions: ${data.instructions}`,
+    `Status: ${data.status}`,
+    `Previous Response ID: ${data.previous_response_id}`,
+    `Model (preset): ${model}`,
+    `Model (actual): ${data.model}`,
+    `Temperature: ${data.temperature}`,
+    `Output Tokens: ${usage.output_tokens}`,
+    `Input Tokens: ${usage.input_tokens}`,
+    `Total Tokens: ${usage.total_tokens}`,
     usage.prompt_tokens_details?.cached_tokens
       ? `Cached Tokens: ${usage.prompt_tokens_details.cached_tokens}`
       : '',

@@ -31,6 +31,7 @@ Access the settings with `option` + `enter`. Here you can:
 
 - Choose a default system prompt
 - Choose between models
+- Choose the reasoning effort level (for model gpt-5.2 and above)
 - Choose an editor/viewer to display the resulting chats 
 - Set or reset your API key
 - Update, reset or customize system prompts 
