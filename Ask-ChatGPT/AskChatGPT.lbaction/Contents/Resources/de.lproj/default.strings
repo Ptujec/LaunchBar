@@ -39,6 +39,7 @@
 "No Usage Log!" = "Kein Nutzungsprotokoll!";
 "The usage log file does not exist." = "Die Protokolldatei ist nicht vorhanden.";
 "Set Reasoning Effort" = "Denkaufwand einstellen";
+"View Only" = "Nur anzeigen";
 "Default" = "Standard";
 "None" = "Ohne";
 "Minimal" = "Minimal";
