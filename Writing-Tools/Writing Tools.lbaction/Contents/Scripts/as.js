@@ -1,5 +1,5 @@
 /*
-Applescripts for Writing Tools Action for LaunchBar (using Chat GPT) 
+Applescripts for Writing Tools Action for LaunchBar (using Chat GPT)
 by Christian Bender (@ptujec)
 2024-12-18
 */

@@ -7,16 +7,16 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-http
-- https://platform.openai.com/docs/api-reference/chat
-- https://platform.openai.com/docs/models#model-endpoint-compatibility
-- https://platform.openai.com/docs/guides/chat/introduction
-- https://platform.openai.com/docs/guides/prompt-engineering
+- https://developers.openai.com/api/reference/resources/responses/methods/create
+
+  Migration:
+    - https://developers.openai.com/api/docs/guides/migrate-to-responses?update-item-definitions=responses#migrating-from-chat-completions
 
 
 TODO:
-- savety check only with longer text? Needs better way to select text (see issue above)
-- make faster detect frontmost and get contents?
-- code cleanup
+- model selection per prompt … or just for custom prompt?
+- use system prompt instead of persona terminology (check AskGPT action for migration)
+- savety check only with longer text? Needs better way to select text
 */
 
 String.prototype.localizationTable = 'default';
@@ -60,7 +60,6 @@ function run(argument) {
   if (!argument) {
     if (!prefs.excludedApps?.map((app) => app.appID).includes(frontmostAppID)) {
       if (confirmationDialog() === false) {
-        // if user canceled
         LaunchBar.hide();
         return;
       }
@@ -140,18 +139,26 @@ function mainAction({
   }
 
   // API CALL
-  const result = HTTP.postJSON('https://api.openai.com/v1/chat/completions', {
+  const result = HTTP.postJSON('https://api.openai.com/v1/responses', {
     headerFields: {
       Authorization: `Bearer ${prefs.apiKey}`,
+      'Content-Type': 'application/json',
     },
     body: {
-      model: model,
-      messages: [
-        { role: 'developer', content: tool.persona },
-        { role: 'user', content: `${tool.prompt} ${content}` },
-      ],
+      model,
+      instructions: tool.persona,
+      input: `${tool.prompt} ${content}`,
+      store: false,
     },
   });
+
+  // File.writeJSON(result, Action.supportPath + '/test.json');
+  // File.writeJSON(
+  //   JSON.parse(result.data),
+  //   Action.supportPath + '/testData.json',
+  // );
+
+  // const result = File.readJSON(Action.supportPath + '/test.json');
 
   processResult({ result, content, hasArgument, frontmostAppID, model, tool });
 }
@@ -166,7 +173,6 @@ function processResult({
 }) {
   const prefs = Action.preferences;
 
-  // ERROR HANDLING
   if (!result.response) {
     LaunchBar.alert(result.error || 'Unknown error occurred');
     return;
@@ -192,7 +198,7 @@ function processResult({
 
   // PARSE RESULT
   let data = JSON.parse(result.data);
-  const answer = data.choices[0].message.content.trim();
+  const answer = data.output[0]?.content[0]?.text.trim();
 
   // LOG TOKEN USAGE
   logTokenUsage(data, model, tool);
@@ -233,17 +239,18 @@ function pasteAnswerInWriter({ answer, hasArgument }) {
   LaunchBar.hide();
 
   const markAllAS = !hasArgument
-    ? // ? 'delay 0.2\nkeystroke "a" using command down\n'
-      'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
+    ? 'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
     : '';
+
   const authorName = prefs.iaAuthor;
 
-  const pasteInWriterAS =
-    'tell application "iA Writer" to activate\n' +
-    'tell application "System Events"\n' +
-    markAllAS +
-    `click menu item "${authorName}" of ${pasteEditsFromMenu}\n` +
-    'end tell\n';
+  const pasteInWriterAS = `
+    tell application "iA Writer" to activate\n
+    tell application "System Events"\n
+    ${markAllAS}
+    click menu item "${authorName}" of ${pasteEditsFromMenu}\n
+    end tell
+    `;
 
   LaunchBar.executeAppleScript(pasteInWriterAS);
 }
@@ -266,12 +273,12 @@ function compareTexts({ content, answer }) {
   File.writeText(answer, answerTextFile);
   File.writeText(content, originalTextFile);
 
-  LaunchBar.executeAppleScript(
-    'tell application "BBEdit"',
-    '	activate',
-    `	set theResult to compare file ("${originalTextFile}" as POSIX file) against file ("${answerTextFile}" as POSIX file)`,
-    'end tell',
-  );
+  LaunchBar.executeAppleScript(`
+    tell application "BBEdit"
+      activate
+      set theResult to compare file ("${originalTextFile}" as POSIX file) against file ("${answerTextFile}" as POSIX file)
+    end tell
+    `);
 }
 
 function playConfirmationSound() {
@@ -288,14 +295,5 @@ function confirmationDialog() {
     'Ok',
     'Cancel'.localize(),
   );
-  switch (response) {
-    case 0:
-      // Continue
-      doIt = true;
-      break;
-    case 1:
-      doIt = false;
-      break;
-  }
-  return doIt;
+  return response === 0;
 }

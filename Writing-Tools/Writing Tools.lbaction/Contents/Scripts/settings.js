@@ -407,16 +407,19 @@ function logTokenUsage(data, model, tool) {
   const timestamp = new Date().toISOString();
   const logEntry = [
     `[${timestamp}]`,
-    `Model: ${model}`,
+    `Model (preset): ${model}`,
+    `Model (actual): ${data.model}`,
     `Tool: ${tool.id} (${tool.title})`,
-    `Prompt Tokens: ${usage.prompt_tokens || 0}`,
-    `Completion Tokens: ${usage.completion_tokens || 0}`,
+    `Instructions: ${data.instructions}`,
+    `Status: ${data.status}`,
+    `Input Tokens: ${usage.input_tokens || 0}`,
+    `Output Tokens: ${usage.output_tokens || 0}`,
     `Total Tokens: ${usage.total_tokens || 0}`,
-    usage.prompt_tokens_details?.cached_tokens
-      ? `Cached Tokens: ${usage.prompt_tokens_details.cached_tokens}`
+    usage.input_tokens_details?.cached_tokens
+      ? `Cached Tokens: ${usage.input_tokens_details.cached_tokens}`
       : '',
-    usage.completion_tokens_details?.reasoning_tokens
-      ? `Reasoning Tokens: ${usage.completion_tokens_details.reasoning_tokens}`
+    usage.output_tokens_details?.reasoning_tokens
+      ? `Reasoning Tokens: ${usage.output_tokens_details.reasoning_tokens}`
       : '',
     '---',
   ]
