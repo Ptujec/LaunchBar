@@ -83,8 +83,9 @@ function options(item) {
   const { argument, systemPrompt, presetId } = item;
 
   const defaultPreset = getDefaultPreset();
-  const newChatIcon =
-    defaultPreset?.icon && defaultPreset?.icon !== 'weasel'
+  const newChatIcon = item.icon
+    ? item.icon
+    : defaultPreset?.icon && defaultPreset?.icon !== 'weasel'
       ? defaultPreset?.icon
       : 'weasel_blank';
 
@@ -376,11 +377,14 @@ function showSystemPrompts(argument) {
 
   const systemPrompts = File.readJSON(userPresetsPath).systemPrompts;
 
-  if (!systemPrompts)
+  if (!systemPrompts) {
     return {
       title: 'No system prompts found',
       alwaysShowsSubtitle: true,
     };
+  }
+
+  const defaultSystemPrompt = getDefaultPreset().id;
 
   return systemPrompts.map((item) => {
     const baseData = {
@@ -388,6 +392,7 @@ function showSystemPrompts(argument) {
       subtitle: argument ? `Prompt: ${argument}` : item.description.localize(),
       alwaysShowsSubtitle: true,
       icon: item.icon,
+      badge: item.id === defaultSystemPrompt ? 'Default'.localize() : undefined,
     };
 
     if (argument) {
@@ -435,7 +440,7 @@ function showChats() {
 
   return chatFiles.map((item) => {
     const filePath = `${chatsFolder}${item}`;
-    const fileTitle = titleCleanup(File.displayName(filePath));
+    const fileTitle = titleCleanup(item);
     const chatFileId = extractChatFileId(filePath);
     const previousResponseId =
       Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
