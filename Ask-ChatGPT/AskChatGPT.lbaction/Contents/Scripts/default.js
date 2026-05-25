@@ -80,86 +80,89 @@ function run(argument) {
 }
 
 function options(item) {
-  const { argument, systemPrompt, presetId } = item;
+  // Options to pick a custom model and if supported, reasoning effort level
+  if (LaunchBar.options.commandKey) {
+    if (item.useCustomModel && item.model) {
+      if (!supportsReasoningEffort(item.model) || item.effort) return;
+      return showReasoningEffortLevels(item);
+    }
+    return showModels({ ...item, useCustomModel: true });
+  }
+
+  const { argument, preset, model, effort } = item;
 
   const defaultPreset = getDefaultPreset();
-  const newChatIcon = item.icon
-    ? item.icon
-    : defaultPreset?.icon && defaultPreset?.icon !== 'weasel'
-      ? defaultPreset?.icon
-      : 'weasel_blank';
 
-  const newChatItem = {
+  const newChatIcon =
+    preset?.icon ||
+    (defaultPreset?.icon && defaultPreset.icon !== 'weasel'
+      ? defaultPreset.icon
+      : 'weasel_blank');
+
+  const badge = preset?.title;
+  const label = model ? `${model}${effort ? ` (${effort})` : ''}` : undefined;
+
+  const newChat = {
     title: 'New Chat'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
     icon: newChatIcon,
+    badge,
+    label,
     action: 'ask',
-    actionArgument: { argument },
+    actionArgument: { argument, preset, model, effort },
     actionRunsInBackground: true,
   };
 
-  const recentChatInfo = getMostRecentChatInfo();
-
-  const continueChatItem = recentChatInfo
-    ? {
-        title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
-        subtitle: `Prompt: ${argument}`,
-        alwaysShowsSubtitle: true,
-        icon: 'weasel_watch',
-        action: 'ask',
-        actionArgument: {
-          argument,
-          addRecent: true,
-          recentPath: recentChatInfo.filePath,
-          recentFileTitle: recentChatInfo.title,
-        },
-        actionRunsInBackground: true,
-      }
-    : undefined;
-
-  const clipboardItem = {
+  const addClipboard = {
     title: 'Add Clipboard'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
-    action: 'ask',
     icon: 'weasel_clipboard',
+    badge,
+    label,
+    action: 'ask',
     actionArgument: {
-      argument: `${argument}\n`,
       addClipboard: true,
+      argument: `${argument}\n`,
+      preset,
+      model,
+      effort,
     },
     actionRunsInBackground: true,
   };
 
-  const baseItems = [
-    newChatItem,
-    ...(continueChatItem ? [continueChatItem] : []),
-    clipboardItem,
-  ];
+  let optionItems;
 
-  // Check if need to reverse order (recent edited less than 5 minutes ago)
-  const shouldReverse =
-    recentChatInfo?.lastEdited &&
-    (new Date() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
+  if (preset) {
+    optionItems = [newChat, addClipboard];
+  } else {
+    const recentChatInfo = getMostRecentChatInfo();
+    const isRecentlyEdited =
+      recentChatInfo?.lastEdited &&
+      (Date.now() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
 
-  const items = shouldReverse
-    ? [baseItems[1], baseItems[0], ...baseItems.slice(2)]
-    : baseItems;
+    const continueChat = {
+      title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
+      subtitle: `Prompt: ${argument}`,
+      alwaysShowsSubtitle: true,
+      icon: 'weasel_watch',
+      action: 'ask',
+      actionArgument: {
+        argument,
+        continueChat: true,
+        recentPath: recentChatInfo.filePath,
+        recentFileTitle: recentChatInfo.title,
+      },
+      actionRunsInBackground: true,
+    };
 
-  // Add badge and systemPrompt to all items if provided
-  if (!systemPrompt) return items;
+    optionItems = isRecentlyEdited
+      ? [continueChat, newChat, addClipboard]
+      : [newChat, continueChat, addClipboard];
+  }
 
-  const presetTitle = getPresetById(presetId)?.title;
-
-  return items.map((item) => ({
-    ...item,
-    badge: presetTitle,
-    actionArgument: {
-      ...item.actionArgument,
-      systemPrompt,
-      presetId,
-    },
-  }));
+  return optionItems;
 }
 
 function ask(item) {
@@ -192,7 +195,7 @@ function ask(item) {
   let chatResponseProperties = {};
   let previousResponseId, systemPrompt, effort, presetId;
 
-  if (item.addRecent) {
+  if (item.continueChat) {
     if (!File.exists(recentPath)) return;
 
     const chatFileId = extractChatFileId(recentPath);
@@ -218,9 +221,8 @@ function ask(item) {
     };
   } else {
     const defaultPreset = getDefaultPreset();
-    presetId = item.presetId ?? defaultPreset?.id;
-    systemPrompt =
-      getPresetById(presetId)?.systemPrompt ?? defaultPreset?.systemPrompt;
+    presetId = item.preset?.id ?? defaultPreset?.id;
+    systemPrompt = item.preset?.systemPrompt ?? defaultPreset?.systemPrompt;
 
     chatResponseProperties = {
       title: {
@@ -233,13 +235,16 @@ function ask(item) {
       },
     };
 
-    effort = supportsReasoningEffort(model)
-      ? getReasoningEffort(model)
-      : undefined;
+    effort = item.effort
+      ? item.effort
+      : supportsReasoningEffort(model)
+        ? getReasoningEffort(model)
+        : undefined;
   }
 
   LaunchBar.log(
     'effort: ' + effort,
+    'model: ' + model,
     'presetId: ' + presetId,
     'systemPrompt: ' + systemPrompt,
     'previousResponseId: ' + previousResponseId,
@@ -401,9 +406,7 @@ function showSystemPrompts(argument) {
         action: 'options',
         actionArgument: {
           argument,
-          presetId: item.id,
-          systemPrompt: item.systemPrompt,
-          icon: item.icon,
+          preset: item,
         },
       };
     }
@@ -502,7 +505,7 @@ function handleChatFileAction({ filePath, fileTitle }) {
 
   const item = {
     argument,
-    addRecent: true,
+    continueChat: true,
     recentPath: filePath,
     recentTitle: fileTitle,
   };
@@ -510,8 +513,9 @@ function handleChatFileAction({ filePath, fileTitle }) {
   ask(item);
 }
 
-function showModels() {
-  const currentModel = Action.preferences.model || recommendedModel;
+function showModels(requestItem) {
+  const defaultModel = Action.preferences.model || recommendedModel;
+  const useCustomModel = requestItem?.useCustomModel;
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
@@ -528,14 +532,53 @@ function showModels() {
 
   return result.data.data
     .filter(filterModels)
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .reverse()
     .map((item) => ({
       title: item.id,
       icon:
-        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
-      action: 'setModel',
-      actionArgument: item.id,
+        defaultModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+      action: useCustomModel ? 'options' : 'setModel',
+      actionArgument: useCustomModel
+        ? { ...requestItem, model: item.id }
+        : item.id,
       badge:
-        item.id === recommendedModel ? 'Recommended'.localize() : undefined,
+        item.id === recommendedModel
+          ? 'Recommended'.localize()
+          : item.id === defaultModel
+            ? 'Default'.localize()
+            : undefined,
     }));
+}
+
+function showReasoningEffortLevels(requestItem) {
+  const useCustomModel = requestItem?.useCustomModel;
+
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
+  const availableEfforts = [
+    'default',
+    'none',
+    'minimal',
+    'low',
+    'medium',
+    'high',
+    'xhigh',
+  ];
+
+  return availableEfforts.map((value) => {
+    const titleText =
+      value === 'xhigh'
+        ? 'XHigh'
+        : value.charAt(0).toUpperCase() + value.slice(1);
+    return {
+      title: titleText.localize(),
+      icon:
+        currentEffort === value ? 'checkTemplate.png' : 'circleTemplate.png',
+      badge: useCustomModel ? requestItem.model : undefined,
+      action: useCustomModel ? 'options' : 'selectReasoningEffort',
+      actionArgument: useCustomModel
+        ? { effort: value, ...requestItem }
+        : value,
+    };
+  });
 }

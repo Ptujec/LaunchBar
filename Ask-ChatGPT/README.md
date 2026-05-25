@@ -9,7 +9,7 @@ This action allows you to send prompts to ChatGPT.
 
 ## How It Works
 
-Press `space` to enter a new prompt. If you have already started a chat, you can continue it, or start a new one. (Note: You can use an alternative system prompt with `command` + `enter` when you are done typing your prompt.)
+Press `space` to enter a new prompt. If you have already started a chat, you can continue it or start a new one. (Note: You can use an alternative system prompt, model, and reasoning effort with `command` + `enter` when you are done typing your prompt. Keep holding `command` for each of the alternative options.)
 
 You can also press `enter` to see all your past chats and continue any of them. Just press `enter` again. You can also use Quicklook here.
 

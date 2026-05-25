@@ -46,7 +46,7 @@ function settings() {
           title: 'Set Reasoning Effort'.localize(),
           icon: 'brainTemplate',
           badge: effortBadge,
-          action: 'showReasoningOptions',
+          action: 'showReasoningEffortLevels',
           actionReturnsItems: true,
         }
       : undefined,
@@ -171,35 +171,6 @@ function setModel(model) {
 }
 
 // REASONING EFFORT (Supported for gpt-5.2 and above)
-
-function showReasoningOptions() {
-  const currentModel = Action.preferences.model ?? recommendedModel;
-  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
-  const availableEfforts = [
-    'default',
-    'none',
-    'minimal',
-    'low',
-    'medium',
-    'high',
-    'xhigh',
-  ];
-
-  return availableEfforts.map((value) => {
-    const titleText =
-      value === 'xhigh'
-        ? 'XHigh'
-        : value.charAt(0).toUpperCase() + value.slice(1);
-    return {
-      title: titleText.localize(),
-      icon:
-        currentEffort === value ? 'checkTemplate.png' : 'circleTemplate.png',
-      // badge: currentModel,
-      action: 'selectReasoningEffort',
-      actionArgument: value,
-    };
-  });
-}
 
 function selectReasoningEffort(effort) {
   const currentModel = Action.preferences.model ?? recommendedModel;
