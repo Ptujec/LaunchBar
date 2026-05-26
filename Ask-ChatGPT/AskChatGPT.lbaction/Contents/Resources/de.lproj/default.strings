@@ -47,3 +47,5 @@
 "Medium" = "Mittel";
 "High" = "Hoch";
 "XHigh" = "Extrem Hoch";
+"None" = "Ohne";
+"No system prompt" = "Kein Systemprompt";

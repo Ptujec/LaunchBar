@@ -56,6 +56,7 @@ function run(argument) {
     }
 
     const newPresetsList = comparePresets();
+
     if (newPresetsList) {
       const response = LaunchBar.alert(
         'Update presets?',
@@ -91,22 +92,14 @@ function options(item) {
 
   const { argument, preset, model, effort } = item;
 
-  const defaultPreset = getDefaultPreset();
-
-  const newChatIcon =
-    preset?.icon ||
-    (defaultPreset?.icon && defaultPreset.icon !== 'weasel'
-      ? defaultPreset.icon
-      : 'weasel_blank');
-
-  const badge = preset?.title;
+  const badge = preset?.id === 'none' ? undefined : preset?.title.localize();
   const label = model ? `${model}${effort ? ` (${effort})` : ''}` : undefined;
 
   const newChat = {
     title: 'New Chat'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
-    icon: newChatIcon,
+    icon: 'weasel_blank',
     badge,
     label,
     action: 'ask',
@@ -134,7 +127,7 @@ function options(item) {
 
   let optionItems;
 
-  if (preset) {
+  if (preset && preset.id !== getDefaultPreset().id) {
     optionItems = [newChat, addClipboard];
   } else {
     const recentChatInfo = getMostRecentChatInfo();
@@ -242,11 +235,13 @@ function ask(item) {
         : undefined;
   }
 
+  const instructions = presetId !== 'none' ? systemPrompt : undefined;
+
   LaunchBar.log(
     'effort: ' + effort,
     'model: ' + model,
     'presetId: ' + presetId,
-    'systemPrompt: ' + systemPrompt,
+    'instructions: ' + instructions,
     'previousResponseId: ' + previousResponseId,
   );
 
@@ -258,7 +253,7 @@ function ask(item) {
     },
     body: {
       model,
-      instructions: systemPrompt,
+      instructions,
       input: argument,
       previous_response_id: previousResponseId,
       reasoning: effort ? { effort } : undefined,
@@ -461,7 +456,7 @@ function showChats() {
       title: fileTitle,
       subtitle: dateString,
       alwaysShowsSubtitle: true,
-      icon: 'weasel_paper',
+      // icon: 'weasel_paper',
       badge: previousResponseId ? undefined : 'View Only'.localize(),
       path: filePath,
       action: 'handleChatFileAction',

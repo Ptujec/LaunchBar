@@ -8,6 +8,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 function settings() {
   const defaultPreset = getDefaultPreset();
+
   const currentModel = Action.preferences.model ?? recommendedModel;
   const supportsReasoning = supportsReasoningEffort(currentModel);
   const currentEffort = getReasoningEffort(currentModel) ?? 'default';
@@ -23,7 +24,7 @@ function settings() {
     {
       title: 'Choose Default System Prompt'.localize(),
       icon: defaultPreset?.icon ?? 'weasel',
-      badge: defaultPreset?.title,
+      badge: defaultPreset?.title.localize(),
       children: showSystemPrompts(),
     },
     {
@@ -231,13 +232,14 @@ function comparePresets() {
 
   const userPresets = File.readJSON(userPresetsPath);
   const allPresets = presets.systemPrompts ? [...presets.systemPrompts] : [];
-  const userPresetTitles = userPresets.systemPrompts
-    ? [...userPresets.systemPrompts].map((item) => item.title)
-    : [];
+  const userPresetIds = new Set(
+    userPresets.systemPrompts?.map((item) => item.id).filter(Boolean) ?? [],
+  );
 
   return allPresets
-    .filter((item) => !userPresetTitles.includes(item.title))
-    .map((item) => item.title)
+    .filter((item) => !userPresetIds.has(item.id))
+    .map((item) => item.title || item.description || item.id)
+    .filter(Boolean)
     .join('\n');
 }
 
@@ -245,12 +247,13 @@ function updatePresets() {
   if (!File.exists(userPresetsPath)) return;
 
   const userPresets = File.readJSON(userPresetsPath);
-  const userSystemPromptTitles = userPresets?.systemPrompts?.map(
-    (item) => item.title,
+  const userSystemPromptIds = new Set(
+    userPresets?.systemPrompts?.map((item) => item.id).filter(Boolean) ?? [],
   );
-  const newSystemPrompts = presets?.systemPrompts?.filter(
-    (item) => !userSystemPromptTitles?.includes(item.title),
-  );
+  const newSystemPrompts =
+    presets?.systemPrompts?.filter(
+      (item) => !userSystemPromptIds.has(item.id),
+    ) ?? [];
 
   const updatedPresets = {
     ...userPresets,

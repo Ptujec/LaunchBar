@@ -1,11 +1,18 @@
 {
   "systemPrompts": [
     {
+      "id": "none",
+      "title": "None",
+      "systemPrompt": "",
+      "description": "No system prompt",
+      "icon": "weasel"
+    },
+    {
       "id": "assistant",
       "title": "Assistant",
       "systemPrompt": "You are a helpful assistant.",
       "description": "This is the default",
-      "icon": "weasel"
+      "icon": "weasel_with_glasses"
     },
     {
       "id": "developer",
