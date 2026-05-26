@@ -436,37 +436,39 @@ function showChats() {
     return;
   }
 
-  return chatFiles.map((item) => {
-    const filePath = `${chatsFolder}${item}`;
-    const fileTitle = titleCleanup(item);
-    const chatFileId = extractChatFileId(filePath);
-    const previousResponseId =
-      Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
+  return chatFiles
+    .filter((item) => item.endsWith('.md'))
+    .map((item) => {
+      const filePath = `${chatsFolder}${item}`;
+      const fileTitle = titleCleanup(item);
+      const chatFileId = extractChatFileId(filePath);
+      const previousResponseId =
+        Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
 
-    const dateString = LaunchBar.formatDate(
-      new Date(File.modificationDate(filePath)),
-      {
-        relativeDateFormatting: true,
-        timeStyle: 'short',
-        dateStyle: 'short',
-      },
-    );
+      const dateString = LaunchBar.formatDate(
+        new Date(File.modificationDate(filePath)),
+        {
+          relativeDateFormatting: true,
+          timeStyle: 'short',
+          dateStyle: 'short',
+        },
+      );
 
-    return {
-      title: fileTitle,
-      subtitle: dateString,
-      alwaysShowsSubtitle: true,
-      // icon: 'weasel_paper',
-      badge: previousResponseId ? undefined : 'View Only'.localize(),
-      path: filePath,
-      action: 'handleChatFileAction',
-      actionArgument: {
-        filePath,
-        fileTitle,
-      },
-      actionRunsInBackground: true,
-    };
-  });
+      return {
+        title: fileTitle,
+        subtitle: dateString,
+        alwaysShowsSubtitle: true,
+        // icon: 'weasel_paper',
+        badge: previousResponseId ? undefined : 'View Only'.localize(),
+        path: filePath,
+        action: 'handleChatFileAction',
+        actionArgument: {
+          filePath,
+          fileTitle,
+        },
+        actionRunsInBackground: true,
+      };
+    });
 }
 
 function handleChatFileAction({ filePath, fileTitle }) {
