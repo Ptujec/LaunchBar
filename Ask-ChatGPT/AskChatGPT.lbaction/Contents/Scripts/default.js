@@ -131,24 +131,27 @@ function options(item) {
     optionItems = [newChat, addClipboard];
   } else {
     const recentChatInfo = getMostRecentChatInfo();
+
     const isRecentlyEdited =
       recentChatInfo?.lastEdited &&
       (Date.now() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
 
-    const continueChat = {
-      title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
-      subtitle: `Prompt: ${argument}`,
-      alwaysShowsSubtitle: true,
-      icon: 'weasel_watch',
-      action: 'ask',
-      actionArgument: {
-        argument,
-        continueChat: true,
-        recentPath: recentChatInfo.filePath,
-        recentFileTitle: recentChatInfo.title,
-      },
-      actionRunsInBackground: true,
-    };
+    const continueChat = recentChatInfo
+      ? {
+          title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
+          subtitle: `Prompt: ${argument}`,
+          alwaysShowsSubtitle: true,
+          icon: 'weasel_watch',
+          action: 'ask',
+          actionArgument: {
+            argument,
+            continueChat: true,
+            recentPath: recentChatInfo.filePath,
+            recentFileTitle: recentChatInfo.title,
+          },
+          actionRunsInBackground: true,
+        }
+      : {};
 
     optionItems = isRecentlyEdited
       ? [continueChat, newChat, addClipboard]
