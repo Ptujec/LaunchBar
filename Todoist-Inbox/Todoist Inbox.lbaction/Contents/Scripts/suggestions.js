@@ -1,7 +1,7 @@
 /*
-Todoist Inbox Action for LaunchBar
+Todoist Inbox Action Suggestions Script for LaunchBar
 by Christian Bender (@ptujec)
-2024-10-04
+2026-05-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -77,7 +77,7 @@ function getAppLinks() {
 
     let url = info[0]?.trim();
     const title = info[1] ? cleanupTitle(info[1]) : url;
-    const time = info[2] ? info[2].trim() : null;
+    const time = info[2] ? info[2].trim() : undefined;
 
     if (!url || url === '') {
       return {
@@ -267,7 +267,7 @@ function handleTwitchUrl(url, time) {
   const baseUrl = 'https://www.twitch.tv/videos/';
 
   const videoIdMatch = url.match(/\/videos\/(\d+)/);
-  if (!videoIdMatch) return [url, null];
+  if (!videoIdMatch) return [url, undefined];
 
   const videoId = videoIdMatch[1];
 

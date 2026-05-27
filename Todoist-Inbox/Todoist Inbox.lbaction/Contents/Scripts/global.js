@@ -1,7 +1,7 @@
 /*
-Todoist Inbox Action for LaunchBar
+Todoist Inbox Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2024-10-04
+2026-05-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -46,7 +46,7 @@ function buildWordsList(string) {
 }
 
 function parseDeadlineDate(string) {
-  if (!string) return null;
+  if (!string) return;
 
   const pattern = new Intl.DateTimeFormat(locale)
     .formatToParts(new Date())
@@ -59,7 +59,7 @@ function parseDeadlineDate(string) {
     );
 
   const dateParts = string.split(/[./-]/).filter(Boolean).map(Number);
-  if (dateParts.length < 2) return null;
+  if (dateParts.length < 2) return;
 
   const positions =
     dateParts.length === 2
@@ -70,7 +70,7 @@ function parseDeadlineDate(string) {
 
   try {
     const fullYear = year < 100 ? year + 2000 : year;
-    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return;
 
     // Create the date and check if it's in the past
     const date = new Date(fullYear, month - 1, day);
@@ -81,7 +81,7 @@ function parseDeadlineDate(string) {
       .toString()
       .padStart(2, '0')}`;
   } catch {
-    return null;
+    return;
   }
 }
 

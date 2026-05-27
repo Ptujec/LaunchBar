@@ -1,7 +1,7 @@
 /*
-Todoist Inbox Action for LaunchBar
+Todoist Inbox Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2024-10-04
+2026-05-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */

@@ -1,7 +1,7 @@
 /*
-Todoist Inbox Action for LaunchBar
+Todoist Inbox Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2025-04-05
+2026-05-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -116,7 +116,7 @@ function performSync(syncToken = '*') {
 
   if (result.error) {
     LaunchBar.alert('Todoist Action Error', result.error);
-    return null;
+    return;
   }
 
   if (!result.response || result.response.status !== 200) {
@@ -172,7 +172,7 @@ function formatChanges(type, { newIds, oldIds, updatedItems, archivedItems }) {
         ({ title, items }) =>
           `- ${title} (${items.length}):\n  • ${items.join('\n  • ')}`,
       )
-      .join('\n\n') || null
+      .join('\n\n') || undefined
   );
 }
 
@@ -428,7 +428,7 @@ function getRecentTasks() {
 
   if (result.error) {
     LaunchBar.alert('Todoist Action Error', result.error);
-    return null;
+    return;
   }
 
   if (result.response.status != 200) {

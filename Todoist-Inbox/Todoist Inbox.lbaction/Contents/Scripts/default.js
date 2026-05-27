@@ -1,7 +1,7 @@
 /*
-Todoist Inbox Action for LaunchBar
+Todoist Inbox Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2025-04-05
+2026-05-18
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
@@ -60,7 +60,9 @@ function run(argument) {
   }
 
   // Reminder
-  reminder = argument.includes(' !') ? argument.match(reReminder)[1] : null;
+  reminder = argument.includes(' !')
+    ? argument.match(reReminder)[1]
+    : undefined;
 
   argument = argument.includes(' !')
     ? argument.replace(reReminder, '')
@@ -69,7 +71,7 @@ function run(argument) {
   // Description
   description = argument.includes(': ')
     ? argument.match(reDescription)[1]
-    : null;
+    : undefined;
   argument = argument.includes(': ')
     ? argument.replace(reDescription, '')
     : argument;
@@ -731,7 +733,7 @@ function processAdvancedData(task) {
 function processPostResponse(result, reminder) {
   if (result.error) {
     LaunchBar.alert('Todoist Action Error', result.error);
-    return null;
+    return;
   }
 
   if (result.response.status != 200) {
@@ -747,7 +749,7 @@ function processPostResponse(result, reminder) {
     return;
   }
 
-  const data = eval(`[${result.data}]`)[0];
+  const data = JSON.parse(result.data);
   const taskID = data.id;
   const addedAt = data.added_at;
 
@@ -963,7 +965,7 @@ function parseReminderString(reminder, dueDate) {
   LaunchBar.log(
     `[Reminder Debug] Skipping reminder - could not convert reminder string`,
   );
-  return null;
+  return;
 }
 
 function convertTimeOffset(reminder) {
@@ -982,7 +984,7 @@ function convertTimeOffset(reminder) {
   // Extract hours and minutes from patterns like "30m", "2h30m", "1h", etc.
   const matches = reminder.match(/(\d+)\s*([hm])/gi) || [];
 
-  if (matches.length === 0) return null;
+  if (matches.length === 0) return;
 
   let hours = 0;
   let minutes = 0;
