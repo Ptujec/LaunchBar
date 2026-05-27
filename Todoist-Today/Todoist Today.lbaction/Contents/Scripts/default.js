@@ -20,7 +20,7 @@ function run() {
   if (!Action.preferences.apiToken) return setApiKey();
 
   try {
-    const response = HTTP.getJSON(
+    const result = HTTP.getJSON(
       'https://todoist.com/api/v1/tasks/filter?query=today&limit=30',
       {
         headerFields: {
@@ -29,33 +29,25 @@ function run() {
       },
     );
 
-    if (response.error) {
-      if (response.response?.localizedStatus === 'forbidden') {
-        LaunchBar.alert('Invalid API Token', 'Please set a valid API token');
-        setApiKey();
-      } else {
-        LaunchBar.alert(
-          'API Error',
-          response.error || 'Unknown error occurred',
-        );
+    if (result.error) {
+      LaunchBar.alert('Todoist Action Error', result.error);
+      return;
+    }
+
+    if (result.response.status != 200) {
+      LaunchBar.alert(
+        'Todoist Action Error',
+        `${result.response.status}: ${result.response.localizedStatus}: ${result.data}`,
+      );
+
+      if (result.response.status == 401) {
+        Action.preferences.apiToken = undefined; // to promt API token entry dialog
       }
+
       return;
     }
 
-    // Ensure we have valid data with results array
-    if (
-      !response.data ||
-      !response.data.results ||
-      !Array.isArray(response.data.results)
-    ) {
-      LaunchBar.alert('Error', 'Invalid response format from Todoist API');
-      return;
-    }
-
-    // File.writeJSON(response, Action.supportPath + '/test.json');
-    // const response = File.readJSON(Action.supportPath + '/test.json');
-
-    const tasks = response.data.results;
+    const tasks = result.data.results;
 
     // File.writeText(data, Action.supportPath + '/testData.json');
 
