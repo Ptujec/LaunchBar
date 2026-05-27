@@ -9,9 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Todoist Today</string>
 	<key>CFBundleVersion</key>
-	<string>2.4.1</string>
-	<key>LBAssociatedApplication</key>
-	<string>com.todoist.mac.Todoist</string>
+	<string>2.5</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -22,10 +20,10 @@
 		<string>Select Todoist and press space (⎵) or right arrow (→) to show the tasks for today. </string>
 		<key>LBTwitter</key>
 		<string>@ptujec</string>
+		<key>LBUpdateURL</key>
+		<string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Todoist-Today/Todoist%20Today.lbaction/Contents/Info.plist</string>
 		<key>LBWebsiteURL</key>
 		<string>https://github.com/Ptujec/LaunchBar/tree/master/Todoist-Today</string>
-		<key>LBUpdateURL</key>
-    <string>https://raw.githubusercontent.com/Ptujec/LaunchBar/master/Todoist-Today/Todoist%20Today.lbaction/Contents/Info.plist</string>
 	</dict>
 	<key>LBRequiredApplication</key>
 	<string>com.todoist.mac.Todoist</string>
@@ -35,8 +33,6 @@
 		<dict>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
