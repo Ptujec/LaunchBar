@@ -127,7 +127,8 @@ function options(item) {
 
   let optionItems;
 
-  if (preset && preset.id !== getDefaultPreset().id) {
+  // if (preset && preset.id !== getDefaultPreset().id) {
+  if (preset) {
     optionItems = [newChat, addClipboard];
   } else {
     const recentChatInfo = getMostRecentChatInfo();
@@ -136,9 +137,14 @@ function options(item) {
       recentChatInfo?.lastEdited &&
       (Date.now() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
 
+    addClipboard.actionArgument = {
+      ...addClipboard.actionArgument,
+      recentPath: recentChatInfo?.filePath,
+    };
+
     const continueChat = recentChatInfo
       ? {
-          title: `${'Continue'.localize()}: ${recentChatInfo.title}`,
+          title: `${'Continue Chat'.localize()}: ${recentChatInfo.title}`,
           subtitle: `Prompt: ${argument}`,
           alwaysShowsSubtitle: true,
           icon: 'weasel_watch',
@@ -147,7 +153,6 @@ function options(item) {
             argument,
             continueChat: true,
             recentPath: recentChatInfo.filePath,
-            recentFileTitle: recentChatInfo.title,
           },
           actionRunsInBackground: true,
         }
@@ -163,6 +168,7 @@ function options(item) {
 
 function ask(item) {
   let argument = item.argument.trim();
+  let continueChat = item.continueChat;
 
   // ADD CLIPBOARD CONTENT
   if (item.addClipboard) {
@@ -173,11 +179,13 @@ function ask(item) {
     const response = LaunchBar.alert(
       argument.trim(),
       `"${displayClipboard}"`,
-      'Ok',
+      'New Chat'.localize(),
+      'Continue Chat'.localize(),
       'Cancel',
     );
 
-    if (response !== 0) return;
+    if (response === 2) return;
+    if (response === 1) continueChat = true;
 
     argument += `\n\n${clipboard}`;
   }
@@ -191,7 +199,7 @@ function ask(item) {
   let chatResponseProperties = {};
   let previousResponseId, systemPrompt, effort, presetId;
 
-  if (item.continueChat) {
+  if (continueChat) {
     if (!File.exists(recentPath)) return;
 
     const chatFileId = extractChatFileId(recentPath);
@@ -242,6 +250,7 @@ function ask(item) {
 
   LaunchBar.log(
     'effort: ' + effort,
+    'continueChat: ' + continueChat,
     'model: ' + model,
     'presetId: ' + presetId,
     'instructions: ' + instructions,
@@ -284,10 +293,17 @@ function ask(item) {
 
   // const result = File.readJSON(Action.supportPath + '/test.json');
 
-  processResult(result, argument, presetId, recentPath, model);
+  processResult(result, argument, presetId, continueChat, recentPath, model);
 }
 
-function processResult(result, argument, presetId, recentPath, model) {
+function processResult(
+  result,
+  argument,
+  presetId,
+  continueChat,
+  recentPath,
+  model,
+) {
   // Error handling
   if (!result.response) {
     LaunchBar.alert(result.error);
@@ -319,7 +335,10 @@ function processResult(result, argument, presetId, recentPath, model) {
   LaunchBar.setClipboardString(answer);
 
   // CREATE/OPEN CHAT TEXT FILE
-  const fileLocation = recentPath || `${chatsFolder}${title}_${chatFileId}.md`;
+  const fileLocation =
+    recentPath && continueChat
+      ? recentPath
+      : `${chatsFolder}${title}_${chatFileId}.md`;
 
   saveChatAndOpen(argument, fileLocation, answer, chatId);
 

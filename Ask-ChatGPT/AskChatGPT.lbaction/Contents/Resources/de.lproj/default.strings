@@ -31,8 +31,7 @@
 "Default Editor" = "Standard-Editor";
 "New Chat" = "Neuer Chat";
 "Add Clipboard" = "Zwischenablage hinzufügen";
-"Continue" = "Fortsetzen";
-"Continue Older Chats" = "Fortsetzen älterer Chats";
+"Continue Chat" = "Chat fortsetzen";
 "Press space to enter a prompt." = "Drücken Sie Leertaste, um einen Prompt einzugeben.";
 "Enter a follow up prompt for" = "Gebe einen weiteren Prompt ein für";
 "Show Usage Log" = "Nutzungsprotokoll anzeigen";
