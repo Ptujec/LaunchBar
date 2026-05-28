@@ -111,7 +111,7 @@ function options(item) {
     title: 'Add Clipboard'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
-    icon: 'weasel_clipboard',
+    icon: 'weasel_clipboard_plus',
     badge,
     label,
     action: 'ask',
@@ -144,10 +144,10 @@ function options(item) {
 
     const continueChat = recentChatInfo
       ? {
-          title: `${'Continue Chat'.localize()}: ${recentChatInfo.title}`,
+          title: `${'Continue Chat'.localize()}: "${recentChatInfo.title}"`,
           subtitle: `Prompt: ${argument}`,
           alwaysShowsSubtitle: true,
-          icon: 'weasel_watch',
+          icon: 'weasel_text',
           action: 'ask',
           actionArgument: {
             argument,

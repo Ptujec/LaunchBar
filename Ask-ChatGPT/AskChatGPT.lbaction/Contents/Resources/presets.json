@@ -12,7 +12,7 @@
       "title": "Assistant",
       "systemPrompt": "You are a helpful assistant.",
       "description": "This is the default",
-      "icon": "weasel_with_glasses"
+      "icon": "weasel_assistant"
     },
     {
       "id": "developer",
