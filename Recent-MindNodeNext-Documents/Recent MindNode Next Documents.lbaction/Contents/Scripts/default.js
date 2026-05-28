@@ -1,4 +1,4 @@
-/* 
+/*
 Recent MindNode Next Documents Action for LaunchBar
 by Christian Bender (@ptujec)
 2026-02-09
@@ -13,11 +13,11 @@ const supportDir = `${LaunchBar.homeDirectory}/Library/Containers/com.ideasoncan
 function run() {
   const version = getLatestVersion();
 
-  const darkMode =
-    File.readPlist('~/Library/Preferences/.GlobalPreferences.plist')
-      .AppleInterfaceStyle === 'Dark'; // takes a few seconds to update after changing
+  // const darkMode =
+  //   File.readPlist('~/Library/Preferences/.GlobalPreferences.plist')
+  //     .AppleInterfaceStyle === 'Dark'; // takes a few seconds to update after changing
 
-  const preview = darkMode ? 'darkPreview' : 'lightPreview';
+  // const preview = darkMode ? 'darkPreview' : 'lightPreview';
 
   const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
 
@@ -32,13 +32,13 @@ function run() {
         (b.lastViewedDate ?? -Infinity) - (a.lastViewedDate ?? -Infinity),
     )
     .map((obj) => {
-      let previewPath = File.pathForFileURL(obj[preview].fullSizeURL);
+      // let previewPath = File.pathForFileURL(obj[preview].fullSizeURL);
 
-      if (!File.exists(previewPath)) {
-        const altPreview = darkMode ? 'lightPreview' : 'darkPreview';
-        previewPath = File.pathForFileURL(obj[altPreview].fullSizeURL);
-        if (!File.exists(previewPath)) previewPath = undefined;
-      }
+      // if (!File.exists(previewPath)) {
+      //   const altPreview = darkMode ? 'lightPreview' : 'darkPreview';
+      //   previewPath = File.pathForFileURL(obj[altPreview].fullSizeURL);
+      //   if (!File.exists(previewPath)) previewPath = undefined;
+      // }
 
       const lastModifiedDate = LaunchBar.formatDate(
         new Date((obj.lastModifiedDate + 978307200) * 1000),
@@ -58,7 +58,7 @@ function run() {
         subtitle: lastModifiedDate,
         // alwaysShowsSubtitle: true,
         icon: 'com.ideasoncanvas.mindnode',
-        path: previewPath,
+        // path: previewPath,
         action: 'open',
         actionArgument: {
           url: `https://mindnode.com/document/${obj.id}#${encodeURI(
@@ -87,13 +87,13 @@ function open({ url, title, aliasString }) {
   if (LaunchBar.options.shiftKey) return LaunchBar.paste(url);
   if (LaunchBar.options.commandKey) {
     LaunchBar.executeAppleScript(`
-        tell application "MindNode" to activate
-        delay 0.6
-        tell application "System Events" 
+        tell application id "com.ideasoncanvas.mindnode" to activate
+        delay 1
+        tell application "System Events"
           keystroke "o" using {command down}
-          delay 0.4
+          delay 1
           keystroke "f" using {command down}
-          delay 0.2
+          delay 0.4
           keystroke "a" using {command down}
         end tell
 
@@ -104,6 +104,11 @@ function open({ url, title, aliasString }) {
     return;
   }
   LaunchBar.openURL(url);
+  // LaunchBar.executeAppleScript(`
+  //   tell application id "com.ideasoncanvas.mindnode" to activate
+  //   delay 0.4
+  //   tell application "LaunchBar" to perform action "Max Window Toggle"
+  //   `);
 }
 
 // HELPER FUNCTIONS
