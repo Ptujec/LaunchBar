@@ -176,16 +176,25 @@ function ask(item) {
     const displayClipboard =
       clipboard.length > 500 ? clipboard.substring(0, 500) + '…' : clipboard;
 
-    const response = LaunchBar.alert(
-      argument.trim(),
-      `"${displayClipboard}"`,
-      'New Chat'.localize(),
-      'Continue Chat'.localize(),
-      'Cancel',
-    );
-
-    if (response === 2) return;
-    if (response === 1) continueChat = true;
+    if (item.recentPath) {
+      const response = LaunchBar.alert(
+        argument.trim(),
+        `"${displayClipboard}"`,
+        'New Chat'.localize(),
+        'Continue Chat'.localize(),
+        'Cancel'.localize(),
+      );
+      if (response === 2) return;
+      if (response === 1) continueChat = true;
+    } else {
+      const response = LaunchBar.alert(
+        argument.trim(),
+        `"${displayClipboard}"`,
+        'Ok',
+        'Cancel'.localize(),
+      );
+      if (response !== 0) return;
+    }
 
     argument += `\n\n${clipboard}`;
   }
@@ -209,13 +218,7 @@ function ask(item) {
       Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
 
     // NOTE: We could handle this gracefully by adding the existing text to the prompt … but I don't think it's worth the complexity
-    if (!previousResponseId) {
-      LaunchBar.alert(
-        'No previous response found',
-        'The responses API implementation requires a previous response ID',
-      ); // TODO: localize
-      return;
-    }
+    if (!previousResponseId) return;
 
     chatResponseProperties = {
       content: {
