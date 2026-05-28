@@ -33,7 +33,6 @@
 "Add Clipboard" = "Zwischenablage hinzufügen";
 "Continue Chat" = "Chat fortsetzen";
 "Press space to enter a prompt." = "Drücken Sie Leertaste, um einen Prompt einzugeben.";
-"Enter a follow up prompt for" = "Gebe einen weiteren Prompt ein für";
 "Show Usage Log" = "Nutzungsprotokoll anzeigen";
 "No Usage Log!" = "Kein Nutzungsprotokoll!";
 "The usage log file does not exist." = "Die Protokolldatei ist nicht vorhanden.";

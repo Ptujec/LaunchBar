@@ -518,7 +518,7 @@ function handleChatFileAction({ filePath, fileTitle }) {
   // Enter Prompt
   const argument = LaunchBar.executeAppleScript(
     `
-    set result to display dialog "${'Enter a follow up prompt for'.localize()}:\n\\"${fileTitle}\\"" with title "Ask ChatGPT" default answer ""
+    set result to display dialog "${'Continue Chat'.localize()}: \\"${fileTitle}\\"" with title "Ask ChatGPT" default answer ""
     set result to text returned of result
     `,
   ).trim();
