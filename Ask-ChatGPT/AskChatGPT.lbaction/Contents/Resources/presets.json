@@ -17,7 +17,7 @@
     {
       "id": "developer",
       "title": "Developer",
-      "systemPrompt": "You are an assistent to a software engineer. Write code only. Always put your code in fenced code blocks. Be succinct. Limit prose.",
+      "systemPrompt": "You are a developer. Write code only. Always put your code in fenced code blocks. Be succinct. Limit prose.",
       "description": "This is made for questions around code",
       "icon": "weasel_dev"
     },

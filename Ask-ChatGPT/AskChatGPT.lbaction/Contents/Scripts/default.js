@@ -95,11 +95,13 @@ function options(item) {
   const badge = preset?.id === 'none' ? undefined : preset?.title.localize();
   const label = model ? `${model}${effort ? ` (${effort})` : ''}` : undefined;
 
+  const newChatIcon = preset ? preset.icon : getDefaultPreset().icon;
+
   const newChat = {
     title: 'New Chat'.localize(),
     subtitle: `Prompt: ${argument}`,
     alwaysShowsSubtitle: true,
-    icon: 'weasel_blank',
+    icon: newChatIcon,
     badge,
     label,
     action: 'ask',
@@ -147,7 +149,7 @@ function options(item) {
           title: `${'Continue Chat'.localize()}: "${recentChatInfo.title}"`,
           subtitle: `Prompt: ${argument}`,
           alwaysShowsSubtitle: true,
-          icon: 'weasel_text',
+          icon: 'weasel_bubble_dots',
           action: 'ask',
           actionArgument: {
             argument,
