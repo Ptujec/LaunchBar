@@ -20,7 +20,7 @@ const backupDir = `${Action.supportPath}/backups`;
 const maxItems = 20; // Items will be archived if the list exceeds this number
 const maxBackups = 10; // Maximum number of backups to keep
 
-const ARCHIVE_TIME_OPTIONS = {
+const archiveTimeOptions = {
   7: '7 Days',
   14: '14 Days',
   30: '1 Month',
@@ -40,12 +40,12 @@ const shortcutURLAddToLaterMac =
 function runWithURL(url) {
   LaunchBar.hide();
 
-  let ytId, twitchId, time;
+  let ytId, twitchId;
   if (url.includes('facebook.com')) url = handleFacebookUrl(url);
-  if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
-  if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
-  if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url, time);
-  if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url, time);
+  if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url);
+  if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url);
+  if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url);
+  if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url);
 
   let title = LaunchBar.execute('/bin/bash', './getTitle.sh', url).trim();
 
@@ -79,7 +79,8 @@ function run() {
 
   let url = info[0]?.trim();
   const title = info[1] ? cleanupTitle(info[1]) : url;
-  const time = info[2] ? info[2].trim() : null;
+  const time = info[2] ? info[2].trim() : undefined;
+  const duration = info[3] ? info[3].trim() : undefined;
 
   if (!url || url === '') {
     LaunchBar.alert('No URL found in the current tab of ' + appName);
@@ -93,7 +94,7 @@ function run() {
   if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url, time);
   if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url, time);
 
-  addLink({ url, title, ytId, twitchId });
+  addLink({ url, title, ytId, twitchId, duration });
 }
 
 // MARK: - Show List
@@ -130,7 +131,9 @@ function showList(forceArchive = false) {
     list
       .reduce((map, current) => {
         const existing = map.get(current.url);
-        const existingDate = existing ? new Date(existing.dateAdded) : null;
+        const existingDate = existing
+          ? new Date(existing.dateAdded)
+          : undefined;
         const currentDate = new Date(current.dateAdded);
         if (!existing || currentDate > existingDate) {
           map.set(current.url, current);
@@ -156,8 +159,13 @@ function showList(forceArchive = false) {
     .map((item, index) => ({
       title: item.title,
       subtitle: item.url !== item.title ? item.url : '',
-      alwaysShowsSubtitle: true,
+      // alwaysShowsSubtitle: true,
       url: item.url, // for QuickLook & Sending to other than default browser
+      label: item.url.includes('t=')
+        ? item.duration
+          ? `${getTimeFromUrl(item.url)} (${formatTime(item.duration)})`
+          : getTimeFromUrl(item.url)
+        : undefined,
       badge: jsonFilePathToUse === archiveFilePath ? 'Archived' : undefined,
       action: 'handleListItem',
       actionArgument: { url: item.url, index, jsonFilePathToUse },
@@ -207,7 +215,7 @@ function handleListItem({ index, url, jsonFilePathToUse }) {
 
 // MARK: - Add Items
 
-function addLink({ url, title, ytId, twitchId }) {
+function addLink({ url, title, ytId, twitchId, duration }) {
   const now = new Date().toLocaleString('sv').replace(' ', 'T');
 
   createBackup(jsonFilePath);
@@ -230,6 +238,7 @@ function addLink({ url, title, ytId, twitchId }) {
       url,
       title,
       dateAdded: now,
+      duration,
     },
   ];
 
@@ -268,6 +277,7 @@ function getInfoFromBrowser(appID) {
         if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
               set _time to (do JavaScript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))" in front document) as string
+              set _duration to (do JavaScript "String(Math.round(document.querySelector('video')?.duration || document.querySelector('audio')?.duration || 0))" in front document) as string
           on error e
               -- do nothing
           end try
@@ -275,7 +285,7 @@ function getInfoFromBrowser(appID) {
         if ${LaunchBar.options.alternateKey === 0} then
             close current tab of window 1
         end if
-        return _url & "\n" & _name & "\n" & _time
+        return _url & "\n" & _name & "\n" & _time & "\n" & _duration
     end tell`
       : `
     tell application id "${appID}"
@@ -285,6 +295,7 @@ function getInfoFromBrowser(appID) {
         if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
             set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))")
+            set _duration to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.duration || document.querySelector('audio')?.duration || 0))")
           on error e
             -- do nothing
           end try
@@ -292,7 +303,7 @@ function getInfoFromBrowser(appID) {
         if ${LaunchBar.options.alternateKey === 0} then
             close active tab of window 1
         end if
-        return _url & "\n" & _name & "\n" & _time
+        return _url & "\n" & _name & "\n" & _time & "\n" & _duration
     end tell`;
 
   return LaunchBar.executeAppleScript(script).trim();
@@ -383,7 +394,7 @@ function handleTwitchUrl(url, time) {
   const baseUrl = 'https://www.twitch.tv/videos/';
 
   const videoIdMatch = url.match(/\/videos\/(\d+)/);
-  if (!videoIdMatch) return [url, null];
+  if (!videoIdMatch) return [url, undefined];
 
   const videoId = videoIdMatch[1];
 
@@ -408,9 +419,26 @@ function addTimeParameterToUrl(url, time) {
   return baseUrl + `${separator}t=${timeValue}`;
 }
 
-function handleFacebookUrl(url) {
-  // LaunchBar.log(`Handling Facebook URL: ${url}`);
+function getTimeFromUrl(url) {
+  const timeMatch = url.match(/t=(\d+)/);
+  if (!timeMatch) return;
 
+  const totalSeconds = parseInt(timeMatch[1]);
+  return formatTime(totalSeconds);
+}
+
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  }
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function handleFacebookUrl(url) {
   if (!url.includes('facebook.com/l.php')) return url;
 
   // Extract the 'u' parameter which contains the actual URL
@@ -482,7 +510,7 @@ function settings() {
           : undefined,
       alwaysShowsSubtitle: true,
       icon: 'gridTemplate',
-      badge: ARCHIVE_TIME_OPTIONS[archiveTime] || ARCHIVE_TIME_OPTIONS['14'],
+      badge: archiveTimeOptions[archiveTime] || archiveTimeOptions['14'],
       action: 'showArchiveTimeOptions',
       actionReturnsItems: true,
     },
@@ -679,7 +707,7 @@ function setSecondaryBrowser(info) {
 function showArchiveTimeOptions() {
   const archiveTime = Action.preferences.archiveTime || '14';
 
-  return Object.entries(ARCHIVE_TIME_OPTIONS).map(([days, label]) => ({
+  return Object.entries(archiveTimeOptions).map(([days, label]) => ({
     title: days === 'never' ? label : `Archive After ${label}`,
     icon: archiveTime === days ? 'checkTemplate' : 'circleTemplate',
     action: 'setArchiveTime',

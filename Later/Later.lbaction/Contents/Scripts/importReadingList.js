@@ -1,4 +1,4 @@
-/* 
+/*
 Reading List Import
 by Christian Bender (@ptujec)
 2025-06-02
@@ -26,7 +26,7 @@ function importReadingList() {
     title: item.URIDictionary.title,
     dateAdded: item.ReadingList.DateAdded.toLocaleString('sv').replace(
       ' ',
-      'T'
+      'T',
     ),
   }));
 
@@ -39,7 +39,7 @@ function importReadingList() {
 
   const archiveTime = Action.preferences.archiveTime || '14';
   const archiveTimeDisplay =
-    ARCHIVE_TIME_OPTIONS[archiveTime] || ARCHIVE_TIME_OPTIONS['14'];
+    archiveTimeOptions[archiveTime] || archiveTimeOptions['14'];
 
   const message = [
     `Found ${newItems.length} new item(s) to import from Safari Reading List.`,
@@ -47,10 +47,10 @@ function importReadingList() {
       ? `${
           formattedItems.length - newItems.length
         } item(s) already exist in your list.`
-      : null,
+      : undefined,
     archiveTime !== 'never'
       ? `Items older than ${archiveTimeDisplay} will be moved to archive.`
-      : null,
+      : undefined,
   ]
     .filter(Boolean)
     .join('\n');
@@ -59,7 +59,7 @@ function importReadingList() {
     'Import Safari Reading List',
     message,
     'Ok',
-    'Cancel'
+    'Cancel',
   );
 
   if (response === 1) {

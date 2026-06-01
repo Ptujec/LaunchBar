@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# 
+#
 # App Info Script for LaunchBar Actions
 #
 # Script to get the bundle ID of a supported browser that is frontmost
 #
 # by Christian Bender (@ptujec)
 # 2025-05-27
-# 
+#
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-# 
+#
 
 supported_browsers=(
     "com.apple.Safari"
