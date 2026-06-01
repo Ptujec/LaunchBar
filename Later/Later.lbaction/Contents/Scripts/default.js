@@ -274,6 +274,7 @@ function getInfoFromBrowser(appID) {
         set _url to URL of front document
         set _name to name of front document
         set _time to ""
+        set _duration to ""
         if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
               set _time to (do JavaScript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))" in front document) as string
@@ -292,6 +293,7 @@ function getInfoFromBrowser(appID) {
         set _url to URL of active tab of front window
         set _name to title of active tab of front window
         set _time to ""
+        set _duration to ""
         if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
             set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))")
@@ -422,9 +424,7 @@ function addTimeParameterToUrl(url, time) {
 function getTimeFromUrl(url) {
   const timeMatch = url.match(/t=(\d+)/);
   if (!timeMatch) return;
-
-  const totalSeconds = parseInt(timeMatch[1]);
-  return formatTime(totalSeconds);
+  return formatTime(parseInt(timeMatch[1]));
 }
 
 function formatTime(seconds) {
