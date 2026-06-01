@@ -35,6 +35,10 @@ const shortcutURLShowLater =
 const shortcutURLAddToLaterMac =
   'https://www.icloud.com/shortcuts/60264ed63f484f0fbd98c76c4ddbb748';
 
+const icon = File.readPlist(
+  `${Action.path}/Contents/Info.plist`,
+)?.CFBundleIconFile;
+
 // MARK: - Main
 
 function runWithURL(url) {
@@ -120,7 +124,7 @@ function showList(forceArchive = false) {
     }
     return {
       title: 'Later',
-      icon: 'glassesTemplate',
+      icon,
       action: 'run',
       actionReturnsItems: true,
     };
@@ -169,7 +173,7 @@ function showList(forceArchive = false) {
       badge: jsonFilePathToUse === archiveFilePath ? 'Archived' : undefined,
       action: 'handleListItem',
       actionArgument: { url: item.url, index, jsonFilePathToUse },
-      icon: 'glassesTemplate',
+      icon,
       dateAdded: item.dateAdded,
     }))
     .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));

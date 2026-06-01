@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>glassesTemplate.png</string>
+	<string>glassesClockTemplate.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>ptujec.LaunchBar.action.Later</string>
 	<key>CFBundleName</key>
 	<string>Later</string>
 	<key>CFBundleVersion</key>
-	<string>1.6.1</string>
+	<string>1.7</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
