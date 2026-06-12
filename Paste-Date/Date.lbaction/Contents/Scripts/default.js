@@ -1,4 +1,4 @@
-/* 
+/*
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
 2026-01-30

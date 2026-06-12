@@ -1,3 +1,5 @@
 "iso_full" = "ISO Full";
 "unix_timestamp" = "Unix Timestamp";
 "iso_datetime" = "ISO DateTime";
+"in" = "in";
+"day of" = "day of";

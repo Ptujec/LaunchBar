@@ -20,24 +20,81 @@ const weekdays = [
   'Saturday',
 ];
 
-const ordinalMap = {
-  ['First'.localize().toLowerCase()]: 1,
-  ['Second'.localize().toLowerCase()]: 2,
-  ['Third'.localize().toLowerCase()]: 3,
-  ['Fourth'.localize().toLowerCase()]: 4,
-  ['Last'.localize().toLowerCase()]: 'last',
-};
-
-const relativeDaySuggestions = ['Yesterday'.localize(), 'Tomorrow'.localize()];
-
-const monthBoundarySuggestions = [
-  'First day of last month'.localize(),
-  'Last day of last month'.localize(),
-  'First day of this month'.localize(),
-  'Last day of this month'.localize(),
-  'First day of next month'.localize(),
-  'Last day of next month'.localize(),
+const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
+
+function getLocalizedStrings() {
+  const currentLocale = LaunchBar.currentLocale;
+  const cachedLocale = Action.preferences.localizedStringsLocale;
+
+  if (cachedLocale !== currentLocale) {
+    // Regenerate all localized strings
+    const cached = {
+      localizedWeekdays: weekdays.map((day) => day.localize()),
+      localizedMonths: months.map((month) => month.localize()),
+      localizedOrdinals: [
+        'First'.localize(),
+        'Second'.localize(),
+        'Third'.localize(),
+        'Fourth'.localize(),
+        'Last'.localize(),
+      ],
+      ordinalMap: {
+        ['First'.localize().toLowerCase()]: 1,
+        ['Second'.localize().toLowerCase()]: 2,
+        ['Third'.localize().toLowerCase()]: 3,
+        ['Fourth'.localize().toLowerCase()]: 4,
+        ['Last'.localize().toLowerCase()]: 'last',
+      },
+      relativeDaySuggestions: ['Yesterday'.localize(), 'Tomorrow'.localize()],
+      monthBoundarySuggestions: [
+        'First day of last month'.localize(),
+        'Last day of last month'.localize(),
+        'First day of this month'.localize(),
+        'Last day of this month'.localize(),
+        'First day of next month'.localize(),
+        'Last day of next month'.localize(),
+      ],
+    };
+
+    cached.localizedOrdinalKeys = cached.localizedOrdinals.map((ord) =>
+      ord.toLowerCase(),
+    );
+
+    // Store in preferences
+    Action.preferences.localizedStrings = JSON.stringify(cached);
+    Action.preferences.localizedStringsLocale = currentLocale;
+
+    return cached;
+  }
+
+  const cached = Action.preferences.localizedStrings;
+  if (cached) return JSON.parse(cached);
+
+  return getLocalizedStrings();
+}
+
+const {
+  localizedWeekdays,
+  localizedMonths,
+  localizedOrdinals,
+  localizedOrdinalKeys,
+  ordinalMap,
+  relativeDaySuggestions,
+  monthBoundarySuggestions,
+} = getLocalizedStrings();
 
 // UTILITY FUNCTIONS
 
@@ -91,7 +148,35 @@ function getNthWeekdayOfMonth(date, number, weekdayIndex) {
     ((weekdayIndex - firstDayOfWeek + 7) % 7) + (number - 1) * 7;
   const result = new Date(year, month, 1 + daysToAdd);
 
-  return result.getMonth() === month ? result : null;
+  return result.getMonth() === month ? result : undefined;
+}
+
+// Get the nth weekday of a specific month (future occurrence)
+function getNthWeekdayOfSpecificMonth(date, monthIndex, number, weekdayIndex) {
+  let targetDate = new Date(date.getFullYear(), monthIndex, 1);
+
+  // If the target month is in the past this year, use next year
+  if (targetDate < date) {
+    targetDate = new Date(date.getFullYear() + 1, monthIndex, 1);
+  }
+
+  return getNthWeekdayOfMonth(targetDate, number, weekdayIndex);
+}
+
+// Get first or last day of a specific month (future occurrence)
+function getMonthBoundaryOfSpecificMonth(date, monthIndex, isLastDay) {
+  let targetDate = new Date(date.getFullYear(), monthIndex, 1);
+
+  // If the target month is in the past this year, use next year
+  if (targetDate < date) {
+    targetDate = new Date(date.getFullYear() + 1, monthIndex, 1);
+  }
+
+  if (isLastDay) {
+    return new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+  } else {
+    return new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+  }
 }
 
 // Date formatting functions
@@ -158,7 +243,7 @@ function processArgument(argument, date) {
     return getNextWeekday(date, weekdayIndex);
   }
 
-  // First and last days of month
+  // First and last days of month (relative)
   const monthMatch = findFirstMatch(
     argument,
     monthBoundarySuggestions.map((s) => s.toLowerCase()),
@@ -180,6 +265,29 @@ function processArgument(argument, date) {
     }
   }
 
+  // First and last days of specific months (e.g., "First day of September")
+  const allMonthBoundarySuggestions = generateMonthBoundarySuggestions().map(
+    (s) => s.toLowerCase(),
+  );
+  const specificMonthMatch = findFirstMatch(
+    argument,
+    allMonthBoundarySuggestions,
+  );
+  if (specificMonthMatch) {
+    const parts = specificMonthMatch.split(' ');
+    const ordinal = parts[0]; // "First" or "Last"
+    const isLastDay = ordinal === 'Last'.localize().toLowerCase();
+    const monthName = parts[parts.length - 1]; // Last part is the month
+
+    const monthIndex = months.findIndex(
+      (m) => m.localize().toLowerCase() === monthName,
+    );
+
+    if (monthIndex !== -1) {
+      return getMonthBoundaryOfSpecificMonth(date, monthIndex, isLastDay);
+    }
+  }
+
   // Relative days
   if (findFirstMatch(argument, ['Tomorrow'.localize()])) {
     return new Date(date.getTime() + 24 * 60 * 60 * 1000);
@@ -194,29 +302,61 @@ function processArgument(argument, date) {
     return new Date(date);
   }
 
-  // nTh weekday matching
+  // nTh weekday matching (with specific month support)
+  const allNthSuggestions = [
+    ...generateNthWeekdaySuggestions(),
+    ...generateMonthWeekdaySuggestions(),
+  ];
   const match = findFirstMatch(
     argument,
-    generateNthWeekdaySuggestions().map((s) => s.toLowerCase()),
+    allNthSuggestions.map((s) => s.toLowerCase()),
   );
 
   if (match) {
-    const [ordinal, weekday, ...rest] = match.split(' ');
-    const isNextMonth = match.includes(
-      'of next month'.localize().toLowerCase(),
-    );
-    const dayIndex = weekdays.findIndex(
-      (day) => day.localize().toLowerCase() === weekday,
+    const matchLower = match.toLowerCase();
+    const parts = matchLower.split(' ');
+
+    // Check if it's a month-based query (e.g., "third sunday september")
+    const monthMatch = months.find(
+      (m) =>
+        m.localize().toLowerCase() === parts[parts.length - 1].toLowerCase(),
     );
 
-    if (dayIndex !== -1) {
-      const targetDate = new Date(date);
-      if (isNextMonth) targetDate.setMonth(targetDate.getMonth() + 1, 1);
-      return getNthWeekdayOfMonth(targetDate, ordinalMap[ordinal], dayIndex);
+    if (monthMatch) {
+      const monthIndex = months.indexOf(monthMatch);
+      const ordinal = parts[0];
+      const weekday = parts[1];
+      const dayIndex = weekdays.findIndex(
+        (day) => day.localize().toLowerCase() === weekday,
+      );
+
+      if (dayIndex !== -1 && ordinalMap[ordinal]) {
+        return getNthWeekdayOfSpecificMonth(
+          date,
+          monthIndex,
+          ordinalMap[ordinal],
+          dayIndex,
+        );
+      }
+    } else {
+      // Standard nTh weekday matching (this month/next month)
+      const [ordinal, weekday, ...rest] = parts;
+      const isNextMonth = matchLower.includes(
+        'of next month'.localize().toLowerCase(),
+      );
+      const dayIndex = weekdays.findIndex(
+        (day) => day.localize().toLowerCase() === weekday,
+      );
+
+      if (dayIndex !== -1) {
+        const targetDate = new Date(date);
+        if (isNextMonth) targetDate.setMonth(targetDate.getMonth() + 1, 1);
+        return getNthWeekdayOfMonth(targetDate, ordinalMap[ordinal], dayIndex);
+      }
     }
   }
 
-  return null;
+  return;
 }
 
 // SUGGESTION FUNCTIONS
@@ -233,17 +373,40 @@ function getWeekdaySuggestions() {
 }
 
 function generateNthWeekdaySuggestions() {
-  return weekdays
-    .map((day) => day.localize())
-    .flatMap((weekday) =>
-      Object.keys(ordinalMap).flatMap((ordinal) => {
+  const ofThisMonth = 'of this month'.localize();
+  const ofNextMonth = 'of next month'.localize();
+
+  return localizedWeekdays.flatMap((weekday) =>
+    localizedOrdinalKeys.flatMap((ordinal) => {
+      const prefix = `${
+        ordinal.charAt(0).toUpperCase() + ordinal.slice(1)
+      } ${weekday}`;
+      return [`${prefix} ${ofThisMonth}`, `${prefix} ${ofNextMonth}`];
+    }),
+  );
+}
+
+function generateMonthWeekdaySuggestions() {
+  const inStr = 'in'.localize();
+
+  return localizedMonths.flatMap((month) =>
+    localizedWeekdays.flatMap((weekday) =>
+      localizedOrdinalKeys.map((ordinal) => {
         const prefix = `${
           ordinal.charAt(0).toUpperCase() + ordinal.slice(1)
         } ${weekday}`;
-        return [
-          `${prefix} ${'of this month'.localize()}`,
-          `${prefix} ${'of next month'.localize()}`,
-        ];
+        return `${prefix} ${inStr} ${month}`;
       }),
-    );
+    ),
+  );
+}
+
+function generateMonthBoundarySuggestions() {
+  const firstDayOf = 'First day of'.localize();
+  const lastDayOf = 'Last day of'.localize();
+
+  return localizedMonths.flatMap((month) => [
+    `${firstDayOf} ${month}`,
+    `${lastDayOf} ${month}`,
+  ]);
 }
