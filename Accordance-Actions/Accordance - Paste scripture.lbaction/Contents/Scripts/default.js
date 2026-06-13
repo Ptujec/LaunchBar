@@ -108,7 +108,7 @@ function getText(newArgument, argument, initialTranslation) {
       text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
 
       // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
-      const translationName = currentTranslation.replace(/°|-LEM/g, '');
+      const translationName = cleanUpTranslationTitle(currentTranslation);
 
       // Uppercase first character of query
       argument = argument.charAt(0).toUpperCase() + argument.slice(1);
@@ -212,6 +212,19 @@ function pasteInKeynote(text, reference) {
       	set _pos_2 to get position of item 2 of _text_items
       	set _x_2 to item 1 of _pos_2
     		set position of item 2 of _text_items to {_x_2, _y_2}
+
+        delay 0.1
+        tell application "System Events"
+          key code 48 using {shift down}
+          delay 0.1
+          keystroke "a"
+          delay 0.1
+          key code 0 using {command down}
+          delay 0.1
+          key code 9 using {command down}
+          delay 0.1
+          key code 53
+        end tell
       end tell
     end tell
     `);
@@ -257,13 +270,13 @@ function settings() {
     {
       title: 'Choose default translation'.localize(),
       icon: 'bookTemplate',
-      badge: defaultTranslation?.replace(/°|-LEM/g, ''),
+      badge: cleanUpTranslationTitle(defaultTranslation),
       children: listTranslations({ mode: 'default' }),
     },
     {
       title: 'Choose fallback translation'.localize(),
       icon: 'bookTemplate',
-      badge: Action.preferences.fallbackTranslation?.replace(/°|-LEM/g, ''),
+      badge: cleanUpTranslationTitle(Action.preferences.fallbackTranslation),
       action: 'listTranslations',
       actionArgument: { mode: 'fallback' },
       actionReturnsItems: true,
@@ -315,7 +328,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   return translations
     .map((translationFile) => {
       const [translation, extension] = translationFile.split('.');
-      let translationName = translation.trim().replace('°', '');
+      let translationName = cleanUpTranslationTitle(translation);
 
       if (extension === 'atext') {
         const plistPath = File.exists(
@@ -549,4 +562,12 @@ function setFormatForApp({ appID, format }) {
   appFormats[appID] = format;
   Action.preferences.appFormats = appFormats;
   return showAppList();
+}
+
+function cleanUpTranslationTitle(translation) {
+  return translation
+    .trim()
+    .replace(/°|-LEM/g, '')
+    .replace('ZJ', 'ŽJ')
+    .replace('ZNZ', 'ŽNZ');
 }
