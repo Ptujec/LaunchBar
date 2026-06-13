@@ -111,7 +111,7 @@ function getText(newArgument, argument, initialTranslation) {
       text = text.replace(/(\s+)?\r\r(\s+)?/g, ' […] ');
 
       // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
-      const translationName = currentTranslation.replace(/°|-LEM/g, '');
+      const translationName = cleanUpTranslationTitle(currentTranslation);
 
       // Uppercase first character of query
       argument = argument.charAt(0).toUpperCase() + argument.slice(1);
@@ -213,7 +213,7 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
   return translations
     .map((translationFile) => {
       const [translation, extension] = translationFile.split('.');
-      let translationName = translation.trim().replace('°', '');
+      let translationName = translation;
 
       if (extension === 'atext') {
         const plistPath = File.exists(
@@ -227,6 +227,8 @@ function listTranslations({ newArgument, argument, mode = 'lookup' } = {}) {
           plist['com.oaktree.module.fullmodulename'] ??
           translationName;
       }
+
+      translationName = cleanUpTranslationTitle(translationName);
 
       const isLastUsed = translation === Action.preferences.lastUsed;
       const isDefault = translation === defaultPref;
@@ -325,4 +327,12 @@ function getFailedFallbackTranslations() {
 
 function clearFailedFallbackTranslations() {
   delete Action.preferences.failedFallbackTranslations;
+}
+
+function cleanUpTranslationTitle(translation) {
+  return translation
+    .trim()
+    .replace(/°|-LEM/g, '')
+    .replace('ZJ', 'ŽJ')
+    .replace('ZNZ', 'ŽNZ');
 }
