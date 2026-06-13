@@ -107,7 +107,8 @@ function chooseTranslation(newArgument, argument) {
     .map((translationFile) => {
       const [translation, extension] = translationFile.split('.');
 
-      let translationName;
+      let translationName = translation;
+
       if (extension === 'atext') {
         let plistPath = `${textModulesPath}${translation}.atext/Info.plist`;
         if (!File.exists(plistPath)) {
@@ -118,9 +119,9 @@ function chooseTranslation(newArgument, argument) {
           plist['com.oaktree.module.humanreadablename'] ??
           plist['com.oaktree.module.fullmodulename'] ??
           translation.trim().replace('°', '');
-      } else {
-        translationName = translation.trim().replace('°', '');
       }
+
+      translationName = cleanUpTranslationTitle(translationName);
 
       const badge =
         translation === Action.preferences.lastUsed
@@ -187,4 +188,12 @@ function getUILanguage() {
   }
 
   return lang?.[0] || 'en';
+}
+
+function cleanUpTranslationTitle(translation) {
+  return translation
+    .trim()
+    .replace(/°|-LEM/g, '')
+    .replace('ZJ', 'ŽJ')
+    .replace('ZNZ', 'ŽNZ');
 }
