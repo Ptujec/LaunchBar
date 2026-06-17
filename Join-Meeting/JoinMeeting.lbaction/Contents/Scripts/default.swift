@@ -94,15 +94,24 @@ struct TeamsProvider: MeetingProvider {
     let name = "Teams"
     let icon = "teamsTemplate"
     private let urlPattern = #"(https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.*[\w@?^=%&/~+#-])"#
+    private let liveUrlPattern = #"(https:\/\/teams\.live\.com\/meet\/.*)"#
     
     func extractMeetingURL(from urlString: String) -> String? {
-        guard urlString.contains("teams.microsoft") else { return nil }
+        guard urlString.contains("teams.microsoft") || urlString.contains("teams.live") else { return nil }
         return urlString.replacingOccurrences(of: "https", with: "msteams")
     }
     
     func extractMeetingURLFromNotes(_ notes: String) -> String? {
-        guard notes.contains("teams.microsoft") else { return nil }
-        let matched = RegexHelper.matches(for: urlPattern, in: notes)
+        guard notes.contains("teams.microsoft") || notes.contains("teams.live") else { return nil }
+        
+        // Try microsoft pattern first
+        var matched = RegexHelper.matches(for: urlPattern, in: notes)
+        if let first = matched.first {
+            return first.replacingOccurrences(of: "https", with: "msteams")
+        }
+        
+        // Try live pattern
+        matched = RegexHelper.matches(for: liveUrlPattern, in: notes)
         return matched.first?.replacingOccurrences(of: "https", with: "msteams")
     }
 }
