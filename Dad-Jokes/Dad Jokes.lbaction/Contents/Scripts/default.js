@@ -1,4 +1,4 @@
-/* 
+/*
 Dad Jokes Action for LaunchBar
 by Christian Bender (@ptujec)
 2023-02-02
@@ -7,7 +7,7 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 
 API: https://icanhazdadjoke.com/
 
-TODO: 
+TODO:
 - Next funktion for favs?
 - Reverse order for favs
 */
@@ -15,208 +15,158 @@ TODO:
 String.prototype.localizationTable = 'default';
 
 function run(argument) {
-  if (argument == undefined) {
-    if (LaunchBar.options.shiftKey) {
-      var output = showFavs();
-      return output;
-    } else if (LaunchBar.options.commandKey) {
-      var dadjokesFile =
-        LaunchBar.homeDirectory +
-        '/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/dadjokes.txt';
+  if (LaunchBar.options.alternateKey) return chooseLocation();
 
-      if (File.exists(dadjokesFile)) {
+  if (!argument) {
+    if (LaunchBar.options.shiftKey) return showFavs();
+    if (LaunchBar.options.commandKey) {
+      if (File.exists(getDadjokesFile())) {
         LaunchBar.hide();
-        LaunchBar.openURL(File.fileURLForPath(dadjokesFile), 'BBEdit');
+        LaunchBar.openURL(
+          File.fileURLForPath(getDadjokesFile()),
+          'com.barebones.bbedit',
+        );
       }
-    } else {
-      getJoke();
+      return;
     }
-  } else {
-    var r = HTTP.getJSON(
-      'https://icanhazdadjoke.com/search?term=' + encodeURI(argument),
-      {
-        headerFields: {
-          Accept: 'application/json',
-          method: 'GET',
-        },
-      }
-    );
-
-    var jokes = r.data.results;
-    var result = [];
-
-    for (var i = 0; i < jokes.length; i++) {
-      var joke = jokes[i].joke.trim();
-
-      result.push({
-        title: joke,
-        icon: 'mustacheTemplate',
-        action: 'displayJoke',
-        actionArgument: jokes[i].joke,
-      });
-    }
-    return result;
-
-    // LaunchBar.openURL('https://icanhazdadjoke.com/search?term=' + encodeURI(argument))
+    getJoke();
+    return;
   }
+  const response = HTTP.getJSON(
+    'https://icanhazdadjoke.com/search?term=' + encodeURI(argument),
+    { headerFields: { Accept: 'application/json', method: 'GET' } },
+  );
+
+  return response.data.results.map((item) => ({
+    title: item.joke.trim(),
+    icon: 'mustacheTemplate',
+    action: 'displayJoke',
+    actionArgument: item.joke,
+  }));
+}
+
+function getDadjokesFile() {
+  const defaultLocation =
+    '/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/';
+
+  return (
+    (Action.preferences.folderLocation || defaultLocation) + 'dadjokes.txt'
+  );
 }
 
 function getJoke() {
-  var joke = HTTP.getJSON('https://icanhazdadjoke.com/', {
-    headerFields: {
-      Accept: 'application/json',
-      method: 'GET',
-    },
+  const joke = HTTP.getJSON('https://icanhazdadjoke.com/', {
+    headerFields: { Accept: 'application/json', method: 'GET' },
   }).data.joke;
 
-  var response = LaunchBar.alert(
+  const choice = LaunchBar.alert(
     joke,
     '',
     'Next'.localize(),
     'Copy & Save'.localize(),
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
 
-  switch (response) {
-    case 0:
-      // Next
-      getJoke();
-      break;
-
-    case 1:
-      // Copy & Save
-      save(joke);
-      LaunchBar.setClipboardString(joke);
-      break;
-
-    case 2:
-      // Cancel
-      // LaunchBar.hide();
-      break;
+  if (choice === 0) getJoke();
+  else if (choice === 1) {
+    save(joke);
+    LaunchBar.setClipboardString(joke);
   }
 }
 
 function showFavs() {
-  var dadjokesFile =
-    LaunchBar.homeDirectory +
-    '/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/dadjokes.txt';
-
+  const dadjokesFile = getDadjokesFile();
   if (!File.exists(dadjokesFile)) {
     LaunchBar.alert('No Favs (file) yet!');
     return;
   }
 
-  var text = File.readText(dadjokesFile);
-  var favs = text.replace(/^(\s|\t)*\n/gm, '').split('\n');
+  const text = File.readText(dadjokesFile);
+  const favs = text.replace(/^(\s|\t)*\n/gm, '').split('\n');
 
-  var result = [];
-
-  favs.forEach(function (item) {
-    if (item.includes('[')) {
-      var joke = item.match(/\[(.+)\]/)[1];
-      var url = item.match(/\((.+)\)/)[1];
-
-      var pushData = {
-        title: joke,
-        icon: 'mustacheTemplate',
-        url: url,
-      };
-    } else {
-      var joke = item;
-      var pushData = {
-        title: joke,
+  return favs
+    .filter((item) => item.length > 0)
+    .map((item) => {
+      if (item.includes('[')) {
+        const joke = item.match(/\[(.+)\]/)[1];
+        const url = item.match(/\((.+)\)/)[1];
+        return { title: joke, icon: 'mustacheTemplate', url };
+      }
+      return {
+        title: item,
         icon: 'mustacheTemplate',
         action: 'displayFav',
-        actionArgument: joke,
-        // children: optionsFavs(joke),
+        actionArgument: item,
       };
-    }
-
-    result.push(pushData);
-  });
-
-  return result;
+    });
 }
 
 function displayJoke(joke) {
-  var response = LaunchBar.alert(
+  const choice = LaunchBar.alert(
     joke,
     '',
     'Copy & Save'.localize(),
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
 
-  switch (response) {
-    case 0:
-      // Copy & Save
-      save(joke);
-      LaunchBar.setClipboardString(joke);
-      var output = showFavs();
-      return output;
-
-    case 1:
-      // Cancel
-      // LaunchBar.hide();
-      break;
+  if (choice === 0) {
+    save(joke);
+    LaunchBar.setClipboardString(joke);
+    return showFavs();
   }
 }
 
 function displayFav(joke) {
-  var response = LaunchBar.alert(
+  const choice = LaunchBar.alert(
     joke,
     '',
     'Copy'.localize(),
     'Remove'.localize(),
-    'Cancel'.localize()
+    'Cancel'.localize(),
   );
 
-  switch (response) {
-    case 0:
-      // Copy
-      LaunchBar.setClipboardString(joke);
-      break;
-
-    case 1:
-      // Remove
-      remove(joke);
-      var output = showFavs();
-      return output;
-
-    case 2:
-      // Cancel
-      // LaunchBar.hide();
-      break;
+  if (choice === 0) LaunchBar.setClipboardString(joke);
+  else if (choice === 1) {
+    remove(joke);
+    return showFavs();
   }
 }
 
 function save(joke) {
-  var dadjokesFile =
-    LaunchBar.homeDirectory +
-    '/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/dadjokes.txt';
+  const dadjokesFile = getDadjokesFile();
 
   if (!File.exists(dadjokesFile)) {
     File.writeText(joke, dadjokesFile);
-  } else {
-    var jokes = File.readText(dadjokesFile);
+    return;
+  }
 
-    // Fix unnecessary empty lines at the top and inbetween
-    jokes = jokes.replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n');
+  let jokes = File.readText(dadjokesFile);
+  jokes = jokes.replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n');
 
-    if (!jokes.includes(joke)) {
-      File.writeText(jokes + '\n\n' + joke, dadjokesFile);
-    }
+  if (!jokes.includes(joke)) {
+    File.writeText(jokes + '\n\n' + joke, dadjokesFile);
   }
 }
 
 function remove(joke) {
-  var dadjokesFile =
-    LaunchBar.homeDirectory +
-    '/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/dadjokes.txt';
-
-  var jokes = File.readText(dadjokesFile).replace(joke, '');
-
-  // Fix unnecessary empty lines at the top and inbetween
+  const dadjokesFile = getDadjokesFile();
+  let jokes = File.readText(dadjokesFile).replace(joke, '');
   jokes = jokes.replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n');
-
   File.writeText(jokes, dadjokesFile);
+}
+
+function chooseLocation() {
+  LaunchBar.hide();
+  const newLocation = LaunchBar.executeAppleScript(
+    `
+    set _home to path to home folder as string
+    set _default to _home & "Library:Mobile Documents:iCloud~is~workflow~my~workflows:" as alias
+    set _folder to choose folder with prompt "Select a folder for this action:" default location _default
+    set _folder to POSIX path of _folder
+    `,
+  ).trim();
+
+  if (!newLocation) return;
+  Action.preferences.folderLocation = newLocation;
+  return;
 }
