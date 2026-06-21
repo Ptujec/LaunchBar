@@ -202,47 +202,31 @@ function chooseFolder() {
 }
 
 function getDefaultFolder() {
-  // let plist, folderPath;
-  // try {
-  //   plist = File.readPlist(
-  //     '~/Library/Containers/pro.writer.mac/Data/Library/Preferences/pro.writer.mac.plist',
-  //   );
-  // } catch (exception) {
-  //   LaunchBar.alert('Error while reading plist: ' + exception);
-  //   return;
-  // }
-
-  // if (plist.NSOSPLastRootDirectory) {
-  //   // Decode the base64 bookmark data
-  //   const bookmarkData = plist.NSOSPLastRootDirectory;
-
-  //   // Try to extract URL from bookmark data
-  //   try {
-  //     const fileURL = File.fileURLForBookmarkData(bookmarkData);
-  //     folderPath = File.pathForFileURL(fileURL);
-  //   } catch (error) {
-  //     // Fallback: try to extract path from raw binary data
-  //     LaunchBar.log('Bookmark decode error: ' + error);
-  //     folderPath = undefined;
-  //   }
-  // }
-
-  let folderPath;
-
-  const compiledExists = File.exists(
-    `${Action.path}/Contents/Scripts/readBookmarkData`,
-  );
+  let plist, folderPath;
 
   try {
-    folderPath = compiledExists
-      ? LaunchBar.execute('./readBookmarkData')?.trim()
-      : LaunchBar.execute('/usr/bin/swift', './readBookmarkData.swift')?.trim();
-  } catch (error) {
-    LaunchBar.log(`Error while reading bookmark data: ${error}`);
-    folderPath = undefined;
+    plist = File.readPlist(
+      '~/Library/Containers/pro.writer.mac/Data/Library/Preferences/pro.writer.mac.plist',
+    );
+  } catch (exception) {
+    LaunchBar.alert(`Error while reading plist: ${exception}`);
+    return;
+  }
+
+  if (plist.NSOSPLastRootDirectory) {
+    const bookmarkData = plist.NSOSPLastRootDirectory;
+    try {
+      folderPath = File.pathFromBookmarkData(bookmarkData, {
+        withoutUI: true,
+      });
+    } catch (error) {
+      LaunchBar.log(`Bookmark decode error: ${error}`);
+      folderPath = undefined;
+    }
   }
 
   if (folderPath) Action.preferences.folderLocation = folderPath;
   if (!folderPath) folderPath = chooseFolder();
+
   return folderPath;
 }
