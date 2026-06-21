@@ -1,178 +1,128 @@
-/* 
+/*
 MindNode Search Action for LaunchBar
 by Christian Bender (@ptujec)
-2023-03-31
+2026-06-21
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
 
+String.prototype.localizationTable = 'default';
+
 function run(argument) {
-  if (argument == '') {
+  if (argument === '') return;
+
+  if (LaunchBar.options.shiftKey) return chooseFolder();
+  const folderPath = Action.preferences.folderLocation || getDefaultFolder();
+
+  // const test = LaunchBar.execute('/bin/ls', '-tA', folderPath);
+
+  if (!argument) {
+    return LaunchBar.execute('/bin/ls', '-t', folderPath)
+      .trim()
+      .split('\n')
+      .filter((item) => item.includes('.mindnode'))
+      .map((item) => ({ title: item, path: `${folderPath}/${item}` }));
+  }
+
+  argument = argument.toLowerCase().trim();
+
+  const pathsString = LaunchBar.execute(
+    '/usr/bin/mdfind',
+    '-onlyin',
+    folderPath,
+    argument,
+  );
+
+  if (pathsString == '') {
+    return { title: 'No matches'.localize(), icon: 'alert' };
+  }
+
+  const paths = pathsString.split('\n').filter((p) => p.trim());
+  return handleMatches(paths, argument);
+}
+
+function handleMatches(paths, argument) {
+  const results = paths
+    .map((path) => {
+      const title = File.displayName(path);
+
+      let subtitle;
+      try {
+        const contents = JSON.stringify(File.readPlist(path + '/contents.xml'));
+        const regex = new RegExp(
+          '([a-zčšžäüöß]* )*?' + argument + '.*?<',
+          'gi',
+        );
+        subtitle = contents.match(regex)?.join(', ').replace(/</g, '').trim();
+      } catch (error) {
+        subtitle = '  ';
+      }
+
+      return subtitle
+        ? { title, subtitle, path, alwaysShowsSubtitle: true }
+        : { title, path };
+    })
+    .sort((a, b) => {
+      const aStartsWithArg = a.title
+        .toLowerCase()
+        .startsWith(argument.toLowerCase());
+      const bStartsWithArg = b.title
+        .toLowerCase()
+        .startsWith(argument.toLowerCase());
+
+      // Prioritize items that start with argument, then sort alphabetically
+      return aStartsWithArg === bStartsWithArg
+        ? a.title.localeCompare(b.title)
+        : aStartsWithArg
+          ? -1
+          : 1;
+    });
+
+  return results;
+}
+
+function chooseFolder() {
+  LaunchBar.hide();
+  const newLocation = LaunchBar.executeAppleScript(
+    `
+    set _home to path to home folder as string
+    set _default to _home & "Library:Mobile Documents:" as alias
+    set _folder to choose folder with prompt "Select a folder for this action:" default location _default
+    set _folder to POSIX path of _folder
+    `,
+  ).trim();
+
+  if (!newLocation) return;
+  Action.preferences.folderLocation = newLocation;
+  return;
+}
+
+function getDefaultFolder() {
+  let plist, folderPath;
+
+  try {
+    plist = File.readPlist(
+      '~/Library/Containers/com.ideasoncanvas.mindnode.macos/Data/Library/Preferences/com.ideasoncanvas.mindnode.macos.plist',
+    );
+  } catch (exception) {
+    LaunchBar.alert(`Error while reading plist: ${exception}`);
     return;
   }
-  let folderPath, plist;
 
-  if (LaunchBar.options.shiftKey) {
-    folderPath = LaunchBar.executeAppleScript(
-      'set _home to path to home folder as string',
-      'set _default to _home & "Library:Mobile Documents:" as alias',
-      'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
-      'set _folder to POSIX path of _folder'
-    ).trim();
-
-    if (!folderPath) return;
-    Action.preferences.folderLocation = folderPath;
-  }
-
-  folderPath = Action.preferences.folderLocation;
-
-  if (!folderPath) {
+  if (plist.NSOSPLastRootDirectory) {
+    const bookmarkData = plist.NSOSPLastRootDirectory;
     try {
-      plist = File.readPlist(
-        '~/Library/Containers/com.ideasoncanvas.mindnode.macos/Data/Library/Preferences/com.ideasoncanvas.mindnode.macos.plist'
-      );
-    } catch (exception) {
-      LaunchBar.alert('Error while reading plist: ' + exception);
-      return;
-    }
-
-    if (plist.NSNavLastRootDirectory) {
-      folderPath = File.pathForFileURL(
-        File.fileURLForPath(plist.NSNavLastRootDirectory)
-      );
-    }
-
-    if (!folderPath) {
-      folderPath = LaunchBar.executeAppleScript(
-        'set _home to path to home folder as string',
-        'set _default to _home & "Library:Mobile Documents:" as alias',
-        'set _folder to choose folder with prompt "Select a folder for this action:" default location _default',
-        'set _folder to POSIX path of _folder'
-      ).trim();
-      if (!folderPath) {
-        LaunchBar.alert('Could not set folder path!');
-        return;
-      }
-      Action.preferences.folderLocation = folderPath;
-    } else {
-      Action.preferences.folderLocation = folderPath;
-    }
-  }
-
-  if (argument == undefined) {
-    var contents = LaunchBar.execute('/bin/ls', '-tA', folderPath)
-      .trim()
-      .split('\n');
-
-    var result = [];
-    for (var i = 0; i < contents.length; i++) {
-      var path = folderPath + '/' + contents[i];
-      if (contents[i].includes('.mindnode')) {
-        result.push({
-          title: contents[i],
-          path: path,
-        });
-      }
-    }
-    return result;
-  } else {
-    argument = argument.toLowerCase().trim();
-
-    if (LaunchBar.options.commandKey) {
-      var output = LaunchBar.execute(
-        '/usr/bin/mdfind',
-        '-onlyin',
-        folderPath,
-        '-name',
-        argument
-      ).split('\n');
-    } else {
-      var output = LaunchBar.execute(
-        '/usr/bin/mdfind',
-        '-onlyin',
-        folderPath,
-        argument
-      ).split('\n');
-    }
-
-    if (output == '') {
-      return [
-        {
-          title: 'No result',
-          icon: 'com.ideasoncanvas.mindnode.macos',
-        },
-      ];
-    } else {
-      var results = [];
-      for (var i = 0; i < output.length; i++) {
-        var result = output[i];
-        if (result != '') {
-          var path = result;
-          var title = File.displayName(path);
-
-          if (LaunchBar.options.commandKey) {
-            results.push({
-              title: title,
-              path: path,
-            });
-          } else {
-            try {
-              var content = File.readPlist(path + '/contents.xml');
-              content = JSON.stringify(content);
-
-              var regex = new RegExp(
-                '([a-zčšžäüöß]* )*?' + argument + '.*?<',
-                'gi'
-              );
-
-              var subtitle = content
-                .match(regex)
-                .join(', ')
-                .replace(/</g, '')
-                .trim();
-            } catch (error) {}
-
-            if (subtitle != null) {
-              results.push({
-                title,
-                subtitle,
-                path,
-                alwaysShowsSubtitle: true,
-              });
-            } else {
-              results.push({ title, path });
-            }
-          }
-        }
-      }
-      results.sort((a, b) => {
-        // Check if either titles start with argument
-        const aStartsWithArg = a.title
-          .toLowerCase()
-          .startsWith(argument.toLowerCase());
-        const bStartsWithArg = b.title
-          .toLowerCase()
-          .startsWith(argument.toLowerCase());
-
-        // If both do, sort by full title alphabetically
-        if (aStartsWithArg && bStartsWithArg) {
-          return a.title.localeCompare(b.title);
-        }
-        // If only a does, put it first
-        else if (aStartsWithArg) {
-          return -1;
-        }
-        // If only b does, put it first
-        else if (bStartsWithArg) {
-          return 1;
-        }
-        // If neither does, sort by full title alphabetically
-        else {
-          return a.title.localeCompare(b.title);
-        }
+      folderPath = File.pathFromBookmarkData(bookmarkData, {
+        withoutUI: true,
       });
-
-      return results;
+    } catch (error) {
+      LaunchBar.log(`Bookmark decode error: ${error}`);
+      folderPath = undefined;
     }
   }
+
+  if (folderPath) Action.preferences.folderLocation = folderPath;
+  if (!folderPath) folderPath = chooseFolder();
+
+  return folderPath;
 }
