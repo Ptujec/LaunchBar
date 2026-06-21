@@ -122,12 +122,7 @@ function showList(forceArchive = false) {
         'Hold ⌘ to add the current website from your browser! Hold ⌥ to view archived items.',
       );
     }
-    return {
-      title: 'Later',
-      icon,
-      action: 'run',
-      actionReturnsItems: true,
-    };
+    return { actionBundleIdentifier: Action.bundleIdentifier };
   }
 
   // Filter out duplicate URLs, keep only the most recent occurrence
@@ -812,13 +807,20 @@ The archive file will be deleted after restoring.`,
 
 function resolveICloudConflicts() {
   LaunchBar.hide();
-  const status = File.exists('./resolveConflicts')
-    ? LaunchBar.execute('/bin/bash', './resolveConflicts', jsonFilePath)?.trim()
+
+  const compiledExists = File.exists(
+    `${Action.path}/Contents/Scripts/resolveConflicts`,
+  );
+
+  const status = compiledExists
+    ? LaunchBar.execute('./resolveConflicts', jsonFilePath)?.trim()
     : LaunchBar.execute(
         '/usr/bin/swift',
         './resolveConflicts.swift',
         jsonFilePath,
       )?.trim();
+
+  // LaunchBar.log('Status: ', status);
 
   if (status === 'MERGED') {
     LaunchBar.displayNotification({
