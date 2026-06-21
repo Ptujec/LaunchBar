@@ -1,16 +1,18 @@
 /*
 iA Writer Search Action for LaunchBar
 by Christian Bender (@ptujec)
-2022-03-27
+2026-06-21
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
+
+TODO: Fix default folder location detection
 */
 
 String.prototype.localizationTable = 'default';
 
 function run(argument) {
   if (LaunchBar.options.shiftKey) return chooseFolder();
-  const folderPath = Action.preferences.folderLocation || chooseFolder();
+  const folderPath = Action.preferences.folderLocation || getDefaultFolder();
 
   if (!argument) {
     const contents = LaunchBar.execute('/bin/ls', '-tA', folderPath)
@@ -199,32 +201,48 @@ function chooseFolder() {
   return;
 }
 
-// function getDefaultFolder() {
-//   let plist, folderPath;
-//   try {
-//     plist = File.readPlist(
-//       '~/Library/Containers/pro.writer.mac/Data/Library/Preferences/pro.writer.mac.plist',
-//     );
-//   } catch (exception) {
-//     LaunchBar.alert('Error while reading plist: ' + exception);
-//     return;
-//   }
+function getDefaultFolder() {
+  // let plist, folderPath;
+  // try {
+  //   plist = File.readPlist(
+  //     '~/Library/Containers/pro.writer.mac/Data/Library/Preferences/pro.writer.mac.plist',
+  //   );
+  // } catch (exception) {
+  //   LaunchBar.alert('Error while reading plist: ' + exception);
+  //   return;
+  // }
 
-//   if (plist.NSOSPLastRootDirectory) {
-//     // Decode the base64 bookmark data
-//     const bookmarkData = plist.NSOSPLastRootDirectory;
+  // if (plist.NSOSPLastRootDirectory) {
+  //   // Decode the base64 bookmark data
+  //   const bookmarkData = plist.NSOSPLastRootDirectory;
 
-//     // Try to extract URL from bookmark data
-//     try {
-//       const fileURL = File.fileURLForBookmarkData(bookmarkData);
-//       folderPath = File.pathForFileURL(fileURL);
-//     } catch (error) {
-//       // Fallback: try to extract path from raw binary data
-//       LaunchBar.log('Bookmark decode error: ' + error);
-//       folderPath = undefined;
-//     }
-//   }
+  //   // Try to extract URL from bookmark data
+  //   try {
+  //     const fileURL = File.fileURLForBookmarkData(bookmarkData);
+  //     folderPath = File.pathForFileURL(fileURL);
+  //   } catch (error) {
+  //     // Fallback: try to extract path from raw binary data
+  //     LaunchBar.log('Bookmark decode error: ' + error);
+  //     folderPath = undefined;
+  //   }
+  // }
 
-//   if (!folderPath) chooseFolder();
-//   return folderPath;
-// }
+  let folderPath;
+
+  const compiledExists = File.exists(
+    `${Action.path}/Contents/Scripts/readBookmarkData`,
+  );
+
+  try {
+    folderPath = compiledExists
+      ? LaunchBar.execute('./readBookmarkData')?.trim()
+      : LaunchBar.execute('/usr/bin/swift', './readBookmarkData.swift')?.trim();
+  } catch (error) {
+    LaunchBar.log(`Error while reading bookmark data: ${error}`);
+    folderPath = undefined;
+  }
+
+  if (folderPath) Action.preferences.folderLocation = folderPath;
+  if (!folderPath) folderPath = chooseFolder();
+  return folderPath;
+}
