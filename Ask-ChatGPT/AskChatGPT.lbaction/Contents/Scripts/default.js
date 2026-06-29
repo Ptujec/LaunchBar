@@ -582,7 +582,6 @@ function showReasoningEffortLevels(requestItem) {
   const availableEfforts = [
     'default',
     'none',
-    'minimal',
     'low',
     'medium',
     'high',
