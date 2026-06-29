@@ -503,16 +503,17 @@ function logTokenUsage(data, model, presetId, fileLocation) {
     `Previous Response ID: ${data.previous_response_id}`,
     `Model (preset): ${model}`,
     `Model (actual): ${data.model}`,
+    `Reasoning Effort: ${data.reasoning.effort}`,
     `Temperature: ${data.temperature}`,
     `Output Tokens: ${usage.output_tokens}`,
     `Input Tokens: ${usage.input_tokens}`,
-    `Total Tokens: ${usage.total_tokens}`,
     usage.prompt_tokens_details?.cached_tokens
       ? `Cached Tokens: ${usage.prompt_tokens_details.cached_tokens}`
       : '',
     usage.completion_tokens_details?.reasoning_tokens
       ? `Reasoning Tokens: ${usage.completion_tokens_details.reasoning_tokens}`
       : '',
+    `Total Tokens: ${usage.total_tokens}`,
     '---',
   ]
     .filter(Boolean)
