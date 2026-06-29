@@ -14,29 +14,27 @@ Documentation:
 
 
 TODO:
+- use system prompt instead of persona terminology (check AskGPT action for migration) … maybe remove the persona field entirely
 - model selection per prompt … or just for custom prompt?
 - reasoning setting?
-- use system prompt instead of persona terminology (check AskGPT action for migration) … maybe remove the persona field entirely
 - savety check only with longer text? Needs better way to select text
 */
 
 String.prototype.localizationTable = 'default';
 include('as.js');
-include('settings.js');
+include('global.js');
 
 const toolsPath = File.readJSON(`${Action.path}/Contents/Resources/tools.json`);
 const userToolsPath = `${Action.supportPath}/userTools.json`;
 const logPath = `${Action.supportPath}/writing-tools-usage.log`;
 
 function run(argument) {
-  const prefs = Action.preferences;
-
   // COPY TOOLS SO THEY CAN BE CUSTOMIZED
   if (!File.exists(userToolsPath)) File.writeJSON(toolsPath, userToolsPath);
 
   // CHECK/SET API KEY
-  if (!prefs.apiKey) importAPIKey();
-  if (!prefs.apiKey) return setApiKey();
+  if (!Action.preferences.apiKey) importAPIKey();
+  if (!Action.preferences.apiKey) return setApiKey();
 
   // SHOW SETTINGS
   if (LaunchBar.options.alternateKey) return settings();
@@ -59,7 +57,11 @@ function run(argument) {
   let content = argument?.trim();
 
   if (!argument) {
-    if (!prefs.excludedApps?.map((app) => app.appID).includes(frontmostAppID)) {
+    if (
+      !Action.preferences.excludedApps
+        ?.map((app) => app.appID)
+        .includes(frontmostAppID)
+    ) {
       if (confirmationDialog() === false) {
         LaunchBar.hide();
         return;
@@ -87,36 +89,58 @@ function run(argument) {
   }
 
   // CHECK FOR AUTHOR (iA Writer)
-  if (frontmostAppID === 'pro.writer.mac' && !prefs.iaAuthor)
+  if (frontmostAppID === 'pro.writer.mac' && !Action.preferences.iaAuthor) {
     return showAuthors({ isMain: true, content, hasArgument, frontmostAppID });
+  }
 
   // SHOW TOOL OPTIONS
-  if (LaunchBar.options.commandKey)
+  if (LaunchBar.options.commandKey) {
     return showTools({ content, hasArgument, frontmostAppID });
+  }
 
   // RUN MAIN ACTION USING THE DEFAULT TOOL
   return mainAction({ content, hasArgument, frontmostAppID });
 }
 
-function mainAction({
-  content,
-  hasArgument,
-  frontmostAppID,
-  tool,
-  isCustomPrompt,
-}) {
+function mainAction(item) {
+  if (LaunchBar.options.commandKey) {
+    if (item.useCustomModel && item.model) {
+      if (!supportsReasoningEffort(item.model) || item.effort) return;
+      return showReasoningEffortLevels(item);
+    }
+    return showModels({ ...item, useCustomModel: true });
+  }
+
+  let {
+    content,
+    hasArgument,
+    frontmostAppID,
+    tool,
+    isCustomPrompt,
+    model,
+    effort,
+  } = item;
+
   LaunchBar.hide();
 
-  const prefs = Action.preferences;
-  const model = prefs.model || recommendedModel;
-  const defaultToolID = prefs.defaultToolID || '1';
+  model = model ? model : Action.preferences.model || recommendedModel;
+
+  effort = effort
+    ? effort
+    : supportsReasoningEffort(model)
+      ? getReasoningEffort(model)
+      : undefined;
+
   const tools = getUserToolsJSON();
+  const defaultToolID = Action.preferences.defaultToolID || '1';
 
   // Handle custom prompt
   if (isCustomPrompt) {
     const customPrompt = LaunchBar.executeAppleScript(
-      `set result to display dialog "${'Enter Prompt'.localize()}:" with title "${'New Prompt'.localize()}" default answer ""`,
-      'set result to text returned of result',
+      `
+      set result to display dialog "${'Enter Prompt'.localize()}:" with title "${'New Prompt'.localize()}" default answer ""
+      set result to text returned of result
+      `,
     ).trim();
 
     if (customPrompt === '') return;
@@ -139,14 +163,17 @@ function mainAction({
     tool = tool ? tool : tools.find((tool) => tool.id === defaultToolID);
   }
 
+  LaunchBar.log(`effort: ${effort}`, `model: ${model}`);
+
   // API CALL
   const result = HTTP.postJSON('https://api.openai.com/v1/responses', {
     headerFields: {
-      Authorization: `Bearer ${prefs.apiKey}`,
+      Authorization: `Bearer ${Action.preferences.apiKey}`,
       'Content-Type': 'application/json',
     },
     body: {
       model,
+      reasoning: effort ? { effort } : undefined,
       instructions: tool.persona,
       input: `${tool.prompt} ${content}`,
       store: false,
@@ -172,8 +199,6 @@ function processResult({
   model,
   tool,
 }) {
-  const prefs = Action.preferences;
-
   if (!result.response) {
     LaunchBar.alert(result.error || 'Unknown error occurred');
     return;
@@ -199,7 +224,16 @@ function processResult({
 
   // PARSE RESULT
   let data = JSON.parse(result.data);
-  const answer = data.output[0]?.content[0]?.text.trim();
+
+  const answer = data.output
+    .find((item) => item.type === 'message')
+    ?.content?.find((item) => item.type === 'output_text')
+    ?.text.trim();
+
+  if (!answer) {
+    LaunchBar.alert('No answer in response'.localize());
+    return;
+  }
 
   // LOG TOKEN USAGE
   logTokenUsage(data, model, tool);
@@ -211,14 +245,14 @@ function processResult({
   }
 
   // COMPARE INPUT TO ANSWER IN BBEDIT Option (Settings)
-  if (prefs.useBBEditCompare) {
+  if (Action.preferences.useBBEditCompare) {
     compareTexts({ content, answer });
     playConfirmationSound();
     return;
   }
 
   // PASTE ANSWER IN IA WRITER
-  if (frontmostAppID === 'pro.writer.mac' && prefs.iaAuthor) {
+  if (frontmostAppID === 'pro.writer.mac' && Action.preferences.iaAuthor) {
     pasteAnswerInWriter({ answer, hasArgument });
     playConfirmationSound();
     return;
@@ -234,8 +268,6 @@ function processResult({
 }
 
 function pasteAnswerInWriter({ answer, hasArgument }) {
-  const prefs = Action.preferences;
-
   LaunchBar.setClipboardString(answer);
   LaunchBar.hide();
 
@@ -243,7 +275,7 @@ function pasteAnswerInWriter({ answer, hasArgument }) {
     ? 'click menu item 14 of menu 4 of menu bar 1 of application process "iA Writer"\n'
     : '';
 
-  const authorName = prefs.iaAuthor;
+  const authorName = Action.preferences.iaAuthor;
 
   const pasteInWriterAS = `
     tell application "iA Writer" to activate\n

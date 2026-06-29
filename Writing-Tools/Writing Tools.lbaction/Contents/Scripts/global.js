@@ -7,12 +7,23 @@ by Christian Bender (@ptujec)
 const recommendedModel = 'gpt-5.4-mini';
 
 function settings() {
-  const prefs = Action.preferences || {};
+  const prefs = Action.preferences;
   const defaultToolID = prefs.defaultToolID || '1';
   const tools = getUserToolsJSON();
   const defaultToolName = tools.find(
     (tool) => tool.id === defaultToolID,
   )?.title;
+
+  const currentModel = prefs.model ?? recommendedModel;
+  const supportsReasoning = supportsReasoningEffort(currentModel);
+  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
+
+  const effortBadge =
+    currentEffort === 'xhigh'
+      ? 'XHigh'.localize()
+      : (
+          currentEffort.charAt(0).toUpperCase() + currentEffort.slice(1)
+        ).localize();
 
   return [
     {
@@ -24,10 +35,19 @@ function settings() {
     {
       title: 'Choose Model'.localize(),
       icon: 'gearTemplate',
-      badge: prefs.model || recommendedModel,
+      badge: currentModel,
       actionReturnsItems: true,
       action: 'showModels',
     },
+    supportsReasoning
+      ? {
+          title: 'Set Reasoning Effort'.localize(),
+          icon: 'brainTemplate',
+          badge: effortBadge,
+          action: 'showReasoningEffortLevels',
+          actionReturnsItems: true,
+        }
+      : undefined,
     File.exists('/Applications/iA Writer.app')
       ? {
           title: 'Set Author (iA Writer)'.localize(),
@@ -85,6 +105,8 @@ function settings() {
   ];
 }
 
+// TOOLS
+
 function getUserToolsJSON() {
   try {
     return File.readJSON(userToolsPath).tools;
@@ -109,7 +131,7 @@ function showTools({ content, hasArgument, frontmostAppID }) {
       content && tool.id === defaultToolID ? 'Default'.localize() : undefined,
     action: content ? 'mainAction' : 'setDefaultTool',
     actionArgument: { content, hasArgument, frontmostAppID, tool },
-    actionRunsInBackground: content ? true : false,
+    // actionRunsInBackground: content ? true : false,
   }));
 
   // Add custom prompt at the top if content is available
@@ -124,7 +146,7 @@ function showTools({ content, hasArgument, frontmostAppID }) {
         frontmostAppID,
         isCustomPrompt: true,
       },
-      actionRunsInBackground: true,
+      // actionRunsInBackground: true,
     };
     return [customPromptItem, ...toolItems];
   }
@@ -147,8 +169,11 @@ function resetTools() {
   return settings();
 }
 
-function showModels() {
-  const currentModel = Action.preferences.model || recommendedModel;
+// MODELS
+
+function showModels(requestItem) {
+  const defaultModel = Action.preferences.model || recommendedModel;
+  const useCustomModel = requestItem?.useCustomModel;
 
   const result = HTTP.getJSON('https://api.openai.com/v1/models', {
     headerFields: {
@@ -169,11 +194,17 @@ function showModels() {
     .map((item) => ({
       title: item.id,
       icon:
-        currentModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
-      action: 'setModel',
-      actionArgument: item.id,
+        defaultModel === item.id ? 'checkTemplate.png' : 'circleTemplate.png',
+      action: useCustomModel ? 'mainAction' : 'setModel',
+      actionArgument: useCustomModel
+        ? { ...requestItem, model: item.id }
+        : item.id,
       badge:
-        item.id === recommendedModel ? 'Recommended'.localize() : undefined,
+        item.id === recommendedModel
+          ? 'Recommended'.localize()
+          : item.id === defaultModel
+            ? 'Default'.localize()
+            : undefined,
     }));
 }
 
@@ -201,6 +232,69 @@ function setModel(model) {
   Action.preferences.model = model;
   return settings();
 }
+
+// REASONING EFFORT
+
+function showReasoningEffortLevels(requestItem) {
+  const useCustomModel = requestItem?.useCustomModel;
+
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  const currentEffort = getReasoningEffort(currentModel) ?? 'default';
+  const availableEfforts = [
+    'default',
+    'none',
+    'low',
+    'medium',
+    'high',
+    'xhigh',
+  ];
+
+  return availableEfforts.map((value) => {
+    const titleText =
+      value === 'xhigh'
+        ? 'XHigh'
+        : value.charAt(0).toUpperCase() + value.slice(1);
+    return {
+      title: titleText.localize(),
+      icon:
+        currentEffort === value ? 'checkTemplate.png' : 'circleTemplate.png',
+      badge: useCustomModel ? requestItem.model : undefined,
+      action: useCustomModel ? 'mainAction' : 'selectReasoningEffort',
+      actionArgument: useCustomModel
+        ? { effort: value, ...requestItem }
+        : value,
+    };
+  });
+}
+
+function selectReasoningEffort(effort) {
+  const currentModel = Action.preferences.model ?? recommendedModel;
+  setReasoningEffort(currentModel, effort);
+  return settings();
+}
+
+function supportsReasoningEffort(model) {
+  const match = model.match(/gpt-(\d+\.\d+)/);
+  if (!match) return false;
+  const version = parseFloat(match[1]);
+  return version >= 5.2;
+}
+
+function getReasoningEffort(model) {
+  const prefKey = `reasoningEffort_${model}`;
+  return Action.preferences[prefKey];
+}
+
+function setReasoningEffort(model, effort) {
+  const prefKey = `reasoningEffort_${model}`;
+  if (!effort || effort === 'default') {
+    delete Action.preferences[prefKey];
+    return;
+  }
+  Action.preferences[prefKey] = effort;
+}
+
+// TEXT EDITOR SETTINGS
 
 function showAuthors({ isMain, content, hasArgument, frontmostAppID }) {
   const authors = LaunchBar.executeAppleScript(showAuthorsAS).trim().split(',');
@@ -334,6 +428,8 @@ function excludeApp(app) {
   return settings();
 }
 
+// API KEY SETTINGS
+
 function importAPIKey() {
   // Try to import API key from Ask ChatGPT Action
   const AskChatGPTPrefs =
@@ -401,6 +497,8 @@ function checkAPIKey(apiKey) {
   return false;
 }
 
+// LOGGING
+
 function logTokenUsage(data, model, tool) {
   const usage = data.usage || {};
 
@@ -409,18 +507,19 @@ function logTokenUsage(data, model, tool) {
     `[${timestamp}]`,
     `Model (preset): ${model}`,
     `Model (actual): ${data.model}`,
-    `Tool: ${tool.id} (${tool.title})`,
+    `Reasoning Effort: ${data.reasoning.effort}`,
+    `Tool: ${tool.id} (${tool.title || tool.prompt?.trim()})`,
     `Instructions: ${data.instructions}`,
     `Status: ${data.status}`,
     `Input Tokens: ${usage.input_tokens || 0}`,
     `Output Tokens: ${usage.output_tokens || 0}`,
-    `Total Tokens: ${usage.total_tokens || 0}`,
     usage.input_tokens_details?.cached_tokens
       ? `Cached Tokens: ${usage.input_tokens_details.cached_tokens}`
       : '',
     usage.output_tokens_details?.reasoning_tokens
       ? `Reasoning Tokens: ${usage.output_tokens_details.reasoning_tokens}`
       : '',
+    `Total Tokens: ${usage.total_tokens || 0}`,
     '---',
   ]
     .filter(Boolean)

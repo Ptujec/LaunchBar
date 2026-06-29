@@ -40,3 +40,13 @@
 "Show Usage Log" = "Nutzungsprotokoll anzeigen";
 "No Usage Log!" = "Kein Nutzungsprotokoll!";
 "The usage log file does not exist." = "Die Protokolldatei ist nicht vorhanden.";
+"No answer in response" = "Kein Antworttext gefunden";
+"Set Reasoning Effort" = "Denkaufwand einstellen";
+"Default" = "Standard";
+"None" = "Ohne";
+"Minimal" = "Minimal";
+"Low" = "Niedrig";
+"Medium" = "Mittel";
+"High" = "Hoch";
+"XHigh" = "Extrem Hoch";
+"None" = "Ohne";
