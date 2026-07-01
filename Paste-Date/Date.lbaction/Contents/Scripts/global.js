@@ -252,16 +252,19 @@ function processArgument(argument, date) {
   const month = date.getMonth();
   const year = date.getFullYear();
 
-  // Handle "last [weekday]" patterns first
-  const lastStr = 'Last'.localize().toLowerCase();
-  if (argument.startsWith(lastStr)) {
-    // Extract the weekday part after "last"
-    const weekdayPart = argument.substring(lastStr.length).trim();
-    const weekdayIndex = weekdays.findIndex((day) =>
-      day.localize().toLowerCase().startsWith(weekdayPart),
+  // Handle "last [weekday]" patterns
+  const lastWeekdaySuggestions = generateLastWeekdaySuggestions().map((s) =>
+    s.toLowerCase(),
+  );
+  const lastWeekdayMatch = findFirstMatch(argument, lastWeekdaySuggestions);
+  if (lastWeekdayMatch) {
+    const parts = lastWeekdayMatch.split(' ');
+    const weekday = parts[parts.length - 1]; // Last part is the weekday
+    const dayIndex = weekdays.findIndex(
+      (day) => day.localize().toLowerCase() === weekday,
     );
-    if (weekdayIndex !== -1) {
-      return getLastWeekday(date, weekdayIndex);
+    if (dayIndex !== -1) {
+      return getLastWeekday(date, dayIndex);
     }
   }
 
