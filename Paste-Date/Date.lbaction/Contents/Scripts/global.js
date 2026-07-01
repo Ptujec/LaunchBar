@@ -1,4 +1,4 @@
-/* 
+/*
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
 2026-01-30
@@ -9,6 +9,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 String.prototype.localizationTable = 'default';
 
 // CONSTANTS
+
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '1.3';
 
 const weekdays = [
   'Sunday',
@@ -39,7 +42,10 @@ function getLocalizedStrings() {
   const currentLocale = LaunchBar.currentLocale;
   const cachedLocale = Action.preferences.localizedStringsLocale;
 
-  if (cachedLocale !== currentLocale) {
+  if (
+    cachedLocale !== currentLocale ||
+    isNewerVersion(lastUsedActionVersion, currentActionVersion)
+  ) {
     // Regenerate all localized strings
     const cached = {
       localizedWeekdays: weekdays.map((day) => day.localize()),
@@ -76,6 +82,7 @@ function getLocalizedStrings() {
     // Store in preferences
     Action.preferences.localizedStrings = JSON.stringify(cached);
     Action.preferences.localizedStringsLocale = currentLocale;
+    Action.preferences.lastUsedActionVersion = Action.version;
 
     return cached;
   }
@@ -127,6 +134,17 @@ function getNextWeekday(date, weekdayIndex) {
   // Always add at least 7 days if it's the same weekday
   nextWeekdayDate.setDate(date.getDate() + (daysToAdd === 0 ? 7 : daysToAdd));
   return nextWeekdayDate;
+}
+
+// This function returns the most recent past occurrence of a given weekday
+function getLastWeekday(date, weekdayIndex) {
+  const lastWeekdayDate = new Date(date.getTime());
+  const daysToSubtract = (date.getDay() - weekdayIndex + 7) % 7;
+  // Always subtract at least 7 days if it's the same weekday
+  lastWeekdayDate.setDate(
+    date.getDate() - (daysToSubtract === 0 ? 7 : daysToSubtract),
+  );
+  return lastWeekdayDate;
 }
 
 // This function calculates the next occurrence of a given weekday from a specified date.
@@ -234,7 +252,20 @@ function processArgument(argument, date) {
   const month = date.getMonth();
   const year = date.getFullYear();
 
-  // Handle weekdays first
+  // Handle "last [weekday]" patterns first
+  const lastStr = 'Last'.localize().toLowerCase();
+  if (argument.startsWith(lastStr)) {
+    // Extract the weekday part after "last"
+    const weekdayPart = argument.substring(lastStr.length).trim();
+    const weekdayIndex = weekdays.findIndex((day) =>
+      day.localize().toLowerCase().startsWith(weekdayPart),
+    );
+    if (weekdayIndex !== -1) {
+      return getLastWeekday(date, weekdayIndex);
+    }
+  }
+
+  // Handle weekdays (next occurrence)
   const weekdayIndex = weekdays.findIndex((day) =>
     day.localize().toLowerCase().startsWith(argument),
   );
@@ -409,4 +440,24 @@ function generateMonthBoundarySuggestions() {
     `${firstDayOf} ${month}`,
     `${lastDayOf} ${month}`,
   ]);
+}
+
+function generateLastWeekdaySuggestions() {
+  const lastStr = 'Last'.localize();
+  return localizedWeekdays.map((weekday) => `${lastStr} ${weekday}`);
+}
+
+// DETECT ACTION UPDATES
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+
+  for (let i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i];
+    const b = ~~lastUsedParts[i];
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }

@@ -1,4 +1,4 @@
-/* 
+/*
 Date Action for LaunchBar
 by Christian Bender (@ptujec)
 2026-01-30
@@ -35,12 +35,16 @@ function getAllSuggestionStrings() {
   const currentLocale = LaunchBar.currentLocale;
   const cachedLocale = Action.preferences.suggestionStringsLocale;
 
-  // Only regenerate the static parts if locale has changed
-  if (cachedLocale !== currentLocale) {
+  // Only regenerate the static parts if locale has changed or action version has updated
+  if (
+    cachedLocale !== currentLocale ||
+    isNewerVersion(lastUsedActionVersion, currentActionVersion)
+  ) {
     const staticStrings = [
       ...relativeDaySuggestions,
       ...monthBoundarySuggestions,
       ...generateMonthBoundarySuggestions(),
+      ...generateLastWeekdaySuggestions(),
       ...generateNthWeekdaySuggestions(),
       ...generateMonthWeekdaySuggestions(),
     ];
@@ -84,9 +88,11 @@ function getMatchedSuggestions(searchString) {
   return matched.map((suggestion) => {
     const dateString = processArgument(suggestion, date);
     const isWeekday = localizedWeekdays.includes(suggestion);
-    const subtitle = isWeekday
-      ? format(dateString, 'long')
-      : format(dateString, 'full');
+    const isLastWeekday = suggestion.toLowerCase().startsWith('last');
+    const subtitle =
+      isWeekday || isLastWeekday
+        ? format(dateString, 'long')
+        : format(dateString, 'full');
 
     return {
       title: suggestion,
