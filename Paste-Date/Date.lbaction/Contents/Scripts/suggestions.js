@@ -27,59 +27,19 @@ function runWithString(string) {
   if (!string) return getCachedSuggestions();
 
   // For searches: filter first, then process only matched suggestions
-  return getMatchedSuggestions(string);
+  const matched = getMatchedSuggestions(string);
+  if (matched.length === 0)
+    return { title: 'No valid entry'.localize(), icon: 'alert' };
+
+  return matched;
 }
 
-// Generate all possible suggestion strings (cached by locale, not by date)
-function getAllSuggestionStrings() {
-  const currentLocale = LaunchBar.currentLocale;
-  const cachedLocale = Action.preferences.suggestionStringsLocale;
-
-  // Only regenerate the static parts if locale has changed or action version has updated
-  if (
-    cachedLocale !== currentLocale ||
-    isNewerVersion(lastUsedActionVersion, currentActionVersion)
-  ) {
-    const staticStrings = [
-      ...relativeDaySuggestions,
-      ...monthBoundarySuggestions,
-      ...generateMonthBoundarySuggestions(),
-      ...generateLastWeekdaySuggestions(),
-      ...generateNthWeekdaySuggestions(),
-      ...generateMonthWeekdaySuggestions(),
-    ];
-
-    Action.preferences.suggestionStrings = JSON.stringify(staticStrings);
-    Action.preferences.suggestionStringsLocale = currentLocale;
-  }
-
-  // Always reorder weekdays based on today's date (time-dependent)
-  const todayIndex = new Date().getDay();
-  const orderedWeekdays = [
-    ...getWeekdaySuggestions().slice(todayIndex),
-    ...getWeekdaySuggestions().slice(0, todayIndex),
-  ];
-
-  // Combine with cached static strings
-  const cachedStrings = JSON.parse(
-    Action.preferences.suggestionStrings || '[]',
-  );
-
-  return [...orderedWeekdays, ...cachedStrings];
-}
-
-// Filter suggestions by search string, then process only matched ones
+// Process matched suggestion strings into formatted results
 function getMatchedSuggestions(searchString) {
-  const allStrings = getAllSuggestionStrings();
-  searchString = searchString.toLowerCase();
+  // Use the single source of truth from global.js for matching
+  const matched = getMatchedSuggestionStrings(searchString);
 
-  // Filter first (cheap), then process only matches (expensive)
-  const matched = allStrings.filter((suggestion) => {
-    const suggLower = suggestion.toLowerCase();
-    // Quick string check before expensive findFirstMatch
-    if (!suggLower.includes(searchString.charAt(0))) return false;
-    return findFirstMatch(searchString, [suggLower]) !== undefined;
-  });
+  if (matched.length === 0) return [];
 
   // Now compute dates and formats only for matched suggestions
   const icon = 'Template';

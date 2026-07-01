@@ -253,18 +253,24 @@ function processArgument(argument, date) {
   const year = date.getFullYear();
 
   // Handle "last [weekday]" patterns
-  const lastWeekdaySuggestions = generateLastWeekdaySuggestions().map((s) =>
-    s.toLowerCase(),
-  );
-  const lastWeekdayMatch = findFirstMatch(argument, lastWeekdaySuggestions);
-  if (lastWeekdayMatch) {
-    const parts = lastWeekdayMatch.split(' ');
-    const weekday = parts[parts.length - 1]; // Last part is the weekday
-    const dayIndex = weekdays.findIndex(
-      (day) => day.localize().toLowerCase() === weekday,
+  const lastWordLower = 'Last'.localize().toLowerCase();
+  const firstArgWord = argument.split(' ')[0];
+  const startsWithLastPrefix = lastWordLower.startsWith(firstArgWord);
+
+  if (startsWithLastPrefix) {
+    const lastWeekdaySuggestions = generateLastWeekdaySuggestions().map((s) =>
+      s.toLowerCase(),
     );
-    if (dayIndex !== -1) {
-      return getLastWeekday(date, dayIndex);
+    const lastWeekdayMatch = findFirstMatch(argument, lastWeekdaySuggestions);
+    if (lastWeekdayMatch) {
+      const parts = lastWeekdayMatch.split(' ');
+      const weekday = parts[parts.length - 1]; // Last part is the weekday
+      const dayIndex = weekdays.findIndex(
+        (day) => day.localize().toLowerCase() === weekday,
+      );
+      if (dayIndex !== -1) {
+        return getLastWeekday(date, dayIndex);
+      }
     }
   }
 
@@ -448,6 +454,63 @@ function generateMonthBoundarySuggestions() {
 function generateLastWeekdaySuggestions() {
   const lastStr = 'Last'.localize();
   return localizedWeekdays.map((weekday) => `${lastStr} ${weekday}`);
+}
+
+// Get matched suggestion strings for a search input (single source of truth)
+// Returns array of matching suggestion strings in order
+function getMatchedSuggestionStrings(searchString) {
+  searchString = searchString.toLowerCase();
+  if (!searchString) return [];
+
+  // Get all suggestion strings (cached if needed, with time-dependent ordering)
+  const currentLocale = LaunchBar.currentLocale;
+  const cachedLocale = Action.preferences.suggestionStringsLocale;
+
+  // Only regenerate the static parts if locale has changed or action version has updated
+  if (
+    cachedLocale !== currentLocale ||
+    isNewerVersion(lastUsedActionVersion, currentActionVersion)
+  ) {
+    const staticStrings = [
+      ...relativeDaySuggestions,
+      ...monthBoundarySuggestions,
+      ...generateMonthBoundarySuggestions(),
+      ...generateLastWeekdaySuggestions(),
+      ...generateNthWeekdaySuggestions(),
+      ...generateMonthWeekdaySuggestions(),
+    ];
+
+    Action.preferences.suggestionStrings = JSON.stringify(staticStrings);
+    Action.preferences.suggestionStringsLocale = currentLocale;
+  }
+
+  // Always reorder weekdays based on today's date (time-dependent)
+  const todayIndex = new Date().getDay();
+  const orderedWeekdays = [
+    ...getWeekdaySuggestions().slice(todayIndex),
+    ...getWeekdaySuggestions().slice(0, todayIndex),
+  ];
+
+  // Combine with cached static strings
+  const cachedStrings = JSON.parse(
+    Action.preferences.suggestionStrings || '[]',
+  );
+
+  const allStrings = [...orderedWeekdays, ...cachedStrings];
+
+  // Filter for matches (cheap operation, no date processing)
+  return allStrings.filter((suggestion) => {
+    const suggLower = suggestion.toLowerCase();
+    if (!suggLower.includes(searchString.charAt(0))) return false;
+    return findFirstMatch(searchString, [suggLower]) !== undefined;
+  });
+}
+
+// Get the first suggestion that matches the search string
+function getFirstMatchingSuggestion(searchString) {
+  // Use the single source of truth from global.js for matching
+  const matched = getMatchedSuggestionStrings(searchString);
+  return matched.length > 0 ? matched[0] : undefined;
 }
 
 // DETECT ACTION UPDATES

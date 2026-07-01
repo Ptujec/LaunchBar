@@ -14,8 +14,12 @@ function run(argument) {
   if (LaunchBar.options.shiftKey) return formatSettings();
 
   const date = new Date();
-  const dateString = argument ? processArgument(argument, date) : date;
-  if (!dateString) return { title: 'No valid entry', icon: 'alert' };
+  let dateString = date; // default
+
+  if (argument) {
+    const matchedSuggestion = getFirstMatchingSuggestion(argument); // Use the same matching logic as suggestions.js to ensure consistency
+    dateString = processArgument(matchedSuggestion || argument, date); // Fallback: try to process the raw argument (for numbers, etc.)
+  }
 
   let dateStyle = Action.preferences.dateStyle ?? 'short';
 
