@@ -17,8 +17,9 @@ AMOUNT="$4"
 PAYEE_ID="$5"
 NOTES="$6"
 DATE="$7"
-TRANSFER_ACCT="$8"  # Optional: if present, this is a transfer transaction
-NEW_PAYEE_NAME="$9" # Optional: if present, create a new payee
+TRANSFER_ACCT="$8"     # Optional: if present, this is a transfer transaction
+NEW_PAYEE_NAME="$9"    # Optional: if present, create a new payee
+IS_OFFBUDGET="${10}"   # Optional: if '1', this is an offbudget transaction (no category, cleared=0)
 
 # Function to log to stderr instead of stdout
 log() {
@@ -194,8 +195,38 @@ INSERT INTO transactions (
 COMMIT;
 EOF
 
+elif [ "$IS_OFFBUDGET" = "1" ]; then
+    # Offbudget transaction - no category, cleared=0
+    sqlite3 "$TEMP_DB" << EOF
+BEGIN TRANSACTION;
+
+INSERT INTO transactions (
+    id,
+    acct,
+    category,
+    amount,
+    description,
+    notes,
+    date,
+    cleared,
+    tombstone
+) VALUES (
+    '$TRANSACTION_UUID',
+    '$ACCOUNT_ID',
+    NULL,
+    $AMOUNT,
+    '$PAYEE_ID',
+    '$NOTES',
+    $DATE,
+    0,
+    0
+);
+
+COMMIT;
+EOF
+
 else
-    # Regular non-transfer transaction
+    # Regular non-transfer, non-offbudget transaction
     sqlite3 "$TEMP_DB" << EOF
 BEGIN TRANSACTION;
 

@@ -9,9 +9,9 @@ on run
 					set _subject to _msg's subject
 					set end of _links to _messageURL
 				end repeat
-				
+
 				set _linkcount to length of _links
-				
+
 				if _linkcount is 1 then
 					set _default to _links as Unicode text
 				else

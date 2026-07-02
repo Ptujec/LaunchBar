@@ -120,12 +120,7 @@ function setPayee({ id: payeeId, transfer_acct }) {
 
   recentPrefs.set('transfer_acct', transfer_acct || '');
 
-  if (transfer_acct) {
-    recentPrefs.set('category', ''); // Set empty category for transfers
-    return showAccounts();
-  }
-
-  return showCategories();
+  return showAccounts();
 }
 
 function handlePayeeAction({ payeeId }) {
@@ -168,6 +163,79 @@ function handlePayeeAction({ payeeId }) {
         return item;
       })
     : [{ title: 'No recent transactions', icon: 'alert' }];
+}
+
+function showAccounts() {
+  const data = getDatabaseData();
+  if (!data || !data.accounts || !data.accounts.length) {
+    return [{ title: 'No accounts found', icon: 'alert' }];
+  }
+
+  const recentPayeeId = recentPrefs.get('payee');
+  const transferAcct = recentPrefs.get('transfer_acct');
+
+  let recentAccountId = null;
+
+  if (recentPayeeId && data.transactions) {
+    const recentTransaction = data.transactions.find(
+      (t) => t.payee_id === recentPayeeId,
+    );
+    if (recentTransaction) {
+      recentAccountId = recentTransaction.account_id;
+    }
+  }
+
+  const sortedAccounts = [...data.accounts]
+    .filter((account) => !transferAcct || account.id !== transferAcct)
+    .sort((a, b) => {
+      if (a.id === recentAccountId) return -1;
+      if (b.id === recentAccountId) return 1;
+      // Sort normal accounts before offbudget accounts
+      if ((a.offbudget === 0 || a.offbudget === undefined) && b.offbudget === 1)
+        return -1;
+      if (a.offbudget === 1 && (b.offbudget === 0 || b.offbudget === undefined))
+        return 1;
+      return a.sort_order - b.sort_order;
+    });
+
+  return sortedAccounts.map((account) => {
+    let icon = 'accountTemplate';
+    if (account.offbudget === 1) {
+      icon =
+        account.balance < 0
+          ? 'offbudgetAccountRed'
+          : 'offbudgetAccountTemplate';
+    } else {
+      icon = account.balance < 0 ? 'accountRed' : 'accountTemplate';
+    }
+
+    return {
+      title: account.name,
+      label: `${formatAmount(account.balance, data.numberFormat)}`,
+      badge: account.id === recentAccountId ? 'recent' : undefined,
+      icon: icon,
+      action: 'setAccount',
+      actionArgument: { id: account.id, isOffbudget: account.offbudget === 1 },
+      actionReturnsItems: true,
+    };
+  });
+}
+
+function setAccount({ id: accountId, isOffbudget }) {
+  recentPrefs.set('account', accountId);
+  recentPrefs.set('isOffbudget', isOffbudget || false);
+
+  const transferAcct = recentPrefs.get('transfer_acct');
+
+  // Check if this is a transfer or offbudget account
+  if (transferAcct || isOffbudget) {
+    // For offbudget accounts, skip categories and go straight to dates
+    recentPrefs.set('category', ''); // Set empty category for offbudget or transfers
+    return showDates();
+  }
+
+  // For regular accounts, show categories
+  return showCategories();
 }
 
 function showCategories() {
@@ -279,7 +347,7 @@ function setCategory(args) {
   if (LaunchBar.options.commandKey) return handleCategoryAction(args);
 
   recentPrefs.set('category', args.id);
-  return showAccounts();
+  return showDates();
 }
 
 function handleCategoryAction({
@@ -297,49 +365,6 @@ function handleCategoryAction({
   return transactionItems.length > 0
     ? [...noteItem, ...transactionItems]
     : [{ title: 'No transactions found for this category', icon: 'alert' }];
-}
-
-function showAccounts() {
-  const data = getDatabaseData();
-  if (!data || !data.accounts || !data.accounts.length) {
-    return [{ title: 'No accounts found', icon: 'alert' }];
-  }
-
-  const recentPayeeId = recentPrefs.get('payee');
-  const transfer_acct = recentPrefs.get('transfer_acct');
-  let recentAccountId = null;
-
-  if (recentPayeeId && data.transactions) {
-    const recentTransaction = data.transactions.find(
-      (t) => t.payee_id === recentPayeeId,
-    );
-    if (recentTransaction) {
-      recentAccountId = recentTransaction.account_id;
-    }
-  }
-
-  const sortedAccounts = [...data.accounts]
-    .filter((account) => !transfer_acct || account.id !== transfer_acct)
-    .sort((a, b) => {
-      if (a.id === recentAccountId) return -1;
-      if (b.id === recentAccountId) return 1;
-      return a.sort_order - b.sort_order;
-    });
-
-  return sortedAccounts.map((account) => ({
-    title: account.name,
-    label: `${formatAmount(account.balance, data.numberFormat)}`,
-    badge: account.id === recentAccountId ? 'recent' : undefined,
-    icon: account.balance < 0 ? 'accountRed' : 'accountTemplate',
-    action: 'setAccount',
-    actionArgument: { id: account.id },
-    actionReturnsItems: true,
-  }));
-}
-
-function setAccount({ id: accountId }) {
-  recentPrefs.set('account', accountId);
-  return showDates();
 }
 
 function showDates() {
@@ -447,6 +472,7 @@ function postTransaction() {
   const isNewPayee = recentPrefs.get('newPayee');
   const payeeName = isNewPayee ? recentPrefs.get('newPayeeName') : '';
   const payeeId = recentPrefs.get('payee');
+  const isOffbudget = recentPrefs.get('isOffbudget') || false;
 
   // Execute transaction
   const result = LaunchBar.execute(
@@ -461,6 +487,7 @@ function postTransaction() {
     date,
     transferAcct || '',
     payeeName,
+    isOffbudget ? '1' : '0',
   ).trim();
 
   if (result.startsWith('ERROR:')) {
@@ -500,6 +527,28 @@ function postTransaction() {
         transferBalance,
         data.numberFormat,
       )}`,
+      url: File.fileURLForPath('/Applications/Actual.app'),
+    });
+    return;
+  }
+
+  if (isOffbudget) {
+    const payee = isNewPayee
+      ? payeeName
+      : data.payees.find((p) => p.id === payeeId)?.name || 'Unknown Payee';
+
+    const formattedDate = LaunchBar.formatDate(
+      new Date(date.toString().replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')),
+      {
+        relativeDateFormatting: true,
+        timeStyle: 'none',
+        dateStyle: 'short',
+      },
+    );
+
+    LaunchBar.displayNotification({
+      title: 'Off-budget transaction added successfully!',
+      string: `${payee}: ${formattedAmount} (${formattedDate})\n${account}: ${formatAmount(accountBalance, data.numberFormat)}`,
       url: File.fileURLForPath('/Applications/Actual.app'),
     });
     return;
