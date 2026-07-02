@@ -24,6 +24,7 @@ accounts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
         accounts.id, 
         accounts.name,
         accounts.sort_order,
+        accounts.offbudget,
         COALESCE((
             SELECT SUM(amount)
             FROM v_transactions_internal_alive t
@@ -34,7 +35,6 @@ accounts=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     FROM accounts
     WHERE accounts.tombstone = 0 
     AND accounts.closed = 0 
-    AND accounts.offbudget = 0
     ORDER BY accounts.sort_order;" 2>&1)
 if [ $? -ne 0 ]; then
   echo "Error querying accounts: $accounts" >&2
@@ -72,7 +72,6 @@ transactions=$(sqlite3 -json "file:$DB_PATH?mode=ro" "
     LEFT JOIN payees p ON t.payee = p.id
     LEFT JOIN categories c ON t.category = c.id
     WHERE (t.is_child = 0 OR t.parent_id IS NOT NULL)
-    AND a.offbudget = 0
     ORDER BY t.date DESC
     $LIMIT_CLAUSE;" 2>&1)
 if [ $? -ne 0 ]; then
@@ -157,7 +156,6 @@ if [ "$FETCH_MODE" = "full" ]; then
             FROM accounts
             WHERE tombstone = 0
             AND closed = 0
-            AND offbudget = 0
         ),
         transfer_payees AS (
             SELECT p.id, a.name, p.transfer_acct

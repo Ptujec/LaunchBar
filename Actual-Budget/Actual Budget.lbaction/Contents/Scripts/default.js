@@ -239,10 +239,16 @@ function showAccountsAndTransactions(customDatabasePath, customBudgetID) {
   const { accounts, transactions, numberFormat, dateFormat } = data;
 
   const accountResults = accounts
-    .filter((account) => !account.closed && !account.offbudget)
+    .filter((account) => !account.closed)
+    .sort((a, b) => a.offbudget - b.offbudget)
     .map((account) => ({
       title: `${account.name}: ${formatAmount(account.balance, numberFormat)}`,
-      icon: account.balance < 0 ? 'creditcardRed' : 'creditcardTemplate',
+      icon:
+        account.balance < 0
+          ? 'creditcardRed'
+          : account.offbudget
+            ? 'creditcardGreyTemplate'
+            : 'creditcardTemplate',
       action: 'showAccountTransactions',
       actionArgument: {
         accountId: account.id,
@@ -512,15 +518,25 @@ function handleTransactionAction({
 
     if (!relatedTransfer) return [];
 
-    const sourceAccount =
-      t.amount < 0 ? t.account_name : relatedTransfer.account_name;
-    const targetAccount =
-      t.amount < 0 ? relatedTransfer.account_name : t.account_name;
+    const [sourceAccount, targetAccount] =
+      t.amount < 0 ? [t, relatedTransfer] : [relatedTransfer, t];
+
+    const sourceAccountName = sourceAccount.account_name;
+    const targetAccountName = targetAccount.account_name;
+
+    const sourceAccountIcon =
+      sourceAccount.account_offbudget === 1
+        ? 'creditcardGreyTemplate'
+        : 'creditcardTemplate';
+    const targetAccountIcon =
+      targetAccount.account_offbudget === 1
+        ? 'creditcardGreyTemplate'
+        : 'creditcardTemplate';
 
     return [
       {
-        title: `${sourceAccount} →`,
-        icon: 'creditcardTemplate',
+        title: `${sourceAccountName} →`,
+        icon: sourceAccountIcon,
         action: 'showAccountTransactions',
         actionArgument: {
           accountId: t.amount < 0 ? t.account_id : relatedTransfer.account_id,
@@ -530,8 +546,8 @@ function handleTransactionAction({
         actionReturnsItems: true,
       },
       {
-        title: targetAccount,
-        icon: 'creditcardTemplate',
+        title: targetAccountName,
+        icon: targetAccountIcon,
         action: 'showAccountTransactions',
         actionArgument: {
           accountId: t.amount < 0 ? relatedTransfer.account_id : t.account_id,
@@ -618,7 +634,10 @@ function handleTransactionAction({
       : undefined,
     {
       title: t.account_name,
-      icon: 'creditcardTemplate',
+      icon:
+        t.account_offbudget === 1
+          ? 'creditcardGreyTemplate'
+          : 'creditcardTemplate',
       action: 'showAccountTransactions',
       actionArgument: {
         accountId: t.account_id,
