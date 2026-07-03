@@ -73,8 +73,15 @@ function getDatabaseData(
 
   const dbModDate = File.modificationDate(databasePath);
 
+  const actionUpdated = isNewerVersion(
+    lastUsedActionVersion,
+    currentActionVersion,
+  );
+
+  Action.preferences.lastUsedActionVersion = Action.version;
+
   // Always check full cache first - if it's valid, use it (full data is a superset)
-  if (File.exists(fullCacheFilePath)) {
+  if (File.exists(fullCacheFilePath) && !actionUpdated) {
     const cacheModDate = File.modificationDate(fullCacheFilePath);
     if (dbModDate < cacheModDate) {
       const cachedData = File.readJSON(fullCacheFilePath);
@@ -85,7 +92,7 @@ function getDatabaseData(
   }
 
   // Fall back to basic cache if we don't need full data
-  if (!requireFullData && File.exists(basicCacheFilePath)) {
+  if (!requireFullData && File.exists(basicCacheFilePath) && !actionUpdated) {
     const cacheModDate = File.modificationDate(basicCacheFilePath);
     if (dbModDate < cacheModDate) {
       return File.readJSON(basicCacheFilePath);
@@ -393,7 +400,7 @@ on run {}
 		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
 		set modifier_down to shift_down
 	end repeat
-	
+
 	tell application "System Events"
 		key code 123 using command down
 		delay 0.01
@@ -420,7 +427,7 @@ on run {}
 		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
 		set modifier_down to shift_down
 	end repeat
-	
+
 	tell application "System Events"
 		key code 123 using command down
 		delay 0.01
@@ -449,7 +456,7 @@ on run {}
 		set shift_down to ((modifier_flags div (get NSShiftKeyMask)) mod 2) = 1
 		set modifier_down to shift_down
 	end repeat
-	
+
 	tell application "System Events"
 		key code 19 using shift down
 		delay 0.01
@@ -457,4 +464,22 @@ on run {}
 	end tell
 end run
   `);
+}
+
+// MARK: - Version Checking
+
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '1.6';
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+
+  for (let i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i];
+    const b = ~~lastUsedParts[i];
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }
