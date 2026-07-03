@@ -143,8 +143,15 @@ function parseDataBase({ databasePath }) {
 
   if (Action.preferences.skipFileCheck) return File.readJSON(cacheFilePath); // return early when we already have fresh data
 
+  const actionUpdated = isNewerVersion(
+    lastUsedActionVersion,
+    currentActionVersion,
+  );
+
+  Action.preferences.lastUsedActionVersion = Action.version;
+
   // Check if cache is valid
-  if (File.exists(cacheFilePath)) {
+  if (File.exists(cacheFilePath) && !actionUpdated) {
     const dbModDate = File.modificationDate(databasePath);
     const cacheModDate = File.modificationDate(cacheFilePath);
 
@@ -619,4 +626,22 @@ function open(arg) {
   LaunchBar.hide();
   if (arg.startsWith('message://')) return LaunchBar.openURL(arg);
   return LaunchBar.openURL(File.fileURLForPath('/Applications/Actual.app'));
+}
+
+// MARK: - Version Checking
+
+const currentActionVersion = Action.version;
+const lastUsedActionVersion = Action.preferences.lastUsedActionVersion ?? '1.6';
+
+function isNewerVersion(lastUsedActionVersion, currentActionVersion) {
+  const lastUsedParts = lastUsedActionVersion.split('.');
+  const currentParts = currentActionVersion.split('.');
+
+  for (let i = 0; i < currentParts.length; i++) {
+    const a = ~~currentParts[i];
+    const b = ~~lastUsedParts[i];
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
 }
