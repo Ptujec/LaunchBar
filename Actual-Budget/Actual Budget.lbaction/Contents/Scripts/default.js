@@ -303,6 +303,7 @@ function showAccountTransactions({
 
   const accountTransactions = transactions
     .filter((t) => t.account_id === accountId)
+    .filter((t) => !t.is_child)
     .slice(0, LaunchBar.options.alternateKey ? undefined : 50)
     .map((t) =>
       formatTransaction(
