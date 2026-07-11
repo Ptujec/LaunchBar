@@ -273,7 +273,7 @@ function ask(item) {
       instructions,
       input: argument,
       previous_response_id: previousResponseId,
-      reasoning: effort ? { effort } : undefined,
+      reasoning: effort && effort !== 'default' ? { effort } : undefined,
       text: {
         format: {
           name: 'chat_response',
@@ -328,7 +328,19 @@ function processResult(
 
   // PARSE RESULT
   const data = JSON.parse(result.data);
-  const text = JSON.parse(data.output[0].content[0].text);
+
+  let text = data.output
+    .find((item) => item.type === 'message')
+    ?.content?.find((item) => item.type === 'output_text')
+    ?.text.trim();
+
+  if (!text) {
+    LaunchBar.alert('No answer in response'.localize());
+    return;
+  } else {
+    text = JSON.parse(text);
+  }
+
   const answer = text.content;
   const title = text.title;
   const chatId = data.id;
