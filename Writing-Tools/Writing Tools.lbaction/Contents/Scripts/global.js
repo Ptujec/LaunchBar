@@ -190,7 +190,7 @@ function showModels(requestItem) {
 
   return result.data.data
     .filter(filterModels)
-    .reverse()
+    .sort((a, b) => b.id.localeCompare(a.id))
     .map((item) => ({
       title: item.id,
       icon:

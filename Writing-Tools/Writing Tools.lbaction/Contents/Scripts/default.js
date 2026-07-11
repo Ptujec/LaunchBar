@@ -15,8 +15,6 @@ Documentation:
 
 TODO:
 - use system prompt instead of persona terminology (check AskGPT action for migration) … maybe remove the persona field entirely
-- model selection per prompt … or just for custom prompt?
-- reasoning setting?
 - savety check only with longer text? Needs better way to select text
 */
 
