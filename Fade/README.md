@@ -6,9 +6,9 @@
 
 This action will fade out or fade in the audio playing in Apple Music or in your browser.
 
-Here is how it works: The action checks whether audio is playing in a browser tab or in Apple Music and fades it out.
+Here’s how it works: The action checks whether audio is playing in a browser tab or in Apple Music, and then fades it out.
 
-The action will remember the last app and, for browser tabs, the last URL. It will fade in the last used source. If the browser tab no longer exists, it will check whether there is something else to play.
+The action will remember the last app and, for browser tabs, the last URL. So next time, it will fade in the last used source. If the browser tab no longer exists, it will check whether there’s something else to play.
 
 You can force Apple Music by holding down `command`.
 
