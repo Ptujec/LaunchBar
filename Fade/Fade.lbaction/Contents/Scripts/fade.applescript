@@ -4,22 +4,73 @@ by Christian Bender (@ptujec)
 2026-07-07
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
-
-TODO: fix Safari other browser relationship
 *)
 
 property FADE_STEPS : 15
 property FADE_INTERVAL : 80
 
+-- JavaScript for detecting playing media
+property JS_CHECK_PLAYING : "(() => {
+  const m = [...document.querySelectorAll('audio,video')].find(m => !m.paused && !m.ended && m.readyState > 0);
+  return m ? 'playing' : '';
+})()"
+
+-- JavaScript for detecting any media (playing or not)
+property JS_CHECK_MEDIA : "(() => {
+  const m = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
+  return m ? 'found' : '';
+})()"
+
+-- JavaScript for fade animation
+property JS_FADE_HANDLER : "
+(() => {
+  const media = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
+  if (!media) return 'no-media';
+
+  const isPlaying = !media.paused && !media.ended;
+  const steps = %STEPS%;
+  const interval = %INTERVAL%;
+
+  if (isPlaying) {
+    const startVol = media.volume;
+    const endVol = 0;
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      media.volume = startVol + (endVol - startVol) * (i / steps);
+      if (i >= steps) {
+        clearInterval(timer);
+        media.volume = endVol;
+        media.pause();
+        media.volume = 1;
+      }
+    }, interval);
+  } else {
+    media.volume = 0;
+    media.play().catch(() => {});
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      media.volume = (i / steps);
+      if (i >= steps) {
+        clearInterval(timer);
+        media.volume = 1;
+      }
+    }, interval);
+  }
+
+  return isPlaying ? 'fading-out' : 'fading-in';
+})()
+"
+
 on run {_music_running, _tab_url, _app, _running_browsers, _webkit_browsers}
 	set _running_browsers to paragraphs of _running_browsers
 	set _webkit_browsers to paragraphs of _webkit_browsers
 
+	-- Music is running, check if it's playing
 	if _music_running is "true" then
-		-- Music is running, check if it's playing
 		tell application id "com.apple.Music"
 			if player state is playing then
-				-- Music is playing, fade it out
 				my fadeMusicOut()
 				return _tab_url & linefeed & "com.apple.Music"
 			end if
@@ -31,7 +82,6 @@ on run {_music_running, _tab_url, _app, _running_browsers, _webkit_browsers}
 	set _browser to _browser as string
 
 	if _playing_tab is not missing value then
-		-- Found playing media in a _browser, fade it out
 		set _tab_url to my fadeBrowserTab(_playing_tab, _browser, _webkit_browsers)
 		return _tab_url & linefeed & _browser
 	end if
@@ -65,108 +115,92 @@ on run {_music_running, _tab_url, _app, _running_browsers, _webkit_browsers}
 		return "" & linefeed & "com.apple.Music"
 	end if
 
-	-- Fallback: return empty string
-	return ""
+	return
 end run
 
--- Find a playing tab in Safari, optionally matching a specific URL
+-- Find a playing tab in any browser, optionally matching a specific URL
 on findPlayingTabInBrowsers(_tab_url, _running_browsers, _webkit_browsers)
 	repeat with _browser in _running_browsers
 		if _browser is in _webkit_browsers then
-			tell application id _browser
-				if (exists front window) then
-					-- If _tab_url provided, try to find it with playing media first
-					if _tab_url is not "" and _tab_url is not missing value then
-						set _tab_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
-						set _playing_tab to my findTabByCondition(_browser, "
+			set {_tab, _url} to my findPlayingTabInWebKit(_tab_url, _browser)
+			if _tab is not missing value then return {_tab, _browser}
+		else
+			set {_tab, _url} to my findPlayingTabInChrome(_tab_url, _browser)
+			if _tab is not missing value then return {_tab, _browser}
+		end if
+	end repeat
+	return {missing value, missing value}
+end findPlayingTabInBrowsers
+
+-- Find playing tab in WebKit browser
+on findPlayingTabInWebKit(_tab_url, _browser)
+	tell application id _browser
+		if not (exists front window) then return {missing value, missing value}
+
+		if _tab_url is not "" and _tab_url is not missing value then
+			set _clean_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
+			set _playing_tab to my findTabByCondition(_browser, "
 (() => {
   try {
-    if (window.location.href !== '" & _tab_url & "') return '';
+    if (window.location.href !== '" & _clean_url & "') return '';
     const m = [...document.querySelectorAll('audio,video')].find(m => !m.paused && !m.ended && m.readyState > 0);
     return m ? 'playing' : '';
   }
   catch(e) { return ''; }
 })()
 ")
-						if _playing_tab is not missing value then return {_playing_tab, _browser}
-					end if
-
-					-- Look for any playing media
-					set _playing_tab to my findTabByCondition(_browser, "
-(() => {
-  const m = [...document.querySelectorAll('audio,video')].find(m => !m.paused && !m.ended && m.readyState > 0);
-  return m ? 'playing' : '';
-})()
-")
-					if _playing_tab is not missing value then return {_playing_tab, _browser}
-				end if
-			end tell
-
-		else
-			-- Chromium-based _browsers (Chrome, Brave, Vivaldi, Helium)
-
-			using terms from application "Chrome"
-				tell application id _browser
-					if (exists of windows) then
-						-- If _tab_url provided, try to find it with playing media first
-						if _tab_url is not "" and _tab_url is not missing value then
-							set _tab_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
-							repeat with w in windows
-								repeat with t in tabs of w
-									try
-										set _tab_url to URL of t
-										if _tab_url contains _tab_url then
-											execute t javascript "(() => { const m = [...document.querySelectorAll('audio,video')].find(m => !m.paused && !m.ended && m.readyState > 0); return m ? 'playing' : ''; })()"
-											if the result is not "" then return {t, _browser}
-										end if
-									end try
-								end repeat
-							end repeat
-						end if
-
-						-- Look for any playing media
-						repeat with w in windows
-							repeat with t in tabs of w
-								execute t javascript "(() => { const m = [...document.querySelectorAll('audio,video')].find(m => !m.paused && !m.ended && m.readyState > 0); return m ? 'playing' : ''; })()"
-								if the result is not "" then return {t, _browser as string}
-							end repeat
-						end repeat
-					end if
-				end tell
-			end using terms from
+			if _playing_tab is not missing value then return {_playing_tab, _tab_url}
 		end if
-	end repeat
 
+		set _playing_tab to my findTabByCondition(_browser, my JS_CHECK_PLAYING)
+		return {_playing_tab, ""}
+	end tell
+end findPlayingTabInWebKit
+
+-- Find playing tab in Chrome-based browser
+on findPlayingTabInChrome(_tab_url, _browser)
+	using terms from application "Chrome"
+		tell application id _browser
+			if not (exists of windows) then return {missing value, missing value}
+
+			if _tab_url is not "" and _tab_url is not missing value then
+				set _clean_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
+				repeat with w in windows
+					repeat with t in tabs of w
+						try
+							if (URL of t) contains _clean_url then
+								execute t javascript my JS_CHECK_PLAYING
+								if the result is not "" then return {t, _tab_url}
+							end if
+						end try
+					end repeat
+				end repeat
+			end if
+
+			repeat with w in windows
+				repeat with t in tabs of w
+					execute t javascript my JS_CHECK_PLAYING
+					if the result is not "" then return {t, ""}
+				end repeat
+			end repeat
+		end tell
+	end using terms from
 	return {missing value, missing value}
-end findPlayingTabInBrowsers
-
-
+end findPlayingTabInChrome
 
 -- Find a tab with playable media (audio or video), regardless of playing state
 on findTabWithMedia(_running_browsers, _webkit_browsers)
 	repeat with _browser in _running_browsers
 		if _browser is in _webkit_browsers then
-			tell application id _browser
-				if (exists front window) then
-					set _media_tab to my findTabByCondition(_browser, "
-(() => {
-  const m = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
-  return m ? 'found' : '';
-})()
-")
-					if _media_tab is not missing value then
-						return {_media_tab, _browser}
-					end if
-				end if
-			end tell
+			set _media_tab to my findTabByCondition(_browser, my JS_CHECK_MEDIA)
+			if _media_tab is not missing value then return {_media_tab, _browser}
 		else
-			-- Chromium-based browsers
 			using terms from application "Chrome"
 				tell application id _browser
 					if (exists of windows) then
 						repeat with w in windows
 							repeat with t in tabs of w
-								execute t javascript "(() => { const m = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0); return m ? 'found' : ''; })()"
+								execute t javascript my JS_CHECK_MEDIA
 								if the result is not "" then return {t, _browser}
 							end repeat
 						end repeat
@@ -175,9 +209,16 @@ on findTabWithMedia(_running_browsers, _webkit_browsers)
 			end using terms from
 		end if
 	end repeat
-
 	return {missing value, missing value}
 end findTabWithMedia
+
+-- Build fade script with current settings
+on buildFadeScript()
+	set _script to my JS_FADE_HANDLER
+	set _script to my replaceText(_script, "%STEPS%", FADE_STEPS as text)
+	set _script to my replaceText(_script, "%INTERVAL%", FADE_INTERVAL as text)
+	return _script
+end buildFadeScript
 
 -- Generic tab finder with condition script
 on findTabByCondition(_browser, conditionScript)
@@ -198,55 +239,26 @@ on findTabByCondition(_browser, conditionScript)
 	return missing value
 end findTabByCondition
 
--- Fade out a Safari tab
+-- Replace text in string
+on replaceText(_text, _search, _replacement)
+	set _old to AppleScript's text item delimiters
+	set AppleScript's text item delimiters to _search
+	set _items to text items of _text
+	set AppleScript's text item delimiters to _replacement
+	set _result to _items as text
+	set AppleScript's text item delimiters to _old
+	return _result
+end replaceText
+
+-- Fade a browser tab (in or out)
 on fadeBrowserTab(_target_tab, _browser, _webkit_browsers)
+	set _fade_script to my buildFadeScript()
+
 	if _browser is in _webkit_browsers then
 		using terms from application "Safari"
 			tell application id _browser
 				set _tab_url to URL of _target_tab
-				do JavaScript "
-(() => {
-  const media = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
-  if (!media) return 'no-media';
-
-  const isPlaying = !media.paused && !media.ended;
-  const steps = " & FADE_STEPS & ";
-  const interval = " & FADE_INTERVAL & ";
-
-  if (isPlaying) {
-    // Fade out
-    const startVol = media.volume;
-    const endVol = 0;
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      media.volume = startVol + (endVol - startVol) * (i / steps);
-      if (i >= steps) {
-        clearInterval(timer);
-        media.volume = endVol;
-        media.pause();
-        media.volume = 1;
-      }
-    }, interval);
-  } else {
-    // Fade in: play first, then fade in
-    media.volume = 0;
-    media.play().catch(() => {});
-
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      media.volume = (i / steps);
-      if (i >= steps) {
-        clearInterval(timer);
-        media.volume = 1;
-      }
-    }, interval);
-  }
-
-  return isPlaying ? 'fading-out' : 'fading-in';
-})()
-" in _target_tab
+				do JavaScript _fade_script in _target_tab
 				return _tab_url
 			end tell
 		end using terms from
@@ -254,49 +266,7 @@ on fadeBrowserTab(_target_tab, _browser, _webkit_browsers)
 		using terms from application "Chrome"
 			tell application id _browser
 				set _tab_url to URL of _target_tab
-				execute _target_tab javascript "
-(() => {
-  const media = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
-  if (!media) return 'no-media';
-
-  const isPlaying = !media.paused && !media.ended;
-  const steps = " & FADE_STEPS & ";
-  const interval = " & FADE_INTERVAL & ";
-
-  if (isPlaying) {
-    // Fade out
-    const startVol = media.volume;
-    const endVol = 0;
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      media.volume = startVol + (endVol - startVol) * (i / steps);
-      if (i >= steps) {
-        clearInterval(timer);
-        media.volume = endVol;
-        media.pause();
-        media.volume = 1;
-      }
-    }, interval);
-  } else {
-    // Fade in: play first, then fade in
-    media.volume = 0;
-    media.play().catch(() => {});
-
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      media.volume = (i / steps);
-      if (i >= steps) {
-        clearInterval(timer);
-        media.volume = 1;
-      }
-    }, interval);
-  }
-
-  return isPlaying ? 'fading-out' : 'fading-in';
-})()
-"
+				execute _target_tab javascript _fade_script
 				return _tab_url
 			end tell
 		end using terms from
@@ -304,47 +274,25 @@ on fadeBrowserTab(_target_tab, _browser, _webkit_browsers)
 end fadeBrowserTab
 
 
--- Fade in a Safari tab or other browser
+-- Fade in a browser tab
 on fadeBrowserIn(_tab_url, _browser, _webkit_browsers)
+	set _fade_script to my buildFadeScript()
+
 	if _browser is in _webkit_browsers then
 		using terms from application "Safari"
 			tell application id _browser
 				if not (exists front window) then return false
 
-				set _tab_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
+				set _clean_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
 				set _target_tab to my findTabByCondition(_browser, "
 (() => {
-  try { return window.location.href === '" & _tab_url & "' ? 'match' : ''; }
+  try { return window.location.href === '" & _clean_url & "' ? 'match' : ''; }
   catch(e) { return ''; }
 })()
 ")
-
 				if _target_tab is missing value then return false
 
-				do JavaScript "
-(() => {
-  const media = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
-  if (!media) return 'no-media';
-
-  media.volume = 0;
-  media.play().catch(() => {});
-
-  const steps = " & FADE_STEPS & ";
-  const interval = " & FADE_INTERVAL & ";
-
-  let i = 0;
-  const timer = setInterval(() => {
-    i++;
-    media.volume = (i / steps);
-    if (i >= steps) {
-      clearInterval(timer);
-      media.volume = 1;
-    }
-  }, interval);
-
-  return 'fading-in';
-})()
-" in _target_tab
+				do JavaScript _fade_script in _target_tab
 				return true
 			end tell
 		end using terms from
@@ -353,13 +301,13 @@ on fadeBrowserIn(_tab_url, _browser, _webkit_browsers)
 			tell application id _browser
 				if not (exists of windows) then return false
 
-				set _tab_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
+				set _clean_url to do shell script "printf %s " & quoted form of _tab_url & " | xargs"
 				set _target_tab to missing value
 
 				repeat with w in windows
 					repeat with t in tabs of w
 						try
-							execute t javascript "(() => { try { return window.location.href === '" & _tab_url & "' ? 'match' : ''; } catch(e) { return ''; } })()"
+							execute t javascript "(() => { try { return window.location.href === '" & _clean_url & "' ? 'match' : ''; } catch(e) { return ''; } })()"
 							if the result is not "" then
 								set _target_tab to t
 								exit repeat
@@ -371,30 +319,7 @@ on fadeBrowserIn(_tab_url, _browser, _webkit_browsers)
 
 				if _target_tab is missing value then return false
 
-				execute _target_tab javascript "
-(() => {
-  const media = [...document.querySelectorAll('audio,video')].find(m => m.readyState > 0);
-  if (!media) return 'no-media';
-
-  media.volume = 0;
-  media.play().catch(() => {});
-
-  const steps = " & FADE_STEPS & ";
-  const interval = " & FADE_INTERVAL & ";
-
-  let i = 0;
-  const timer = setInterval(() => {
-    i++;
-    media.volume = (i / steps);
-    if (i >= steps) {
-      clearInterval(timer);
-      media.volume = 1;
-    }
-  }, interval);
-
-  return 'fading-in';
-})()
-"
+				execute _target_tab javascript _fade_script
 				return true
 			end tell
 		end using terms from

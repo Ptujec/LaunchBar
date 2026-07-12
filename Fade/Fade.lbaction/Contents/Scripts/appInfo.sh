@@ -1,12 +1,10 @@
 #!/bin/bash
 
 #
-# App Info Script for LaunchBar Actions
-#
-# Script to get the bundle ID of a supported browser that is frontmost
+# App Info Script for Fade LaunchBar Action
 #
 # by Christian Bender (@ptujec)
-# 2026-07-07
+# 2026-07-12
 #
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 #

@@ -32,7 +32,10 @@ const excludedBrowsers = [
 ];
 
 function run() {
-  if (LaunchBar.options.alternateKey) return addBrowsers();
+  if (LaunchBar.options.alternateKey) return addBrowsers((manual = true));
+
+  const add = appFolderModified();
+  if (add) addBrowsers((manual = false));
 
   const supportedApps = [
     ...webkitBrowsers,
@@ -93,61 +96,92 @@ function run() {
     result?.length > 1 ? result[1] : result[0] || '';
 }
 
-function addBrowsers() {
-  const excluded = [
+// MARK: - Browser Detection
+
+function getInstalledAppsInfo() {
+  return File.getDirectoryContents('/Applications/')
+    .filter((item) => item.endsWith('.app'))
+    .flatMap((item) => {
+      const infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+      if (!File.exists(infoPlistPath)) return [];
+
+      const infoPlist = File.readPlist(infoPlistPath);
+      return [
+        {
+          id: infoPlist.CFBundleIdentifier,
+          supportsWeb:
+            infoPlist.NSUserActivityTypes?.includes(
+              'NSUserActivityTypeBrowsingWeb',
+            ) ?? false,
+        },
+      ];
+    });
+}
+
+function addBrowsers(manual) {
+  const customBrowsers = Action.preferences.customBrowsers ?? [];
+  const dontCount = [
     ...webkitBrowsers,
     ...chromiumBrowsers,
-    ...(Action.preferences.customBrowsers ?? []),
+    ...customBrowsers,
     ...excludedBrowsers,
   ];
 
-  let newlyAddedBrowsers = [];
-  let allAddedBrowsers = [...(Action.preferences.customBrowsers ?? [])];
+  const installedAppsInfo = getInstalledAppsInfo();
+  const newlyAddedBrowsers = installedAppsInfo
+    .filter((app) => app.supportsWeb && !dontCount.includes(app.id))
+    .map((app) => app.id);
 
-  const installedApps = File.getDirectoryContents('/Applications/');
-  for (item of installedApps) {
-    if (item.endsWith('.app')) {
-      const infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+  const allBrowsers = [...customBrowsers, ...newlyAddedBrowsers];
+  Action.preferences.customBrowsers = allBrowsers;
 
-      if (File.exists(infoPlistPath)) {
-        const infoPlist = File.readPlist(infoPlistPath);
-        const bundleName = infoPlist.CFBundleName;
-        const appID = infoPlist.CFBundleIdentifier;
-        const activityTypes = infoPlist.NSUserActivityTypes;
+  if (!manual) return;
 
-        if (activityTypes && !excluded.includes(appID)) {
-          for (item of activityTypes) {
-            if (item == 'NSUserActivityTypeBrowsingWeb') {
-              newlyAddedBrowsers.push(appID);
-              allAddedBrowsers.push(appID);
-            }
-          }
-        }
-      }
-    }
-  }
+  const allBrowserIDs = [
+    ...webkitBrowsers,
+    ...chromiumBrowsers,
+    ...allBrowsers,
+  ];
 
-  Action.preferences.customBrowsers = allAddedBrowsers;
+  const installedBrowsers = [
+    'com.apple.Safari',
+    ...installedAppsInfo
+      .filter((app) => allBrowserIDs.includes(app.id))
+      .map((app) => app.id),
+  ];
 
   const generalNote =
-    'Note: For browser support to work, you need to allow JavaScript for Apple Events. This is turned off by default. To turn it on in Safari, go to Settings ‣ Developer ‣ Automation. In Chromium browsers, you can find the option in the View ‣ Developer menu.\n\nGecko-based browsers like Firefox and Zen are not supported by this LaunchBar action.\n\nIf you add a browser that is WebKit-based, I may need to add its bundle ID in default.js to work properly. Let me know.';
+    'NOTE: For browser support to work, you need to allow JavaScript for Apple Events in each browser. It is turned OFF by default. To turn it on in Safari, go to Settings ‣ Developer ‣ Automation. In Chromium browsers, you can find the option in the View ‣ Developer menu.\n\nGecko-based browsers like Firefox and Zen are not supported.\n\nIf you add a browser that is WebKit-based, I may need to add its bundle ID in default.js to work properly. Let me know.';
 
-  let title, subtitle;
+  const title =
+    newlyAddedBrowsers.length === 0
+      ? 'No new browsers found.'
+      : `Added ${newlyAddedBrowsers.length} browser(s):`;
 
-  if (newlyAddedBrowsers.length === 0) {
-    title =
-      allAddedBrowsers.length > 0
-        ? 'You added all available browsers:'
-        : 'You added all available browsers.';
-    subtitle =
-      allAddedBrowsers.length > 0
-        ? allAddedBrowsers.join('\n') + '\n\n' + generalNote
-        : generalNote;
-  } else {
-    title = 'Added ' + newlyAddedBrowsers.length + ' browser(s):';
-    subtitle = newlyAddedBrowsers.join('\n') + '\n\n' + generalNote;
-  }
+  const subtitle =
+    (newlyAddedBrowsers.length === 0
+      ? `This action supports the following installed browsers (bundle IDs):\n\n${installedBrowsers.join('\n')}`
+      : newlyAddedBrowsers.join('\n')) +
+    '\n\n' +
+    generalNote;
 
   LaunchBar.alert(title, subtitle);
-  return { actionBundleIdentifier: Action.bundleIdentifier };
+}
+
+// MARK: - App Folder Checking
+
+function appFolderModified() {
+  const currentModificationDate = File.modificationDate('/Applications');
+
+  const appFolderLastModificationDate =
+    Action.preferences.appFolderLastModificationDate;
+
+  Action.preferences.appFolderLastModificationDate = currentModificationDate;
+
+  if (!appFolderLastModificationDate) return true;
+
+  return (
+    appFolderLastModificationDate.toLocaleString() !==
+    currentModificationDate.toLocaleString()
+  );
 }

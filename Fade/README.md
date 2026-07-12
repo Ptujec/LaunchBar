@@ -14,10 +14,9 @@ You can force Apple Music by holding down `command`.
 
 ## About Browsers (Important!)
 
-For browser support to work, **you need to allow JavaScript for Apple Events**. This is turned off by default. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can find the option in the `View` ‣ `Developer` menu. 
+For browser support to work, **you need to allow JavaScript for Apple Events** for each browser. By default, it is turned **off**. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can usually find the option in the `View` ‣ `Developer` menu. 
 
-
-This action should work with all WebKit- and Chromium-based browsers. It supports common browsers like Safari and Chrome out of the box. You can also add missing browsers from your Applications folder by holding `option` when running the action. Let me know if something doesn’t work as expected. Firefox and other Gecko-based browsers, including Zen, are not supported. 
+This action should work with most common browsers (e.g. Safari, Chrome, Brave …). When you run it, it also checks your Applications folder for new supported browsers. Firefox and other Gecko-based browsers, including Zen, are not supported. You can also add browsers from your Applications folder manually by holding `option` when running the action. Let me know if something doesn’t work as expected.
 
 
 ## Download & Update
