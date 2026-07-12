@@ -12,11 +12,11 @@ The action will remember the last app and, for browser tabs, the last URL. So ne
 
 You can force Apple Music by holding down `command`.
 
-## About Browsers (Important!)
+## Setup Browser Support
 
 For browser support to work, **you need to allow JavaScript for Apple Events** for each browser. By default, it is turned **off**. To turn it on in Safari, go to `Settings` ‣ `Developer` ‣ `Automation`. In Chromium browsers, you can usually find the option in the `View` ‣ `Developer` menu. 
 
-This action should work with most common browsers (e.g. Safari, Chrome, Brave …). When you run it, it also checks your Applications folder for new supported browsers. Firefox and other Gecko-based browsers, including Zen, are not supported. You can also add browsers from your Applications folder manually by holding `option` when running the action. Let me know if something doesn’t work as expected.
+Note: This action should work with most common browsers (e.g. Safari, Chrome, Brave …). When you run it, it also checks your Applications folder for new supported browsers. Firefox and other Gecko-based browsers, including Zen, are not supported. You can also add browsers from your Applications folder manually by holding `option` when running the action. Let me know if something doesn’t work as expected.
 
 
 ## Download & Update
