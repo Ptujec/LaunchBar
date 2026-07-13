@@ -1,7 +1,7 @@
 /*
 Fade Action Script for LaunchBar
 by Christian Bender (@ptujec)
-2026-07-07
+2026-07-13
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -19,16 +19,6 @@ const chromiumBrowsers = [
   'com.brave.Browser',
   'com.vivaldi.Vivaldi',
   'net.imput.helium',
-];
-
-const excludedBrowsers = [
-  'org.mozilla.firefox',
-  'org.mozilla.firefoxdeveloperedition',
-  'app.zen-browser.zen',
-  'io.gitlab.librewolf-community',
-  'net.waterfox.waterfox',
-  'org.torproject.torbrowser',
-  'one.ablaze.floorp',
 ];
 
 function run() {
@@ -98,11 +88,20 @@ function run() {
 
 // MARK: - Browser Detection
 
+function hasSdefFile(appPath) {
+  const resourcesPath = appPath + '/Contents/Resources';
+  if (!File.exists(resourcesPath)) return false;
+
+  const files = File.getDirectoryContents(resourcesPath);
+  return files.some((file) => file.endsWith('.sdef'));
+}
+
 function getInstalledAppsInfo() {
   return File.getDirectoryContents('/Applications/')
     .filter((item) => item.endsWith('.app'))
     .flatMap((item) => {
-      const infoPlistPath = '/Applications/' + item + '/Contents/Info.plist';
+      const appPath = '/Applications/' + item;
+      const infoPlistPath = appPath + '/Contents/Info.plist';
       if (!File.exists(infoPlistPath)) return [];
 
       const infoPlist = File.readPlist(infoPlistPath);
@@ -113,6 +112,7 @@ function getInstalledAppsInfo() {
             infoPlist.NSUserActivityTypes?.includes(
               'NSUserActivityTypeBrowsingWeb',
             ) ?? false,
+          hasSdef: hasSdefFile(appPath),
         },
       ];
     });
@@ -120,38 +120,35 @@ function getInstalledAppsInfo() {
 
 function addBrowsers(manual) {
   const customBrowsers = Action.preferences.customBrowsers ?? [];
-  const dontCount = [
-    ...webkitBrowsers,
-    ...chromiumBrowsers,
-    ...customBrowsers,
-    ...excludedBrowsers,
-  ];
+  const dontCount = [...webkitBrowsers, ...chromiumBrowsers, ...customBrowsers];
 
   const installedAppsInfo = getInstalledAppsInfo();
   const newlyAddedBrowsers = installedAppsInfo
-    .filter((app) => app.supportsWeb && !dontCount.includes(app.id))
+    .filter(
+      (app) => app.supportsWeb && app.hasSdef && !dontCount.includes(app.id),
+    )
     .map((app) => app.id);
 
-  const allBrowsers = [...customBrowsers, ...newlyAddedBrowsers];
-  Action.preferences.customBrowsers = allBrowsers;
+  const updatedCustomBrowsers = [...customBrowsers, ...newlyAddedBrowsers];
+  Action.preferences.customBrowsers = updatedCustomBrowsers;
 
   if (!manual) return;
 
-  const allBrowserIDs = [
+  const supportedBrowserIDs = [
     ...webkitBrowsers,
     ...chromiumBrowsers,
-    ...allBrowsers,
+    ...updatedCustomBrowsers,
   ];
 
   const installedBrowsers = [
     'com.apple.Safari',
     ...installedAppsInfo
-      .filter((app) => allBrowserIDs.includes(app.id))
+      .filter((app) => supportedBrowserIDs.includes(app.id))
       .map((app) => app.id),
   ];
 
   const generalNote =
-    'NOTE: For browser support to work, you need to allow JavaScript for Apple Events in each browser. It is turned OFF by default. To turn it on in Safari, go to Settings ‣ Developer ‣ Automation. In Chromium browsers, you can find the option in the View ‣ Developer menu.\n\nGecko-based browsers like Firefox and Zen are not supported.\n\nIf you add a browser that is WebKit-based, I may need to add its bundle ID in default.js to work properly. Let me know.';
+    'NOTE: For browser support to work, you need to allow JavaScript for Apple Events in each browser. It is turned OFF by default. To turn it on in Safari, go to Settings ‣ Developer ‣ Automation. In Chromium browsers, you can usually find the option in the View ‣ Developer menu.\n\nBrowsers without scripting support (like Firefox and Gecko-based browsers) are automatically excluded based on the presence of a .sdef file in their app bundle.';
 
   const title =
     newlyAddedBrowsers.length === 0
