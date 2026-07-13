@@ -105,16 +105,15 @@ function getInstalledAppsInfo() {
       if (!File.exists(infoPlistPath)) return [];
 
       const infoPlist = File.readPlist(infoPlistPath);
-      return [
-        {
-          id: infoPlist.CFBundleIdentifier,
-          supportsWeb:
-            infoPlist.NSUserActivityTypes?.includes(
-              'NSUserActivityTypeBrowsingWeb',
-            ) ?? false,
-          hasSdef: hasSdefFile(appPath),
-        },
-      ];
+      const supportsWeb =
+        infoPlist.NSUserActivityTypes?.includes(
+          'NSUserActivityTypeBrowsingWeb',
+        ) ?? false;
+
+      if (!supportsWeb) return [];
+      if (!hasSdefFile(appPath)) return [];
+
+      return { id: infoPlist.CFBundleIdentifier };
     });
 }
 
@@ -124,9 +123,7 @@ function addBrowsers(manual) {
 
   const installedAppsInfo = getInstalledAppsInfo();
   const newlyAddedBrowsers = installedAppsInfo
-    .filter(
-      (app) => app.supportsWeb && app.hasSdef && !dontCount.includes(app.id),
-    )
+    .filter((app) => !dontCount.includes(app.id))
     .map((app) => app.id);
 
   const updatedCustomBrowsers = [...customBrowsers, ...newlyAddedBrowsers];
