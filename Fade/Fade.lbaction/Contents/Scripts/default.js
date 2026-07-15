@@ -105,15 +105,17 @@ function getInstalledAppsInfo() {
       if (!File.exists(infoPlistPath)) return [];
 
       const infoPlist = File.readPlist(infoPlistPath);
+      const id = infoPlist.CFBundleIdentifier;
+      if ([...webkitBrowsers, ...chromiumBrowsers].includes(id)) return { id };
+
       const supportsWeb =
         infoPlist.NSUserActivityTypes?.includes(
           'NSUserActivityTypeBrowsingWeb',
         ) ?? false;
-
       if (!supportsWeb) return [];
       if (!hasSdefFile(appPath)) return [];
 
-      return { id: infoPlist.CFBundleIdentifier };
+      return { id };
     });
 }
 
