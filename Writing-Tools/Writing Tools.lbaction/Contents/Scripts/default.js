@@ -171,7 +171,7 @@ function mainAction(item) {
     },
     body: {
       model,
-      reasoning: effort ? { effort } : undefined,
+      reasoning: effort && effort !== 'default' ? { effort } : undefined,
       instructions: tool.persona,
       input: `${tool.prompt} ${content}`,
       store: false,
