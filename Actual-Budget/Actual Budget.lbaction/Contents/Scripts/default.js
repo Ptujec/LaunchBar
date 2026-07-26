@@ -606,6 +606,82 @@ function handleTransactionAction({
 
   const displayNotes = t.notes ? t.notes.replace(urlRegex, '').trim() : '';
 
+  // Fetch data to get category balance for current month (only for current month transactions)
+  let categoryItem;
+
+  if (t.category_name) {
+    // Check if transaction is from current month
+    const currentDate = new Date();
+    const currentMonth =
+      currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1);
+    const transactionMonth = Math.floor(t.date / 100);
+
+    // Only show category balance for current month transactions
+    if (transactionMonth === currentMonth) {
+      const data = getCachedDatabaseData({
+        customDatabasePath,
+        customBudgetID,
+        checkForEntity: { id: t.category_id, field: 'category_id' },
+      });
+
+      if (data) {
+        const {
+          transactions: allTransactions,
+          zero_budgets,
+          categories,
+          numberFormat: fmt,
+        } = data;
+        const category = categories?.find((c) => c.id === t.category_id);
+
+        if (category) {
+          const categoryBalance = getCategoryBalance(
+            t.category_id,
+            allTransactions,
+            zero_budgets,
+            category,
+          );
+          const formattedBalance = formatAmount(categoryBalance, fmt);
+          const categoryIcon =
+            categoryBalance < 0
+              ? 'categoryRed'
+              : categoryBalance === 0
+                ? 'categoryGreyTemplate'
+                : 'categoryTemplate';
+
+          categoryItem = {
+            title:
+              categoryBalance !== 0
+                ? `${t.category_name}: ${formattedBalance}`
+                : t.category_name,
+            icon: categoryIcon,
+            action: 'showCategoryTransactions',
+            actionArgument: {
+              categoryId: t.category_id,
+              customDatabasePath,
+              customBudgetID,
+            },
+            actionReturnsItems: true,
+          };
+        }
+      }
+    }
+
+    // Fallback if data fetch failed or not current month
+    if (!categoryItem) {
+      categoryItem = {
+        title: t.category_name,
+        icon: 'categoryTemplate',
+        action: 'showCategoryTransactions',
+        actionArgument: {
+          categoryId: t.category_id,
+          customDatabasePath,
+          customBudgetID,
+        },
+        actionReturnsItems: true,
+      };
+    }
+  }
+
   return [
     t.payee_name
       ? {
@@ -620,19 +696,7 @@ function handleTransactionAction({
           actionReturnsItems: true,
         }
       : undefined,
-    t.category_name
-      ? {
-          title: t.category_name,
-          icon: 'categoryTemplate',
-          action: 'showCategoryTransactions',
-          actionArgument: {
-            categoryId: t.category_id,
-            customDatabasePath,
-            customBudgetID,
-          },
-          actionReturnsItems: true,
-        }
-      : undefined,
+    categoryItem,
     {
       title: t.account_name,
       icon:
