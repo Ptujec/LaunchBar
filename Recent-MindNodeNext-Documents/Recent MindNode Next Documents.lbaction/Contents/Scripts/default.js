@@ -19,11 +19,13 @@ function run() {
 
   // const preview = darkMode ? 'darkPreview' : 'lightPreview';
 
-  const cloudDocumentsDir = `${supportDir}/${version}/CloudDocuments`;
+  const snapshotPath = `${supportDir}/${version}/MindNode Library.mindnodelibrary/Caches/DocumentsMetadataSnapshot.json`;
 
-  const snapshotData = File.readJSON(
-    `${cloudDocumentsDir}/Caches/DocumentsMetadataSnapshot.json`,
-  ) || { documents: {} };
+  if (!File.exists(snapshotPath)) {
+    return { title: 'No snapshot', icon: 'alert' };
+  }
+
+  const snapshotData = File.readJSON(snapshotPath) || { documents: {} };
 
   return Object.values(snapshotData.documents)
     .filter((obj) => !obj.isTrashed && obj.title)
