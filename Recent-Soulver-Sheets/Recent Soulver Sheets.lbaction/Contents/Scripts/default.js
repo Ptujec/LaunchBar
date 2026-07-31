@@ -1,4 +1,4 @@
-/* 
+/*
 Recent Soulver Sheets Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-06-11
@@ -10,23 +10,28 @@ String.prototype.localizationTable = 'default';
 
 const groupContainerDir = `${LaunchBar.homeDirectory}/Library/Group Containers/`;
 
-const icloudSheetbookPath = `${LaunchBar.homeDirectory}/Library/Mobile Documents/iCloud~app~soulver/Documents/Default.sheetbook`;
+const syncedSheetbookPath = `${LaunchBar.homeDirectory}/Library/Application Support/app.soulver.mac/Synced.sheetbook`;
 
 const localSheetbookPath = `${LaunchBar.homeDirectory}/Library/Application Support/app.soulver.mac/Default.sheetbook`;
 
 function run() {
-  let defaultSheetbookPath = File.exists(localSheetbookPath)
-    ? localSheetbookPath
-    : File.exists(icloudSheetbookPath)
-    ? icloudSheetbookPath
-    : getDefaultSheetbookPath();
+  let defaultSheetbookPath = File.exists(syncedSheetbookPath)
+    ? syncedSheetbookPath
+    : File.exists(localSheetbookPath)
+      ? localSheetbookPath
+      : undefined;
+
+  if (!defaultSheetbookPath) {
+    LaunchBar.alert('No Sheetbook Path Found');
+    return;
+  }
 
   LaunchBar.log(`\nUsing Sheetbook Path: ${defaultSheetbookPath}`);
 
   const groupContainers = File.getDirectoryContents(groupContainerDir);
 
   const soulverGroupContainer = groupContainers.find((item) =>
-    item.endsWith('group.app.soulver')
+    item.endsWith('group.app.soulver'),
   );
 
   if (!soulverGroupContainer) {
@@ -80,7 +85,7 @@ function run() {
           actionRunsInBackground: true,
           date: sheet.modificationDate,
         };
-      })
+      }),
     )
     .sort((a, b) => b.date - a.date));
 }
@@ -88,16 +93,4 @@ function run() {
 function open(id) {
   LaunchBar.hide();
   LaunchBar.openURL(`x-soulver://x-callback-url/open?&id=${id}`);
-}
-
-function getDefaultSheetbookPath() {
-  if (File.exists(Action.preferences.defaultSheetbookPath)) {
-    return Action.preferences.defaultSheetbookPath;
-  }
-  const root = File.exists('./getRoot')
-    ? LaunchBar.execute('/bin/bash', './getRoot')?.trim()
-    : LaunchBar.execute('/usr/bin/swift', './getRoot.swift').trim();
-
-  Action.preferences.defaultSheetbookPath = `${root}/Default.sheetbook`;
-  return `${root}/Default.sheetbook`;
 }
