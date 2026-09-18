@@ -34,11 +34,11 @@ function run() {
   // Create JSON
   if (createJSON == true) {
     const symbols = File.readText(
-      Action.path + '/Contents/Resources/sfsymbols.txt'
+      Action.path + '/Contents/Resources/sfsymbols.txt',
     ).split(/(?!$)/u);
 
     const text = File.readText(
-      Action.path + '/Contents/Resources/sfsymbols_names.txt'
+      Action.path + '/Contents/Resources/sfsymbols_names.txt',
     ).split('\n');
 
     const result = [];
