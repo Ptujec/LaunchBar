@@ -26,6 +26,27 @@ log() {
     echo "$1" >&2
 }
 
+# Function to escape single quotes for SQL by doubling them
+escape_sql() {
+    echo "$1" | sed "s/'/''/g"
+}
+
+# Escape all string values that are interpolated into SQL statements
+ACCOUNT_ID=$(escape_sql "$ACCOUNT_ID")
+CATEGORY_ID=$(escape_sql "$CATEGORY_ID")
+PAYEE_ID=$(escape_sql "$PAYEE_ID")
+TRANSFER_ACCT=$(escape_sql "$TRANSFER_ACCT")
+
+# Reject non-numeric AMOUNT/DATE since they are interpolated unquoted into SQL
+if ! [[ "$AMOUNT" =~ ^-?[0-9]+$ ]]; then
+    echo "ERROR: Invalid amount"
+    exit 1
+fi
+if [ -n "$DATE" ] && ! [[ "$DATE" =~ ^-?[0-9]+$ ]]; then
+    echo "ERROR: Invalid date"
+    exit 1
+fi
+
 # Function to normalize accented characters (fix corrupted unicode)
 normalize_accents() {
     local text="$1"
