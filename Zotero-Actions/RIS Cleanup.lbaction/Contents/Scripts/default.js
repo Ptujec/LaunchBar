@@ -9,6 +9,9 @@ Documentation:
 - https://github.com/aurimasv/translators/wiki/RIS-Tag-Map
 - https://de.wikipedia.org/wiki/RIS_(Dateiformat)
 - https://github.com/zotero/translators/blob/b80ec528f6ac8c17523354b91893e3772d7ff715/RIS.js#L412
+
+TODO:
+- If RIS file has multiple ER tags use for sorting?
 */
 
 const TEMP_PATH = '/private/tmp/temp.ris';
@@ -16,11 +19,14 @@ const ORIGINAL_TEMP_PATH = '/private/tmp/original.ris';
 const TAGS_TO_REMOVE_FILE = `${Action.supportPath}/tagsToRemove.txt`;
 const EDITOR_ID = 'com.apple.TextEdit';
 const EDITOR_NAME = 'TextEdit';
+let lastAPICallTime = 0;
+const API_RATE_LIMIT_DELAY = 1500;
 
 function run(path) {
   initializeTagsFile();
 
-  if (LaunchBar.options.commandKey) return settings();
+  if (LaunchBar.options.commandKey || LaunchBar.options.alternateKey)
+    return settings();
 
   if (Action.preferences.autoCloseEmptyTabs !== false) {
     closeEmptySafariTabs();
@@ -47,10 +53,15 @@ function run(path) {
   const contents = File.readText(path).trim().split('\n');
 
   const hasVolumeTag = contents.some((line) => line.startsWith('VL'));
+  const shouldAutoConvertTitles = isEnglishOrNoLanguageTag(contents);
 
   const tags = contents
     .filter((item) => filterTags(item, hasVolumeTag))
-    .map((item) => formatDate(formatAuthor(formatTitle(formatVolume(item)))));
+    .map((item) =>
+      formatDate(
+        formatAuthor(formatTitle(formatVolume(item), shouldAutoConvertTitles)),
+      ),
+    );
 
   File.writeText(tags.join('\n'), TEMP_PATH);
   return show();
@@ -62,18 +73,40 @@ function show() {
     .trim()
     .split('\n');
 
+  const titleTagPrefixes = ['T1', 'T2', 'TI', 'TT', 'J2'];
+
   const result = contents
     .filter((item) => item.trim() !== '')
     .map((item) => {
       const tag = item.trim();
+      const isTitleTag = titleTagPrefixes.some((prefix) =>
+        tag.startsWith(prefix),
+      );
+      const hasOriginal = getTitleMapping(tag);
+
       return {
         title: tag,
-        icon: 'removeTemplate',
-        action: 'remove',
+        icon: !isTitleTag
+          ? 'removeTemplate'
+          : hasOriginal
+            ? 'revertTemplate'
+            : 'convertTemplate',
+        action: !isTitleTag
+          ? 'remove'
+          : hasOriginal
+            ? 'revertTitle'
+            : 'convertToTitleCase',
         actionArgument: tag,
+        isTitleTag,
       };
-    });
-  // .sort((a, b) => a.title.localeCompare(b.title));
+    })
+    .sort((a, b) => {
+      if (a.isTitleTag && !b.isTitleTag) return -1;
+      if (!a.isTitleTag && b.isTitleTag) return 1;
+      if (a.isTitleTag) return a.title.localeCompare(b.title);
+      return 0;
+    })
+    .map(({ isTitleTag, ...item }) => item);
 
   return [
     {
@@ -96,6 +129,196 @@ function remove(tag) {
   const text = File.readText(TEMP_PATH).replace(tag, '');
   File.writeText(text, TEMP_PATH);
   return show();
+}
+
+function convertToTitleCase(tag) {
+  if (LaunchBar.options.commandKey) {
+    remove(tag);
+    return show();
+  }
+
+  const apiKey = getApiKeyFromTrueTitleCase();
+
+  if (!apiKey) {
+    return {
+      title: 'API Key Missing',
+      subtitle: 'True Title Case API key not configured',
+      icon: 'alert',
+    };
+  }
+
+  // Extract the title part (everything after the tag prefix and dash)
+  const titleMatch = tag.match(/^([A-Z0-9]{2})\s+-\s+(.+)$/);
+  if (!titleMatch) {
+    return {
+      title: 'Invalid Format',
+      subtitle: 'Could not parse title format',
+      icon: 'alert',
+    };
+  }
+
+  const prefix = titleMatch[1];
+  const titleText = titleMatch[2];
+
+  try {
+    const result = convertToTitleCaseAPI(titleText, apiKey);
+
+    if (!result.success) {
+      return {
+        title: `Error: ${result.status}`,
+        subtitle: result.message,
+        icon: 'alert',
+      };
+    }
+
+    const convertedTag = `${prefix}  - ${result.value}`;
+
+    // Store the original title mapping
+    saveTitleMapping(convertedTag, tag);
+
+    const text = File.readText(TEMP_PATH).replace(tag, convertedTag);
+    File.writeText(text, TEMP_PATH);
+
+    return show();
+  } catch (error) {
+    return {
+      title: 'Conversion Error',
+      subtitle: error.toString(),
+      icon: 'alert',
+    };
+  }
+}
+
+function revertTitle(convertedTag) {
+  if (LaunchBar.options.commandKey) {
+    remove(convertedTag);
+    return show();
+  }
+
+  const originalTag = getTitleMapping(convertedTag);
+
+  if (!originalTag) {
+    return {
+      title: 'Original Title Not Found',
+      icon: 'alert',
+    };
+  }
+
+  const text = File.readText(TEMP_PATH).replace(convertedTag, originalTag);
+  File.writeText(text, TEMP_PATH);
+  clearTitleMapping(convertedTag);
+
+  return show();
+}
+
+function convertToTitleCaseAPI(text, apiKey) {
+  // Respect API rate limits - wait if necessary
+  const now = Date.now();
+  const timeSinceLastCall = now - lastAPICallTime;
+
+  if (timeSinceLastCall < API_RATE_LIMIT_DELAY) {
+    const delayNeeded = API_RATE_LIMIT_DELAY - timeSinceLastCall;
+    LaunchBar.executeAppleScript(`delay ${Math.ceil(delayNeeded / 1000)}`);
+  }
+
+  const url = `https://title-case-converter.p.rapidapi.com/v1/TitleCase?title=${encodeURIComponent(text)}&style=AMA&preserveAllCaps=0&tagSpeciesNames=0`;
+
+  const options = {
+    headerFields: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': 'title-case-converter.p.rapidapi.com',
+    },
+  };
+
+  try {
+    const data = HTTP.getJSON(url, options);
+    lastAPICallTime = Date.now();
+
+    if (!data || !data.response || !data.data) {
+      LaunchBar.log(`API response missing expected structure`);
+      return {
+        success: false,
+        status: 'Invalid Response',
+        message: 'Unexpected API response structure',
+      };
+    }
+
+    const status = data.response.status;
+    const message = data.data.message;
+
+    if (status !== 200) {
+      LaunchBar.log(`API returned status ${status}: ${message}`);
+      return {
+        success: false,
+        status,
+        message,
+      };
+    }
+
+    return {
+      success: true,
+      value: data.data.result,
+    };
+  } catch (error) {
+    lastAPICallTime = Date.now();
+    LaunchBar.log(`API call error: ${error.toString()}`);
+    return {
+      success: false,
+      status: 'Error',
+      message: error.toString(),
+    };
+  }
+}
+
+function getApiKeyFromTrueTitleCase() {
+  const preferencesPath =
+    '~/Library/Application Support/LaunchBar/Action Support/ptujec.LaunchBar.action.TrueTitleCase/Preferences.plist';
+
+  if (File.exists(preferencesPath)) {
+    try {
+      const prefs = File.readPlist(preferencesPath);
+      return prefs.apiKey;
+    } catch (error) {
+      LaunchBar.log('Error reading preferences: ' + error);
+      return;
+    }
+  }
+
+  return;
+}
+
+function saveTitleMapping(convertedTag, originalTag) {
+  if (!Action.preferences.titleMappings) {
+    Action.preferences.titleMappings = {};
+  }
+  Action.preferences.titleMappings[convertedTag] = originalTag;
+}
+
+function getTitleMapping(convertedTag) {
+  if (!Action.preferences.titleMappings) {
+    return null;
+  }
+  return Action.preferences.titleMappings[convertedTag];
+}
+
+function clearTitleMapping(convertedTag) {
+  if (Action.preferences.titleMappings) {
+    delete Action.preferences.titleMappings[convertedTag];
+  }
+}
+
+function isEnglishOrNoLanguageTag(contents) {
+  const laLine = contents.find((line) => line.startsWith('LA  - '));
+
+  if (!laLine) {
+    return true;
+  }
+
+  const language = laLine
+    .replace(/LA\s+-\s+/, '')
+    .trim()
+    .toLowerCase();
+  return language.startsWith('eng');
 }
 
 function addToZotero() {
@@ -125,7 +348,7 @@ function closeEmptySafariTabs() {
   const isSafariRunning = LaunchBar.execute(
     '/bin/sh',
     '-c',
-    'lsappinfo info -only bundleid com.apple.Safari'
+    'lsappinfo info -only bundleid com.apple.Safari',
   );
 
   if (isSafariRunning) {
@@ -163,15 +386,41 @@ function filterTags(item, hasVolumeTag) {
   return true;
 }
 
-function formatTitle(item) {
-  // TODO: Find some why to do title case for English but not for Germans … maybe with some LMM?
-
+function formatTitle(item, shouldAutoConvertTitles = true) {
   if (
     ['T1', 'T2', 'TI', 'TT', 'J2'].some((prefix) => item.startsWith(prefix))
   ) {
-    if (!Action.preferences.autoFormatTitles) return item;
+    // Apply true title case conversion based on language tag check
+    // Always converts for English documents (or when no language tag is present)
+    if (shouldAutoConvertTitles) {
+      const apiKey = getApiKeyFromTrueTitleCase();
+      if (apiKey) {
+        const titleMatch = item.match(/^([A-Z0-9]{2})\s+-\s+(.+)$/);
+        if (titleMatch) {
+          const prefix = titleMatch[1];
+          const titleText = titleMatch[2];
+
+          try {
+            const result = convertToTitleCaseAPI(titleText, apiKey);
+
+            if (result.success) {
+              const originalTag = item;
+              item = `${prefix}  - ${result.value}`;
+              saveTitleMapping(item, originalTag);
+            } else {
+              LaunchBar.log(
+                `Title conversion failed for ${prefix}: ${result.message}`,
+              );
+            }
+          } catch (e) {
+            LaunchBar.log(`Title conversion error for ${prefix}: ${e}`);
+          }
+        }
+      }
+    }
   }
   item = item.replace(/\s+:/g, ':').trim();
+
   return item;
 }
 
@@ -211,7 +460,7 @@ function formatVolume(item) {
     // Then handle Roman numerals
     return item.replace(
       /VL\s+-\s+([IVXLCDM]+)/gi,
-      (_, roman) => `VL  - ${romanToNumber(roman.toUpperCase())}`
+      (_, roman) => `VL  - ${romanToNumber(roman.toUpperCase())}`,
     );
   }
   return item;
@@ -269,7 +518,7 @@ function settings() {
     },
     {
       title: 'Format Titles',
-      subtitle: 'Removing space before colon in titles',
+      subtitle: 'Remove spaces and auto convert to title case',
       alwaysShowsSubtitle: true,
       icon: autoFormatTitles ? 'checkTemplate' : 'circleTemplate',
       action: 'autoFormatTitlesToggle',
