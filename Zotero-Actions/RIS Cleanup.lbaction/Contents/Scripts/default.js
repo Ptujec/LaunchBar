@@ -25,8 +25,9 @@ const API_RATE_LIMIT_DELAY = 1500;
 function run(path) {
   initializeTagsFile();
 
-  if (LaunchBar.options.commandKey || LaunchBar.options.alternateKey)
+  if (LaunchBar.options.commandKey || LaunchBar.options.alternateKey) {
     return settings();
+  }
 
   if (Action.preferences.autoCloseEmptyTabs !== false) {
     closeEmptySafariTabs();
@@ -395,7 +396,8 @@ function formatTitle(item, shouldAutoConvertTitles = true) {
     if (shouldAutoConvertTitles) {
       const apiKey = getApiKeyFromTrueTitleCase();
       if (apiKey) {
-        const titleMatch = item.match(/^([A-Z0-9]{2})\s+-\s+(.+)$/);
+        const titleMatch = item.match(/^([A-Z0-9]{2})\s+-\s+(.+)/);
+
         if (titleMatch) {
           const prefix = titleMatch[1];
           const titleText = titleMatch[2];
@@ -420,7 +422,6 @@ function formatTitle(item, shouldAutoConvertTitles = true) {
     }
   }
   item = item.replace(/\s+:/g, ':').trim();
-
   return item;
 }
 
