@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Search Zotero</string>
 	<key>CFBundleVersion</key>
-	<string>1.9.3</string>
+	<string>1.10</string>
 	<key>LBAssociatedApplication</key>
 	<string>org.zotero.zotero</string>
 	<key>LBDescription</key>
@@ -35,8 +35,6 @@
 			</array>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
@@ -54,8 +52,6 @@
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>

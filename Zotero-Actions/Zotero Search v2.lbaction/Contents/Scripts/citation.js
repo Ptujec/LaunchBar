@@ -20,6 +20,8 @@ function pasteCitation(dict) {
   const citationJson = getCitationLocalAPI(dict.itemKey);
   if (!citationJson) return;
 
+  // File.writeJSON(citationJson, `${Action.supportPath}/test.json`);
+
   const itemID = dict.itemID;
   saveRecent(itemID);
 
@@ -37,8 +39,8 @@ function pasteCitation(dict) {
   let text = hasAnnotation
     ? citation
     : isBibliography
-    ? citationJson.bib
-    : citationJson.citation;
+      ? citationJson.bib
+      : citationJson.citation;
 
   const citationFormat = Action.preferences.citationFormat || fallbackFormat;
 
@@ -74,7 +76,7 @@ function pasteCitation(dict) {
         includeZoteroLink
           ? dict.zoteroAnnotationURL || dict.zoteroSelectURL
           : '',
-        hasAnnotation ? dict.annotation : ''
+        hasAnnotation ? dict.annotation : '',
       );
     }
     return;
@@ -141,7 +143,7 @@ function getCitationLocalAPI(itemKey) {
       `Zotero API Error${errorDetails}`,
       `Failed to fetch citation data. Please check that:\n1. Zotero is running\n2. The citation style (${style}) is working properly in Zotero.\n3. Check if the style ID in the CSL file is prefixed with "http://www.zotero.org/styles/". The URL that is used as the ID does not have to exist. But the the prefix seems to be required for the API to accept the style.`,
       'Open Zotero',
-      'Cancel'
+      'Cancel',
     );
     if (alertResponse === 0) {
       LaunchBar.openURL(File.fileURLForPath('/Applications/Zotero.app'));
@@ -161,7 +163,7 @@ function apiPermissionCheck() {
       'Permission required!',
       'You need to enable "Allow other applications on this computer to communicate with Zotero" in Zotero → Settings → Advanced.',
       'Ok',
-      'Cancel'
+      'Cancel',
     );
     if (response === 0)
       LaunchBar.openURL(File.fileURLForPath('/Applications/Zotero.app'));

@@ -1,4 +1,4 @@
-/* 
+/*
 Zotero Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-02-05
@@ -93,7 +93,7 @@ function runWithString(string) {
 
   // return combinedSuggestions;
   const uniqueSuggestions = Array.from(
-    new Set(combinedSuggestions.map((suggestion) => suggestion.title))
+    new Set(combinedSuggestions.map((suggestion) => suggestion.title)),
   ).map((title) => ({ title: title, icon: icon }));
 
   return uniqueSuggestions;

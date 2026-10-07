@@ -1,4 +1,4 @@
-/* 
+/*
 Zotero Action for LaunchBar
 by Christian Bender (@ptujec)
 2025-02-05
@@ -103,17 +103,14 @@ function search(argument) {
   const result = showEntries(Array.from(allReversedItemIDs));
 
   if (result.length === 0) {
-    return [
-      {
-        title: 'No results. Press enter to browse all items.',
-        icon: 'alert',
-        action: 'browse',
-        actionArgument: data,
-        actionReturnsItems: true,
-      },
-    ];
+    return {
+      title: 'No results. Press enter to browse all items.',
+      icon: 'alert',
+      action: 'browse',
+      actionArgument: data,
+      actionReturnsItems: true,
+    };
   }
-
   return result;
 }
 
@@ -122,7 +119,7 @@ function searchInStorageDir(argument) {
     '/usr/bin/mdfind',
     '-onlyin',
     storageDirectory,
-    argument
+    argument,
   )
     .trim()
     .split('\n');
@@ -147,7 +144,7 @@ function searchInStorageDir(argument) {
       const relativePath = path.replace(storageDirectory, '');
       const key = relativePath.split('/')[0];
       return attachmentMap.get(key) || [];
-    })
+    }),
   );
 
   return itemIDs;
@@ -185,7 +182,7 @@ function browse() {
       icon: 'libraryTemplate',
       action: 'showAllItems',
       actionReturnsItems: true,
-    }
+    },
   );
 
   return result;
@@ -237,11 +234,11 @@ function showCreators() {
       }
       return acc;
     },
-    new Map()
+    new Map(),
   );
 
   return (results = Array.from(creatorsMap.values()).sort((a, b) =>
-    a.title.localeCompare(b.title)
+    a.title.localeCompare(b.title),
   ));
 }
 
@@ -400,20 +397,20 @@ function showEntries(itemIDs) {
         hasAuthor
           ? creator.typeID === creatorTypes.author
           : hasEditor
-          ? creator.typeID === creatorTypes.editor
-          : true
+            ? creator.typeID === creatorTypes.editor
+            : true,
       );
 
       const creatorString =
         filteredCreators.length > 3
           ? `${filteredCreators[0].lastName} et al.`
           : filteredCreators.length === 3
-          ? `${filteredCreators[0].lastName}, ${filteredCreators[1].lastName} & ${filteredCreators[2].lastName}`
-          : filteredCreators.length === 2
-          ? filteredCreators.map((c) => c.lastName).join(' & ')
-          : filteredCreators.length === 1
-          ? filteredCreators[0].name
-          : '';
+            ? `${filteredCreators[0].lastName}, ${filteredCreators[1].lastName} & ${filteredCreators[2].lastName}`
+            : filteredCreators.length === 2
+              ? filteredCreators.map((c) => c.lastName).join(' & ')
+              : filteredCreators.length === 1
+                ? filteredCreators[0].name
+                : '';
 
       const title = titleMap.get(itemID);
       const date = dateMap.get(itemID) || '';
@@ -446,6 +443,8 @@ function itemActions(dict) {
     selectInZotero(dict);
   } else if (LaunchBar.options.shiftKey) {
     pasteCitation(dict);
+  } else if (LaunchBar.options.controlKey) {
+    return LaunchBar.paste(dict.zoteroSelectURL);
   } else {
     return showItemDetails(dict);
   }
@@ -465,7 +464,7 @@ function showItemDetails(dict) {
     .map((item) => {
       const fullPath = item.path.replace(
         'storage:',
-        `${storageDirectory}${item.key}/`
+        `${storageDirectory}${item.key}/`,
       );
       const title = fullPath.split('/').pop();
       return {
@@ -484,7 +483,7 @@ function showItemDetails(dict) {
       (item) =>
         itemID == item.parentItemID &&
         !item.path &&
-        (item.contentType == 'text/html' || item.contentType == null)
+        (item.contentType == 'text/html' || !item.contentType),
     )
     .map((item) => item.itemID);
 
@@ -590,8 +589,8 @@ function showItemDetails(dict) {
     authorIDs.length > 0
       ? authorIDs
       : editorIDs.length > 0
-      ? editorIDs
-      : otherIDs;
+        ? editorIDs
+        : otherIDs;
 
   // Collections
   const collectionsArr = data.collectionItems
@@ -635,13 +634,13 @@ function showItemDetails(dict) {
       creatorsLength === 1
         ? itemCreators[0].name
         : creatorsLength === 2
-        ? itemCreators.map((creator) => creator.name).join(' & ')
-        : creatorsLength > 2
-        ? `${itemCreators
-            .slice(0, -1)
-            .map((creator) => creator.lastName)
-            .join(', ')} & ${itemCreators[lastIndex].lastName}`
-        : '';
+          ? itemCreators.map((creator) => creator.name).join(' & ')
+          : creatorsLength > 2
+            ? `${itemCreators
+                .slice(0, -1)
+                .map((creator) => creator.lastName)
+                .join(', ')} & ${itemCreators[lastIndex].lastName}`
+            : '';
 
     details.push({
       title: creatorString,
@@ -727,34 +726,34 @@ function showItemDetails(dict) {
 
   // Annotations
   const annotations = data.annotations.filter(
-    (ann) => ann.mainItemID === itemID
+    (ann) => ann.mainItemID === itemID,
   );
 
   const annotationsItems =
     annotations.length === 0
       ? []
       : annotations.length === 1
-      ? showAnnotations({
-          itemID,
-          annotations,
-          attachments: attachmentsWithPath,
-          dict,
-        })
-      : [
-          {
-            title: 'Annotations',
-            badge: annotations.length.toString(),
-            icon: 'annotationsTemplate',
-            action: 'showAnnotations',
-            actionArgument: {
-              itemID,
-              annotations,
-              attachments: attachmentsWithPath,
-              dict,
+        ? showAnnotations({
+            itemID,
+            annotations,
+            attachments: attachmentsWithPath,
+            dict,
+          })
+        : [
+            {
+              title: 'Annotations',
+              badge: annotations.length.toString(),
+              icon: 'annotationsTemplate',
+              action: 'showAnnotations',
+              actionArgument: {
+                itemID,
+                annotations,
+                attachments: attachmentsWithPath,
+                dict,
+              },
+              actionReturnsItems: true,
             },
-            actionReturnsItems: true,
-          },
-        ];
+          ];
 
   details.push(...notes, ...annotationsItems, ...urls);
 
@@ -809,12 +808,19 @@ function showItemDetails(dict) {
       actionRunsInBackground: true,
     },
     {
+      title: 'Paste Link',
+      icon: 'pasteLinkTemplate',
+      action: 'pasteLink',
+      actionArgument: dict.zoteroSelectURL,
+      actionRunsInBackground: true,
+    },
+    {
       title: 'Select in Zotero',
       icon: 'selectTemplate',
       url: dict.zoteroSelectURL,
       action: 'selectInZotero',
       actionArgument: dict,
-    }
+    },
   );
 
   return details;
@@ -839,6 +845,10 @@ function itemDetailActions(dict) {
     return pasteCitation(dict);
   }
 
+  if (LaunchBar.options.controlKey) {
+    return LaunchBar.paste(dict.zoteroSelectURL);
+  }
+
   // Save as Recent
   LaunchBar.hide();
   saveRecent(dict.itemID);
@@ -848,7 +858,7 @@ function itemDetailActions(dict) {
     // dict.key is the attachment key
     const data = File.readJSON(dataPath);
     const foundItem = data.items.filter(
-      (item) => dict.itemID === item.itemID
+      (item) => dict.itemID === item.itemID,
     )[0]; // the itemID is from the entry not the attachment … but should be the same library
 
     if (foundItem) {
@@ -864,7 +874,7 @@ function itemDetailActions(dict) {
       if (zoteroFileHandlerPDFPref) {
         LaunchBar.openURL(
           File.fileURLForPath(dict.path),
-          zoteroFileHandlerPDFPref.split('/').pop()
+          zoteroFileHandlerPDFPref.split('/').pop(),
         );
         return;
       }
@@ -885,7 +895,7 @@ function showItemsByField(fieldID, value) {
     .filter(
       (item) =>
         item.fieldID === fieldID &&
-        item.value.toLowerCase() === value.toLowerCase()
+        item.value.toLowerCase() === value.toLowerCase(),
     )
     .map((item) => item.itemID);
 
@@ -899,14 +909,14 @@ function showBookSections(bookTitle) {
 function showDictionaryEntry(dictionaryTitle) {
   return showItemsByField(
     Action.preferences.fields.dictionaryTitle,
-    dictionaryTitle
+    dictionaryTitle,
   );
 }
 
 function showEncyclopediaArticles(encyclopediaTitle) {
   return showItemsByField(
     Action.preferences.fields.encyclopediaTitle,
-    encyclopediaTitle
+    encyclopediaTitle,
   );
 }
 
@@ -921,9 +931,9 @@ function showJournalArticles(journalTitle) {
     ...new Set(
       data.meta
         .filter(
-          (item) => item.value.toLowerCase() === journalTitle.toLowerCase()
+          (item) => item.value.toLowerCase() === journalTitle.toLowerCase(),
         )
-        .map((item) => item.itemID)
+        .map((item) => item.itemID),
     ),
   ];
 
@@ -1001,64 +1011,63 @@ function showAnnotations({ itemID, annotations, attachments, dict }) {
       return a.sortIndex.localeCompare(b.sortIndex);
     });
 
-  return sortedAnnotations
-    .map((ann) => {
-      const attachment = attachments.find(
-        (att) => att.itemID === ann.attachmentIDNum
-      );
-      if (!attachment) return null;
+  return sortedAnnotations.map((ann) => {
+    const attachment = attachments.find(
+      (att) => att.itemID === ann.attachmentIDNum,
+    );
+    if (!attachment) return;
 
-      const title = ann.text || ann.comment || 'No text';
-      const subtitle = ann.text && ann.comment ? ann.comment : '';
-      let annotationURL = `zotero://open-pdf/library/items/${ann.attachmentKey}?annotation=${ann.annotationKey}`;
+    const title = ann.text || ann.comment || 'No text';
+    const subtitle = ann.text && ann.comment ? ann.comment : '';
+    let annotationURL = `zotero://open-pdf/library/items/${ann.attachmentKey}?annotation=${ann.annotationKey}`;
 
-      if (ann.position) {
-        try {
-          const position = JSON.parse(ann.position);
-          position.value &&
-            (annotationURL += `&sel=${encodeURIComponent(position.value)}`);
-        } catch (e) {} // Ignore JSON parse errors
+    if (ann.position) {
+      try {
+        const position = JSON.parse(ann.position);
+        position.value &&
+          (annotationURL += `&sel=${encodeURIComponent(position.value)}`);
+      } catch (e) {} // Ignore JSON parse errors
+    }
+
+    const hasCommentAndText = ann.text && ann.comment;
+
+    const icon = (() => {
+      switch (ann.type) {
+        case 1: // Highlight
+          return ann.text
+            ? hasCommentAndText
+              ? 'annotationsTemplate'
+              : 'highlightTemplate'
+            : 'annotationTemplate';
+        case 5: // Underline
+          return 'underlinedTemplate';
+        case 6: // Text
+          return 'textTemplate';
+        default:
+          return 'annotationTemplate';
       }
+    })();
 
-      const hasCommentAndText = ann.text && ann.comment;
-
-      const icon = (() => {
-        switch (ann.type) {
-          case 1: // Highlight
-            return ann.text
-              ? hasCommentAndText
-                ? 'annotationsTemplate'
-                : 'highlightTemplate'
-              : 'annotationTemplate';
-          case 5: // Underline
-            return 'underlinedTemplate';
-          case 6: // Text
-            return 'textTemplate';
-          default:
-            return 'annotationTemplate';
-        }
-      })();
-
-      return {
+    return {
+      title,
+      subtitle,
+      alwaysShowsSubtitle: true,
+      icon,
+      action: 'annotationAction',
+      actionArgument: {
+        itemID,
+        url: annotationURL,
         title,
-        subtitle,
-        alwaysShowsSubtitle: true,
-        icon,
-        action: 'annotationAction',
-        actionArgument: {
-          itemID,
-          url: annotationURL,
-          title,
-          hasCommentAndText,
-          text: ann.text,
-          comment: ann.comment,
-          pageLabel: ann.pageLabel,
-          dict,
-        },
-        actionReturnsItems: hasCommentAndText ? true : false,
-      };
-    })
-    .filter(Boolean); // Remove null entries
+        hasCommentAndText,
+        text: ann.text,
+        comment: ann.comment,
+        pageLabel: ann.pageLabel,
+        dict,
+      },
+      actionReturnsItems: hasCommentAndText ? true : false,
+    };
+  });
+  // .filter(Boolean); // Remove null entries
 }
 
 function annotationAction({
@@ -1172,4 +1181,8 @@ function saveRecent(itemID) {
   }
 
   Action.preferences.recentItems = recentItems;
+}
+
+function pasteLink(zoteroSelectURL) {
+  LaunchBar.paste(zoteroSelectURL);
 }

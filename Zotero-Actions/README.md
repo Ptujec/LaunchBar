@@ -57,7 +57,7 @@ This action also allows you to quickly look up items in the Zotero app. This way
 
 #### 5) Paste and Link Citation/Bibliography
 
-You can paste citation and bibliography references for a selected item to your frontmost application, including a link to the item in Zotero.
+You can paste citation and bibliography references for a selected item into your frontmost application, including a link to the item in Zotero, or paste only the Zotero item link.
 
 By default, the citation will be pasted, and the link is copied to the clipboard, so it is easy to add it. Other options are rich text*, markdown, or HTML. Select the action, and then press `option` + `enter`. 
 
@@ -85,7 +85,9 @@ There are also some shortcuts (modifier keys) that work with any selected Zotero
 
 2) Paste a citation reference with `shift` + `enter`. 
 
-3) Paste a bibliography reference with `shift` + `option` + `enter`.  
+3) Paste a bibliography reference with `shift` + `option` + `enter`.
+
+4) Paste the link to item in Zotero with `control`  + `enter`.
 
 Those even work on the top level. So you don't need to go into details to use them.
 
