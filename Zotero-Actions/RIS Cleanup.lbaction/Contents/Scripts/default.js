@@ -319,7 +319,7 @@ function isEnglishOrNoLanguageTag(contents) {
     .replace(/LA\s+-\s+/, '')
     .trim()
     .toLowerCase();
-  return language.startsWith('eng');
+  return language.startsWith('en');
 }
 
 function addToZotero() {
