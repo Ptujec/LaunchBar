@@ -412,6 +412,8 @@ function showEntries(itemIDs) {
                 ? filteredCreators[0].name
                 : '';
 
+      // TODO: If no creator use the institution as the subtitle … have an institution field in details?
+
       const title = titleMap.get(itemID);
       const date = dateMap.get(itemID) || '';
       const subtitle = (creatorString ? creatorString + ' ' : '') + date;
@@ -507,7 +509,7 @@ function showItemDetails(dict) {
         urls.push({
           title: item.value,
           url: item.value,
-          icon: 'linkTemplate',
+          icon: 'openTemplate',
           action: 'openURL',
           actionArgument: { itemID, url: item.value },
         });
@@ -808,7 +810,7 @@ function showItemDetails(dict) {
       actionRunsInBackground: true,
     },
     {
-      title: 'Paste Link',
+      title: 'Paste Zotero Link',
       icon: 'pasteLinkTemplate',
       action: 'pasteLink',
       actionArgument: dict.zoteroSelectURL,
@@ -1080,6 +1082,11 @@ function annotationAction({
   pageLabel,
   dict,
 }) {
+  if (LaunchBar.options.controlKey) {
+    LaunchBar.paste(url);
+    return;
+  }
+
   if (hasCommentAndText && !LaunchBar.options.commandKey) {
     return [
       {
@@ -1137,7 +1144,12 @@ function annotationAction({
 }
 
 function openURL({ itemID, url }) {
+  if (LaunchBar.options.shiftKey) {
+    LaunchBar.paste(url);
+    return;
+  }
   LaunchBar.hide();
+
   saveRecent(itemID);
   LaunchBar.openURL(url);
 }
@@ -1158,9 +1170,8 @@ function openNote({ parentItemID, itemID }) {
   const foundItem = data.items.filter((item) => itemID === item.itemID)[0];
   if (foundItem) {
     zoteroSelectURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
+    LaunchBar.openURL(zoteroSelectURL);
   }
-
-  LaunchBar.openURL(zoteroSelectURL);
 }
 
 function saveRecent(itemID) {
