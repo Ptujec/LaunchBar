@@ -617,11 +617,13 @@ function showItemDetails(dict) {
     .map((item) => ({
       title: item.title,
       icon: 'noteTemplate',
-      action: 'openNote',
+      action: 'noteAction',
       actionArgument: {
         itemID: item.itemID,
         parentItemID: item.parentItemID,
+        note: item.note,
       },
+      actionReturnsItems: true,
     }));
 
   dict.url = urls[0] ? urls[0].url : '';
@@ -844,11 +846,14 @@ function itemDetailActions(dict) {
   }
 
   if (LaunchBar.options.shiftKey) {
-    return pasteCitation(dict);
+    pasteCitation(dict);
+    return;
   }
 
-  if (LaunchBar.options.controlKey) {
-    return LaunchBar.paste(dict.zoteroSelectURL);
+  if (LaunchBar.options.controlKey && dict.zoteroSelectURL) {
+    // evtl. condition change to !dict.path
+    LaunchBar.paste(dict.zoteroSelectURL);
+    return;
   }
 
   // Save as Recent
@@ -864,6 +869,11 @@ function itemDetailActions(dict) {
     )[0]; // the itemID is from the entry not the attachment … but should be the same library
 
     if (foundItem) {
+      if (LaunchBar.options.controlKey) {
+        LaunchBar.paste(`zotero://open-pdf/${foundItem.libraryID}_${dict.key}`);
+        return;
+      }
+
       // does not work with epub files yet
       const zoteroFileHandlerPDFPref =
         zoteroPrefs['extensions.zotero.fileHandler.pdf'];
@@ -1160,18 +1170,38 @@ function selectInZotero({ itemID, zoteroSelectURL }) {
   LaunchBar.openURL(zoteroSelectURL);
 }
 
-function openNote({ parentItemID, itemID }) {
-  // dict.itemID
-  LaunchBar.hide();
-  saveRecent(parentItemID);
+function noteAction({ parentItemID, itemID, note }) {
+  const noteItems = note
+    ?.replace(/<[^>]+>/g, '')
+    .split('\n')
+    .filter((line) => line.trim()); // Remove HTML tags
 
   const data = File.readJSON(dataPath);
 
   const foundItem = data.items.filter((item) => itemID === item.itemID)[0];
-  if (foundItem) {
-    zoteroSelectURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
-    LaunchBar.openURL(zoteroSelectURL);
+  if (!foundItem) return;
+
+  const zoteroSelectURL = `zotero://select/items/${foundItem.libraryID}_${foundItem.key}`;
+
+  if (LaunchBar.options.controlKey) {
+    LaunchBar.paste(zoteroSelectURL);
+    return;
   }
+
+  if (LaunchBar.options.commandKey || !note) {
+    saveRecent(parentItemID);
+    LaunchBar.openURL(zoteroSelectURL);
+    return;
+  }
+
+  if (noteItems.length === 0) return;
+
+  return noteItems.map((line) => ({
+    title: line,
+    icon: 'noteTemplate',
+    action: 'noteAction',
+    actionArgument: { parentItemID, itemID },
+  }));
 }
 
 function saveRecent(itemID) {
