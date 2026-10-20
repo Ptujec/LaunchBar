@@ -106,8 +106,6 @@ function pasteCitation(dict) {
   if (includeZoteroLink) {
     // LaunchBar.setClipboardString(dict.url) and LaunchBar.paste(text) do not work in this instance for some reason
 
-    // TODO: BUG: currently there seems to be some issue with pasting annotations … maybe remove this option … or at least the link part?
-
     const url = dict.zoteroAnnotationURL ?? dict.zoteroSelectURL;
 
     LaunchBar.executeAppleScript(`

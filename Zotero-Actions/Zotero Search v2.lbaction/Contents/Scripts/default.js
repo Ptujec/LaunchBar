@@ -10,14 +10,18 @@ include('global.js');
 include('citation.js');
 
 function run(argument) {
-  // Show Settings
-  if (LaunchBar.options.alternateKey) return settings();
+  if (!argument) {
+    if (LaunchBar.options.alternateKey) return settings();
+    return browse();
+  }
+  if (LaunchBar.options.shiftKey) {
+    return searchAnnotations(argument);
+  }
 
-  if (!argument) return browse();
   return search(argument);
 }
 
-// SEARCH
+// MARK: SEARCH
 
 function search(argument) {
   const data = loadData();
@@ -111,7 +115,20 @@ function search(argument) {
       actionReturnsItems: true,
     };
   }
-  return result;
+  const annotationsEntry =
+    annotationIDs.size > 0
+      ? [
+          {
+            title: 'Annotations',
+            icon: 'annotationsTemplate',
+            action: 'searchAnnotations',
+            actionArgument: argument,
+            actionReturnsItems: true,
+          },
+        ]
+      : [];
+
+  return [...annotationsEntry, ...result];
 }
 
 function searchInStorageDir(argument) {
@@ -150,7 +167,118 @@ function searchInStorageDir(argument) {
   return itemIDs;
 }
 
-// BROWSE
+function searchAnnotations(argument) {
+  const data = loadData();
+  argument = argument.toLowerCase();
+
+  const result = data.annotations
+    .map((ann) => {
+      const text = (ann.text || '').toLowerCase();
+      const comment = (ann.comment || '').toLowerCase();
+      if (text.includes(argument) || comment.includes(argument)) {
+        const title = ann.text || ann.comment || 'No text';
+        const citation = getItemCitation(data, ann.mainItemID);
+        const citationText =
+          ann.pageLabel && citation ? `${citation}:${ann.pageLabel}` : citation;
+
+        const subtitle =
+          ann.text && ann.comment
+            ? `${ann.comment} (${citationText})`
+            : citationText;
+
+        let annotationURL = `zotero://open-pdf/library/items/${ann.attachmentKey}?annotation=${ann.annotationKey}`;
+
+        if (ann.position) {
+          try {
+            const position = JSON.parse(ann.position);
+            position.value &&
+              (annotationURL += `&sel=${encodeURIComponent(position.value)}`);
+          } catch (e) {} // Ignore JSON parse errors
+        }
+
+        const hasCommentAndText = ann.text && ann.comment;
+
+        const icon = (() => {
+          switch (ann.type) {
+            case 1: // Highlight
+              return ann.text
+                ? hasCommentAndText
+                  ? 'annotationsTemplate'
+                  : 'highlightTemplate'
+                : 'annotationTemplate';
+            case 5: // Underline
+              return 'underlinedTemplate';
+            case 6: // Text
+              return 'textTemplate';
+            default:
+              return 'annotationTemplate';
+          }
+        })();
+
+        const itemID = ann.mainItemID;
+        const itemKey =
+          data.items.find((item) => item.itemID === itemID)?.key || '';
+
+        return {
+          title,
+          subtitle,
+          alwaysShowsSubtitle: true,
+          icon,
+          action: 'annotationAction',
+          actionArgument: {
+            itemID,
+            url: annotationURL,
+            title,
+            hasCommentAndText,
+            text: ann.text,
+            comment: ann.comment,
+            pageLabel: ann.pageLabel,
+            dict: { itemID, itemKey },
+            isSearchResult: true,
+          },
+          // actionReturnsItems: hasCommentAndText ? true : false,
+          actionReturnsItems: true,
+        };
+      }
+    })
+    .filter(Boolean)
+    .reverse();
+
+  if (result.length === 0) {
+    return { actionBundleIdentifier: Action.bundleIdentifier };
+  }
+  return result;
+}
+
+function getItemCitation(data, itemID) {
+  const fields = Action.preferences.fields;
+  const creatorTypes = Action.preferences.creatorTypes;
+
+  const creators = data.itemCreators
+    .filter((item) => item.itemID === itemID)
+    .map((item) => ({
+      lastName: item.lastName,
+      name: formatCreatorName(item),
+      typeID: item.creatorTypeID,
+    }));
+
+  const dateMeta = data.meta.find(
+    (item) => item.itemID === itemID && item.fieldID === fields.date,
+  );
+  const date = dateMeta ? dateMeta.value.split('-')[0] : '';
+
+  const institution = data.meta.find(
+    (item) => item.itemID === itemID && item.fieldID === fields.institution,
+  )?.value;
+
+  const creatorString =
+    formatCreatorString(filterCreatorsByType(creators, creatorTypes)) ||
+    institution ||
+    '';
+  return [creatorString, date].filter(Boolean).join(' ');
+}
+
+// MARK: BROWSE
 function browse() {
   checkAndUpdateData();
 
@@ -341,9 +469,7 @@ function showEntries(itemIDs) {
       itemCreatorsMap.set(itemID, []);
     }
     itemCreatorsMap.get(itemID).push({
-      name: [lastName, firstName ? initializeName(firstName) : '']
-        .filter(Boolean)
-        .join(', '),
+      name: formatCreatorName({ lastName, firstName }),
       lastName,
       typeID: creatorTypeID,
       creatorID,
@@ -352,6 +478,8 @@ function showEntries(itemIDs) {
 
   const titleMap = new Map();
   const dateMap = new Map();
+  const institutionMap = new Map();
+  const pagesMap = new Map();
   for (const { itemID, fieldID, value } of data.meta) {
     if (
       fieldID == fields.title ||
@@ -362,6 +490,10 @@ function showEntries(itemIDs) {
       titleMap.set(itemID, value);
     } else if (fieldID == fields.date) {
       dateMap.set(itemID, value.split('-')[0]);
+    } else if (fieldID == fields.institution) {
+      institutionMap.set(itemID, value);
+    } else if (fieldID == fields.pages) {
+      pagesMap.set(itemID, value);
     }
   }
 
@@ -390,33 +522,19 @@ function showEntries(itemIDs) {
         : iconBase;
 
       const creators = itemCreatorsMap.get(itemID) || [];
-      const hasAuthor = creators.some((c) => c.typeID === creatorTypes.author);
-      const hasEditor = creators.some((c) => c.typeID === creatorTypes.editor);
-
-      const filteredCreators = creators.filter((creator) =>
-        hasAuthor
-          ? creator.typeID === creatorTypes.author
-          : hasEditor
-            ? creator.typeID === creatorTypes.editor
-            : true,
-      );
-
+      const filteredCreators = filterCreatorsByType(creators, creatorTypes);
       const creatorString =
-        filteredCreators.length > 3
-          ? `${filteredCreators[0].lastName} et al.`
-          : filteredCreators.length === 3
-            ? `${filteredCreators[0].lastName}, ${filteredCreators[1].lastName} & ${filteredCreators[2].lastName}`
-            : filteredCreators.length === 2
-              ? filteredCreators.map((c) => c.lastName).join(' & ')
-              : filteredCreators.length === 1
-                ? filteredCreators[0].name
-                : '';
-
-      // TODO: If no creator use the institution as the subtitle … have an institution field in details?
+        formatCreatorString(filteredCreators) ||
+        institutionMap.get(itemID) ||
+        '';
 
       const title = titleMap.get(itemID);
       const date = dateMap.get(itemID) || '';
-      const subtitle = (creatorString ? creatorString + ' ' : '') + date;
+      const pages = pagesMap.get(itemID);
+      const subtitle =
+        (creatorString ? `${creatorString} ` : '') +
+        date +
+        (pages ? `, ${pages}` : '');
 
       return {
         title: title || subtitle || '[Untitled]',
@@ -438,7 +556,12 @@ function showEntries(itemIDs) {
     });
 }
 
-// ITEM ACTIONS
+function showItemDetailsByID(itemID) {
+  const [entry] = showEntries([itemID]);
+  return entry ? showItemDetails(entry.actionArgument) : [];
+}
+
+// MARK: ITEM ACTIONS
 
 function itemActions(dict) {
   if (LaunchBar.options.commandKey) {
@@ -533,6 +656,8 @@ function showItemDetails(dict) {
   const seriesTitle = metaFields[fields.series];
   const dictionaryTitle = metaFields[fields.dictionaryTitle];
   const encyclopediaTitle = metaFields[fields.encyclopediaTitle];
+  const institution = metaFields[fields.institution];
+  const pages = metaFields[fields.pages];
 
   // Attached URLs
   const attachedUrls = [];
@@ -614,8 +739,8 @@ function showItemDetails(dict) {
   // Notes
   const notes = data.itemNotes
     .filter((item) => itemID === item.parentItemID)
-    .map((item) => ({
-      title: item.title,
+    .map((item, index) => ({
+      title: item.title || `Note ${index + 1}`,
       icon: 'noteTemplate',
       action: 'noteAction',
       actionArgument: {
@@ -657,10 +782,37 @@ function showItemDetails(dict) {
     });
   }
 
+  if (institution) {
+    details.push({
+      title: institution,
+      icon: 'institutionTemplate',
+      action: 'showItemInstitution',
+      actionArgument: {
+        institution,
+      },
+      actionReturnsItems: true,
+    });
+  }
+
+  // Date
   details.push({
     title: dict.date,
     icon: 'calTemplate',
   });
+
+  // Pages
+  if (pages) {
+    details.push({
+      title: pages,
+      icon: 'pagesTemplate',
+    });
+  }
+
+  // Book Sections
+  if (dict.icon === 'book') {
+    const chapters = showBookSections(dict.title);
+    if (chapters.length > 0) details.push(...chapters);
+  }
 
   // Publication metadata
   const publicationMetadata = [
@@ -936,6 +1088,10 @@ function showSeriesItems(seriesTitle) {
   return showItemsByField(Action.preferences.fields.series, seriesTitle);
 }
 
+function showItemInstitution({ institution }) {
+  return showItemsByField(Action.preferences.fields.institution, institution);
+}
+
 function showJournalArticles(journalTitle) {
   const data = loadData();
 
@@ -1091,13 +1247,18 @@ function annotationAction({
   comment,
   pageLabel,
   dict,
+  isSearchResult = false,
 }) {
   if (LaunchBar.options.controlKey) {
     LaunchBar.paste(url);
     return;
   }
 
-  if (hasCommentAndText && !LaunchBar.options.commandKey) {
+  if (
+    hasCommentAndText &&
+    !LaunchBar.options.commandKey &&
+    !LaunchBar.options.shiftKey
+  ) {
     return [
       {
         title: text,
@@ -1129,10 +1290,9 @@ function annotationAction({
           dict,
         },
       },
+      ...(isSearchResult ? showItemDetailsByID(itemID) : []),
     ];
   }
-
-  LaunchBar.hide();
 
   if (LaunchBar.options.shiftKey) {
     const addCitationToAnnotation =
@@ -1149,6 +1309,47 @@ function annotationAction({
     return;
   }
 
+  if (isSearchResult && !LaunchBar.options.commandKey) {
+    return [
+      text
+        ? {
+            title: text,
+            icon: 'highlightTemplate',
+            action: 'annotationAction',
+            actionArgument: {
+              itemID,
+              url,
+              title,
+              hasCommentAndText: false,
+              text,
+              comment,
+              pageLabel,
+              dict,
+            },
+          }
+        : undefined,
+      comment
+        ? {
+            title: comment,
+            icon: 'annotationTemplate',
+            action: 'annotationAction',
+            actionArgument: {
+              itemID,
+              url,
+              title,
+              hasCommentAndText: false,
+              text,
+              comment,
+              pageLabel,
+              dict,
+            },
+          }
+        : undefined,
+      ...showItemDetailsByID(itemID),
+    ];
+  }
+
+  LaunchBar.hide();
   saveRecent(itemID);
   LaunchBar.openURL(url);
 }

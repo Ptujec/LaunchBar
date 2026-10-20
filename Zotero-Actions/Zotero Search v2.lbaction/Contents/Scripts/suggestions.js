@@ -51,7 +51,8 @@ function runWithString(string) {
         item.fieldID == fields.caseName ||
         item.fieldID == fields.nameOfAct ||
         item.fieldID == fields.subject ||
-        item.fieldID == fields.series) &&
+        item.fieldID == fields.series ||
+        item.fieldID == fields.institution) && // technically not a title but still needs to be included for suggestions
       itemIDs.has(item.itemID)
     ) {
       let value = item.value.toLowerCase();

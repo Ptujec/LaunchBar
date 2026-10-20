@@ -35,7 +35,7 @@ function checkAndUpdateData() {
       '/bin/bash',
       './data.sh',
       zoteroDirectory + 'zotero.sqlite',
-      updateJSON
+      updateJSON,
     );
 
     if (output) {
@@ -100,12 +100,12 @@ function getZoteroPrefs() {
   try {
     prefsContent = File.readText(
       prefsPath,
-      Action.preferences.textEncodingPrefs || 'UTF-8'
+      Action.preferences.textEncodingPrefs || 'UTF-8',
     );
   } catch (error) {
     LaunchBar.log(
       error,
-      'Trying again after reading the text encoding of "prefs.js".'
+      'Trying again after reading the text encoding of "prefs.js".',
     );
 
     let textEncodingPrefs;
@@ -113,7 +113,7 @@ function getZoteroPrefs() {
     textEncodingPrefs = LaunchBar.execute(
       '/usr/bin/file',
       '--mime-encoding',
-      prefsPath
+      prefsPath,
     )
       .split(':')?.[1]
       .trim();
@@ -123,7 +123,7 @@ function getZoteroPrefs() {
         '/usr/bin/xattr',
         '-p',
         'com.apple.TextEncoding',
-        prefsPath
+        prefsPath,
       )
         .split(';')?.[0]
         .trim();
@@ -143,10 +143,10 @@ function getZoteroPrefs() {
         value === 'true'
           ? true
           : value === 'false'
-          ? false
-          : /^-?\d+$/.test(value)
-          ? parseInt(value)
-          : value.replace(/['"]/g, '');
+            ? false
+            : /^-?\d+$/.test(value)
+              ? parseInt(value)
+              : value.replace(/['"]/g, '');
     }
   }
   return preferences;
@@ -158,7 +158,7 @@ const lastUsedStyleInZotero = zoteroPrefs['extensions.zotero.export.lastStyle'];
 const fallbackStyle = lastUsedStyleInZotero || 'apa';
 
 const pasteHelperInstalled = File.exists(
-  '~/Library/Application Support/LaunchBar/Actions/Paste Helper.lbaction/Contents/Scripts/default' // checking for the executable to ensure the action is installed and compiled
+  '~/Library/Application Support/LaunchBar/Actions/Paste Helper.lbaction/Contents/Scripts/default', // checking for the executable to ensure the action is installed and compiled
 );
 const fallbackFormat = pasteHelperInstalled ? 'richText' : 'plain';
 
@@ -221,7 +221,7 @@ function listStyles() {
 
       return {
         title: title,
-        subtitle: fullId, // TODO: maybe use just id later
+        subtitle: fullId,
         alwaysShowsSubtitle: true,
         badge: 'Style',
         icon: id === currentStyle ? 'checkTemplate.png' : 'circleTemplate.png',
@@ -233,8 +233,8 @@ function listStyles() {
       a.icon === 'checkTemplate.png'
         ? -1
         : b.icon === 'checkTemplate.png'
-        ? 1
-        : a.title.localeCompare(b.title)
+          ? 1
+          : a.title.localeCompare(b.title),
     );
 }
 
@@ -326,4 +326,35 @@ function initializeName(name) {
     .split(' ')
     .map((part, index) => (index === 0 ? part : part.charAt(0) + '.'))
     .join(' ');
+}
+
+function formatCreatorName({ lastName, firstName }) {
+  return [lastName, firstName ? initializeName(firstName) : '']
+    .filter(Boolean)
+    .join(', ');
+}
+
+function filterCreatorsByType(creators, creatorTypes) {
+  const hasAuthor = creators.some((c) => c.typeID === creatorTypes.author);
+  const hasEditor = creators.some((c) => c.typeID === creatorTypes.editor);
+
+  return creators.filter((creator) =>
+    hasAuthor
+      ? creator.typeID === creatorTypes.author
+      : hasEditor
+        ? creator.typeID === creatorTypes.editor
+        : true,
+  );
+}
+
+function formatCreatorString(creators) {
+  return creators.length > 3
+    ? `${creators[0].lastName} et al.`
+    : creators.length === 3
+      ? `${creators[0].lastName}, ${creators[1].lastName} & ${creators[2].lastName}`
+      : creators.length === 2
+        ? creators.map((c) => c.lastName).join(' & ')
+        : creators.length === 1
+          ? creators[0].name
+          : '';
 }
