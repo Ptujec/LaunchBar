@@ -160,11 +160,7 @@ function showList(forceArchive = false) {
       subtitle: item.url !== item.title ? item.url : '',
       // alwaysShowsSubtitle: true,
       url: item.url, // for QuickLook & Sending to other than default browser
-      label: item.url.includes('t=')
-        ? item.duration
-          ? `${getTimeFromUrl(item.url)} (${formatTime(item.duration)})`
-          : getTimeFromUrl(item.url)
-        : undefined,
+      label: formatLabel(getTimeFromUrl(item.url), item.duration),
       badge: jsonFilePathToUse === archiveFilePath ? 'Archived' : undefined,
       action: 'handleListItem',
       actionArgument: { url: item.url, index, jsonFilePathToUse },
@@ -225,8 +221,14 @@ function addLink({ url, title, ytId, twitchId, duration }) {
   jsonData.source = 'launchbar';
   jsonData.edited = now;
 
+  const listId = getYoutubeListId(url);
+
   jsonData.data = jsonData.data.filter((item) => {
-    if (ytId) return !item.url.includes(ytId);
+    if (ytId)
+      return !(
+        item.url.includes(ytId) ||
+        (listId && getYoutubeListId(item.url) === listId)
+      );
     if (twitchId) return !item.url.includes(twitchId);
     return item.url !== url;
   });
@@ -382,9 +384,15 @@ function handleYoutubeUrl(url, time) {
 
   if (!ytId) return [url, ytId];
 
-  url =
-    `${baseUrl}${ytId}` +
-    ((time && parseFloat(time)) > 10 ? `&t=${time}s` : '');
+  const listId = url.match(/[?&]list=([^&]+)/)?.[1];
+  const index = url.match(/[?&]index=(\d+)/)?.[1];
+
+  let params = '';
+  if (time && parseFloat(time) > 10) params += `&t=${time}s`;
+  if (listId) params += `&list=${listId}`;
+  if (listId && index) params += `&index=${index}`;
+
+  url = `${baseUrl}${ytId}${params}`;
 
   return [url, ytId];
 }
@@ -421,9 +429,18 @@ function addTimeParameterToUrl(url, time) {
 }
 
 function getTimeFromUrl(url) {
-  const timeMatch = url.match(/t=(\d+)/);
+  const timeMatch = url.match(/[?&]t=(\d+)/);
   if (!timeMatch) return;
   return formatTime(parseInt(timeMatch[1]));
+}
+
+function getYoutubeListId(url) {
+  return url.match(/[?&]list=([^&]+)/)?.[1];
+}
+
+function formatLabel(time, duration) {
+  if (!time) return duration ? formatTime(duration) : undefined;
+  return duration ? `${time} (${formatTime(duration)})` : time;
 }
 
 function formatTime(seconds) {
