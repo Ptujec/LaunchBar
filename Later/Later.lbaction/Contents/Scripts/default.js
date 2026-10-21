@@ -46,7 +46,8 @@ function runWithURL(url) {
 
   let ytId, twitchId;
   if (url.includes('facebook.com')) url = handleFacebookUrl(url);
-  if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url);
+  if (url.includes('youtube.com/watch') && url.includes('watch'))
+    [url, ytId] = handleYoutubeUrl(url);
   if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url);
   if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url);
   if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url);
@@ -93,7 +94,8 @@ function run() {
   }
 
   let ytId, twitchId;
-  if (url.includes('youtu')) [url, ytId] = handleYoutubeUrl(url, time);
+  if (url.includes('youtube.com/watch'))
+    [url, ytId] = handleYoutubeUrl(url, time);
   if (url.includes('twitch.tv')) [url, twitchId] = handleTwitchUrl(url, time);
   if (url.includes('pocketcasts.com')) url = addTimeParameterToUrl(url, time);
   if (url.includes('open.spotify.com')) url = addTimeParameterToUrl(url, time);
@@ -276,7 +278,7 @@ function getInfoFromBrowser(appID) {
         set _name to name of front document
         set _time to ""
         set _duration to ""
-        if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
+        if (_url contains "youtube.com\/watch") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
               set _time to (do JavaScript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))" in front document) as string
               set _duration to (do JavaScript "String(Math.round(document.querySelector('video')?.duration || document.querySelector('audio')?.duration || 0))" in front document) as string
@@ -295,7 +297,7 @@ function getInfoFromBrowser(appID) {
         set _name to title of active tab of front window
         set _time to ""
         set _duration to ""
-        if (_url contains "youtube.com") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
+        if (_url contains "youtube.com\/watch") or (_url contains "twitch.tv") or (_url contains "pocketcasts.com") or (_url contains "open.spotify.com") then
           try
             set _time to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.currentTime || document.querySelector('audio')?.currentTime || 0))")
             set _duration to (execute active tab of front window javascript "String(Math.round(document.querySelector('video')?.duration || document.querySelector('audio')?.duration || 0))")
