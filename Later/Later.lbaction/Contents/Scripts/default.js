@@ -388,9 +388,9 @@ function handleYoutubeUrl(url, time) {
   const index = url.match(/[?&]index=(\d+)/)?.[1];
 
   let params = '';
-  if (time && parseFloat(time) > 10) params += `&t=${time}s`;
   if (listId) params += `&list=${listId}`;
   if (listId && index) params += `&index=${index}`;
+  if (time && parseFloat(time) > 10) params += `&t=${time}s`;
 
   url = `${baseUrl}${ytId}${params}`;
 
