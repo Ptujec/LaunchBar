@@ -16,471 +16,210 @@ Usefull:
 - https://timezone360.com/en/time-in/ for timezone name lookup
 */
 
+const CITIES_PATH = Action.path + '/Contents/Resources/cities.json';
+const DAY_TIMES = [
+  [6, 21],
+  [6, 22],
+  [7, 21],
+  [7, 22],
+  [8, 21],
+  [8, 22],
+  [8, 23],
+  [9, 23],
+];
+
 function run(argument) {
-  if (argument == undefined) {
-    if (LaunchBar.options.shiftKey) {
-      var output = setDayTimeOptions();
-      return output;
-    } else {
-      var output = showFavs();
-      return output;
-    }
-  } else {
-    if (argument != '' && argument != ' ') {
-      var cData = File.readJSON(
-        '~/Library/Application Support/LaunchBar/Actions/Timezones.lbaction/Contents/Resources/cities.json'
-      );
-
-      var cities = [];
-      for (var i = 0; i < cData.length; i++) {
-        var city = cData[i].city;
-
-        if (city.toLowerCase().includes(argument.toLowerCase())) {
-          city = city.replace(/\(.*\)/, '').trim();
-
-          var tz = cData[i].timezone;
-          var country = cData[i].country;
-          var province = cData[i].province;
-          if (province != '') {
-            var localeInfo = province + ', ' + country;
-          } else {
-            var localeInfo = country;
-          }
-
-          var lat = cData[i].lat;
-          var lng = cData[i].lng;
-
-          if (cData[i].iso2 == 'US') {
-            var mapLocationInfo = province;
-          } else {
-            var mapLocationInfo = country;
-          }
-
-          var mapsURL = encodeURI(
-            'https://maps.apple.com/?q=' +
-              city +
-              ',' +
-              mapLocationInfo +
-              '&near=' +
-              lat +
-              ',' +
-              lng
-          );
-
-          try {
-            var longDate = LaunchBar.formatDate(new Date(), {
-              timeStyle: 'none',
-              dateStyle: 'long',
-              timeZone: tz,
-              // locale: 'en',
-            });
-
-            var time = LaunchBar.formatDate(new Date(), {
-              timeStyle: 'short',
-              dateStyle: 'none',
-              timeZone: tz,
-              // locale: 'en',
-            });
-
-            var stampDateTime = LaunchBar.formatDate(new Date(), {
-              timeStyle: 'medium',
-              dateStyle: 'medium',
-              timeZone: tz,
-              locale: 'de',
-            });
-
-            var stampTime = stampDateTime.split(', ')[1];
-            var stampDate = stampDateTime.split(', ')[0];
-
-            var tYear = stampDate.split('.')[2];
-            var tMonth = stampDate.split('.')[1];
-            var tDay = stampDate.split('.')[0];
-
-            var hour = stampTime.split(':')[0];
-
-            var timestamp = tYear + '-' + tMonth + '-' + tDay + 'T' + stampTime;
-
-            // Check for day time setting
-            if (Action.preferences.dayTime != undefined) {
-              var m = Action.preferences.dayTime.m;
-              var e = Action.preferences.dayTime.e;
-            } else {
-              var m = 8;
-              var e = 21;
-            }
-
-            if (hour >= m && hour < e) {
-              var icon = 'dayTemplate';
-            } else {
-              var icon = 'nightTemplate';
-            }
-
-            cities.push({
-              title: time + ', ' + longDate,
-              subtitle: localeInfo + ', TZ: ' + tz,
-              badge: city,
-              icon: icon,
-              action: 'actionOptions',
-              actionArgument: {
-                mapsURL: mapsURL,
-                city: city,
-                lat: lat,
-                lng: lng,
-                cData: cData[i],
-              },
-              timestamp: timestamp,
-            });
-          } catch (error) {
-            //
-          }
-        }
-      }
-    }
-
-    cities.sort(function (a, b) {
-      return a.timestamp > b.timestamp;
-    });
-
-    return cities;
+  if (argument === undefined) {
+    return LaunchBar.options.shiftKey ? setDayTimeOptions() : showFavs();
   }
+  if (argument.trim() === '') return [];
+
+  const query = argument.toLowerCase();
+  const matches = File.readJSON(CITIES_PATH).filter((c) =>
+    c.city.toLowerCase().includes(query),
+  );
+  return buildItems(matches, (c) => ({
+    alwaysShowsSubtitle: true,
+    action: 'actionOptions',
+    actionArgument: c,
+  }));
+}
+
+function buildItems(cities, extra) {
+  return cities
+    .flatMap((c) => {
+      try {
+        return [{ ...cityItem(c), ...extra(c) }];
+      } catch {
+        return [];
+      }
+    })
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+function cityItem(c) {
+  const city = cleanCity(c.city);
+  const tz = c.timezone;
+  const now = new Date();
+  const fmt = (options) =>
+    LaunchBar.formatDate(now, { timeZone: tz, ...options });
+
+  const [date, time] = fmt({
+    timeStyle: 'medium',
+    dateStyle: 'medium',
+    locale: 'de',
+  }).split(', ');
+  const [day, month, year] = date.split('.');
+  const hour = Number(time.split(':')[0]);
+  const { m, e } = dayTime();
+
+  const longDate = fmt({ timeStyle: 'none', dateStyle: 'long' });
+  const shortTime = fmt({ timeStyle: 'short', dateStyle: 'none' });
+
+  return {
+    title: `${shortTime}, ${longDate}`,
+    subtitle: `${localeInfo(c)}, TZ: ${tz}`,
+    badge: city,
+    icon: hour >= m && hour < e ? 'dayTemplate' : 'nightTemplate',
+    timestamp: `${year}-${month}-${day}T${time}`,
+  };
+}
+
+function cleanCity(name) {
+  return name.replace(/\(.*\)/, '').trim();
+}
+
+function localeInfo(c) {
+  return c.province ? `${c.province}, ${c.country}` : c.country;
+}
+
+function mapsURL(c, city) {
+  const place = c.iso2 === 'US' ? c.province : c.country;
+  return encodeURI(
+    `https://maps.apple.com/?q=${city},${place}&near=${c.lat},${c.lng}`,
+  );
+}
+
+function dayTime() {
+  return Action.preferences.dayTime ?? { m: 8, e: 21 };
+}
+
+function getFavorites() {
+  const favs = Action.preferences.favorites;
+  return Array.isArray(favs) ? favs : [];
 }
 
 function showFavs() {
-  if (
-    Action.preferences.favorites == undefined ||
-    Action.preferences.favorites == ''
-  ) {
-    if (Action.preferences.favoritesBackup != undefined) {
-      var responseCheckURL = LaunchBar.alert(
-        'No Favorites found!',
-        'Do you want to restore your old Favorites?',
-        'Restore',
-        'Cancel'
-      );
-      switch (responseCheckURL) {
-        case 0: // Restore
-          Action.preferences.favorites = Action.preferences.favoritesBackup;
-          // LaunchBar.alert('Done!')
-          var output = showFavs();
-          return output;
-          break;
-        case 1: // Cancel
-          break;
-      }
-    } else {
-      LaunchBar.alert(
-        'No Favorites found!',
-        'Press "space" to search for cities.\nThen press enter on a result for more options.'
-      );
+  const favs = getFavorites();
+  if (favs.length > 0) {
+    return [
+      ...buildItems(favs, (c) => ({ children: favOptions(c) })),
+      {
+        title: 'Remove all Favorites',
+        icon: 'unFavTemplate.png',
+        action: 'removeAll',
+      },
+    ];
+  }
+
+  const backup = Action.preferences.favoritesBackup;
+  if (Array.isArray(backup) && backup.length > 0) {
+    const choice = LaunchBar.alert(
+      'No Favorites found!',
+      'Do you want to restore your old Favorites?',
+      'Restore',
+      'Cancel',
+    );
+    if (choice === 0) {
+      Action.preferences.favorites = backup;
+      return showFavs();
     }
   } else {
-    var cData = Action.preferences.favorites;
-
-    var cities = [];
-    for (var i = 0; i < cData.length; i++) {
-      var city = cData[i].city.replace(/\(.*\)/, '').trim();
-      var tz = cData[i].timezone;
-      var country = cData[i].country;
-      var province = cData[i].province;
-      if (province != '') {
-        var localeInfo = province + ', ' + country;
-      } else {
-        var localeInfo = country;
-      }
-
-      var lat = cData[i].lat;
-      var lng = cData[i].lng;
-
-      if (cData[i].iso2 == 'US') {
-        var mapLocationInfo = province;
-      } else {
-        var mapLocationInfo = country;
-      }
-
-      var mapsURL = encodeURI(
-        'https://maps.apple.com/?q=' +
-          city +
-          ',' +
-          mapLocationInfo +
-          '&near=' +
-          lat +
-          ',' +
-          lng
-      );
-
-      try {
-        var longDate = LaunchBar.formatDate(new Date(), {
-          timeStyle: 'none',
-          dateStyle: 'long',
-          timeZone: tz,
-          // locale: 'en',
-        });
-
-        var time = LaunchBar.formatDate(new Date(), {
-          timeStyle: 'short',
-          dateStyle: 'none',
-          timeZone: tz,
-          // locale: 'en',
-        });
-
-        var stampDateTime = LaunchBar.formatDate(new Date(), {
-          timeStyle: 'medium',
-          dateStyle: 'medium',
-          timeZone: tz,
-          locale: 'de',
-        });
-
-        var stampTime = stampDateTime.split(', ')[1];
-        var stampDate = stampDateTime.split(', ')[0];
-
-        var tYear = stampDate.split('.')[2];
-        var tMonth = stampDate.split('.')[1];
-        var tDay = stampDate.split('.')[0];
-
-        var hour = stampTime.split(':')[0];
-
-        var timestamp = tYear + '-' + tMonth + '-' + tDay + 'T' + stampTime;
-
-        // Check for day time setting
-        if (Action.preferences.dayTime != undefined) {
-          var m = Action.preferences.dayTime.m;
-          var e = Action.preferences.dayTime.e;
-        } else {
-          var m = 8;
-          var e = 21;
-        }
-
-        if (hour >= m && hour < e) {
-          var icon = 'dayTemplate';
-        } else {
-          var icon = 'nightTemplate';
-        }
-
-        var cityData = cData[i];
-
-        cities.push({
-          title: time + ', ' + longDate,
-          subtitle: localeInfo + ', TZ: ' + tz,
-          badge: city,
-          icon: icon,
-          children: favOptions(mapsURL, city, lat, lng, cityData),
-          timestamp: timestamp,
-        });
-      } catch (error) {
-        //
-      }
-    }
-    cities.sort(function (a, b) {
-      return a.timestamp > b.timestamp;
-    });
-    return cities;
+    LaunchBar.alert(
+      'No Favorites found!',
+      'Press "space" to search for cities.\nThen press enter on a result for more options.',
+    );
   }
 }
 
-function actionOptions(a) {
-  var url = a.mapsURL;
-  var city = a.city;
-  var cData = a.cData;
-
+function actionOptions(c) {
+  const city = cleanCity(c.city);
   return [
     {
-      title: 'Open "' + city + '" in Apple Maps',
-      url: url,
+      title: `Open "${city}" in Apple Maps`,
+      url: mapsURL(c, city),
       icon: 'com.apple.Maps',
     },
     {
-      title: 'Mark "' + city + '" as Favorite',
+      title: `Mark "${city}" as Favorite`,
       icon: 'favTemplate',
       action: 'makeFav',
-      actionArgument: cData,
+      actionArgument: c,
     },
   ];
 }
 
-function makeFav(cData) {
-  var currentFavs = Action.preferences.favorites;
-
-  if (currentFavs != undefined) {
-    var favs = currentFavs.concat(cData);
-  } else {
-    var favs = [cData];
-  }
-
-  Action.preferences.favorites = favs;
-  var output = showFavs();
-  return output;
-}
-
-function favOptions(mapsURL, city, lat, lng, cityData) {
+function favOptions(c) {
+  const city = cleanCity(c.city);
   return [
     {
-      title: 'Open "' + city + '" in Apple Maps',
-      url: mapsURL,
+      title: `Open "${city}" in Apple Maps`,
+      url: mapsURL(c, city),
       icon: 'com.apple.Maps',
     },
     {
-      title: 'Remove "' + city + '" from Favorites',
+      title: `Remove "${city}" from Favorites`,
       icon: 'unFavTemplate.png',
       action: 'removeFav',
-      actionArgument: cityData,
-    },
-    {
-      title: 'Remove all Favorites',
-      icon: 'unFavAllTemplate.png',
-      action: 'removeAll',
+      actionArgument: c,
     },
   ];
 }
 
-function removeFav(cData) {
-  var fcData = Action.preferences.favorites;
+function makeFav(c) {
+  Action.preferences.favorites = [...getFavorites(), c];
+  return showFavs();
+}
 
-  var city = cData.city;
-  var tz = cData.timezone;
-
-  for (var i = 0; i < fcData.length; i++) {
-    if (fcData[i].city == city && fcData[i].timezone == tz) {
-      fcData.splice(i, 1);
-      break;
-    }
-  }
-  Action.preferences.favorites = fcData;
-  var output = showFavs();
-  return output;
+function removeFav(c) {
+  const favs = getFavorites();
+  const index = favs.findIndex(
+    (f) => f.city === c.city && f.timezone === c.timezone,
+  );
+  Action.preferences.favorites = favs.filter((_, i) => i !== index);
+  return showFavs();
 }
 
 function removeAll() {
-  var responseCheckURL = LaunchBar.alert(
+  const choice = LaunchBar.alert(
     'Remove all Favorites',
     'Do you want to remove all Favorites?',
     'Yes',
-    'Cancel'
+    'Cancel',
   );
-  switch (responseCheckURL) {
-    case 0: // Remove all
-      Action.preferences.favoritesBackup = Action.preferences.favorites;
-      Action.preferences.favorites = '';
-      break;
-    case 1: // Cancel
-      var output = showFavs();
-      return output;
-  }
+  if (choice !== 0) return showFavs();
+
+  const favs = getFavorites();
+  // Keep the existing backup if there is nothing to back up
+  if (favs.length > 0) Action.preferences.favoritesBackup = favs;
+  Action.preferences.favorites = [];
 }
 
 function setDayTimeOptions() {
-  var options = [
-    {
-      title: '6:00 - 21:00 (6 am - 9 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 21,
-        m: 6,
-      },
-    },
-    {
-      title: '6:00 - 22:00 (6 am - 10 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 22,
-        m: 6,
-      },
-    },
-    {
-      title: '7:00 - 21:00 (7 am - 9 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 21,
-        m: 7,
-      },
-    },
-    {
-      title: '7:00 - 22:00 (7 am - 10 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 22,
-        m: 7,
-      },
-    },
-    {
-      title: '8:00 - 21:00 (8 am - 9 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockSelectedTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 21,
-        m: 8,
-      },
-    },
-    {
-      title: '8:00 - 22:00 (8 am - 10 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 22,
-        m: 8,
-      },
-    },
-    {
-      title: '8:00 - 23:00 (8 am - 11 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 23,
-        m: 8,
-      },
-    },
-    {
-      title: '9:00 - 23:00 (9 am - 11 pm)',
-      badge: 'Settings - Day Time',
-      icon: 'clockTemplate',
-      action: 'setDayTime',
-      actionArgument: {
-        e: 23,
-        m: 9,
-      },
-    },
-  ];
-
-  if (Action.preferences.dayTime == undefined) {
-    return options;
-  } else {
-    var dayTime = Action.preferences.dayTime;
-    // LaunchBar.alert(JSON.stringify(dayTime))
-    // LaunchBar.alert(JSON.stringify(options[0].actionArgument))
-
-    var result = [];
-    for (var i = 0; i < options.length; i++) {
-      if (
-        JSON.stringify(dayTime) == JSON.stringify(options[i].actionArgument)
-      ) {
-        var icon = 'clockSelectedTemplate';
-      } else {
-        var icon = 'clockTemplate';
-      }
-      result.push({
-        title: options[i].title,
-        badge: options[i].badge,
-        icon: icon,
-        action: options[i].action,
-        actionArgument: options[i].actionArgument,
-      });
-    }
-    return result;
-  }
+  const current = dayTime();
+  return DAY_TIMES.map(([m, e]) => ({
+    title: `${m}:00 - ${e}:00 (${m} am - ${e - 12} pm)`,
+    badge: 'Settings - Day Time',
+    icon:
+      current.m === m && current.e === e
+        ? 'clockSelectedTemplate'
+        : 'clockTemplate',
+    action: 'setDayTime',
+    actionArgument: { m, e },
+  }));
 }
 
 function setDayTime(dayTime) {
   Action.preferences.dayTime = dayTime;
-  var output = showFavs();
-  return output;
+  return showFavs();
 }
