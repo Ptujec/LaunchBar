@@ -49,9 +49,14 @@ function run() {
 
   if (!lines) return;
 
+  const bundleIDTag =
+    parseFloat(LaunchBar.systemVersion) < '27.2'
+      ? '"CFBundleIdentifier"'
+      : 'bundleID';
+
   const runningApps = lines
     .map((line) => {
-      const match = line.match(/"CFBundleIdentifier"="([^"]+)"/);
+      const match = line.match(new RegExp(`${bundleIDTag}="([^"]+)"`));
       return match ? match[1] : undefined;
     })
     .filter(Boolean);
