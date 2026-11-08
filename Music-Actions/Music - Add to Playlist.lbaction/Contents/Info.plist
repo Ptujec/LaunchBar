@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Music - Add to Playlist</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.1</string>
+	<string>4</string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -29,15 +29,13 @@
 		<dict>
 			<key>LBKeepWindowActive</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
-			<string>default.applescript</string>
+			<string>default.js</string>
 		</dict>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>14.1</string>
+	<string>27.2</string>
 </dict>
 </plist>
