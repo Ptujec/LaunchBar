@@ -20,8 +20,15 @@ supported_browsers=(
 )
 
 front_app=$(lsappinfo front)
-frontmost=$(lsappinfo info -only bundleid "$front_app" | cut -d'"' -f4)
-app_name=$(lsappinfo info -only name "$front_app" | cut -d'"' -f4)
+macos_major=$(sw_vers -productVersion | cut -d. -f1)
+if [ "$macos_major" -ge 27 ]; then
+    app_id=$(lsappinfo info -only bundleid "$front_app" | grep 'bundleID="' | cut -d'"' -f2)
+    app_name=$(lsappinfo info -only name "$front_app" | head -n 1 | cut -d'"' -f2)
+else
+    app_id=$(lsappinfo info -only bundleid "$front_app" | cut -d'"' -f4)
+    app_name=$(lsappinfo info -only name "$front_app" | cut -d'"' -f4)
+fi
+
 is_supported="false"
 
 # Check if frontmost app is in supported browsers

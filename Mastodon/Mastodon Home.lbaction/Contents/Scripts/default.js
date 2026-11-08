@@ -53,8 +53,6 @@ function run() {
   if (url.includes(server)) {
     LaunchBar.openURL(urlscheme + url, frontmostID);
     if (closeOption === 'true') closeURL(url, frontmostID);
-    // LaunchBar.alert('Your are already at home!'.localize());
-    // LaunchBar.hide();
     return;
   }
 
