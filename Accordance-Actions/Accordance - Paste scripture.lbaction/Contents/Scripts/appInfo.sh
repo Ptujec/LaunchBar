@@ -13,5 +13,11 @@
 
 sleep 0.02 # give LaunchBar time to hide
 front_app=$(lsappinfo front)
-frontmost=$(lsappinfo info -only bundleid "$front_app" | cut -d'"' -f4) # returns the bundle ID of the frontmost app
+# macOS 27+ prints bundleID="..." (field 2); older versions print "CFBundleIdentifier"="..." (field 4)
+macos_major=$(sw_vers -productVersion | cut -d. -f1)
+if [ "$macos_major" -ge 27 ]; then
+    frontmost=$(lsappinfo info -only bundleid "$front_app" | grep 'bundleID=' | cut -d'"' -f2)
+else
+    frontmost=$(lsappinfo info -only bundleid "$front_app" | cut -d'"' -f4)
+fi
 echo "$frontmost"

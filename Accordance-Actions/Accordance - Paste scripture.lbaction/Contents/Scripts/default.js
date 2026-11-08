@@ -110,6 +110,9 @@ function getText(newArgument, argument, initialTranslation) {
       // Cleanup Bible Text Abbreviation for User Bibles and Bibles with Lemmata
       const translationName = cleanUpTranslationTitle(currentTranslation);
 
+      // Cleanup NGÜ
+      if (translationName === 'NGÜ') text = text.replace(/´|`/g, '');
+
       // Uppercase first character of query
       argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
@@ -139,11 +142,11 @@ function paste(text, reference) {
   const frontmostAppID = LaunchBar.execute('/bin/bash', './appInfo.sh').trim();
 
   if (
-    frontmostAppID === 'com.apple.iWork.Keynote' &&
+    ['com.apple.iWork.Keynote', 'com.apple.Keynote'].includes(frontmostAppID) &&
     Action.preferences.keynote
   ) {
     LaunchBar.setClipboardString(text); // Workaround for stupid Unicode stuff
-    return pasteInKeynote(text, reference);
+    return pasteInKeynote(text, reference, frontmostAppID);
   }
 
   // Get format: first check app-specific format, then fall back to default format
@@ -188,9 +191,9 @@ function pasteInWriter(text) {
   LaunchBar.executeAppleScript(pasteInWriterAS);
 }
 
-function pasteInKeynote(text, reference) {
+function pasteInKeynote(text, reference, frontmostAppID) {
   LaunchBar.executeAppleScript(`
-    tell application "Keynote"
+    tell application id "${frontmostAppID}"
       activate
     	set _doc to the front document
       set _slide_num to slide number of current slide of _doc
@@ -569,5 +572,7 @@ function cleanUpTranslationTitle(translation) {
     .trim()
     .replace(/°|-LEM/g, '')
     .replace('ZJ', 'ŽJ')
-    .replace('ZNZ', 'ŽNZ');
+    .replace('ZNZ', 'ŽNZ')
+    .replace('ESVS', 'ESV')
+    .replace(/\d+$/g, '');
 }
