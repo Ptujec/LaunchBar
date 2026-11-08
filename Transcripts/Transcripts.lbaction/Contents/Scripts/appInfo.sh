@@ -6,7 +6,7 @@
 # Script to get the bundle ID of a supported browser that is running
 #
 # by Christian Bender (@ptujec)
-# 2025-05-27
+# 2026-11-08
 # 
 # Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 # 
@@ -19,7 +19,14 @@ supported_browsers=(
     "company.thebrowser.Browser" # this browser is abandoned but maybe still used
 )
 
-frontmost=$(lsappinfo info -only bundleid `lsappinfo front` | cut -d'"' -f4)
+
+macos_major=$(sw_vers -productVersion | cut -d. -f1)
+
+if [ "$macos_major" -ge 27 ]; then
+    frontmost=$(lsappinfo info -only bundleid `lsappinfo front` | grep 'bundleID="' | cut -d'"' -f2)
+else
+    frontmost=$(lsappinfo info -only bundleid `lsappinfo front` | cut -d'"' -f4)
+fi
 
 # Check if frontmost app is in supported browsers
 for browser in "${supported_browsers[@]}"; do
