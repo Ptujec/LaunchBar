@@ -28,6 +28,8 @@ const textModulesPath =
 
 function run(argument) {
   argument = argument.trim();
+  argument = argument.split('\n').join('; '); // E.g. for results with multiple verses separated by new lines from YouVersion Action
+
   let newArgument;
 
   // Check Vers Notation Setting (see checkbox in "Appearance" section of Accoradance Preferences)
