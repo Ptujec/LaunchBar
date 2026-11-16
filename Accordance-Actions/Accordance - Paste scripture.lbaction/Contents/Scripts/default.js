@@ -65,11 +65,11 @@ function run(argument) {
     newArgument = newArgument
       .replace(/\.( ?[a-zžščöäüß])/gi, '$1')
       .replace(/([a-zžščöäüß])\./gi, '$1')
-      .replace(/1 ?Moses/, 'Genesis')
-      .replace(/2 ?Moses/, 'Exodus')
-      .replace(/3 ?Moses/, 'Leviticus')
-      .replace(/4 ?Moses/, 'Numbers')
-      .replace(/5 ?Moses/, 'Deuteronomy');
+      .replace(/1 ?Moses/g, 'Genesis')
+      .replace(/2 ?Moses/g, 'Exodus')
+      .replace(/3 ?Moses/g, 'Leviticus')
+      .replace(/4 ?Moses/g, 'Numbers')
+      .replace(/5 ?Moses/g, 'Deuteronomy');
   }
 
   return LaunchBar.options.commandKey
