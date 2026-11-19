@@ -116,7 +116,9 @@ function getText(newArgument, argument, initialTranslation) {
       // Uppercase first character of query
       argument = argument.charAt(0).toUpperCase() + argument.slice(1);
 
-      const isFallback = currentTranslation === fallbackTranslation;
+      const isFallback =
+        currentTranslation === fallbackTranslation &&
+        currentTranslation !== initialTranslation;
       const isDefault =
         currentTranslation === defaultTranslation &&
         currentTranslation !== initialTranslation;
