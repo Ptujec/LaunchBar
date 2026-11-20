@@ -81,13 +81,14 @@ function run(argument) {
 }
 
 function options(item) {
-  // Options to pick a custom model and if supported, reasoning effort level
-  if (LaunchBar.options.commandKey) {
-    if (item.useCustomModel && item.model) {
-      if (!supportsReasoningEffort(item.model) || item.effort) return;
+  // Pick a custom model, then reasoning effort if supported; otherwise fall through to the options list
+  if (LaunchBar.options.commandKey && !item.effort) {
+    if (!item.useCustomModel || !item.model) {
+      return showModels({ ...item, useCustomModel: true });
+    }
+    if (supportsReasoningEffort(item.model)) {
       return showReasoningEffortLevels(item);
     }
-    return showModels({ ...item, useCustomModel: true });
   }
 
   const { argument, preset, model, effort } = item;
@@ -127,45 +128,42 @@ function options(item) {
     actionRunsInBackground: true,
   };
 
-  let optionItems;
+  const recentChatInfo = getMostRecentChatInfo();
 
-  // if (preset && preset.id !== getDefaultPreset().id) {
-  if (preset) {
-    optionItems = [newChat, addClipboard];
-  } else {
-    const recentChatInfo = getMostRecentChatInfo();
+  const isRecentlyEdited =
+    recentChatInfo?.lastEdited &&
+    (Date.now() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
 
-    const isRecentlyEdited =
-      recentChatInfo?.lastEdited &&
-      (Date.now() - new Date(recentChatInfo.lastEdited)) / 60000 < 5;
+  addClipboard.actionArgument = {
+    ...addClipboard.actionArgument,
+    recentPath: recentChatInfo?.filePath,
+  };
 
-    addClipboard.actionArgument = {
-      ...addClipboard.actionArgument,
-      recentPath: recentChatInfo?.filePath,
-    };
+  // Continuing a chat keeps its original system prompt, so the preset is not applied
+  const continueChat = recentChatInfo
+    ? {
+        title: `${'Continue Chat'.localize()}: "${recentChatInfo.title}"`,
+        subtitle: `Prompt: ${argument}`,
+        alwaysShowsSubtitle: true,
+        icon: 'weasel_bubble_dots',
+        label,
+        action: 'ask',
+        actionArgument: {
+          argument,
+          continueChat: true,
+          recentPath: recentChatInfo.filePath,
+          model: model ?? recentChatInfo.model,
+          effort: effort ?? recentChatInfo.effort,
+        },
+        actionRunsInBackground: true,
+      }
+    : undefined;
 
-    const continueChat = recentChatInfo
-      ? {
-          title: `${'Continue Chat'.localize()}: "${recentChatInfo.title}"`,
-          subtitle: `Prompt: ${argument}`,
-          alwaysShowsSubtitle: true,
-          icon: 'weasel_bubble_dots',
-          action: 'ask',
-          actionArgument: {
-            argument,
-            continueChat: true,
-            recentPath: recentChatInfo.filePath,
-          },
-          actionRunsInBackground: true,
-        }
-      : {};
+  const orderedItems = isRecentlyEdited
+    ? [continueChat, newChat, addClipboard]
+    : [newChat, continueChat, addClipboard];
 
-    optionItems = isRecentlyEdited
-      ? [continueChat, newChat, addClipboard]
-      : [newChat, continueChat, addClipboard];
-  }
-
-  return optionItems;
+  return orderedItems.filter(Boolean);
 }
 
 function ask(item) {
@@ -228,6 +226,13 @@ function ask(item) {
         description: 'Main response',
       },
     };
+
+    // Use provided effort or get from preferences for the model
+    effort = item.effort
+      ? item.effort
+      : supportsReasoningEffort(model)
+        ? getReasoningEffort(model)
+        : undefined;
   } else {
     const defaultPreset = getDefaultPreset();
     presetId = item.preset?.id ?? defaultPreset?.id;
@@ -298,7 +303,15 @@ function ask(item) {
 
   // const result = File.readJSON(Action.supportPath + '/test.json');
 
-  processResult(result, argument, presetId, continueChat, recentPath, model);
+  processResult(
+    result,
+    argument,
+    presetId,
+    continueChat,
+    recentPath,
+    model,
+    effort,
+  );
 }
 
 function processResult(
@@ -308,6 +321,7 @@ function processResult(
   continueChat,
   recentPath,
   model,
+  effort,
 ) {
   // Error handling
   if (!result.response) {
@@ -357,13 +371,20 @@ function processResult(
       ? recentPath
       : `${chatsFolder}${title}_${chatFileId}.md`;
 
-  saveChatAndOpen(argument, fileLocation, answer, chatId);
+  saveChatAndOpen(argument, fileLocation, answer, chatId, model, effort);
 
   // LOG TOKEN USAGE
   logTokenUsage(data, model, presetId, fileLocation);
 }
 
-function saveChatAndOpen(argument, fileLocation, answer, chatId) {
+function saveChatAndOpen(
+  argument,
+  fileLocation,
+  answer,
+  chatId,
+  model,
+  effort,
+) {
   if (!File.exists(chatsFolder)) File.createDirectory(chatsFolder);
 
   const quotedArgument = argument
@@ -407,6 +428,8 @@ function saveChatAndOpen(argument, fileLocation, answer, chatId) {
 
     Action.preferences.chatMetadata[chatFileId] = {
       previousResponseId: chatId,
+      model: model,
+      effort: effort,
     };
   }
 }
@@ -515,8 +538,8 @@ function handleChatFileAction({ filePath, fileTitle }) {
 
   // RETRIEVE STORED METADATA FOR THIS CHAT
   const chatFileId = extractChatFileId(filePath);
-  const previousResponseId =
-    Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
+  const chatMetadata = Action.preferences.chatMetadata?.[chatFileId];
+  const previousResponseId = chatMetadata?.previousResponseId;
 
   if (LaunchBar.options.commandKey) {
     // LaunchBar.openURL(File.fileURLForPath(filePath));
@@ -544,6 +567,8 @@ function handleChatFileAction({ filePath, fileTitle }) {
     continueChat: true,
     recentPath: filePath,
     recentTitle: fileTitle,
+    model: chatMetadata?.model,
+    effort: chatMetadata?.effort,
   };
 
   ask(item);

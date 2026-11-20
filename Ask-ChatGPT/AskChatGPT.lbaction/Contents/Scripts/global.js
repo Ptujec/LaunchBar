@@ -89,15 +89,17 @@ function getMostRecentChatInfo() {
   const mostRecentFile = chatFiles[0];
   const filePath = `${chatsFolder}${mostRecentFile}`;
   const chatFileId = extractChatFileId(filePath);
-  const previousResponseId =
-    Action.preferences.chatMetadata?.[chatFileId]?.previousResponseId;
+  const chatMetadata = Action.preferences.chatMetadata?.[chatFileId];
+  const previousResponseId = chatMetadata?.previousResponseId;
 
   if (!previousResponseId) return;
 
   const title = titleCleanup(File.displayName(filePath));
   const lastEdited = File.modificationDate(filePath);
+  const model = chatMetadata?.model;
+  const effort = chatMetadata?.effort;
 
-  return { filePath, title, lastEdited, previousResponseId };
+  return { filePath, title, lastEdited, previousResponseId, model, effort };
 }
 
 function titleCleanup(title) {
@@ -157,6 +159,7 @@ function filterModels(model) {
     'tts',
     'audio',
     'realtime',
+    'live',
   ];
 
   if (!id.startsWith('gpt-') || model.owned_by === 'openai-internal')
@@ -180,7 +183,7 @@ function selectReasoningEffort(effort) {
 }
 
 function supportsReasoningEffort(model) {
-  const match = model.match(/gpt-(\d+\.\d+)/);
+  const match = model.match(/gpt-(\d+(?:\.\d+)?)/);
   if (!match) return false;
   const version = parseFloat(match[1]);
   return version >= 5.2;
