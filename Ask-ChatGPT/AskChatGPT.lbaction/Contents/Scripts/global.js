@@ -343,6 +343,7 @@ const excludedApps = [
   'com.cameronshemilt.StudyCards',
   'com.apple.dt.Xcode',
   'org.musescore.MuseScore',
+  'com.microsoft.Word',
 ];
 
 function chooseEditor() {

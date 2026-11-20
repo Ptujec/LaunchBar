@@ -404,22 +404,6 @@ function saveChatAndOpen(
   const fileURL = File.fileURLForPath(fileLocation);
   LaunchBar.openURL(fileURL, Action.preferences.editor?.appID);
 
-  // TODO: needs to language independent
-
-  // if (Action.preferences.editor?.appID === 'pro.writer.mac') {
-  //   LaunchBar.executeAppleScript(
-  //     `
-  //     tell application "iA Writer" to activate
-  //     tell application "System Events"
-  //       try
-  //         click menu item "Modern (Sans)" of menu "Vorlage" of menu item "Vorlage" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
-  //         click menu item "Vorschau anzeigen" of menu "Darstellung" of menu bar item "Darstellung" of menu bar 1 of application process "iA Writer" of application "System Events"
-  //       end try
-  //     end tell
-  //     `,
-  //   );
-  // }
-
   // STORE CHAT METADATA
   const chatFileId = extractChatFileId(fileLocation);
 
