@@ -8,56 +8,56 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 - https://stackoverflow.com/questions/6484670/how-do-i-split-a-string-into-an-array-of-characters
 */
 
-const sfSymbolsLocation = Action.supportPath + '/sfSymbols.json';
-const recentSymbolsLocation = Action.supportPath + '/recentSymbols.json';
-const infoPlistLocation = Action.path + '/Contents/Info.plist';
+const sfSymbolsLocation = `${Action.supportPath}/sfSymbols.json`;
+const recentSymbolsLocation = `${Action.supportPath}/recentSymbols.json`;
+const infoPlistLocation = `${Action.path}/Contents/Info.plist`;
 
 function run() {
   const actionVersion = File.readPlist(infoPlistLocation).CFBundleVersion;
   let createJSON;
 
   // Check First Run
-  if (Action.preferences.firstRun != false) {
+  if (Action.preferences.firstRun !== false) {
     Action.preferences.firstRun = false;
     createJSON = true;
     Action.preferences.firstRunActionVersion = actionVersion;
   } else {
     // Check if Version Number is the same
-    if (actionVersion == Action.preferences.firstRunActionVersion) {
+    if (actionVersion === Action.preferences.firstRunActionVersion) {
       createJSON = false;
     } else {
       createJSON = true;
       Action.preferences.firstRunActionVersion = actionVersion;
     }
+    try {
+      File.readJSON(sfSymbolsLocation);
+    } catch (error) {
+      createJSON = true;
+    }
   }
 
   // Create JSON
   if (createJSON == true) {
-    const symbols = File.readText(
-      Action.path + '/Contents/Resources/sfsymbols.txt',
-    ).split(/(?!$)/u);
+    File.writeJSON([], recentSymbolsLocation);
 
-    const text = File.readText(
-      Action.path + '/Contents/Resources/sfsymbols_names.txt',
+    const symbols = File.readText(
+      `${Action.path}/Contents/Resources/sfsymbols.txt`,
     ).split('\n');
 
-    const result = [];
-    for (let i = 0; i < text.length; i++) {
-      const title = text[i];
+    const text = File.readText(
+      `${Action.path}/Contents/Resources/sfsymbols_names.txt`,
+    ).split('\n');
 
-      const pushData = {
-        title: title,
-        icon: 'symbol:' + text[i],
-        index: i,
-        action: 'action',
-        actionArgument: {
-          symbol: symbols[i],
-          title: title,
-        },
-      };
-
-      result.push(pushData);
-    }
+    const result = text.map((title, i) => ({
+      title,
+      icon: `symbol:${title}`,
+      index: i,
+      action: 'action',
+      actionArgument: {
+        symbol: symbols[i],
+        title,
+      },
+    }));
     File.writeJSON(result, sfSymbolsLocation);
   }
 
@@ -92,7 +92,7 @@ function action(dict) {
 
   newRecentSymbols.push({
     title: dict.title,
-    icon: 'character:' + dict.symbol,
+    icon: `symbol:${dict.title}`,
     action: 'action',
     badge: 'recent',
     actionArgument: {
