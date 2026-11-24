@@ -160,6 +160,7 @@ function filterModels(model) {
     'audio',
     'realtime',
     'live',
+    'healthcare',
   ];
 
   if (!id.startsWith('gpt-') || model.owned_by === 'openai-internal')
