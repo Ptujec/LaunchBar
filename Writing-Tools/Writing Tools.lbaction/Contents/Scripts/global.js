@@ -219,6 +219,8 @@ function filterModels(model) {
     'codex',
     'audio',
     'realtime',
+    'live',
+    'healthcare',
   ];
 
   if (!id.startsWith('gpt-') || model.owned_by === 'openai-internal')
