@@ -15,6 +15,8 @@
 "citation" = "Zitat";
 "markdown" = "Markdown";
 "Reset to default" = "Auf Standard zurücksetzen";
-"Choose fallback translation" = "Ersatzübersetzung auswählen";
-" (fallback)" = " (Fallback)";
-" (default)" = " (Standard)";
+"Choose fallback translation" = "Ersatzübersetzung festlegen";
+"Set normalization for translations" = "Stellenangaben-Normalisierung für Übersetzungen";
+"Applied to all references." = "Betrifft alle Stellenangaben.";
+"Automatic Reference Normalization" = "Automatische Stellenangaben-Normalisierung";
+"Applied to references with non-default chapter/verse separators." = "Betrifft Stellenangaben ohne standardmäßige Kapitel/Vers-Trennzeichen.";
