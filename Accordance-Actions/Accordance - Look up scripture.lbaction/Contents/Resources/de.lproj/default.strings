@@ -1,1 +1,5 @@
 "recent" = "Zuletzt benutzt";
+"Automatic Reference Normalization" = "Automatische Stellenangaben-Normalisierung";
+"Set normalization for translations" = "Stellenangaben-Normalisierung für Übersetzungen";
+"Applied to all references." = "Betrifft alle Stellenangaben.";
+"Applied to references with non-default chapter/verse separators." = "Betrifft Stellenangaben ohne standardmäßige Kapitel/Vers-Trennzeichen.";

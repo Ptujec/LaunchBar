@@ -1,0 +1,502 @@
+{
+  "aliases": [
+    { "english": "Moses", "alt": ["Mojzes", "Mojzesova"], "abbr": ["Mz"] },
+    { "english": "Genesis", "alt": ["Geneza"], "abbr": ["Gn"] },
+    { "english": "Exodus", "alt": ["Eksodus"], "abbr": [] },
+    { "english": "Leviticus", "alt": ["Levitikus", "Levitik"], "abbr": ["Lv"] },
+    { "english": "Numbers", "alt": ["Numeri"], "abbr": ["Nm"] },
+    { "english": "Deuteronomy", "alt": ["Deuternomium", "Devteronomij"], "abbr": ["Dtn", "Du"] },
+    { "english": "Joshua", "alt": ["Jozue", "Josua"], "abbr": [] },
+    { "english": "Judges", "alt": ["Sodniki", "Richter"], "abbr": ["Jdg", "Jds"] },
+    { "english": "Ruth", "alt": ["Ruta"], "abbr": ["Rth", "Rt"] },
+    { "english": "Samuel", "alt": [], "abbr": ["Sm"] },
+    { "english": "Kings", "alt": ["Kralji", "Kraljeva", "Könige"], "abbr": ["Kgs"] },
+    { "english": "Chronicles", "alt": ["Kroniška", "Chronik"], "abbr": ["Krn"] },
+    { "english": "Ezra", "alt": ["Ezra", "Esra"], "abbr": [] },
+    { "english": "Nehemiah", "alt": ["Nehemija", "Nehemia"], "abbr": [] },
+    { "english": "Esther", "alt": ["Estera", "Ester"], "abbr": [] },
+    { "english": "Job", "alt": ["Job", "Ijob", "Hiob"], "abbr": ["Jb"] },
+    { "english": "Psalms", "alt": ["Psalmi", "Psalmen"], "abbr": ["Pss"] },
+    { "english": "Proverbs", "alt": ["Pregovori", "Sprichwörter", "Sprüche"], "abbr": ["Prv", "Prg"] },
+    { "english": "Ecclesiastes", "alt": ["Qoheleth", "Kohelet", "Prediger", "Pridigar"], "abbr": ["Prd"] },
+    { "english": "Song", "alt": ["Visoka pesem", "Canticles", "Hohelied"], "abbr": ["Sng", "Sg", "SS", "Vp", "Hl", "Hld"] },
+    { "english": "Isaiah", "alt": ["Izaija", "Jesaja"], "abbr": [] },
+    { "english": "Jeremiah", "alt": ["Jeremija", "Jeremia"], "abbr": ["Jr"] },
+    { "english": "Lamentations", "alt": ["Žalostinke", "Klagelieder"], "abbr": ["Lm", "Klgl"] },
+    { "english": "Ezekiel", "alt": ["Ezekiel", "Hesekiel"], "abbr": ["Ezk"] },
+    { "english": "Daniel", "alt": [], "abbr": ["Dn"] },
+    { "english": "Hosea", "alt": ["Ozej"], "abbr": [] },
+    { "english": "Joel", "alt": [], "abbr": ["Jl"] },
+    { "english": "Obadiah", "alt": ["Abdija", "Obadja"], "abbr": ["Obd"] },
+    { "english": "Jonah", "alt": ["Jona"], "abbr": ["Jnh"] },
+    { "english": "Micah", "alt": ["Mihej", "Micha"], "abbr": ["Mch"] },
+    { "english": "Nahum", "alt": [], "abbr": ["Nam"] },
+    { "english": "Habakkuk", "alt": ["Habakuk"], "abbr": ["Hb"] },
+    { "english": "Zephaniah", "alt": ["Sofonija", "Zefanja"], "abbr": [] },
+    { "english": "Haggai", "alt": ["Agej"], "abbr": ["Hg"] },
+    { "english": "Zechariah", "alt": ["Zaharija", "Sacharja"], "abbr": ["Zch"] },
+    { "english": "Malachi", "alt": ["Malahija", "Maleachi"], "abbr": ["Ml"] },
+    { "english": "Matthew", "alt": ["Matej", "Matthäus"], "abbr": ["Mt"] },
+    { "english": "Mark", "alt": ["Marko", "Markus"], "abbr": ["Mk", "Mr", "Mrk"] },
+    { "english": "Luke", "alt": ["Luka", "Lukas"], "abbr": ["Lk"] },
+    { "english": "John", "alt": ["Janez", "Johannes"], "abbr": ["Jhn", "Jn"] },
+    { "english": "Acts", "alt": ["Apostolska dela", "Apostelgeschichte"], "abbr": ["Apg", "Apd"] },
+    { "english": "Romans", "alt": ["Rimljanom", "Römer"], "abbr": ["Rm"] },
+    { "english": "Corinthians", "alt": ["Korinčanom", "Korinther"], "abbr": [] },
+    { "english": "Galatians", "alt": ["Galačanom", "Galater"], "abbr": [] },
+    { "english": "Ephesians", "alt": ["Efežanom", "Epheser"], "abbr": [] },
+    { "english": "Philippians", "alt": ["Filipljanom", "Philipper"], "abbr": ["Php", "Flp"] },
+    { "english": "Colossians", "alt": ["Kološanom", "Kolosser"], "abbr": [] },
+    { "english": "Thessalonians", "alt": ["Tesaloničanom", "Thessalonicher"], "abbr": [] },
+    { "english": "Timothy", "alt": ["Timoteju", "Timotheus"], "abbr": [] },
+    { "english": "Titus", "alt": [], "abbr": ["Tt"] },
+    { "english": "Philemon", "alt": ["Filemonu", "Philemon"], "abbr": ["Flm", "Phm", "Phlm", "Phim"] },
+    { "english": "Hebrews", "alt": ["Hebrejcem", "Hebräer"], "abbr": ["Hbr"] },
+    { "english": "James", "alt": ["Jakob", "Jakobus"], "abbr": ["Jas"] },
+    { "english": "Peter", "alt": ["Peter", "Petrus"], "abbr": ["Pt"] },
+    { "english": "Jude", "alt": ["Juda", "Judas"], "abbr": ["Jd"] },
+    { "english": "Revelation", "alt": ["Apocalypse", "Razodetje", "Offenbarung"], "abbr": ["Offb", "Rv"] }
+  ],
+  "books": {
+    "GEN": {
+      "de": { "full": "1. Mose", "abbr": "1Mo" },
+      "sl": { "full": "1 Mojzes", "abbr": "1 Mz" },
+      "en": { "full": "Genesis", "abbr": "Gen" }
+    },
+    "EXO": {
+      "de": { "full": "2. Mose", "abbr": "2Mo" },
+      "sl": { "full": "2 Mojzes", "abbr": "2 Mz" },
+      "en": { "full": "Exodus", "abbr": "Exod" }
+    },
+    "LEV": {
+      "de": { "full": "3. Mose", "abbr": "3Mo" },
+      "sl": { "full": "3 Mojzes", "abbr": "3 Mz" },
+      "en": { "full": "Leviticus", "abbr": "Lev" }
+    },
+    "NUM": {
+      "de": { "full": "4. Mose", "abbr": "4Mo" },
+      "sl": { "full": "4 Mojzes", "abbr": "4 Mz" },
+      "en": { "full": "Numbers", "abbr": "Num" }
+    },
+    "DEU": {
+      "de": { "full": "5. Mose", "abbr": "5Mo" },
+      "sl": { "full": "5 Mojzes", "abbr": "5 Mz" },
+      "en": { "full": "Deuteronomy", "abbr": "Deut" }
+    },
+    "JOS": {
+      "de": { "full": "Josua", "abbr": "Jos" },
+      "sl": { "full": "Jozue", "abbr": "Joz" },
+      "en": { "full": "Joshua", "abbr": "Josh" }
+    },
+    "JDG": {
+      "de": { "full": "Richter", "abbr": "Ri" },
+      "sl": { "full": "Sodniki", "abbr": "Sod" },
+      "en": { "full": "Judges", "abbr": "Judg" }
+    },
+    "RUT": {
+      "de": { "full": "Rut", "abbr": "Rut" },
+      "sl": { "full": "Ruta", "abbr": "Rut" },
+      "en": { "full": "Ruth", "abbr": "Ruth" }
+    },
+    "1SA": {
+      "de": { "full": "1. Samuel", "abbr": "1Sam" },
+      "sl": { "full": "1 Samuel", "abbr": "1 Sam" },
+      "en": { "full": "1 Samuel", "abbr": "1 Sam" }
+    },
+    "2SA": {
+      "de": { "full": "2. Samuel", "abbr": "2Sam" },
+      "sl": { "full": "2 Samuel", "abbr": "2 Sam" },
+      "en": { "full": "2 Samuel", "abbr": "2 Sam" }
+    },
+    "1KI": {
+      "de": { "full": "1. Könige", "abbr": "1Kön" },
+      "sl": { "full": "1 kralji", "abbr": "1 Kr" },
+      "en": { "full": "1 Kings", "abbr": "1 Kgs" }
+    },
+    "2KI": {
+      "de": { "full": "2. Könige", "abbr": "2Kön" },
+      "sl": { "full": "2 kralji", "abbr": "2 Kr" },
+      "en": { "full": "2 Kings", "abbr": "2 Kgs" }
+    },
+    "1CH": {
+      "de": { "full": "1. Chronik", "abbr": "1Chr" },
+      "sl": { "full": "1 kroniška", "abbr": "1 Krn" },
+      "en": { "full": "1 Chronicles", "abbr": "1 Chr" }
+    },
+    "2CH": {
+      "de": { "full": "2. Chronik", "abbr": "2Chr" },
+      "sl": { "full": "2 kroniška", "abbr": "2 Krn" },
+      "en": { "full": "2 Chronicles", "abbr": "2 Chr" }
+    },
+    "EZR": {
+      "de": { "full": "Esra", "abbr": "Esra" },
+      "sl": { "full": "Ezra", "abbr": "Ezr" },
+      "en": { "full": "Ezra", "abbr": "Ezra" }
+    },
+    "NEH": {
+      "de": { "full": "Nehemia", "abbr": "Neh" },
+      "sl": { "full": "Nehemija", "abbr": "Neh" },
+      "en": { "full": "Nehemiah", "abbr": "Neh" }
+    },
+    "EST": {
+      "de": { "full": "Ester", "abbr": "Est" },
+      "sl": { "full": "Estera", "abbr": "Est" },
+      "en": { "full": "Esther", "abbr": "Esth" }
+    },
+    "JOB": {
+      "de": { "full": "Hiob", "abbr": "Hi" },
+      "sl": { "full": "Job", "abbr": "Jb" },
+      "en": { "full": "Job", "abbr": "Job" }
+    },
+    "PSA": {
+      "de": { "full": "Psalm", "abbr": "Ps" },
+      "sl": { "full": "Psalmi", "abbr": "Ps" },
+      "en": { "full": "Psalms", "abbr": "Ps" }
+    },
+    "PRO": {
+      "de": { "full": "Sprüche", "abbr": "Spr" },
+      "sl": { "full": "Pregovori", "abbr": "Prg" },
+      "en": { "full": "Proverbs", "abbr": "Prov" }
+    },
+    "ECC": {
+      "de": { "full": "Prediger", "abbr": "Pred" },
+      "sl": { "full": "Pridigar", "abbr": "Prd" },
+      "en": { "full": "Ecclesiastes", "abbr": "Eccl" }
+    },
+    "SNG": {
+      "de": { "full": "Hohelied", "abbr": "Hld" },
+      "sl": { "full": "Visoka pesem", "abbr": "Vp" },
+      "en": { "full": "Song of Songs", "abbr": "Song" }
+    },
+    "ISA": {
+      "de": { "full": "Jesaja", "abbr": "Jes" },
+      "sl": { "full": "Izaija", "abbr": "Iz" },
+      "en": { "full": "Isaiah", "abbr": "Isa" }
+    },
+    "JER": {
+      "de": { "full": "Jeremia", "abbr": "Jer" },
+      "sl": { "full": "Jeremija", "abbr": "Jer" },
+      "en": { "full": "Jeremiah", "abbr": "Jer" }
+    },
+    "LAM": {
+      "de": { "full": "Klagelieder", "abbr": "Klgl" },
+      "sl": { "full": "Žalostinke", "abbr": "Žal" },
+      "en": { "full": "Lamentations", "abbr": "Lam" }
+    },
+    "EZK": {
+      "de": { "full": "Hesekiel", "abbr": "Hes" },
+      "sl": { "full": "Ezekiel", "abbr": "Ezk" },
+      "en": { "full": "Ezekiel", "abbr": "Ezek" }
+    },
+    "DAN": {
+      "de": { "full": "Daniel", "abbr": "Dan" },
+      "sl": { "full": "Daniel", "abbr": "Dan" },
+      "en": { "full": "Daniel", "abbr": "Dan" }
+    },
+    "HOS": {
+      "de": { "full": "Hosea", "abbr": "Hos" },
+      "sl": { "full": "Ozej", "abbr": "Oz" },
+      "en": { "full": "Hosea", "abbr": "Hos" }
+    },
+    "JOL": {
+      "de": { "full": "Joel", "abbr": "Joel" },
+      "sl": { "full": "Joel", "abbr": "Jl" },
+      "en": { "full": "Joel", "abbr": "Joel" }
+    },
+    "AMO": {
+      "de": { "full": "Amos", "abbr": "Am" },
+      "sl": { "full": "Amos", "abbr": "Am" },
+      "en": { "full": "Amos", "abbr": "Amos" }
+    },
+    "OBA": {
+      "de": { "full": "Obadja", "abbr": "Obd" },
+      "sl": { "full": "Abdija", "abbr": "Abd" },
+      "en": { "full": "Obadiah", "abbr": "Obad" }
+    },
+    "JON": {
+      "de": { "full": "Jona", "abbr": "Jona" },
+      "sl": { "full": "Jona", "abbr": "Jon" },
+      "en": { "full": "Jonah", "abbr": "Jon" }
+    },
+    "MIC": {
+      "de": { "full": "Micha", "abbr": "Mi" },
+      "sl": { "full": "Mihej", "abbr": "Mih" },
+      "en": { "full": "Micah", "abbr": "Mic" }
+    },
+    "NAM": {
+      "de": { "full": "Nahum", "abbr": "Nah" },
+      "sl": { "full": "Nahum", "abbr": "Nah" },
+      "en": { "full": "Nahum", "abbr": "Nah" }
+    },
+    "HAB": {
+      "de": { "full": "Habakuk", "abbr": "Hab" },
+      "sl": { "full": "Habakuk", "abbr": "Hab" },
+      "en": { "full": "Habakkuk", "abbr": "Hab" }
+    },
+    "ZEP": {
+      "de": { "full": "Zefanja", "abbr": "Zef" },
+      "sl": { "full": "Sofonija", "abbr": "Sof" },
+      "en": { "full": "Zephaniah", "abbr": "Zeph" }
+    },
+    "HAG": {
+      "de": { "full": "Haggai", "abbr": "Hag" },
+      "sl": { "full": "Agej", "abbr": "Ag" },
+      "en": { "full": "Haggai", "abbr": "Hag" }
+    },
+    "ZEC": {
+      "de": { "full": "Sacharja", "abbr": "Sach" },
+      "sl": { "full": "Zaharija", "abbr": "Zah" },
+      "en": { "full": "Zechariah", "abbr": "Zech" }
+    },
+    "MAL": {
+      "de": { "full": "Maleachi", "abbr": "Mal" },
+      "sl": { "full": "Malahija", "abbr": "Mal" },
+      "en": { "full": "Malachi", "abbr": "Mal" }
+    },
+    "MAT": {
+      "de": { "full": "Matthäus", "abbr": "Mt" },
+      "sl": { "full": "Matej", "abbr": "Mt" },
+      "en": { "full": "Matthew", "abbr": "Matt" }
+    },
+    "MRK": {
+      "de": { "full": "Markus", "abbr": "Mk" },
+      "sl": { "full": "Marko", "abbr": "Mr" },
+      "en": { "full": "Mark", "abbr": "Mark" }
+    },
+    "LUK": {
+      "de": { "full": "Lukas", "abbr": "Lk" },
+      "sl": { "full": "Luka", "abbr": "Lk" },
+      "en": { "full": "Luke", "abbr": "Luke" }
+    },
+    "JHN": {
+      "de": { "full": "Johannes", "abbr": "Joh" },
+      "sl": { "full": "Janez", "abbr": "Jn" },
+      "en": { "full": "John", "abbr": "John" }
+    },
+    "ACT": {
+      "de": { "full": "Apostelgeschichte", "abbr": "Apg" },
+      "sl": { "full": "Apostolska dela", "abbr": "Apd" },
+      "en": { "full": "Acts", "abbr": "Acts" }
+    },
+    "ROM": {
+      "de": { "full": "Römer", "abbr": "Röm" },
+      "sl": { "full": "Rimljanom", "abbr": "Rim" },
+      "en": { "full": "Romans", "abbr": "Rom" }
+    },
+    "1CO": {
+      "de": { "full": "1. Korinther", "abbr": "1Kor" },
+      "sl": { "full": "1 Korinčanom", "abbr": "1 Kor" },
+      "en": { "full": "1 Corinthians", "abbr": "1 Cor" }
+    },
+    "2CO": {
+      "de": { "full": "2. Korinther", "abbr": "2Kor" },
+      "sl": { "full": "2 Korinčanom", "abbr": "2 Kor" },
+      "en": { "full": "2 Corinthians", "abbr": "2 Cor" }
+    },
+    "GAL": {
+      "de": { "full": "Galater", "abbr": "Gal" },
+      "sl": { "full": "Galačanom", "abbr": "Gal" },
+      "en": { "full": "Galatians", "abbr": "Gal" }
+    },
+    "EPH": {
+      "de": { "full": "Epheser", "abbr": "Eph" },
+      "sl": { "full": "Efežanom", "abbr": "Ef" },
+      "en": { "full": "Ephesians", "abbr": "Eph" }
+    },
+    "PHP": {
+      "de": { "full": "Philipper", "abbr": "Phil" },
+      "sl": { "full": "Filipljanom", "abbr": "Flp" },
+      "en": { "full": "Philippians", "abbr": "Phil" }
+    },
+    "COL": {
+      "de": { "full": "Kolosser", "abbr": "Kol" },
+      "sl": { "full": "Kološanom", "abbr": "Kol" },
+      "en": { "full": "Colossians", "abbr": "Col" }
+    },
+    "1TH": {
+      "de": { "full": "1. Thessalonicher", "abbr": "1Thess" },
+      "sl": { "full": "1 Tesaloničanom", "abbr": "1 Tes" },
+      "en": { "full": "1 Thessalonians", "abbr": "1 Thess" }
+    },
+    "2TH": {
+      "de": { "full": "2. Thessalonicher", "abbr": "2Thess" },
+      "sl": { "full": "2 Tesaloničanom", "abbr": "2 Tes" },
+      "en": { "full": "2 Thessalonians", "abbr": "2 Thess" }
+    },
+    "1TI": {
+      "de": { "full": "1. Timotheus", "abbr": "1Tim" },
+      "sl": { "full": "1 Timoteju", "abbr": "1 Tim" },
+      "en": { "full": "1 Timothy", "abbr": "1 Tim" }
+    },
+    "2TI": {
+      "de": { "full": "2. Timotheus", "abbr": "2Tim" },
+      "sl": { "full": "2 Timoteju", "abbr": "2 Tim" },
+      "en": { "full": "2 Timothy", "abbr": "2 Tim" }
+    },
+    "TIT": {
+      "de": { "full": "Titus", "abbr": "Tit" },
+      "sl": { "full": "Titu", "abbr": "Tit" },
+      "en": { "full": "Titus", "abbr": "Titus" }
+    },
+    "PHM": {
+      "de": { "full": "Philemon", "abbr": "Phlm" },
+      "sl": { "full": "Filemonu", "abbr": "Flm" },
+      "en": { "full": "Philemon", "abbr": "Phlm" }
+    },
+    "HEB": {
+      "de": { "full": "Hebräer", "abbr": "Hebr" },
+      "sl": { "full": "Hebrejcem", "abbr": "Heb" },
+      "en": { "full": "Hebrews", "abbr": "Heb" }
+    },
+    "JAS": {
+      "de": { "full": "Jakobus", "abbr": "Jak" },
+      "sl": { "full": "Jakob", "abbr": "Jak" },
+      "en": { "full": "James", "abbr": "Jas" }
+    },
+    "1PE": {
+      "de": { "full": "1. Petrus", "abbr": "1Petr" },
+      "sl": { "full": "1 Peter", "abbr": "1 Pt" },
+      "en": { "full": "1 Peter", "abbr": "1 Pet" }
+    },
+    "2PE": {
+      "de": { "full": "2. Petrus", "abbr": "2Petr" },
+      "sl": { "full": "2 Peter", "abbr": "2 Pt" },
+      "en": { "full": "2 Peter", "abbr": "2 Pet" }
+    },
+    "1JN": {
+      "de": { "full": "1. Johannes", "abbr": "1Joh" },
+      "sl": { "full": "1 Janez", "abbr": "1 Jn" },
+      "en": { "full": "1 John", "abbr": "1 John" }
+    },
+    "2JN": {
+      "de": { "full": "2. Johannes", "abbr": "2Joh" },
+      "sl": { "full": "2 Janez", "abbr": "2 Jn" },
+      "en": { "full": "2 John", "abbr": "2 John" }
+    },
+    "3JN": {
+      "de": { "full": "3. Johannes", "abbr": "3Joh" },
+      "sl": { "full": "3 Janez", "abbr": "3 Jn" },
+      "en": { "full": "3 John", "abbr": "3 John" }
+    },
+    "JUD": {
+      "de": { "full": "Judas", "abbr": "Jud" },
+      "sl": { "full": "Juda", "abbr": "Jud" },
+      "en": { "full": "Jude", "abbr": "Jude" }
+    },
+    "REV": {
+      "de": { "full": "Offenbarung", "abbr": "Offb" },
+      "sl": { "full": "Razodetje", "abbr": "Raz" },
+      "en": { "full": "Revelation", "abbr": "Rev" }
+    },
+    "TOB": {
+      "de": { "full": "Tobit", "abbr": "Tob" },
+      "sl": { "full": "Tobit", "abbr": "Tob" },
+      "en": { "full": "Tobit", "abbr": "Tob" }
+    },
+    "JDT": {
+      "de": { "full": "Judit", "abbr": "Jdt" },
+      "sl": { "full": "Judita", "abbr": "Jdt" },
+      "en": { "full": "Judith", "abbr": "Jdt" }
+    },
+    "ESG": {
+      "de": { "full": "Ester (griechisch)", "abbr": "EstGr" },
+      "sl": { "full": "Estera (grška)", "abbr": "EstG" },
+      "en": { "full": "Esther (Greek)", "abbr": "EstGr" }
+    },
+    "WIS": {
+      "de": { "full": "Weisheit", "abbr": "Weish" },
+      "sl": { "full": "Knjiga modrosti", "abbr": "Mdr" },
+      "en": { "full": "Wisdom of Solomon", "abbr": "Wis" }
+    },
+    "SIR": {
+      "de": { "full": "Jesus Sirach", "abbr": "Sir" },
+      "sl": { "full": "Sirah", "abbr": "Sir" },
+      "en": { "full": "Sirach", "abbr": "Sir" }
+    },
+    "BAR": {
+      "de": { "full": "Baruch", "abbr": "Bar" },
+      "sl": { "full": "Baruh", "abbr": "Bar" },
+      "en": { "full": "Baruch", "abbr": "Bar" }
+    },
+    "LJE": {
+      "de": { "full": "Brief des Jeremia", "abbr": "EpJer" },
+      "sl": { "full": "Jeremijevo pismo", "abbr": "JerP" },
+      "en": { "full": "Letter of Jeremiah", "abbr": "EpJer" }
+    },
+    "S3Y": {
+      "de": { "full": "Gebet Asarjas und Lobgesang der drei Männer", "abbr": "Asarja" },
+      "sl": { "full": "Azarjájeva molitev / Hvalnica treh mladeničev", "abbr": "Az" },
+      "en": { "full": "Song of the Three Young Men", "abbr": "S3Y" }
+    },
+    "SUS": {
+      "de": { "full": "Susanna", "abbr": "Sus" },
+      "sl": { "full": "Suzana", "abbr": "Suz" },
+      "en": { "full": "Susanna", "abbr": "Sus" }
+    },
+    "BEL": {
+      "de": { "full": "Bel und der Drache", "abbr": "Bel" },
+      "sl": { "full": "Bel in zmaj", "abbr": "Bel" },
+      "en": { "full": "Bel and the Dragon", "abbr": "Bel" }
+    },
+    "MAN": {
+      "de": { "full": "Gebet Manasses", "abbr": "Man" },
+      "sl": { "full": "Manasejeva molitev", "abbr": "Man" },
+      "en": { "full": "Prayer of Manasseh", "abbr": "Man" }
+    },
+    "1MA": {
+      "de": { "full": "1. Makkabäer", "abbr": "1Makk" },
+      "sl": { "full": "1 Makabejci", "abbr": "1 Mkb" },
+      "en": { "full": "1 Maccabees", "abbr": "1 Macc" }
+    },
+    "2MA": {
+      "de": { "full": "2. Makkabäer", "abbr": "2Makk" },
+      "sl": { "full": "2 Makabejci", "abbr": "2 Mkb" },
+      "en": { "full": "2 Maccabees", "abbr": "2 Macc" }
+    },
+    "3MA": {
+      "de": { "full": "3. Makkabäer", "abbr": "3Makk" },
+      "sl": { "full": "3 Maccabees", "abbr": "3 Macc" },
+      "en": { "full": "3 Maccabees", "abbr": "3 Macc" }
+    },
+    "4MA": {
+      "de": { "full": "4. Makkabäer", "abbr": "4Makk" },
+      "sl": { "full": "4 Maccabees", "abbr": "4 Macc" },
+      "en": { "full": "4 Maccabees", "abbr": "4 Macc" }
+    },
+    "1ES": {
+      "de": { "full": "1. Esra", "abbr": "1Esra" },
+      "sl": { "full": "1. Ezdrova knjiga", "abbr": "1 Esd" },
+      "en": { "full": "1 Esdras", "abbr": "1 Esd" }
+    },
+    "2ES": {
+      "de": { "full": "2. Esra", "abbr": "2Esra" },
+      "sl": { "full": "2. Ezdrova knjiga", "abbr": "2 Esd" },
+      "en": { "full": "2 Esdras", "abbr": "2 Esd" }
+    },
+    "PS2": {
+      "de": { "full": "Psalm 151", "abbr": "Ps151" },
+      "sl": { "full": "Psalm 151", "abbr": "Ps151" },
+      "en": { "full": "Psalm 151", "abbr": "Ps 151" }
+    },
+    "DAG": {
+      "de": { "full": "Zusätze zu Daniel (griechisch)", "abbr": "ZusDan" },
+      "sl": { "full": "Dodatki (grški) k Danielu", "abbr": "DanD" },
+      "en": { "full": "Daniel (Greek)", "abbr": "DanGr" }
+    },
+    "PRM": {
+      "de": { "full": "Gebet Manasses", "abbr": "Man" },
+      "sl": { "full": "Manasejeva molitev", "abbr": "Man" },
+      "en": { "full": "Prayer of Manasseh", "abbr": "Man" }
+    },
+    "ODA": {
+      "de": { "full": "Oden", "abbr": "Oden" },
+      "sl": { "full": "Odes", "abbr": "Odes" },
+      "en": { "full": "Odes", "abbr": "Odes" }
+    },
+    "PSS": {
+      "de": { "full": "Psalmen Salomos", "abbr": "PsSal" },
+      "sl": { "full": "Psalms of Solomon", "abbr": "Pss Sol" },
+      "en": { "full": "Psalms of Solomon", "abbr": "Pss Sol" }
+    }
+  }
+}

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Accordance - Look up scripture</string>
 	<key>CFBundleVersion</key>
-	<string>4.5.10</string>
+	<string>5</string>
 	<key>LBAssociatedApplication</key>
 	<string>com.OakTree.Accordance</string>
 	<key>LBDescription</key>
@@ -44,8 +44,6 @@ This action is associated with Accordance. So you can run it by pressing space w
 			<true/>
 			<key>LBRequiresArgument</key>
 			<true/>
-			<key>LBResultType</key>
-			<string>unknown</string>
 			<key>LBReturnsResult</key>
 			<true/>
 			<key>LBScriptName</key>
