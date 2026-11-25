@@ -8,6 +8,9 @@ Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 
+Versification specification:
+- https://github.com/youversion/versification-specification/
+
 The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
