@@ -9,6 +9,9 @@ Documentation:
 - https://developer.obdev.at/launchbar-developer-documentation/#/javascript-launchbar
 - https://accordancefiles2.com/helpfiles/14-macOS/index.htm#t=mac_14%2Fcontent%2Ftopics%2F05_dd%2Fusing_links_common_tasks.htm&rhsearch=url&rhhlterm=url%20urls (See: Examples of Accordance-specific URLs)
 
+Versification specification:
+- https://github.com/youversion/versification-specification/
+
 The Original Accordance Automation Script Library:
 - http://macbiblioblog.blogspot.com/2009/01/downloads.html
 */
