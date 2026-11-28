@@ -3,7 +3,7 @@
 /* 
 Mindnode URL Scheme Action for LaunchBar
 by Christian Bender (@ptujec)
-2024-02-13
+2026-11-28
 
 Copyright see: https://github.com/Ptujec/LaunchBar/blob/master/LICENSE
 */
@@ -17,18 +17,14 @@ struct Environment {
     static let isCommandKeyPressed = info["LB_OPTION_COMMAND_KEY"] == "1"
 }
 
-// MARK: - URL Generation
+// MARK: - Input Parsing
 
-func generateMindnodeURL(path: String) -> (urlScheme: String, docTitle: String) {
-    let docTitle = path.replacingOccurrences(
-        of: "/Users/.+/Documents/",
-        with: "",
-        options: .regularExpression
-    )
-    let encodedTitle = docTitle.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? docTitle
-    let urlScheme = "mindnode://open?name=\(encodedTitle)"
-    
-    return (urlScheme, docTitle)
+func parseMindnodeItem(input: String) -> (title: String, url: String)? {
+    guard let data = input.data(using: .utf8),
+          let json = try? JSONSerialization.jsonObject(with: data) else { return nil }
+    let item: [String: Any]? = (json as? [[String: Any]])?.first ?? (json as? [String: Any])
+    guard let title = item?["title"] as? String, let url = item?["url"] as? String else { return nil }
+    return (title, url)
 }
 
 // MARK: - Pasteboard Handling
@@ -85,10 +81,14 @@ func main() {
         exit(1)
     }
     
-    let path = CommandLine.arguments[1]
-    let (urlScheme, docTitle) = generateMindnodeURL(path: path)
-    
-    copyToClipboard(title: docTitle, url: urlScheme)
+    let input = CommandLine.arguments[1]
+
+    guard let item = parseMindnodeItem(input: input) else {
+        NSLog("Invalid Mindnode item: \(input)")
+        exit(1)
+    }
+
+    copyToClipboard(title: item.title, url: item.url)
     executePaste()
 }
 
